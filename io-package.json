@@ -21,13 +21,13 @@
             "file1": {
                 "type": "file",
                 "enabled": false,
-                "name": 'foo.log'
+                "name": "foo.log"
 
             },
             "file2": {
                 "type": "file",
                 "enabled": false,
-                "name": 'bar.log'
+                "name": "bar.log"
 
             },
             "graphite": {
