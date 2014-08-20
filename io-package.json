@@ -32,7 +32,7 @@
             },
             "graphite": {
                 "type": "graphite",
-                "enabled": false
+                "enabled": false,
                 "host": "172.16.23.180"
             },
             "rrd": {
