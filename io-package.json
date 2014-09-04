@@ -6,7 +6,8 @@
         "mode":                     "daemon",
         "platform":                 "javascript/Node.js",
         "loglevel":                 "info",
-        "keywords":                 ["charts", "history", "logging"]
+        "keywords":                 ["charts", "history", "logging"],
+        "main":                     "history.js"
     },
     "native": {
         "fifo": {
