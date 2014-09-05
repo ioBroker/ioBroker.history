@@ -2,7 +2,7 @@
     "common": {
         "name":                     "history",
         "desc":                     "manages state history",
-        "version":                  "0.0.1",
+        "version":                  "0.0.2",
         "mode":                     "daemon",
         "platform":                 "javascript/Node.js",
         "loglevel":                 "info",
@@ -10,45 +10,8 @@
         "main":                     "history.js"
     },
     "native": {
-        "fifo": {
-            "defaultMin": 16,
-            "defaultMax": 32
-        },
-        "transports": {
-            "couchdb": {
-                "type": "couchdb",
-                "enabled": true
-            },
-            "file1": {
-                "type": "file",
-                "enabled": false,
-                "name": "foo.log"
-
-            },
-            "file2": {
-                "type": "file",
-                "enabled": false,
-                "name": "bar.log"
-
-            },
-            "graphite": {
-                "type": "graphite",
-                "enabled": false,
-                "host": "172.16.23.180"
-            },
-            "rrd": {
-                "type": "rrd",
-                "enabled": false
-            },
-            "mysql": {
-                "type": "mysql",
-                "enabled": false,
-                "host": "172.16.23.180",
-                "user": "user",
-                "pass": "xyz",
-                "db": "iobroker"
-            }
-        }
+        "minLength": 64,
+        "maxLength": 128
     },
     "objects": [
         {

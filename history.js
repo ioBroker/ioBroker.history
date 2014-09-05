@@ -10,6 +10,7 @@ var adapter = require(__dirname + '/../../lib/adapter.js')({
     objectChange: function (id, obj) {
         if (obj.history) {
             history[id] = obj.history;
+            console.log(id, obj.history);
         } else {
             delete history[id];
         }
@@ -45,60 +46,53 @@ function main() {
     });
 
     adapter.subscribeForeignStates('*');
-
 }
 
 function pushHistory(id, state) {
 
     // Push to fifo
-    if (history[id] && history[id].fifo && history[id].fifo.enabled) {
+    if (history[id] && history[id].enabled) {
         if (history[id].changesOnly && state.ts !== state.lc) return;
         setTimeout(function (_id, _state) {
             adapter.states.pushFifo(_id, _state);
 
-            if (history[id].fifo.maxLength) {
-                adapter.states.lenFifo(_id, function (len) {
-                    if (len > history[_id].fifo.maxLength) {
-                        // Todo sent to other Log targets
-                        adapter.states.trimFifo(_id, history[_id].fifo.minLength || 0);
-                    }
-                });
-            }
-
+            adapter.states.lenFifo(_id, function (err, len) {
+                if (len > adapter.config.maxLength) {
+                    // Todo sent to other Log targets
+                    adapter.states.trimFifo(_id, adapter.config.minLength || 0, function (err, obj) {
+                        appendCouch(_id, obj);
+                    });
+                }
+            });
         }, 1000, id, state);
     }
 
-    // Todo other Targets
-    if (history[id] && history[id].direct && history[id].direct.enabled && history[id].direct.targets) {
-        for (var i = 0; i < history[id].direct.targets.length; i++) {
-            send(history[id].direct.targets[i], state);
+}
+
+
+function appendCouch(id, states) {
+    //var id = 'history.' +adapter.instance + '.' + id;
+    var id = 'history.' + id;
+    adapter.getForeignObject(id, function (err, res) {
+        var obj;
+        if (err || !res) {
+            obj = {
+                type: 'history',
+                common: {},
+                native: {},
+                data: []
+            }
+        } else {
+            obj = res;
+
         }
-
-    }
-
-}
-
-function send(target, id, state) {
-
-}
-
-function sendCouch(id, state) {
+        for (var i = states.length - 1; i >= 0 ; i--) {
+            obj.data.push(states[i]);
+        }
+        adapter.setForeignObject(id, obj, function () {
+            adapter.log.info('moved ' + states.length + ' history datapoints of ' + _id + ' to CouchDB');
+        });
+    });
 
 }
 
-
-function sendFile(id, state) {
-
-}
-
-function sendRRD(id, state) {
-
-}
-
-function sendGraphite(id, state) {
-
-}
-
-function sendMySQL(id, state) {
-
-}
