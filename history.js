@@ -8,11 +8,14 @@ var adapter = require(__dirname + '/../../lib/adapter.js')({
     name:           'history',
 
     objectChange: function (id, obj) {
-        if (obj.history) {
-            history[id] = obj.history;
-            console.log(id, obj.history);
+        if (obj.common && obj.common.history && obj.common.history.enabled) {
+            history[id] = obj.common.history;
+            adapter.log.info('enabled logging of ' + id);
         } else {
-            delete history[id];
+            if (history[id]) {
+                adapter.log.info('disabled logging of ' + id);
+                delete history[id];
+            }
         }
     },
 
@@ -38,7 +41,7 @@ function main() {
         if (doc.rows) {
             for (var i = 0, l = doc.rows.length; i < l; i++) {
                 if (doc.rows[i].value) {
-                    adapter.log.info('history push ' + doc.rows[i].id);
+                    adapter.log.info('enabled logging of ' + doc.rows[i].id);
                     history[doc.rows[i].id] = doc.rows[i].value;
                 }
             }
@@ -46,11 +49,12 @@ function main() {
     });
 
     adapter.subscribeForeignStates('*');
+    adapter.subscribeForeignObjects('*');
 }
 
 function pushHistory(id, state) {
 
-    // Push to fifo
+    // Push into redis
     if (history[id] && history[id].enabled) {
         if (history[id].changesOnly && state.ts !== state.lc) return;
         setTimeout(function (_id, _state) {
@@ -58,9 +62,10 @@ function pushHistory(id, state) {
 
             adapter.states.lenFifo(_id, function (err, len) {
                 if (len > adapter.config.maxLength) {
-                    // Todo sent to other Log targets
                     adapter.states.trimFifo(_id, adapter.config.minLength || 0, function (err, obj) {
+
                         appendCouch(_id, obj);
+
                     });
                 }
             });
