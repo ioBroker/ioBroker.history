@@ -8,7 +8,7 @@ var adapter = require(__dirname + '/../../lib/adapter.js')({
     name:           'history',
 
     objectChange: function (id, obj) {
-        if (obj.common && obj.common.history && obj.common.history.enabled) {
+        if (obj && obj.common && obj.common.history && obj.common.history.enabled) {
             history[id] = obj.common.history;
             adapter.log.info('enabled logging of ' + id);
         } else {
@@ -61,9 +61,10 @@ function pushHistory(id, state) {
             adapter.states.pushFifo(_id, _state);
 
             adapter.states.lenFifo(_id, function (err, len) {
+                adapter.log.info('fifo ' + _id + ' len=' + len + ' maxLength=' + adapter.config.maxLength);
                 if (len > adapter.config.maxLength) {
                     adapter.states.trimFifo(_id, adapter.config.minLength || 0, function (err, obj) {
-
+                        adapter.log.info('moving ' + obj.length + ' entries to couchdb');
                         appendCouch(_id, obj);
 
                     });
@@ -77,7 +78,7 @@ function pushHistory(id, state) {
 
 function appendCouch(id, states) {
     //var id = 'history.' +adapter.instance + '.' + id;
-    var id = 'history.' + id;
+    id = 'history.' + id;
     adapter.getForeignObject(id, function (err, res) {
         var obj;
         if (err || !res) {
@@ -91,11 +92,11 @@ function appendCouch(id, states) {
             obj = res;
 
         }
-        for (var i = states.length - 1; i >= 0 ; i--) {
-            obj.data.push(states[i]);
+        for (var i = states.length - 1; i >= 0; i--) {
+            obj.data.unshift(states[i]);
         }
         adapter.setForeignObject(id, obj, function () {
-            adapter.log.info('moved ' + states.length + ' history datapoints of ' + _id + ' to CouchDB');
+            adapter.log.info('moved ' + states.length + ' history datapoints of ' + id + ' to CouchDB');
         });
     });
 

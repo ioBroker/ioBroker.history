@@ -2,12 +2,17 @@
     "common": {
         "name":                     "history",
         "desc":                     "manages state history",
-        "version":                  "0.0.3",
+        "version":                  "0.0.4",
         "mode":                     "daemon",
         "platform":                 "javascript/Node.js",
         "loglevel":                 "info",
         "keywords":                 ["charts", "history", "logging"],
-        "main":                     "history.js"
+        "main":                     "history.js",
+        "authors": [
+            "hobbyquaker <hq@ccu.io>"
+        ],
+        "license":                  "MIT",
+        "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md"
     },
     "native": {
         "minLength": 64,
