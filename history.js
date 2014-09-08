@@ -59,7 +59,6 @@ function pushHistory(id, state) {
         if (history[id].changesOnly && state.ts !== state.lc) return;
         setTimeout(function (_id, _state) {
             adapter.states.pushFifo(_id, _state);
-
             adapter.states.lenFifo(_id, function (err, len) {
                 adapter.log.info('fifo ' + _id + ' len=' + len + ' maxLength=' + adapter.config.maxLength);
                 if (len > adapter.config.maxLength) {
@@ -77,28 +76,51 @@ function pushHistory(id, state) {
 
 
 function appendCouch(id, states) {
-    //var id = 'history.' +adapter.instance + '.' + id;
-    id = 'history.' + id;
-    adapter.getForeignObject(id, function (err, res) {
+
+    var day = ts2day(states[states.length - 1].ts);
+    var cid = 'history.' + id + '.' + day;
+
+    adapter.getForeignObject(cid, function (err, res) {
         var obj;
         if (err || !res) {
             obj = {
                 type: 'history',
-                common: {},
-                native: {},
-                data: []
+                common: {
+                    source: id,
+                    day:    day,
+                    data:   []
+                },
+                native: {}
             }
         } else {
             obj = res;
+        }
 
-        }
         for (var i = states.length - 1; i >= 0; i--) {
-            obj.data.unshift(states[i]);
+            if (ts2day(states[i].ts) === day) {
+                obj.common.data.unshift(states[i]);
+            } else {
+                break;
+            }
         }
-        adapter.setForeignObject(id, obj, function () {
-            adapter.log.info('moved ' + states.length + ' history datapoints of ' + id + ' to CouchDB');
+
+        adapter.setForeignObject(cid, obj, function () {
+            adapter.log.info('moved ' + states.length + ' history datapoints from Redis history.' + id + ' to CouchDB ' + cid);
         });
+
+        if (i >= 0) {
+            adapter.log.info((i + 1) + ' remaining datapoints of history.' + id);
+            appendCouch(id, states.slice(0, (i + 1)));
+        }
+
     });
 
 }
 
+
+function ts2day(ts) {
+    var dateObj = new Date(ts * 1000);
+    return dateObj.getFullYear() +
+        ("0" + (dateObj.getMonth() + 1).toString(10)).slice(-2) +
+        ("0" + (dateObj.getDate()).toString(10)).slice(-2);
+}
