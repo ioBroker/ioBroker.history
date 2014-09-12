@@ -6,13 +6,17 @@
         "mode":                     "daemon",
         "platform":                 "javascript/Node.js",
         "loglevel":                 "info",
-        "keywords":                 ["charts", "history", "logging"],
+        "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
         "main":                     "history.js",
         "authors": [
             "hobbyquaker <hq@ccu.io>"
         ],
         "license":                  "MIT",
-        "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md"
+        "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
+        "singleton":                true,
+        "icon":                     "history.png",
+        "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png"
+
     },
     "native": {
         "minLength": 64,
