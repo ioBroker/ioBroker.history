@@ -1,3 +1,4 @@
+![Logo](admin/history.png)
 # ioBroker.history
 
 This adapter saves state history in a two-staged process. At first datapoints are stored in Redis, as soon as they
