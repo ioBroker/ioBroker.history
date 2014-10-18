@@ -9,11 +9,13 @@ reach maxLength they are trimmed to minLength and moved to CouchDB.
 
 
 ## Changelog
+### 0.0.6 (2014-10-19)
+* (bluefox) add configuration page
 
-#### 0.0.5
+### 0.0.5
 * (hobbyquaker) CouchDB document for each day
 
-#### 0.0.4
+### 0.0.4
 
 * (hobbyquaker) fixed order of entries in CouchDB
 

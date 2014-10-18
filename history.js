@@ -89,7 +89,7 @@ function appendCouch(id, states) {
                     data:   []
                 },
                 native: {}
-            }
+            };
         } else {
             obj = res;
         }

@@ -1,0 +1,40 @@
+<html>
+<meta charset="UTF-8">
+<title></title>
+<!-- these 4 files always have to be included -->
+<link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
+<script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+<script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
+
+<!-- these three files  have to be always included -->
+<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+<script type="text/javascript" src="../../js/translate.js"></script>
+<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+
+<!-- you have to define 2 functions in the global scope: -->
+<script type="text/javascript">
+    systemDictionary = {
+        "History adapter settings": {
+            "de": "History-Adapter Einstellungen",
+            "ru": "Настройки профайлера"},
+        "note": {
+            "en": "History settings must be done for every state individually on the tab \"States\" and only if adapter is active",
+            "de": "History Einstellungen mussen für jeden State einzeln gemacht werden auf der Lasche \"States\" und nur wenn adapter aktiv ist",
+            "ru": "Настройки профайлера делаются для каждого состояния отдельно в закладке \"Состояния\" и только, когда драйвер активирован"
+        }
+    };
+    // the function loadSettings has to exist ...
+    function load(settings) {
+        $('#save').button("disable");
+    }
+</script>
+
+<div id="adapter-container">
+    <table><tr>
+        <td><img src="history.png"></td>
+        <td style="padding-top: 20px;padding-left: 10px"><h3 class="translate">History adapter settings</h3></td>
+    </tr></table>
+    <div class="translate" style="margin:20">note</div>
+</div>
+</html>
