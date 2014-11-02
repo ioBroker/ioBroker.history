@@ -55,7 +55,7 @@ function pushHistory(id, state) {
 
     // Push into redis
     if (history[id] && history[id].enabled) {
-        if (history[id].changesOnly && (state.ts !== state.lc || state.val !== state.val || state.ack !== state.ack)) return;
+        if (history[id].changesOnly && (state.ts !== state.lc)) return;
 
         setTimeout(function (_id, _state) {
             adapter.states.pushFifo(_id, _state);
