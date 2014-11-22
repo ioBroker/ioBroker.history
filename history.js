@@ -4,7 +4,7 @@
 
 var adapter = require(__dirname + '/../../lib/adapter.js')({
 
-    name:           'history',
+    name: 'history',
 
     objectChange: function (id, obj) {
         if (obj && obj.common && obj.common.history && obj.common.history.enabled) {
@@ -37,7 +37,7 @@ var history = {};
 function main() {
 
     adapter.objects.getObjectView('history', 'state', {}, function (err, doc) {
-        if (doc.rows) {
+        if (doc && doc.rows) {
             for (var i = 0, l = doc.rows.length; i < l; i++) {
                 if (doc.rows[i].value) {
                     adapter.log.info('enabled logging of ' + doc.rows[i].id);
