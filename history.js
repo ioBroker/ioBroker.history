@@ -55,23 +55,27 @@ function pushHistory(id, state) {
 
     // Push into redis
     if (history[id] && history[id].enabled) {
-        if (history[id].changesOnly && (state.ts !== state.lc)) return;
+        if (history[id].state && history[id].changesOnly && (state.ts !== state.lc)) return;
 
-        setTimeout(function (_id, _state) {
-            adapter.states.pushFifo(_id, _state);
+        history[id].state = state;
+        // Do not store values ofter than 1 second
+        if (!history[id].timeout) {
 
-            adapter.states.trimFifo(_id, history[id].minLength || adapter.config.minLength, history[id].maxLength || adapter.config.maxLength, function (err, obj) {
-                if (!err && obj.length) {
-                    adapter.log.info('moving ' + obj.length + ' entries to couchdb');
-                    appendCouch(_id, obj);
-                }
-            });
+            history[id].timeout = setTimeout(function (_id) {
+                history[_id].timeout = null;
+                adapter.states.pushFifo(_id, history[_id].state);
 
-        }, 1000, id, state);
+                adapter.states.trimFifo(_id, history[id].minLength || adapter.config.minLength, history[id].maxLength || adapter.config.maxLength, function (err, obj) {
+                    if (!err && obj.length) {
+                        adapter.log.info('moving ' + obj.length + ' entries to couchdb');
+                        appendCouch(_id, obj);
+                    }
+                });
+
+            }, history[id].debounce || 1000, id);
+        }
     }
-
 }
-
 
 function appendCouch(id, states) {
 
@@ -110,15 +114,21 @@ function appendCouch(id, states) {
             adapter.log.info((i + 1) + ' remaining datapoints of history.' + id);
             appendCouch(id, states.slice(0, (i + 1)));
         }
-
     });
 
 }
 
-
 function ts2day(ts) {
     var dateObj = new Date(ts * 1000);
-    return dateObj.getFullYear() +
-        ("0" + (dateObj.getMonth() + 1).toString(10)).slice(-2) +
-        ("0" + (dateObj.getDate()).toString(10)).slice(-2);
+
+    var text = dateObj.getFullYear().toString();
+    var v = dateObj.getMonth() + 1;
+    if (v < 10) text += '0';
+    text += v.toString();
+
+    v = dateObj.getDate();
+    if (v < 10) text += '0';
+    text += v.toString();
+
+    return text;
 }

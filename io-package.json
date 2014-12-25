@@ -2,8 +2,12 @@
     "common": {
         "name":                     "history",
         "title":                    "History",
-        "desc":                     "Log state history in a two-stages process (first to Redis, then to CouchDB)",
-        "version":                  "0.0.7",
+        "desc":                     {
+            "en": "Log state history in a two-stages process (first to Redis, then to CouchDB)",
+            "de": "Log die Historie von einzelnen Zuständen",
+            "ru": "Сохранять историю событий для отдельных состояний"
+        },
+        "version":                  "0.0.8",
         "mode":                     "daemon",
         "platform":                 "Javascript/Node.js",
         "loglevel":                 "info",
@@ -11,14 +15,13 @@
         "main":                     "history.js",
         "enabled":                  true,
         "authors": [
-            "hobbyquaker <hq@ccu.io>"
+            "hobbyquaker <hq@ccu.io>", "bluefox <bluefox@ccu.io>"
         ],
         "license":                  "MIT",
         "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
         "singleton":                true,
         "icon":                     "history.png",
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png"
-
     },
     "native": {
         "minLength": 480,

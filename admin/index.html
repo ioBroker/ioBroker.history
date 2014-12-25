@@ -22,10 +22,82 @@
             "en": "History settings must be done for every state individually on the tab \"States\" and only if adapter is active",
             "de": "History Einstellungen mussen für jeden State einzeln gemacht werden auf der Lasche \"States\" und nur wenn adapter aktiv ist",
             "ru": "Настройки профайлера делаются для каждого состояния отдельно в закладке \"Состояния\" и только, когда драйвер активирован"
+        },
+        "Default settings:": {
+            "de": "Default Einstellungen für Zuständen:",
+            "ru": "Настройки по умолчанию для состояний"
+        },
+        "maxLength": {
+            "en": "Maximal number of stored in states values:",
+            "de": "Maximale Anzahl von Ereignissen nach welche die in DB gespeichert werden:",
+            "ru": "Количество событий по достижении которого данные сохраняются в базе:"
+        },
+        "minLength": {
+            "en": "Number of states values in queue after store in DB:",
+            "de": "Anzahl von Ereignissen nach die Ereignisse in DB gespeichert sind:",
+            "ru": "Количество событий в очереди после сохранения:"
         }
     };
-    // the function loadSettings has to exist ...
+
+    function setValue(id, value) {
+        // example: select elements with id=key and class=value and insert value
+        if ($('#' + id + '.value').attr('type') == 'checkbox') {
+            $('#' + id + '.value').prop('checked', value).change(function() {
+                changed = true;
+                $('#save').button("enable");
+            });
+        } else {
+            $('#' + id + '.value').val(value).change(function() {
+                changed = true;
+                $('#save').button("enable");
+            }).keyup(function() {
+                // Chack that only numbers entered
+                if ($(this).hasClass('number')) {
+                    var val = $(this).val();
+                    if (val) {
+                        var newVal = '';
+                        for (var i = 0; i < val.length; i++) {
+                            if (val[i] >= '0' && val[i] <= '9') {
+                                newVal += val[i];
+                            }
+                        }
+
+                        if (val != newVal) $(this).val(newVal);
+                    }
+                }
+
+                changed = true;
+                $('#save').button("enable");
+            });
+        }
+    }
+
     function load(settings) {
+        for (var key in settings) {
+            setValue(key, settings[key]);
+        }
+
+        changed = false;
+        $('#save').button("disable");
+    }
+
+    // ... and the function save has to exist.
+    // you have to make sure the callback is called with the settings object as first param!
+    function save(callback) {
+        // example: select elements with class=value and build settings object
+        changed = false;
+        var settings = {};
+        $('.value').each(function () {
+            var $this = $(this);
+            var id = $this.attr('id');
+
+            if ($this.attr('type') == 'checkbox') {
+                settings[id] = $this.prop('checked');
+            } else {
+                settings[id] = $this.val();
+           }
+        });
+        callback(settings);
         $('#save').button("disable");
     }
 </script>
@@ -36,5 +108,20 @@
         <td style="padding-top: 20px;padding-left: 10px"><h3 class="translate">History adapter settings</h3></td>
     </tr></table>
     <div class="translate" style="margin:20">note</div>
+    <br>
+    <h4 class="translate">Default settings:</h4>
+    <table>
+        <tr>
+            <td class="translate">minLength</td>
+            <td><input id="minLength" type="text" size="5" class="value"/></td>
+            <td class="translate"></td>
+        </tr>
+        <tr>
+            <td class="translate">maxLength</td>
+            <td><input id="maxLength" type="text" size="5" class="value"/></td>
+            <td class="translate"></td>
+        </tr>
+    </table>
+
 </div>
 </html>

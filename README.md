@@ -9,6 +9,9 @@ reach maxLength they are trimmed to minLength and moved to CouchDB.
 
 
 ## Changelog
+### 0.0.8 (2014-12-25)
+* (bluefox) support of de-bounce interval
+
 ### 0.0.7 (2014-11-01)
 * (bluefox) store every change and not only lc != ts
 
