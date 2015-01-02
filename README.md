@@ -9,6 +9,9 @@ reach maxLength they are trimmed to minLength and moved to CouchDB.
 
 
 ## Changelog
+### 0.1.0 (2015-01-02)
+* (bluefox) enable npm install
+
 ### 0.0.8 (2014-12-25)
 * (bluefox) support of de-bounce interval
 
