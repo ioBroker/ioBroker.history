@@ -63,16 +63,18 @@ function pushHistory(id, state) {
         if (!history[id].timeout) {
 
             history[id].timeout = setTimeout(function (_id) {
-                history[_id].timeout = null;
-                adapter.states.pushFifo(_id, history[_id].state);
+                // if it was not deleted in this time
+                if (history[_id]) {
+                    history[_id].timeout = null;
+                    adapter.states.pushFifo(_id, history[_id].state);
 
-                adapter.states.trimFifo(_id, history[id].minLength || adapter.config.minLength, history[id].maxLength || adapter.config.maxLength, function (err, obj) {
-                    if (!err && obj.length) {
-                        adapter.log.info('moving ' + obj.length + ' entries to couchdb');
-                        appendCouch(_id, obj);
-                    }
-                });
-
+                    adapter.states.trimFifo(_id, history[id].minLength || adapter.config.minLength, history[id].maxLength || adapter.config.maxLength, function (err, obj) {
+                        if (!err && obj.length) {
+                            adapter.log.info('moving ' + obj.length + ' entries to couchdb');
+                            appendCouch(_id, obj);
+                        }
+                    });
+                }
             }, history[id].debounce || 1000, id);
         }
     }
