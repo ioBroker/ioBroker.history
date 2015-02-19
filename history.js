@@ -87,7 +87,7 @@ function appendCouch(id, states) {
 
     adapter.getForeignObject(cid, function (err, res) {
         var obj;
-        if (err || !res) {
+        if (err || !res || !res.common) {
             obj = {
                 type: 'history',
                 common: {

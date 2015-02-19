@@ -9,6 +9,10 @@ reach maxLength they are trimmed to minLength and moved to CouchDB.
 
 
 ## Changelog
+### 0.1.3 (2015-02-19)
+* (bluefox) fix small error in history (Thanks on Dschaedl)
+* (bluefox) update admin page
+
 ### 0.1.2 (2015-01-20)
 * (bluefox) enable save&close button by config
 

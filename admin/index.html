@@ -39,21 +39,17 @@
         }
     };
 
-    function setValue(id, value) {
+    function setValue(id, value, onChange) {
         // example: select elements with id=key and class=value and insert value
         if ($('#' + id + '.value').attr('type') == 'checkbox') {
             $('#' + id + '.value').prop('checked', value).change(function() {
-                changed = true;
-                $('#save').button("enable");
-				$('#saveclose').button("enable");
+                onChange();
             });
         } else {
             $('#' + id + '.value').val(value).change(function() {
-                changed = true;
-                $('#save').button("enable");
-                $('#saveclose').button("enable");
+                onChange();
             }).keyup(function() {
-                // Chack that only numbers entered
+                // Check that only numbers entered
                 if ($(this).hasClass('number')) {
                     var val = $(this).val();
                     if (val) {
@@ -64,25 +60,19 @@
                             }
                         }
 
-                        if (val != newVal) $(this).val(newVal);
+                        if (val != newVal) $(this).val(newVal).trigger('change');
                     }
                 }
-
-                changed = true;
-                $('#save').button("enable");
- 				$('#saveclose').button("enable");
            });
         }
     }
 
-    function load(settings) {
+    function load(settings, onChange) {
         for (var key in settings) {
-            setValue(key, settings[key]);
+            setValue(key, settings[key], onChange);
         }
 
-        changed = false;
-        $('#save').button("disable");
-        $('#saveclose').button("disable");
+        onChange(false);
     }
 
     // ... and the function save has to exist.
@@ -118,12 +108,12 @@
     <table>
         <tr>
             <td class="translate">minLength</td>
-            <td><input id="minLength" type="text" size="5" class="value"/></td>
+            <td><input id="minLength" type="text" size="5" class="value number"/></td>
             <td class="translate"></td>
         </tr>
         <tr>
             <td class="translate">maxLength</td>
-            <td><input id="maxLength" type="text" size="5" class="value"/></td>
+            <td><input id="maxLength" type="text" size="5" class="value number"/></td>
             <td class="translate"></td>
         </tr>
     </table>
