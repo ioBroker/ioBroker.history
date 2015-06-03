@@ -87,7 +87,7 @@ function appendCouch(id, states) {
 
     adapter.getForeignObject(cid, function (err, res) {
         var obj;
-        if (err || !res || !res.common) {
+        if (err || !res) {
             obj = {
                 type: 'history',
                 common: {
@@ -100,6 +100,13 @@ function appendCouch(id, states) {
         } else {
             obj = res;
         }
+
+        if (!obj.common) {
+            adapter.log.error('invalid object ' + id);
+            return;
+        }
+
+        if (!obj.common.data) obj.common.data = [];
 
         for (var i = states.length - 1; i >= 0; i--) {
             if (ts2day(states[i].ts) === day) {
