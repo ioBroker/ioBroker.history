@@ -3,8 +3,8 @@
         "name":                     "history",
         "title":                    "History",
         "desc":                     {
-            "en": "Log state history in a two-stages process (first to Redis, then to CouchDB)",
-            "de": "Log die Historie von einzelnen Zuständen",
+            "en": "Log state history",
+            "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
         "version":                  "0.1.3",
