@@ -3,7 +3,7 @@
         "name":                     "history",
         "title":                    "History",
         "desc":                     {
-            "en": "Log state history",
+            "en": "Logging of state history",
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
