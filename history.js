@@ -109,6 +109,7 @@ function appendCouch(id, states) {
         if (!obj.common.data) obj.common.data = [];
 
         for (var i = states.length - 1; i >= 0; i--) {
+            if (!states[i]) continue;
             if (ts2day(states[i].ts) === day) {
                 obj.common.data.unshift(states[i]);
             } else {
