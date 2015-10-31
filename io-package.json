@@ -11,6 +11,8 @@
         "mode":                     "daemon",
         "platform":                 "Javascript/Node.js",
         "loglevel":                 "info",
+        "messagebox":               true,
+        "subscribe":                "messagebox",
         "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
         "main":                     "history.js",
         "enabled":                  true,
