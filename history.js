@@ -1,7 +1,7 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 "use strict";
-var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
+var utils = require(__dirname + '/lib/utils'); // Get common adapter utils
 var fs = require('fs');
 var adapter = utils.adapter({
 
@@ -31,16 +31,16 @@ var adapter = utils.adapter({
         main();
     },
 
-    message: function(obj){
+    message: function (obj) {
         processMessage(obj);
     }
 
 });
 
-var dataDir = __dirname +"/../../iobroker-data/history"; // todo get DataDir
+var dataDir = __dirname + "/../../iobroker-data/history"; // todo get DataDir
 
 function processMessage(msg) {
-    if(msg.command == "getHistory"){
+    if (msg.command == "getHistory") {
         getHistory(msg)
     }
 }
@@ -104,8 +104,8 @@ function appendCouch(id, states) {
                 type: 'history',
                 common: {
                     source: id,
-                    day:    day,
-                    data:   []
+                    day: day,
+                    data: []
                 },
                 native: {}
             };
@@ -141,18 +141,27 @@ function appendCouch(id, states) {
 
 }
 
-function getHistory(msg,callback){
+function getHistory(msg, callback) {
+    var startTime = new Date().getTime();
     var id = msg.message.id;
     var _options =
     {
-        start : msg.message.start || Math.round((new Date()).getTime() / 1000) - 5030, // - 1 year
-        end  : msg.message.end || Math.round((new Date()).getTime() / 1000) + 5000,
-        step: msg.message.step ,
-        count:msg.message.count,
-        aggregate: msg.message.aggregate || "max" // One of: max, min, average, total
+        start: msg.message.options.start || Math.round((new Date()).getTime() / 1000) - 5030, // - 1 year
+        end: msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
+        step: msg.message.options.step,
+        count: msg.message.options.count,
+        fix: msg.message.options.fix,
+        getNull: msg.message.options.getNull,
+        aggregate: msg.message.options.aggregate || "average" // One of: max, min, average, total
     };
 
+    if (_options.start > _options.end){
+        var _end = _options.end;
+        _options.end = _options.start;
+        _options.start =_end;
+    }
 
+    var x = 0;
     // get Data
     function get_cacheData(id, start, end, callback) {
         adapter.getFifo(id, function (err, res) {
@@ -229,105 +238,119 @@ function getHistory(msg,callback){
     //   step  is step in seconds, if no step is there so count is used, if no count, step is 1 second
     //   aggregate is method. One of: max, min, average, total
     function aggregate(data, options) {
+        if (data && data.length) {
+            var start = new Date(options.start * 1000);
+            var end = new Date(options.end * 1000);
 
-        var step;
-        if (!options.count && options.step) {
-            step = options.step;
-        } else if (options.count) {
-            step = Math.round(data.length / options.count);
-        }else{
-            step = Math.round(data.length / 1000);
-        }
-
-        if (!step) step = 1;
-
-        // 1 Step is 1 second
-        var start = new Date(options.start * 1000);
-        var end = new Date(options.end * 1000);
-        var timeStamp = start;
-        var stepEnd;
-        var i = 0;
-        var result = [];
-        var iStep = 0;
-        options.aggregate = options.aggregate || 'max';
-
-        while (start < end) {
-            stepEnd = new Date(start);
-            stepEnd.setSeconds(stepEnd.getSeconds() + step);
-            if (stepEnd < start) {
-                // Summer time
-                stepEnd.setHours(start.getHours() + 2);
+console.log("fix: "+ _options.fix)
+            var step;
+            if (!options.count && options.step) {
+                step = options.step;
+            } else if (options.count) {
+                step = Math.round(data.length / options.count);
+            } else {
+                step = (options.end-options.start)/ _options.fix ;
             }
 
-            // find all entries in this time period
-            var value = null;
-            var count = 0;
-            var timeStamp = new Date(data[i].ts);
-            while (i < data.length && new Date(data[i].ts * 1000) < stepEnd) {
-                var y = new Date(data[i].ts * 1000)
-                if (options.aggregate == 'max') {
-                    // Find max
-                    if (value === null || data[i].val > value) value = data[i].val;
-                } else if (options.aggregate == 'min') {
-                    // Find min
-                    if (value === null || data[i].val < value) value = data[i].val;
-                } else if (options.aggregate == 'average') {
-                    if (value === null) value = 0;
-                    value += data[i].val;
-                    count++;
-                } else if (options.aggregate == 'average10') {
-                    if (data[i].ts > timeStamp) {
+            //console.log(options.end)
+            //console.log(options.start)
+            //console.log(options.end-options.start)
+            //console.log((options.end-options.start)/500)
+            if (!step) step = 1;
+
+            // 1 Step is 1 second
+
+            var stepEnd;
+            var i = 0;
+            var result = [];
+            var iStep = 0;
+            options.aggregate = options.aggregate || 'max';
+
+
+            while (i < data.length && new Date(data[i].ts * 1000) < end) {
+                stepEnd = new Date(start);
+                var x = stepEnd.getSeconds()
+                stepEnd.setSeconds(x + step);
+                //if (stepEnd < start) {
+                //    // Summer time
+                //    stepEnd.setHours(start.getHours() + 2);
+                //}
+
+                // find all entries in this time period
+                var value = null;
+                var count = 0;
+
+                var timeStamp = new Date(data[i].ts);
+                while (i < data.length && new Date(data[i].ts * 1000) < stepEnd) {
+                    if (options.aggregate == 'max') {
+                        // Find max
+                        if (value === null || data[i].val > value) value = data[i].val;
+                    } else if (options.aggregate == 'min') {
+                        // Find min
+                        if (value === null || data[i].val < value) value = data[i].val;
+                    } else if (options.aggregate == 'average') {
+                        if (value === null) value = 0;
+                        value += data[i].val;
                         count++;
-                        timeStamp = data[i].ts;
+                    } else if (options.aggregate == 'average10') {
+                        if (data[i].ts > timeStamp) {
+                            count++;
+                            timeStamp = data[i].ts;
+                        }
+                        if (value === null) value = 0;
+                        value += data[i].val;
+                    } else if (options.aggregate == 'total') {
+                        // Find sum
+                        if (value === null) value = 0;
+                        value += parseFloat(data[i].val);
                     }
-                    if (value === null) value = 0;
-                    value += data[i].val;
-                } else if (options.aggregate == 'total') {
-                    // Find sum
-                    if (value === null) value = 0;
-                    value += parseFloat(data[i].val);
+                    i++;
                 }
-                i++;
-            }
 
-            if (options.aggregate == 'average' || options.aggregate == 'average10') {
-                if (!count) {
-                    value = null;
-                } else {
-                    value /= count;
-                    value = Math.round(value * 100) / 100;
+                if (options.aggregate == 'average' || options.aggregate == 'average10') {
+                    if (!count) {
+                        value = null;
+                    } else {
+                        value /= count;
+                        value = Math.round(value * 100) / 100;
+                    }
                 }
-            }
-            if (value) {
-                result[iStep] = {ts: stepEnd.getTime() / 1000};
-                result[iStep].val = value;
-                iStep++;
-            }
+                if (value || _options.getNull ) {
+                    result[iStep] = {ts: stepEnd.getTime() / 1000};
+                    result[iStep].val = value;
+                    iStep++;
+                }
 
 
-            start = stepEnd;
+                start = stepEnd;
+            }
+
+            return [result,step,data.length];
+        } else {
+            return [];
         }
-
-        return result;
     }
 
-    get_cacheData(id,_options.start, _options.end,function(cacheData){
-        get_fileData(id,_options.start, _options.end,function(fileData){
+    get_cacheData(id, _options.start, _options.end, function (cacheData) {
+        get_fileData(id, _options.start, _options.end, function (fileData) {
 
-            var data = cacheData.concat(fileData)
+            var data = cacheData.concat(fileData);
 
             function SortByName(a, b) {
                 var aName = a.ts;
                 var bName = b.ts;
                 return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
             }
-            data = data.sort(SortByName)
 
-            var aggre_data = aggregate(data,_options)
-            //callback(null, aggre_data);
-            //callback(null, []);
-            //adapter.sendTo(msg.from, msg.command, {result: [], error: null}, msg.callback);
-            adapter.sendTo(msg.from, msg.command, {result: aggre_data, error: null}, msg.callback);
+            data = data.sort(SortByName);
+
+
+                var aggre_data = aggregate(data, _options);
+
+                adapter.log.info("Sende: " + aggre_data[0].length +" von: " + aggre_data[2] +" in: " + (new Date().getTime()- startTime) +"ms" );
+                adapter.sendTo(msg.from, msg.command, {result: aggre_data[0],'step':aggre_data[1], error: null}, msg.callback);
+
+
         })
     })
 }
