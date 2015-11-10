@@ -176,16 +176,15 @@ function get_cacheData(id, option, callback) {
 
 function get_fileData(id, options, callback) {
 
-
-    var historyName = dataDir + 'history/';
     var day_start = ts2day(options.start);
     var day_end = ts2day(options.end);
     var data = [];
+    var path = controllerDir + "/" + dataDir + "history/"
 
     // erstellt Ordner Liste
 
 
-    var day_list = getDirectories(dataDir + "/history/").sort(function (a, b) {
+    var day_list = getDirectories(path).sort(function (a, b) {
         return a - b
     });
 
@@ -193,7 +192,7 @@ function get_fileData(id, options, callback) {
     for (var i = 0; i < day_list.length; i++) {
         var day = parseInt(day_list[i]);
         if (day >= day_start && day <= day_end) {
-            var file = "c:/io/iobroker-data/history/" + day_list[i].toString() + "/history." + id + ".json";
+            var file = path + day_list[i].toString() + "/history." + id + ".json";
             if (fs.existsSync(file)) {
                 try {
                     data = data.concat(JSON.parse(fs.readFileSync(file)))
