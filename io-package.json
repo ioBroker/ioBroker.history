@@ -29,7 +29,9 @@
     },
     "native": {
         "minLength": 480,
-        "maxLength": 960
+        "maxLength": 960,
+        "limit":2000,
+        "storeDir": ""
     },
     "objects": [
         {
