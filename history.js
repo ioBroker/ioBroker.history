@@ -11,7 +11,7 @@ var adapter = utils.adapter({
     name: 'history',
 
     objectChange: function (id, obj) {
-        if (obj && obj.common && obj.common.history && obj.common.history.enabled) {
+        if (obj && obj.common && obj.common.history && obj.common.history[adapter.namespace]) {
             history[id] = obj.common.history;
             adapter.log.info('enabled logging of ' + id);
         } else {
@@ -48,6 +48,17 @@ function processMessage(msg) {
 }
 
 function main() {
+    adapter.config.storeDir = adapter.config.storeDir || 'history';
+    adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
+    // remove last /
+    if (adapter.config.storeDir[adapter.config.storeDir.length - 1] == '/') {
+        adapter.config.storeDir = adapter.config.storeDir.substring(0, adapter.config.storeDir.length - 1);
+    }
+
+    if (adapter.config.storeDir[0] !== '/' && !adapter.config.storeDir.match(/^\w:\//)) {
+        adapter.config.storeDir = dataDir + adapter.config.storeDir;
+    }
+    adapter.config.storeDir += '/';
 
     adapter.objects.getObjectView('history', 'state', {}, function (err, doc) {
         if (doc && doc.rows) {
@@ -55,6 +66,13 @@ function main() {
                 if (doc.rows[i].value) {
                     adapter.log.info('enabled logging of ' + doc.rows[i].id);
                     history[doc.rows[i].id] = doc.rows[i].value;
+                    // convert old value
+                    if (history[doc.rows[i].id].enabled !== undefined) {
+                        history[doc.rows[i].id] = history[doc.rows[i].id].enabled ? {'history.0': history[doc.rows[i].id]} : {};
+                    }
+                    if (!history[doc.rows[i].id][adapter.namespace] || history[doc.rows[i].id][adapter.namespace].enabled === false) {
+                        delete history[doc.rows[i].id];
+                    }
                 }
             }
         }
@@ -65,34 +83,39 @@ function main() {
 }
 
 function pushHistory(id, state) {
-
     // Push into redis
-    if (history[id] && history[id].enabled) {
-        if (history[id].state && history[id].changesOnly && (state.ts !== state.lc)) return;
+    if (history[id]) {
+        var settings = history[id][adapter.namespace];
+
+        if (!settings) return;
+        
+        if (history[id].state && settings.changesOnly && (state.ts !== state.lc)) return;
 
         history[id].state = state;
         // Do not store values ofter than 1 second
         if (!history[id].timeout) {
 
             history[id].timeout = setTimeout(function (_id) {
+                if (!history[_id]) return;
+                var _settings = history[_id][adapter.namespace];
                 // if it was not deleted in this time
-                if (history[_id]) {
+                if (_settings) {
                     history[_id].timeout = null;
                     adapter.states.pushFifo(_id, history[_id].state);
 
-                    adapter.states.trimFifo(_id, history[id].minLength || adapter.config.minLength, history[id].maxLength || adapter.config.maxLength, function (err, obj) {
+                    adapter.states.trimFifo(_id, _settings.minLength || adapter.config.minLength, _settings.maxLength || adapter.config.maxLength, function (err, obj) {
                         if (!err && obj.length) {
-                            adapter.log.info('moving ' + obj.length + ' entries to couchdb');
-                            appendCouch(_id, obj);
+                            adapter.log.info('moving ' + obj.length + ' entries to file');
+                            appendFile(_id, obj);
                         }
                     });
                 }
-            }, history[id].debounce || 1000, id);
+            }, settings.debounce || 1000, id);
         }
     }
 }
 
-function appendCouch(id, states) {
+function appendFile(id, states) {
 
     var day = ts2day(states[states.length - 1].ts);
     var cid = 'history.' + id + '.' + day;
@@ -135,10 +158,9 @@ function appendCouch(id, states) {
 
         if (i >= 0) {
             adapter.log.info((i + 1) + ' remaining datapoints of history.' + id);
-            appendCouch(id, states.slice(0, (i + 1)));
+            appendFile(id, states.slice(0, (i + 1)));
         }
     });
-
 }
 
 function getCachedData(id, option, callback) {
@@ -177,20 +199,17 @@ function getFileData(id, options, callback) {
     var day_start = ts2day(options.start);
     var day_end = ts2day(options.end);
     var data = [];
-    var path = controllerDir + "/" + dataDir + "history/"
 
-    // erstellt Ordner Liste
-
-
-    var day_list = getDirectories(path).sort(function (a, b) {
+    // get list of directories
+    var day_list = getDirectories(adapter.config.storeDir).sort(function (a, b) {
         return a - b
     });
 
-    // List Datei aus Ordner
+    // get all files in directory
     for (var i = 0; i < day_list.length; i++) {
         var day = parseInt(day_list[i]);
         if (day >= day_start && day <= day_end) {
-            var file = path + day_list[i].toString() + '/history.' + id + '.json';
+            var file = adapter.config.storeDir + day_list[i].toString() + '/history.' + id + '.json';
             if (fs.existsSync(file)) {
                 try {
                     data = data.concat(JSON.parse(fs.readFileSync(file)))
