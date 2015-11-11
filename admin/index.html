@@ -27,6 +27,11 @@
             "de": "Default Einstellungen für Zuständen:",
             "ru": "Настройки по умолчанию для состояний"
         },
+        "storeDir": {
+            "en": "Storage directory:",
+            "de": "Speicherverzeichnis:",
+            "ru": "Путь для файлов:"
+        },
         "maxLength": {
             "en": "Maximal number of stored in states values:",
             "de": "Maximale Anzahl von Ereignissen nach welche die in DB gespeichert werden:",
@@ -60,9 +65,10 @@
                             }
                         }
 
-                        if (val != newVal) $(this).val(newVal).trigger('change');
+                        if (val != newVal) $(this).val(newVal);
                     }
                 }
+                $(this).trigger('change');
            });
         }
     }
@@ -104,8 +110,15 @@
     </tr></table>
     <div class="translate" style="margin:20">note</div>
     <br>
-    <h4 class="translate">Default settings:</h4>
+
     <table>
+        <tr><td colspan="3"><h4 class="translate">Storage settings:</h4></td></tr>
+        <tr>
+            <td class="translate">storeDir</td>
+            <td><input id="storeDir" type="text" class="value"/></td>
+            <td class="translate"></td>
+        </tr>
+        <tr><td colspan="3"><h4 class="translate">Default settings:</h4></td></tr>
         <tr>
             <td class="translate">minLength</td>
             <td><input id="minLength" type="text" size="5" class="value number"/></td>

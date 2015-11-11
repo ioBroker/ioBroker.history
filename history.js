@@ -2,10 +2,10 @@
 /*jslint node: true */
 "use strict";
 
-var utils = require(__dirname + '/lib/utils'); // Get common adapter utils
-var controllerDir = utils.controllerDir;
-var dataDir  = require(controllerDir + '/lib/tools').getDefaultDataDir();
-var fs = require('fs');
+var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
+var dataDir = require(utils.controllerDir + '/lib/tools').getDefaultDataDir();
+var fs      = require('fs');
+
 var adapter = utils.adapter({
 
     name: 'history',
@@ -37,14 +37,12 @@ var adapter = utils.adapter({
     message: function (obj) {
         processMessage(obj);
     }
-
 });
+
 var history = {};
 
-
-
 function processMessage(msg) {
-    if (msg.command == "getHistory") {
+    if (msg.command == 'getHistory') {
         getHistory(msg)
     }
 }
@@ -132,7 +130,7 @@ function appendCouch(id, states) {
         }
 
         adapter.setForeignObject(cid, obj, function () {
-            adapter.log.info('moved ' + states.length + ' history datapoints from Redis history.' + id + ' to CouchDB ' + cid);
+            adapter.log.info('store ' + states.length + ' history datapoints from RAM history.' + id + ' to file ' + cid);
         });
 
         if (i >= 0) {
@@ -143,7 +141,7 @@ function appendCouch(id, states) {
 
 }
 
-function get_cacheData(id, option, callback) {
+function getCachedData(id, option, callback) {
     adapter.getFifo(id, function (err, res) {
         var cache = []
         if (!err && res) {
@@ -170,11 +168,11 @@ function get_cacheData(id, option, callback) {
                 adapter.log.debug('datapoints for ' + id + ' do not yet exist');
             }
         }
-        callback(cache)
-    })
+        callback(cache);
+    });
 }
 
-function get_fileData(id, options, callback) {
+function getFileData(id, options, callback) {
 
     var day_start = ts2day(options.start);
     var day_end = ts2day(options.end);
@@ -192,7 +190,7 @@ function get_fileData(id, options, callback) {
     for (var i = 0; i < day_list.length; i++) {
         var day = parseInt(day_list[i]);
         if (day >= day_start && day <= day_end) {
-            var file = path + day_list[i].toString() + "/history." + id + ".json";
+            var file = path + day_list[i].toString() + '/history.' + id + '.json';
             if (fs.existsSync(file)) {
                 try {
                     data = data.concat(JSON.parse(fs.readFileSync(file)))
@@ -258,13 +256,6 @@ function aggregate(data, options) {
                     if (value === null) value = 0;
                     value += data[i].val;
                     count++;
-                } else if (options.aggregate == 'average10') {
-                    if (data[i].ts > timeStamp) {
-                        count++;
-                        timeStamp = data[i].ts;
-                    }
-                    if (value === null) value = 0;
-                    value += data[i].val;
                 } else if (options.aggregate == 'total') {
                     // Find sum
                     if (value === null) value = 0;
@@ -273,7 +264,7 @@ function aggregate(data, options) {
                 i++;
             }
 
-            if (options.aggregate == 'average' || options.aggregate == 'average10') {
+            if (options.aggregate == 'average') {
                 if (!count) {
                     value = null;
                 } else {
@@ -300,27 +291,24 @@ function aggregate(data, options) {
 function getHistory(msg, callback) {
     var startTime = new Date().getTime();
     var id = msg.message.id;
-    var options =
-    {
-        start: msg.message.options.start || Math.round((new Date()).getTime() / 1000) - 5030, // - 1 year
-        end: msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
-        step: parseInt(msg.message.options.step) || null,
-        count: parseInt(msg.message.options.count) || 500,
-        getNull: msg.message.options.getNull,
-        aggregate: msg.message.options.aggregate || "average", // One of: max, min, average, total
-        limit: msg.message.options.limit || adapter.config.limit || 2000
+    var options = {
+        start:      msg.message.options.start || Math.round((new Date()).getTime() / 1000) - 5030, // - 1 year
+        end:        msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
+        step:       parseInt(msg.message.options.step) || null,
+        count:      parseInt(msg.message.options.count) || 500,
+        getNull:    msg.message.options.getNull,
+        aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
+        limit:      msg.message.options.limit || adapter.config.limit || 2000
     };
 
     if (options.start > options.end){
         var _end = options.end;
-        options.end = options.start;
+        options.end   = options.start;
         options.start =_end;
     }
 
-
-
-    get_cacheData(id, options, function (cacheData) {
-        get_fileData(id, options, function (fileData) {
+    getCachedData(id, options, function (cacheData) {
+        getFileData(id, options, function (fileData) {
 
             var data = cacheData.concat(fileData);
 
@@ -332,15 +320,12 @@ function getHistory(msg, callback) {
 
             data = data.sort(sortByTs);
 
+            var aggregateData = aggregate(data, options);
 
-                var aggregateData = aggregate(data, options);
-
-                adapter.log.info("Sende: " + aggregateData[0].length +" von: " + aggregateData[2] +" in: " + (new Date().getTime()- startTime) +"ms" );
-                adapter.sendTo(msg.from, msg.command, {result: aggregateData[0],'step':aggregateData[1], error: null}, msg.callback);
-
-
-        })
-    })
+            adapter.log.info('Send: ' + aggregateData[0].length + ' of: ' + aggregateData[2] + ' in: ' + (new Date().getTime()- startTime) + 'ms');
+            adapter.sendTo(msg.from, msg.command, {result: aggregateData[0], 'step': aggregateData[1], error: null}, msg.callback);
+        });
+    });
 }
 
 function getDirectories(path) {
