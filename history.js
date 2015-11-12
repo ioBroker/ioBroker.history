@@ -122,6 +122,10 @@ function pushHistory(id, state) {
                 if (_settings) {
                     history[_id].timeout = null;
                     history[_id].list = history[_id].list || [];
+                    if (typeof history[_id].state.val === 'string') {
+                        var f = parseFloat(history[_id].state.val);
+                        if (f.toString() == history[_id].state.val) history[_id].state.val = f;
+                    }
                     history[_id].list.push(history[_id].state);
 
                     if (history[id].list.length > _settings.maxLength) {
@@ -135,7 +139,7 @@ function pushHistory(id, state) {
 }
 
 function appendFile(id, states) {
-
+    // todo check retention time
     var day = ts2day(states[states.length - 1].ts);
 
     var file = adapter.config.storeDir + day + '/history.' + id + '.json';
@@ -171,53 +175,12 @@ function appendFile(id, states) {
     if (states.length) {
         appendFile(id, states);
     }
-
-    /*adapter.getForeignObject(cid, function (err, res) {
-        var obj;
-        if (err || !res) {
-            obj = {
-                type: 'history',
-                common: {
-                    source: id,
-                    day: day,
-                    data: []
-                },
-                native: {}
-            };
-        } else {
-            obj = res;
-        }
-
-        if (!obj.common) {
-            adapter.log.error('invalid object ' + id);
-            return;
-        }
-
-        if (!obj.common.data) obj.common.data = [];
-
-        for (var i = states.length - 1; i >= 0; i--) {
-            if (!states[i]) continue;
-            if (ts2day(states[i].ts) === day) {
-                obj.common.data.unshift(states[i]);
-            } else {
-                break;
-            }
-        }
-
-        adapter.setForeignObject(cid, obj, function () {
-            adapter.log.info('store ' + states.length + ' history datapoints from RAM history.' + id + ' to file ' + cid);
-        });
-
-        if (i >= 0) {
-            adapter.log.info((i + 1) + ' remaining datapoints of history.' + id);
-            appendFile(id, states.slice(0, (i + 1)));
-        }
-    });*/
 }
 
 function getCachedData(id, options, callback) {
     var res = history[id].list;
     var cache = [];
+    // todo canbe optimized
     if (res) {
         var iProblemCount = 0;
         for (var i = res.length - 1; i >= 0 ; i--) {
@@ -289,6 +252,9 @@ function getFileData(id, options, callback) {
 
 function aggregate(data, options) {
     if (data && data.length) {
+        if (typeof data[0].val !== 'number') {
+            return {result: data, step: 0, sourceLength: data.length};
+        }
         var start = new Date(options.start * 1000);
         var end   = new Date(options.end * 1000);
 
@@ -309,8 +275,7 @@ function aggregate(data, options) {
         var result = [];
         var iStep = 0;
         options.aggregate = options.aggregate || 'max';
-
-
+        
         while (i < data.length && new Date(data[i].ts * 1000) < end) {
             stepEnd = new Date(start);
             var x = stepEnd.getSeconds();
@@ -352,7 +317,7 @@ function aggregate(data, options) {
                     value = Math.round(value * 100) / 100;
                 }
             }
-            if (value || options.getNull ) {
+            if (value !== null || !options.ignoreNull) {
                 result[iStep] = {ts: stepEnd.getTime() / 1000};
                 result[iStep].val = value;
                 iStep++;
@@ -401,7 +366,7 @@ function getHistory(msg) {
         end:        msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
         step:       parseInt(msg.message.options.step) || null,
         count:      parseInt(msg.message.options.count) || 500,
-        getNull:    msg.message.options.getNull,
+        ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
         limit:      msg.message.options.limit || adapter.config.limit || 2000
     };
