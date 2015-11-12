@@ -3,7 +3,8 @@
 "use strict";
 
 var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
-var dataDir = require(utils.controllerDir + '/lib/tools').getDefaultDataDir();
+var path    = require('path');
+var dataDir = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
 var fs      = require('fs');
 
 var adapter = utils.adapter({
@@ -43,7 +44,7 @@ var history = {};
 
 function processMessage(msg) {
     if (msg.command == 'getHistory') {
-        getHistory(msg)
+        getHistory(msg);
     }
 }
 
@@ -64,7 +65,6 @@ function main() {
         if (doc && doc.rows) {
             for (var i = 0, l = doc.rows.length; i < l; i++) {
                 if (doc.rows[i].value) {
-                    adapter.log.info('enabled logging of ' + doc.rows[i].id);
                     history[doc.rows[i].id] = doc.rows[i].value;
                     // convert old value
                     if (history[doc.rows[i].id].enabled !== undefined) {
@@ -72,6 +72,8 @@ function main() {
                     }
                     if (!history[doc.rows[i].id][adapter.namespace] || history[doc.rows[i].id][adapter.namespace].enabled === false) {
                         delete history[doc.rows[i].id];
+                    } else {
+                        adapter.log.info('enabled logging of ' + doc.rows[i].id);
                     }
                 }
             }
@@ -163,22 +165,26 @@ function appendFile(id, states) {
     });
 }
 
-function getCachedData(id, option, callback) {
+function getCachedData(id, options, callback) {
     adapter.getFifo(id, function (err, res) {
-        var cache = []
+        var cache = [];
         if (!err && res) {
             var iProblemCount = 0;
-            for (var i = 0; i < res.length; i++) {
+            for (var i = res.length - 1; i >= 0 ; i--) {
                 if (!res[i]) {
                     iProblemCount++;
                     continue;
                 }
-                if (res[i].ts < option.start) {
+                if (options.start && res[i].ts < options.start) {
+                    break;
+                } else if (res[i].ts > options.end) {
                     continue;
-                } else if (res[i].ts > option.end) {
+                }
+                cache.unshift(res[i]);
+
+                if (!options.start && cache.length >= options.count) {
                     break;
                 }
-                cache.push(res[i]);
             }
             if (iProblemCount) adapter.log.warn('got null states ' + iProblemCount + ' times for ' + id);
 
@@ -190,39 +196,46 @@ function getCachedData(id, option, callback) {
                 adapter.log.debug('datapoints for ' + id + ' do not yet exist');
             }
         }
-        callback(cache);
+        options.length = cache.length;
+        callback(cache, !options.start && cache.length >= options.count);
     });
 }
 
 function getFileData(id, options, callback) {
 
-    var day_start = ts2day(options.start);
-    var day_end = ts2day(options.end);
-    var data = [];
+    var day_start = options.start ? ts2day(options.start) : null;
+    var day_end   = ts2day(options.end);
+    var data      = [];
 
     // get list of directories
     var day_list = getDirectories(adapter.config.storeDir).sort(function (a, b) {
-        return a - b
+        return a - b;
     });
 
     // get all files in directory
-    for (var i = 0; i < day_list.length; i++) {
+    for (var i = day_list.length - 1; i >= 0; i--) {
         var day = parseInt(day_list[i]);
-        if (day >= day_start && day <= day_end) {
+
+        if (day_start && day < day_start) {
+            break;
+        } else
+        if ((!day_start || day >= day_start) && day <= day_end) {
             var file = adapter.config.storeDir + day_list[i].toString() + '/history.' + id + '.json';
             if (fs.existsSync(file)) {
                 try {
-                    data = data.concat(JSON.parse(fs.readFileSync(file)))
+                    data = data.concat(JSON.parse(fs.readFileSync(file)));
                 } catch (e) {
-                    log.error('Cannot parse file ' + file + ': ' + e.message);
+                    adapter.log.error('Cannot parse file ' + file + ': ' + e.message);
+                }
+                // if we need "count" entries
+                if (!day_start && (options.length + data.length > options.count)) {
+                    break;
                 }
             }
-        } else if (day >= day_end) {
-            break;
         }
     }
 
-    callback(data)
+    callback(data);
 }
 
 function aggregate(data, options) {
@@ -234,19 +247,18 @@ function aggregate(data, options) {
         if (options.step) {
             step = options.step;
         } else{
-            step = Math.round((options.end-options.start)/ options.count) ;
+            step = Math.round((options.end - options.start) / options.count) ;
         }
 
         // Limit 2000
-        if( (options.end-options.start) / step > options.limit){
-            step = Math.round((options.end-options.start)/ options.limit);
+        if ((options.end - options.start) / step > options.limit){
+            step = Math.round((options.end - options.start)/ options.limit);
         }
 
-
         var stepEnd;
-        var i = 0;
+        var i      = 0;
         var result = [];
-        var iStep = 0;
+        var iStep  = 0;
         options.aggregate = options.aggregate || 'max';
 
 
@@ -254,16 +266,16 @@ function aggregate(data, options) {
             stepEnd = new Date(start);
             var x = stepEnd.getSeconds();
             stepEnd.setSeconds(x + step);
-            //if (stepEnd < start) {
-            //    // Summer time
-            //    stepEnd.setHours(start.getHours() + 2);
-            //}
+
+            if (stepEnd < start) {
+                // Summer time
+                stepEnd.setHours(start.getHours() + 2);
+            }
 
             // find all entries in this time period
             var value = null;
             var count = 0;
 
-            var timeStamp = new Date(data[i].ts);
             while (i < data.length && new Date(data[i].ts * 1000) < stepEnd) {
                 if (options.aggregate == 'max') {
                     // Find max
@@ -297,27 +309,32 @@ function aggregate(data, options) {
                 iStep++;
             }
 
-
             start = stepEnd;
         }
 
-        return [result,step,data.length];
+        return {result: result, step: step, sourceLength: data.length};
     } else {
-        return [];
+        return {result: [], step: 0, sourceLength: 0};
     }
 }
 
-function getHistory(msg, callback) {
+function sortByTs(a, b) {
+    var aTs = a.ts;
+    var bTs = b.ts;
+    return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
+}
+
+function getHistory(msg) {
     var startTime = new Date().getTime();
     var id = msg.message.id;
     var options = {
-        start:      msg.message.options.start || Math.round((new Date()).getTime() / 1000) - 5030, // - 1 year
-        end:        msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
-        step:       parseInt(msg.message.options.step) || null,
+        start:      msg.message.options.start,
+        end:        msg.message.options.end   || Math.round((new Date()).getTime() / 1000) + 5000,
+        step:       parseInt(msg.message.options.step)  || null,
         count:      parseInt(msg.message.options.count) || 500,
         getNull:    msg.message.options.getNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
-        limit:      msg.message.options.limit || adapter.config.limit || 2000
+        limit:      msg.message.options.limit     || adapter.config.limit || 2000
     };
 
     if (options.start > options.end){
@@ -326,24 +343,47 @@ function getHistory(msg, callback) {
         options.start =_end;
     }
 
-    getCachedData(id, options, function (cacheData) {
-        getFileData(id, options, function (fileData) {
+    if (!options.start && !options.count) {
+        options.start = Math.round((new Date()).getTime() / 1000) - 5030; // - 1 year
+    }
 
-            var data = cacheData.concat(fileData);
+    getCachedData(id, options, function (cacheData, isFull) {
+        // if all data read
+        if (isFull && cacheData.length) {
+            options.start = cacheData[0].ts;
+            var data = cacheData.sort(sortByTs);
 
-            function sortByTs(a, b) {
-                var aTs = a.ts;
-                var bTs = b.ts;
-                return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
+            var aggregateData;
+            if (!options.aggregate || options.aggregate === 'none') {
+                aggregateData = {result: data, step: 0, sourceLength: data.length};
+            } else {
+                aggregateData = aggregate(data, options);
             }
 
-            data = data.sort(sortByTs);
+            adapter.log.info('Send: ' + aggregateData.result.length + ' of: ' + aggregateData.sourceLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+            adapter.sendTo(msg.from, msg.command, {result: aggregateData.result, step: aggregateData.step, error: null}, msg.callback);
+        } else {
+            getFileData(id, options, function (fileData) {
 
-            var aggregateData = aggregate(data, options);
+                var data = cacheData.concat(fileData);
 
-            adapter.log.info('Send: ' + aggregateData[0].length + ' of: ' + aggregateData[2] + ' in: ' + (new Date().getTime()- startTime) + 'ms');
-            adapter.sendTo(msg.from, msg.command, {result: aggregateData[0], 'step': aggregateData[1], error: null}, msg.callback);
-        });
+                data = data.sort(sortByTs);
+
+                if (!options.start && options.count && data.length > options.count) {
+                    data.splice(0, data.length - options.count);
+                }
+
+                var aggregateData;
+                if (!options.aggregate || options.aggregate === 'none') {
+                    aggregateData = {result: data, step: 0, sourceLength: data.length};
+                } else {
+                    aggregateData = aggregate(data, options);
+                }
+
+                adapter.log.info('Send: ' + aggregateData.result.length + ' of: ' + aggregateData.sourceLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                adapter.sendTo(msg.from, msg.command, {result: aggregateData.result, step: aggregateData.step, error: null}, msg.callback);
+            });
+        }
     });
 }
 
