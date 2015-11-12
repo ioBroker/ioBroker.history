@@ -67,7 +67,7 @@ function processMessage(msg) {
 function main() {
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
-    // remove last /
+    // remove last "/"
     if (adapter.config.storeDir[adapter.config.storeDir.length - 1] == '/') {
         adapter.config.storeDir = adapter.config.storeDir.substring(0, adapter.config.storeDir.length - 1);
     }
@@ -84,13 +84,20 @@ function main() {
                     history[doc.rows[i].id] = doc.rows[i].value;
                     // convert old value
                     if (history[doc.rows[i].id].enabled !== undefined) {
-                        history[doc.rows[i].id] = history[doc.rows[i].id].enabled ? {'history.0': history[doc.rows[i].id]} : {};
+                        history[doc.rows[i].id] = history[doc.rows[i].id].enabled ? {'history.0': history[doc.rows[i].id]} : null;
+                        if (!history[doc.rows[i].id]) {
+                            delete history[doc.rows[i].id];
+                            continue;
+                        }
                     }
                     if (!history[doc.rows[i].id][adapter.namespace] || history[doc.rows[i].id][adapter.namespace].enabled === false) {
                         delete history[doc.rows[i].id];
                     } else {
                         adapter.log.info('enabled logging of ' + doc.rows[i].id);
-                        history[doc.rows[i].id][adapter.namespace].maxLength = parseInt(history[doc.rows[i].id][adapter.namespace].maxLength || adapter.config.maxLength, 10);
+                        history[doc.rows[i].id][adapter.namespace].maxLength   = parseInt(history[doc.rows[i].id][adapter.namespace].maxLength || adapter.config.maxLength, 10);
+                        history[doc.rows[i].id][adapter.namespace].retention   = parseInt(history[doc.rows[i].id][adapter.namespace].retention || adapter.config.retention, 10);
+                        history[doc.rows[i].id][adapter.namespace].debounce    = parseInt(history[doc.rows[i].id][adapter.namespace].debounce  || adapter.config.debounce,  10);
+                        history[doc.rows[i].id][adapter.namespace].changesOnly = history[doc.rows[i].id][adapter.namespace].changesOnly === 'true' || history[doc.rows[i].id][adapter.namespace].changesOnly === true;
                     }
                 }
             }
@@ -124,7 +131,13 @@ function pushHistory(id, state) {
                     history[_id].list = history[_id].list || [];
                     if (typeof history[_id].state.val === 'string') {
                         var f = parseFloat(history[_id].state.val);
-                        if (f.toString() == history[_id].state.val) history[_id].state.val = f;
+                        if (f.toString() == history[_id].state.val) {
+                            history[_id].state.val = f;
+                        } else if (history[_id].state.val === 'true') {
+                            history[_id].state.val = true;
+                        } else if (history[_id].state.val === 'false') {
+                            history[_id].state.val = false;
+                        }
                     }
                     history[_id].list.push(history[_id].state);
 
