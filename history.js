@@ -81,23 +81,29 @@ function main() {
         if (doc && doc.rows) {
             for (var i = 0, l = doc.rows.length; i < l; i++) {
                 if (doc.rows[i].value) {
-                    history[doc.rows[i].id] = doc.rows[i].value;
+                    var id = doc.rows[i].id;
+                    history[id] = doc.rows[i].value;
                     // convert old value
-                    if (history[doc.rows[i].id].enabled !== undefined) {
-                        history[doc.rows[i].id] = history[doc.rows[i].id].enabled ? {'history.0': history[doc.rows[i].id]} : null;
-                        if (!history[doc.rows[i].id]) {
-                            delete history[doc.rows[i].id];
+                    if (history[id].enabled !== undefined) {
+                        history[id] = history[id].enabled ? {'history.0': history[id]} : null;
+                        if (!history[id]) {
+                            delete history[id];
                             continue;
                         }
                     }
-                    if (!history[doc.rows[i].id][adapter.namespace] || history[doc.rows[i].id][adapter.namespace].enabled === false) {
-                        delete history[doc.rows[i].id];
+                    if (!history[id][adapter.namespace] || history[id][adapter.namespace].enabled === false) {
+                        delete history[id];
                     } else {
-                        adapter.log.info('enabled logging of ' + doc.rows[i].id);
-                        history[doc.rows[i].id][adapter.namespace].maxLength   = parseInt(history[doc.rows[i].id][adapter.namespace].maxLength || adapter.config.maxLength, 10);
-                        history[doc.rows[i].id][adapter.namespace].retention   = parseInt(history[doc.rows[i].id][adapter.namespace].retention || adapter.config.retention, 10);
-                        history[doc.rows[i].id][adapter.namespace].debounce    = parseInt(history[doc.rows[i].id][adapter.namespace].debounce  || adapter.config.debounce,  10);
-                        history[doc.rows[i].id][adapter.namespace].changesOnly = history[doc.rows[i].id][adapter.namespace].changesOnly === 'true' || history[doc.rows[i].id][adapter.namespace].changesOnly === true;
+                        adapter.log.info('enabled logging of ' + id);
+                        history[id][adapter.namespace].maxLength   = parseInt(history[id][adapter.namespace].maxLength || adapter.config.maxLength, 10) || 960;
+                        history[id][adapter.namespace].retention   = parseInt(history[id][adapter.namespace].retention || adapter.config.retention, 10) || 0;
+                        history[id][adapter.namespace].debounce    = parseInt(history[id][adapter.namespace].debounce  || adapter.config.debounce,  10) || 1000;
+                        history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+
+                        // add one day if retention is too small
+                        if (history[id][adapter.namespace].retention <= 604800) {
+                            history[id][adapter.namespace].retention += 86400;
+                        }
                     }
                 }
             }
@@ -144,15 +150,57 @@ function pushHistory(id, state) {
                     if (history[id].list.length > _settings.maxLength) {
                         adapter.log.info('moving ' + history[id].list.length + ' entries to file');
                         appendFile(_id, history[_id].list);
+                        checkRetention(_id);
                     }
                 }
-            }, settings.debounce || 1000, id);
+            }, settings.debounce, id);
+        }
+    }
+}
+
+function checkRetention(id) {
+    if (history[id][adapter.namespace].retention) {
+        var d = new Date();
+        var dt = d.getTime();
+        // check every 6 hours
+        if (!history[id].lastCheck || dt - history[id].lastCheck >= 21600000/* 6 hours */) {
+            history[id].lastCheck = dt;
+            // get list of directories
+            var dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
+                return a - b;
+            });
+            // calculate date
+            d.setSeconds(-(history[id][adapter.namespace].retention));
+            var day = ts2day(Math.round(d.getTime() / 1000));
+            for (var i = 0; i < dayList.length; i++) {
+                if (dayList[i] < day) {
+                    var file = adapter.config.storeDir + dayList[i] + '/history.' + id + '.json';
+                    if (fs.existsSync(file)) {
+                        adapter.log.info('Delete old history "' + file + '"');
+                        try {
+                            fs.unlinkSync(file);
+                        } catch(ex) {
+                            adapter.log.error('Cannot delete file "' + file + '": ' + ex);
+                        }
+                        var files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
+                        if (!files.length) {
+                            adapter.log.info('Delete old history dir "' + adapter.config.storeDir + dayList[i] + '"');
+                            try {
+                                fs.unlink(adapter.config.storeDir + dayList[i]);
+                            } catch(ex) {
+                                adapter.log.error('Cannot delete directory "' + adapter.config.storeDir + dayList[i] + '": ' + ex);
+                            }
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
         }
     }
 }
 
 function appendFile(id, states) {
-    // todo check retention time
     var day = ts2day(states[states.length - 1].ts);
 
     var file = adapter.config.storeDir + day + '/history.' + id + '.json';
@@ -193,7 +241,7 @@ function appendFile(id, states) {
 function getCachedData(id, options, callback) {
     var res = history[id].list;
     var cache = [];
-    // todo canbe optimized
+    // todo can be optimized
     if (res) {
         var iProblemCount = 0;
         for (var i = res.length - 1; i >= 0 ; i--) {
@@ -233,19 +281,19 @@ function getFileData(id, options, callback) {
     var data = [];
 
     // get list of directories
-    var day_list = getDirectories(adapter.config.storeDir).sort(function (a, b) {
+    var dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
         return a - b;
     });
 
     // get all files in directory
-    for (var i = day_list.length - 1; i >= 0; i--) {
-        var day = parseInt(day_list[i]);
+    for (var i = dayList.length - 1; i >= 0; i--) {
+        var day = parseInt(dayList[i]);
 
         if (day_start && day < day_start) {
             break;
         } else
         if ((!day_start || day >= day_start) && day <= day_end) {
-            var file = adapter.config.storeDir + day_list[i].toString() + '/history.' + id + '.json';
+            var file = adapter.config.storeDir + dayList[i].toString() + '/history.' + id + '.json';
             if (fs.existsSync(file)) {
                 try {
                     data = data.concat(JSON.parse(fs.readFileSync(file)));
