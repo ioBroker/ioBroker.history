@@ -145,6 +145,10 @@ function pushHistory(id, state) {
                             history[_id].state.val = false;
                         }
                     }
+                    if (history[_id].state.lc !== undefined) delete history[_id].state.lc;
+                    history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+                    if (!adapter.config.storeFrom && history[_id].state.from !== undefined) delete history[_id].state.from;
+
                     history[_id].list.push(history[_id].state);
 
                     if (history[id].list.length > _settings.maxLength) {

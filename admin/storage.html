@@ -62,23 +62,29 @@
         "3 days":                 {"en": "3 days",                "de": "3 Tage",                       "ru": "3 дня"},
         "1 day":                  {"en": "1 day",                 "de": "1 Tag",                        "ru": "1 день"}
     });
-    // this function must have name setDefault + 'adapter name' starting from capital letter
-    function setDefaultHistory(id, obj) {
-        if (obj && obj.common && obj.common.type != 'number') {
+    // There are two ways how to predefine default settings:
+    // - with attribute "data-default" (content independent)
+    // - with function in global variable "defaults". Function name is equal with adapter name.
+    //   as input function receives object with all information concerning it
+    if (typeof defaults !== 'undefined') {
+        defaults.history = function (obj, instanceObj) {
+            if (obj && obj.common && obj.common.type != 'number') {
+                return {
+                    enabled:     false,
+                    changesOnly: false,
+                    debounce:    0,
+                    maxLength:   instanceObj.native.maxLength,
+                    retention:   instanceObj.native.retention
+                };
+            }
             return {
                 enabled:     false,
-                changesOnly: false,
-                debounce:    0,
-                maxLength:   960,
-                retention:   31536000
+                changesOnly: true,
+                debounce:    instanceObj.native.debounce,
+                maxLength:   instanceObj.native.maxLength,
+                retention:   instanceObj.native.retention
             };
         }
-        return {
-            enabled:     false,
-            changesOnly: true,
-            debounce:    10000,
-            maxLength:   960,
-            retention:   31536000
-        };
     }
+
 </script>

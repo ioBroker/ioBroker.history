@@ -29,7 +29,10 @@
     "native": {
         "maxLength": 960,
         "limit":     2000,
-        "storeDir":  ""
+        "storeDir":  "",
+        "debounce":  10000,
+        "retention": 31536000,
+        "storeFrom": false
     },
     "objects": [
         {
