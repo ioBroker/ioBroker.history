@@ -183,7 +183,7 @@ function checkRetention(id) {
                         adapter.log.info('Delete old history "' + file + '"');
                         try {
                             fs.unlinkSync(file);
-                        } catch(ex) {
+                        } catch (ex) {
                             adapter.log.error('Cannot delete file "' + file + '": ' + ex);
                         }
                         var files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
@@ -191,7 +191,7 @@ function checkRetention(id) {
                             adapter.log.info('Delete old history dir "' + adapter.config.storeDir + dayList[i] + '"');
                             try {
                                 fs.unlink(adapter.config.storeDir + dayList[i]);
-                            } catch(ex) {
+                            } catch (ex) {
                                 adapter.log.error('Cannot delete directory "' + adapter.config.storeDir + dayList[i] + '": ' + ex);
                             }
                         }
@@ -214,7 +214,7 @@ function appendFile(id, states) {
     for (i = states.length - 1; i >= 0; i--) {
         if (!states[i]) continue;
         if (ts2day(states[i].ts) !== day) {
-            break
+            break;
         }
     }
     data = states.splice(i - states.length + 1);
@@ -245,7 +245,7 @@ function appendFile(id, states) {
 function getCachedData(id, options, callback) {
     var res = [];
     var cache = [];
-    if(history[id]){
+    if (history[id]) {
          res = history[id].list;
          cache = [];
         // todo can be optimized
@@ -331,13 +331,13 @@ function aggregate(data, options) {
         var step = 1; // 1 Step is 1 second
         if (options.step) {
             step = options.step;
-        } else{
+        } else {
             step = Math.round((options.end - options.start) / options.count) ;
         }
 
         // Limit 2000
-        if ((options.end - options.start) / step > options.limit){
-            step = Math.round((options.end - options.start)/ options.limit);
+        if ((options.end - options.start) / step > options.limit) {
+            step = Math.round((options.end - options.start) / options.limit);
         }
 
         var stepEnd;
@@ -450,10 +450,10 @@ function getHistory(msg) {
         limit:      msg.message.options.limit || adapter.config.limit || 2000
     };
 
-    if (options.start > options.end){
+    if (options.start > options.end) {
         var _end = options.end;
-        options.end   = options.start;
-        options.start =_end;
+        options.end   =  options.start;
+        options.start = _end;
     }
 
     if (!options.start && !options.count) {
