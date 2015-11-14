@@ -11,6 +11,8 @@
         "mode":                     "daemon",
         "platform":                 "Javascript/Node.js",
         "loglevel":                 "info",
+        "messagebox":               true,
+        "subscribe":                "messagebox",
         "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
         "main":                     "history.js",
         "enabled":                  true,
@@ -20,14 +22,14 @@
         ],
         "license":                  "MIT",
         "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
-        "singleton":                true,
         "icon":                     "history.png",
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
 		"type":                     "storage"
     },
     "native": {
-        "minLength": 480,
-        "maxLength": 960
+        "maxLength": 960,
+        "limit":     2000,
+        "storeDir":  ""
     },
     "objects": [
         {
