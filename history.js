@@ -239,37 +239,42 @@ function appendFile(id, states) {
 }
 
 function getCachedData(id, options, callback) {
-    var res = history[id].list;
+    var res = [];
     var cache = [];
-    // todo can be optimized
-    if (res) {
-        var iProblemCount = 0;
-        for (var i = res.length - 1; i >= 0 ; i--) {
-            if (!res[i]) {
-                iProblemCount++;
-                continue;
-            }
-            if (options.start && res[i].ts < options.start) {
-                break;
-            } else if (res[i].ts > options.end) {
-                continue;
-            }
-            cache.unshift(res[i]);
+    if(history[id]){
+         res = history[id].list;
+         cache = [];
+        // todo can be optimized
+        if (res) {
+            var iProblemCount = 0;
+            for (var i = res.length - 1; i >= 0 ; i--) {
+                if (!res[i]) {
+                    iProblemCount++;
+                    continue;
+                }
+                if (options.start && res[i].ts < options.start) {
+                    break;
+                } else if (res[i].ts > options.end) {
+                    continue;
+                }
+                cache.unshift(res[i]);
 
-            if (!options.start && cache.length >= options.count) {
-                break;
+                if (!options.start && cache.length >= options.count) {
+                    break;
+                }
             }
-        }
-        if (iProblemCount) adapter.log.warn('got null states ' + iProblemCount + ' times for ' + id);
+            if (iProblemCount) adapter.log.warn('got null states ' + iProblemCount + ' times for ' + id);
 
-        adapter.log.debug('got ' + res.length + ' datapoints for ' + id);
-    } else {
-        if (err != 'Not exists') {
-            adapter.log.error(err);
+            adapter.log.debug('got ' + res.length + ' datapoints for ' + id);
         } else {
+            //if (err != 'Not exists') {
+            //    adapter.log.error(err);
+            //} else {
             adapter.log.debug('datapoints for ' + id + ' do not yet exist');
+            //}
         }
     }
+
     options.length = cache.length;
     callback(cache, !options.start && cache.length >= options.count);
 }
@@ -405,17 +410,26 @@ function sendResponse(msg, options, data, startTime) {
     if (options.count && !options.start && data.length > options.count) {
         data.splice(0, data.length - options.count);
     }
+    if (data[0]) {
+        options.start = options.start || data[0].ts;
 
-    options.start = options.start || data[0].ts;
+        if (!options.aggregate || options.aggregate === 'none') {
+            aggregateData = {result: data, step: 0, sourceLength: data.length};
+        } else {
+            aggregateData = aggregate(data, options);
+        }
 
-    if (!options.aggregate || options.aggregate === 'none') {
-        aggregateData = {result: data, step: 0, sourceLength: data.length};
+        adapter.log.info('Send: ' + aggregateData.result.length + ' of: ' + aggregateData.sourceLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+        adapter.sendTo(msg.from, msg.command, {
+            result: aggregateData.result,
+            step: aggregateData.step,
+            error: null
+        }, msg.callback);
     } else {
-        aggregateData = aggregate(data, options);
+        adapter.log.info('No Data');
+        adapter.sendTo(msg.from, msg.command, {result: [].result, step: null, error: null}, msg.callback);
     }
 
-    adapter.log.info('Send: ' + aggregateData.result.length + ' of: ' + aggregateData.sourceLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
-    adapter.sendTo(msg.from, msg.command, {result: aggregateData.result, step: aggregateData.step, error: null}, msg.callback);
 
 }
 
