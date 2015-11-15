@@ -9,6 +9,11 @@ reach maxLength they are trimmed to minLength and moved to CouchDB.
 
 
 ## Changelog
+### 0.2.0 (2015-11-15)
+* (Smiling_Jack) save and load in adapter and not in js-controller
+* (Smiling_Jack) aggregation of data points
+* (Smiling_Jack) support of storage path
+
 ### 0.1.3 (2015-02-19)
 * (bluefox) fix small error in history (Thanks on Dschaedl)
 * (bluefox) update admin page
