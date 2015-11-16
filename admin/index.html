@@ -17,7 +17,7 @@
     systemDictionary = {
         "History adapter settings": {
             "de": "History-Adapter Einstellungen",
-            "ru": "Настройки профайлера"},
+            "ru": "Настройки профайлера"
         },
         "note": {
             "en": "History settings must be done for every state individually on the tab \"States\" and only if adapter is active",
@@ -202,7 +202,7 @@
     </table>
     <div class="translate" style="margin:20px">note</div>
     <br>
-    <h4 style="width: 100%" class="translate">Storage settings:</h4>
+    <h4 style="width: calc(100% - 10px)" class="translate">Storage settings:</h4>
     <table>
         <tr>
             <td class="translate">storeDir</td>
@@ -210,24 +210,13 @@
             <td class="translate"></td>
         </tr>
     </table>
-            <h4 style="width: 100%" class="translate">Default settings:</h4>
+            <h4 style="width: calc(100% - 10px)" class="translate">Default settings:</h4>
     <table>
         <tr>
             <td class="translate">maxLength</td>
             <td><input id="maxLength" type="text" size="5" class="value number"/></td>
             <td class="translate"></td>
         </tr>
-    </table>
-    <h4 style="width: 100%" class="translate">Demo Data:</h4>
-    <table>
-    <tr>
-        <td class="translate">ID</td>
-        <td class="translate">Start</td>
-        <td class="translate">End</td>
-        <td class="translate">Steps</td>
-        <td class="translate">Curve</td>
-        <td></td>
-    </tr>
         <tr>
             <td class="translate">debounce</td>
             <td><input id="debounce" type="text" size="5" class="value number"/></td>
@@ -247,6 +236,27 @@
                 <option value="432000"      class="translate">5 days</option>
                 <option value="259200"      class="translate">3 days</option>
                 <option value="86400"       class="translate">1 day</option>
+            </select></td>
+        </tr>
+    </table>
+    <h4 style="width: calc(100% - 10px)" class="translate">Demo Data:</h4>
+    <table>
+    <tr>
+        <td class="translate">ID</td>
+        <td class="translate">Start</td>
+        <td class="translate">End</td>
+        <td class="translate">Steps</td>
+        <td class="translate">Curve</td>
+        <td></td>
+    </tr>
+        <tr>
+            <td class="translate"><input id="demoID" type="text" /></td>
+            <td class="translate"><input id="demoStart" /></td>
+            <td class="translate"><input id="demoEnd"  /></td>
+            <td class="translate"><input id="demoStep" type="number" min="1" step="1" value="60"/></td>
+            <td class="translate"><select id="demoCurve">
+                <option value="sin"  class="translate">Sinus</option>
+                <option value="zahn"  class="translate">DEC/INC</option>
             </select></td>
             <td class="translate"><button id="generateDemo">Generate</button></td>
         </tr>
