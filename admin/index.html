@@ -17,7 +17,7 @@
     systemDictionary = {
         "History adapter settings": {
             "de": "History-Adapter Einstellungen",
-            "ru": "Настройки профайлера"
+            "ru": "Настройки профайлера"},
         },
         "note": {
             "en": "History settings must be done for every state individually on the tab \"States\" and only if adapter is active",
@@ -37,6 +37,11 @@
             "en": "Maximal number of stored in RAM values:",
             "de": "Maximale Anzahl von Ereignissen in RAM:",
             "ru": "Количество событий в RAM:"
+        },
+        "storeFrom": {
+            "en": "Store origin of value:",
+            "de": "Speichern Quelle vom Ereigniss mit:",
+            "ru": "Сохранять источник события:"
         }
     };
 
@@ -224,13 +229,24 @@
         <td></td>
     </tr>
         <tr>
-            <td class="translate"><input id="demoID" type="text" /></td>
-            <td class="translate"><input id="demoStart" /></td>
-            <td class="translate"><input id="demoEnd"  /></td>
-            <td class="translate"><input id="demoStep" type="number" min="1" step="1" value="60"/></td>
-            <td class="translate"><select id="demoCurve">
-                <option value="sin"  class="translate">Sinus</option>
-                <option value="triangular"  class="translate">Triangular</option>
+            <td class="translate">debounce</td>
+            <td><input id="debounce" type="text" size="5" class="value number"/></td>
+            <td class="translate"></td>
+        </tr>
+        <tr>
+            <td class="translate">retention</td>
+            <td><select id="retention">
+                <option value="0"           class="translate">keep forever</option>
+                <option value="63072000"    class="translate">2 years</option>
+                <option value="31536000"    class="translate">1 year</option>
+                <option value="15811200"    class="translate">6 months</option>
+                <option value="7948800"     class="translate">3 months</option>
+                <option value="2678400"     class="translate">1 months</option>
+                <option value="1209600"     class="translate">2 weeks</option>
+                <option value="604800"      class="translate">1 week</option>
+                <option value="432000"      class="translate">5 days</option>
+                <option value="259200"      class="translate">3 days</option>
+                <option value="86400"       class="translate">1 day</option>
             </select></td>
             <td class="translate"><button id="generateDemo">Generate</button></td>
         </tr>
