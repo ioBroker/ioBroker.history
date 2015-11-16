@@ -1,12 +1,18 @@
 ![Logo](admin/history.png)
 # ioBroker.history
 
-This adapter saves state history in a two-staged process. At first datapoints are stored in Redis, as soon as they
-reach maxLength they are trimmed to minLength and moved to CouchDB.
+This adapter saves state history in a two-staged process. 
+At first datapoints are stored in RAM, as soon as they reach maxLength they will be stored on disk.
 
+To setup some datapoints to be stored they must be configured in admin "Objects" Tab (last button).
 
-## Todo
+## Settings
 
+- **Storage directory** - Path to the directory, where the files will be stored. It can be done relative to "iobroker-data" or absolute, like "/mnt/history" or "D:/History"
+- **Maximal number of stored in RAM values** - After this number of values reached in RAM they will be saved on disk.
+- **Store origin of value** - If "from" field will be stored too. Can save place on disk.
+- **De-bounce interval** - Protection against too often changes of some value. 
+- **Storage retention** - How many values in the past will be stored on disk.
 
 ## Changelog
 ### 0.2.0 (2015-11-15)
@@ -36,18 +42,11 @@ reach maxLength they are trimmed to minLength and moved to CouchDB.
 ### 0.0.6 (2014-10-19)
 * (bluefox) add configuration page
 
-### 0.0.5
-* (hobbyquaker) CouchDB document for each day
-
-### 0.0.4
-
-* (hobbyquaker) fixed order of entries in CouchDB
-
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2014 hobbyquaker
+Copyright (c) 2014-2015 Bluefox, Smiling_Jack
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
