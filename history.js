@@ -62,6 +62,8 @@ function finish(callback) {
 function processMessage(msg) {
     if (msg.command == 'getHistory') {
         getHistory(msg);
+    } else if (msg.command == 'generateDemo') {
+        generateDemo(msg)
     }
 }
 
@@ -113,6 +115,174 @@ function main() {
 
     adapter.subscribeForeignStates('*');
     adapter.subscribeForeignObjects('*');
+}
+
+function generateDemo(msg) {
+    var options = [
+        msg.message.curve || "sin",                         // 0 curve
+        msg.message.end || new Date().toDateString(),       // 1 end
+        msg.message.start || new Date().setDate(-1),        // 2 start
+        msg.message.step || 60,                            // 3 step
+        msg.message.id || "Demo_Data",                      // 4 id
+        adapter.config.storeDir                             // 5 path
+    ]
+
+
+    function fork(options) {
+
+        var new_day;
+
+        var path = options[5];
+        var fileName = '/history.'+adapter.name+'.'+adapter.instance+'.' + options[4] + '.json'
+
+        var data = [];
+        var start = new Date(options[2]).getTime();
+        var end = new Date(options[1]).getTime();
+        var value = 1;
+        var sin = 0.1;
+        var up = true;
+        var curve = options[0]
+
+        var step = options[3]* 1000;
+        var old_day;
+
+        if (end < start) {
+            var tmp = end; end = start; start = tmp;
+        }
+
+        end = new Date(end).setHours(24)
+
+        function generate() {
+            old_day = new Date(start).getDay();
+            for (start; start <= end;) {
+
+                new_day = new Date(start + step).getDay();
+                if (new_day != old_day) {
+                    save();
+                    break;
+                }
+
+
+                data.push({
+                    'ts': new Date(start).getTime() / 1000,
+                    'val': value,
+                    //'lc': new Date(start).getTime() /1000,
+                    //"from": "system.adapter.javascript.0",
+                    //'ack': false
+                });
+
+                if (curve == "sin") {
+                    if (sin == 6.2) {
+                        sin = 0
+                    } else {
+                        sin = Math.round((sin + 0.1) * 10) / 10;
+                    }
+                    value = Math.round(Math.sin(sin) * 10000) /100;
+                } else {
+                    if (up == true) {
+                        value++;
+                    } else {
+                        value--;
+                    }
+                }
+                start += step;
+            }
+        }
+
+        function save() {
+            try {
+                fs.mkdirSync(path + ts2day(start))
+            }
+            catch (err) {
+
+            }
+
+
+            fs.writeFile(path + ts2day(start) + fileName, JSON.stringify(data), 'utf8', function (err, res) {
+                data = [];
+                if (up == true) {
+                    up = false
+                } else {
+                    up = true
+                }
+
+                data.push({
+                    'ts': new Date(start).getTime() / 1000,
+                    'val': value,
+                    //'lc': new Date(start).getTime() /1000,
+                    //"from": "system.adapter.javascript.0",
+                    //'ack': false
+                });
+
+                if (curve == "sin") {
+                    if (sin == 6.2) {
+                        sin = 0
+                    } else {
+                        sin = Math.round((sin + 0.1) * 10) / 10;
+                    }
+                    value = Math.round(Math.sin(sin) * 10000) / 100;
+                }
+                else {
+                    if (up == true) {
+                        value++;
+                    } else {
+                        value--;
+                    }
+                }
+
+                start += step;
+
+                if(start < end){
+                    generate()
+                }else{
+                    var history = {}
+                    history["history."+ adapter.instance] = {
+                        enabled: true,
+                        changesOnly: true,
+                        debounce: 1000,
+                        maxLength: 960,
+                        retention: 0
+                    }
+
+                    adapter.setObject(options[4], {
+                        type: 'state',
+                        common: {
+                            name: options[4],
+                            type: 'state',
+                            enabled: false,
+                            history: history
+                        }
+                    });
+                    adapter.sendTo(msg.from, msg.command, "finish", msg.callback);
+                }
+
+            });
+        }
+
+        function ts2day(ts) {
+            var dateObj = new Date(ts);
+
+            var text = dateObj.getFullYear().toString();
+            var v = dateObj.getMonth() + 1;
+            if (v < 10) text += '0';
+            text += v.toString();
+
+            v = dateObj.getDate();
+            if (v < 10) text += '0';
+            text += v.toString();
+
+            return text;
+        }
+var x = new Date().getTime()
+        generate()
+
+    }
+
+
+
+
+fork(options);
+
 }
 
 function pushHistory(id, state) {
@@ -286,8 +456,8 @@ function getCachedData(id, options, callback) {
 
 function getFileData(id, options, callback) {
 
-    var day_start = options.start ? ts2day(options.start) : null;
-    var day_end = ts2day(options.end);
+    var day_start = parseInt(options.start ? ts2day(options.start) : null);
+    var day_end = parseInt(ts2day(options.end));
     var data = [];
 
     // get list of directories
@@ -299,23 +469,26 @@ function getFileData(id, options, callback) {
     for (var i = dayList.length - 1; i >= 0; i--) {
         var day = parseInt(dayList[i]);
 
-        if (day_start && day < day_start) {
-            break;
-        } else
-        if ((!day_start || day >= day_start) && day <= day_end) {
-            var file = adapter.config.storeDir + dayList[i].toString() + '/history.' + id + '.json';
-            if (fs.existsSync(file)) {
-                try {
-                    data = data.concat(JSON.parse(fs.readFileSync(file)));
-                } catch (e) {
-                    adapter.log.error('Cannot parse file ' + file + ': ' + e.message);
-                }
-                // if we need "count" entries
-                if (!day_start && (options.length + data.length > options.count)) {
-                    break;
+        //if (!isNaN(day)){
+            //if (day_start && day < day_start) {
+            //    break;
+            //} else
+            if ((!day_start || day >= day_start) && day <= day_end) {
+                var file = adapter.config.storeDir + dayList[i].toString() + '/history.' + id + '.json';
+                if (fs.existsSync(file)) {
+                    try {
+                        data = data.concat(JSON.parse(fs.readFileSync(file)));
+                    } catch (e) {
+                        adapter.log.error('Cannot parse file ' + file + ': ' + e.message);
+                    }
+                    // if we need "count" entries
+                    if (!day_start && (options.length + data.length > options.count)) {
+                        break;
+                    }
                 }
             }
-        }
+        //}
+
     }
 
     callback(data);
