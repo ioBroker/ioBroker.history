@@ -132,7 +132,7 @@ function generateDemo(msg) {
         var new_day;
 
         var path = options[5];
-        var fileName = '/history.'+adapter.name+'.'+adapter.instance+'.' + options[4] + '.json'
+        var fileName = '/history.'+adapter.name+'.'+adapter.instance+'.Demo.' + options[4] + '.json';
 
         var data = [];
         var start = new Date(options[2]).getTime();
@@ -149,7 +149,7 @@ function generateDemo(msg) {
             var tmp = end; end = start; start = tmp;
         }
 
-        end = new Date(end).setHours(24)
+        end = new Date(end).setHours(24);
 
         function generate() {
             old_day = new Date(start).getDay();
@@ -165,9 +165,8 @@ function generateDemo(msg) {
                 data.push({
                     'ts': new Date(start).getTime() / 1000,
                     'val': value,
-                    'lc': new Date(start).getTime() /1000,
-                    "from": "system.adapter.javascript.0",
-                    'ack': false
+                    'q': 0,
+                    'ack': true
                 });
 
                 if (curve == "sin") {
@@ -176,7 +175,11 @@ function generateDemo(msg) {
                     } else {
                         sin = Math.round((sin + 0.1) * 10) / 10;
                     }
-                    value = Math.round(Math.sin(sin) * 10000) /100;
+                    value = Math.round(Math.sin(sin) * 10000) / 100;
+                } else if (curve == "dec") {
+                    value++
+                } else if (curve == "inc") {
+                    value--
                 } else {
                     if (up == true) {
                         value++;
@@ -189,11 +192,9 @@ function generateDemo(msg) {
         }
 
         function save() {
-            try {
-                fs.mkdirSync(path + ts2day(start))
-            }
-            catch (err) {
 
+            if (!fs.existsSync(path + ts2day(start))) {
+                fs.mkdirSync(path + ts2day(start));
             }
 
 
@@ -208,9 +209,8 @@ function generateDemo(msg) {
                 data.push({
                     'ts': new Date(start).getTime() / 1000,
                     'val': value,
-                    'lc': new Date(start).getTime() /1000,
-                    "from": "system.adapter.javascript.0",
-                    'ack': false
+                    'q': 0,
+                    'ack': true
                 });
 
                 if (curve == "sin") {
@@ -220,8 +220,11 @@ function generateDemo(msg) {
                         sin = Math.round((sin + 0.1) * 10) / 10;
                     }
                     value = Math.round(Math.sin(sin) * 10000) / 100;
-                }
-                else {
+                } else if (curve == "dec") {
+                    value++
+                } else if (curve == "inc") {
+                    value--
+                } else {
                     if (up == true) {
                         value++;
                     } else {
@@ -234,16 +237,16 @@ function generateDemo(msg) {
                 if(start < end){
                     generate()
                 }else{
-                    var history = {}
+                    var history = {};
                     history["history."+ adapter.instance] = {
-                        enabled: true,
+                        enabled: false,
                         changesOnly: true,
                         debounce: 1000,
                         maxLength: 960,
                         retention: 0
-                    }
+                    };
 
-                    adapter.setObject(options[4], {
+                    adapter.setObject("Demo."+options[4], {
                         type: 'state',
                         common: {
                             name: options[4],
@@ -272,7 +275,7 @@ function generateDemo(msg) {
 
             return text;
         }
-var x = new Date().getTime()
+
         generate()
 
     }
@@ -322,7 +325,7 @@ function pushHistory(id, state) {
                     history[_id].list.push(history[_id].state);
 
                     if (history[id].list.length > _settings.maxLength) {
-                        adapter.log.info('moving ' + history[id].list.length + ' entries to file');
+                        adapter.log.info('moving ' + history[id].list.length + ' entries from '+ id +' to file');
                         appendFile(_id, history[_id].list);
                         checkRetention(_id);
                     }
@@ -468,7 +471,7 @@ function getFileData(options, callback) {
 
         for (var i in dayList) {
             var day = parseInt(dayList[i]);
-            if (!isNaN(day)) {
+            if (!isNaN(day) && day > 20100101) {
              if (day <= day_end) {
 
                     var file = options.path + dayList[i].toString() + '/history.' + options.id + '.json';
@@ -489,7 +492,7 @@ function getFileData(options, callback) {
                             }
 
                         } catch (e) {
-                            console.log('Cannot parse file ' + file + ': ' + e.message);
+                            console.log('Cannnnot parse file ' + file + ': ' + e.message);
                         }
                     }
                 }
@@ -573,23 +576,20 @@ function getHistory(msg) {
         });
     }else{
         var gh = cp.fork(__dirname+'/lib/getHistory.js',[JSON.stringify(options)],{silent:false})
-        //gh.on('connect', function (code, signal) {
-        //    console.log('connect ' + code + "   " + signal);
-        //});
-        //gh.on('close', function (code, signal) {
-        //    console.log('close ' + code + "   " + signal);
-        //});
-        //gh.on('error', function (code, signal) {
-        //    console.log('error ' + code + "   " + signal);
-        //});
+
         gh.on('message', function (data) {
-            if (data[0] == "response"){
+            if (data[0] == "getCache") {
+                getCachedData(options, function (cacheData) {
+                    gh.send(["cacheData",cacheData])
+                });
+
+            } else if (data[0] == "response") {
                 if (data[1]) {
 
-                    adapter.log.info('Send: ' + data[1].length + ' of: ' + "todo" + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                    adapter.log.info('Send: ' + data[1].length + ' of: ' + data[2] + ' in: ' + (new Date().getTime() - startTime) + 'ms');
                     adapter.sendTo(msg.from, msg.command, {
                         result: data[1],
-                        step: data[2],
+                        step: data[3],
                         error: null
                     }, msg.callback);
                 } else {
@@ -597,7 +597,17 @@ function getHistory(msg) {
                     adapter.sendTo(msg.from, msg.command, {result: [].result, step: null, error: null}, msg.callback);
                 }
             }
+
         });
+
+        setTimeout(function(){
+            try {
+                gh.kill('SIGINT')
+            }
+            catch (err){
+
+            }
+        },120000)
     }
 }
 
