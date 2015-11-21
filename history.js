@@ -108,6 +108,11 @@ function main() {
     }
     adapter.config.storeDir += '/';
 
+    // create directory
+    if (!fs.existsSync(adapter.config.storeDir)) {
+        fs.mkdirSync(adapter.config.storeDir);
+    }
+
     adapter.objects.getObjectView('history', 'state', {}, function (err, doc) {
         var count = 0;
         if (doc && doc.rows) {
