@@ -147,7 +147,7 @@ function main() {
             }
         }
         if (count < 20) {
-            for (var id in sqlDPs) {
+            for (var id in history) {
                 adapter.subscribeForeignStates(id);
             }
         } else {
