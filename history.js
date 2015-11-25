@@ -354,7 +354,11 @@ function pushHistory(id, state) {
                         }
                     }
                     if (history[_id].state.lc !== undefined) delete history[_id].state.lc;
-                    history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+                    if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
+                        delete history[_id].state.ack;
+                    } else {
+                        history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+                    }
                     if (!adapter.config.storeFrom && history[_id].state.from !== undefined) delete history[_id].state.from;
 
                     history[_id].list.push(history[_id].state);
@@ -469,6 +473,7 @@ function getCachedData(options, callback) {
                 } else if (res[i].ts > options.end) {
                     continue;
                 }
+                if (options.ack) res[i].ack = !!res[i];
                 cache.unshift(res[i]);
 
                 if (!options.start && cache.length >= options.count) {
@@ -514,6 +519,7 @@ function getFileData(options, callback) {
                     });
 
                     for (var ii in _data) {
+                        if (options.ack) _data[ii].ack = !!_data[ii];
                         data.push(_data[ii]);
                         if (data.length >= options.count) break;
                     }
@@ -537,20 +543,23 @@ function sortByTs(a, b) {
 function getHistory(msg) {
     var startTime = new Date().getTime();
     var options = {
-        id:         msg.message.id,
+        id:         msg.message.id ? msg.message.id : null,
         path:       adapter.config.storeDir,
         start:      msg.message.options.start,
         end:        msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
         step:       parseInt(msg.message.options.step) || null,
         count:      parseInt(msg.message.options.count) || 300,
+        from:       msg.message.options.from || false,
+        ack:        msg.message.options.ack  || false,
+        q:          msg.message.options.from || false,
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
         limit:      msg.message.options.limit || adapter.config.limit || 2000
     };
 
     if (options.start > options.end) {
-        var _end = options.end;
-        options.end   =  options.start;
+        var _end      = options.end;
+        options.end   = options.start;
         options.start = _end;
     }
 
@@ -562,8 +571,8 @@ function getHistory(msg) {
                 adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                 adapter.sendTo(msg.from, msg.command, {
                     result: cacheData,
-                    step: null,
-                    error: null
+                    step:   null,
+                    error:  null
                 }, msg.callback);
             } else {
                 options.count -= cacheData.length;

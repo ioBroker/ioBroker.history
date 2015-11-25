@@ -33,7 +33,8 @@
         "storeDir":  "",
         "debounce":  10000,
         "retention": 31536000,
-        "storeFrom": false
+        "storeFrom": false,
+        "storeAck":  true
     },
     "objects": [
         {
