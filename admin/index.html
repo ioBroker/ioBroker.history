@@ -38,11 +38,6 @@
             "de": "Maximale Anzahl von Ereignissen in RAM:",
             "ru": "Количество событий в RAM:"
         },
-        "storeFrom": {
-            "en": "Store origin of value:",
-            "de": "Speichern Quelle vom Ereigniss mit:",
-            "ru": "Сохранять источник события:"
-        },
         "debounce":               {"en": "De-bounce interval(ms)", "de": "Entprellzeit(ms)",            "ru": "Минимальный интервал(ms)"},
         "retention":              {"en": "Storage retention",     "de": "Storage Vorhaltezeit",         "ru": "Время хранения в базе"},
         "keep forever":           {"en": "keep forever",          "de": "keine automatische Löschung",  "ru": "хранить вечно"},
@@ -57,6 +52,12 @@
         "3 days":                 {"en": "3 days",                "de": "3 Tage",                       "ru": "3 дня"},
         "1 day":                  {"en": "1 day",                 "de": "1 Tag",                        "ru": "1 день"}
 
+        },
+        "storeFrom": {
+            "en": "Store origin of value:",
+            "de": "Speichern Quelle vom Ereigniss mit:",
+            "ru": "Сохранять источник события:"
+        }
     };
 
     function setValue(id, value, onChange) {
@@ -223,6 +224,9 @@
             <td><input id="storeDir" type="text" class="value"/></td>
             <td class="translate"></td>
         </tr>
+    </table>
+            <h4 style="width: calc(100% - 10px)" class="translate">Default settings:</h4>
+    <table>
         <tr>
             <td class="translate">storeFrom</td>
             <td><input id="storeFrom" type="checkbox" class="value"/></td>
@@ -276,7 +280,9 @@
             <td class="translate"><input id="demoStep" type="number" min="1" step="1" value="60"/></td>
             <td class="translate"><select id="demoCurve">
                 <option value="sin"  class="translate">Sinus</option>
-                <option value="zahn"  class="translate">DEC/INC</option>
+                <option value="dec"  class="translate">DEC</option>
+                <option value="inc"  class="translate">INC</option>
+                <option value="dec/int"  class="translate">DEC/INC</option>
             </select></td>
             <td class="translate"><button id="generateDemo">Generate</button></td>
         </tr>

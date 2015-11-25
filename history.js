@@ -1,12 +1,11 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 "use strict";
-
-var utils     = require(__dirname + '/lib/utils'); // Get common adapter utils
-var path      = require('path');
-var dataDir   = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
-var fs        = require('fs');
-var common    = require(__dirname + '/lib/aggregate');
+var cp      = require('child_process');
+var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
+var path    = require('path');
+var dataDir = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
+var fs      = require('fs');
 
 var history = {};
 var subscribeAll = false;
@@ -23,8 +22,8 @@ var adapter = utils.adapter({
 
             if (!history[id] && !subscribeAll) {
                 // unsubscribe
-                for (var id in history) {
-                    adapter.unsubscribeForeignStates(id);
+                for (var _id in history) {
+                    adapter.unsubscribeForeignStates(_id);
                 }
                 subscribeAll = true;
                 adapter.subscribeForeignStates('*');
@@ -147,8 +146,8 @@ function main() {
             }
         }
         if (count < 20) {
-            for (var id in history) {
-                adapter.subscribeForeignStates(id);
+            for (var _id in history) {
+                adapter.subscribeForeignStates(_id);
             }
         } else {
             subscribeAll = true;
@@ -203,13 +202,11 @@ function generateDemo(msg) {
                     break;
                 }
 
-
                 data.push({
                     'ts': new Date(start).getTime() / 1000,
-                    'val': value
-                    //,lc: new Date(start).getTime() /1000
-                    //,from: 'system.adapter.javascript.0'
-                    //,ack: false
+                    'val': value,
+                    'q': 0,
+                    'ack': true
                 });
 
                 if (curve =='sin') {
@@ -218,7 +215,11 @@ function generateDemo(msg) {
                     } else {
                         sin = Math.round((sin + 0.1) * 10) / 10;
                     }
-                    value = Math.round(Math.sin(sin) * 10000) /100;
+                    value = Math.round(Math.sin(sin) * 10000) / 100;
+                } else if (curve == 'dec') {
+                    value++;
+                } else if (curve == 'inc') {
+                    value--;
                 } else {
                     if (up == true) {
                         value++;
@@ -232,9 +233,10 @@ function generateDemo(msg) {
 
         function save() {
             try {
-                fs.mkdirSync(path + ts2day(start));
-            }
-            catch (err) {
+                if (!fs.existsSync(path + ts2day(start))) {
+                    fs.mkdirSync(path + ts2day(start));
+                } 
+            } catch (err) {
                 adapter.log.error(err);
             }
 
@@ -243,11 +245,10 @@ function generateDemo(msg) {
                 up = !up;
 
                 data.push({
-                    ts: new Date(start).getTime() / 1000,
-                    val: value
-                    //,lc:  new Date(start).getTime() /1000
-                    //,from: 'system.adapter.javascript.0'
-                    //,ack: false
+                    'ts':   new Date(start).getTime() / 1000,
+                    'val':  value,
+                    'q':    0,
+                    'ack':  true
                 });
 
                 if (curve == 'sin') {
@@ -257,8 +258,11 @@ function generateDemo(msg) {
                         sin = Math.round((sin + 0.1) * 10) / 10;
                     }
                     value = Math.round(Math.sin(sin) * 10000) / 100;
-                }
-                else {
+                } else if (curve == 'dec') {
+                    value++;
+                } else if (curve == 'inc') {
+                    value--;
+                } else {
                     if (up == true) {
                         value++;
                     } else {
@@ -268,19 +272,19 @@ function generateDemo(msg) {
 
                 start += step;
 
-                if(start < end){
+                if (start < end){
                     generate()
-                }else{
+                } else {
                     var history = {};
                     history[adapter.namespace] = {
-                        enabled:        true,
+                        enabled:        false,
                         changesOnly:    true,
                         debounce:       1000,
                         maxLength:      960,
                         retention:      0
                     };
 
-                    adapter.setObject(options[4], {
+                    adapter.setObject('demo.' + options[4], {
                         type: 'state',
                         common: {
                             name:       options[4],
@@ -356,7 +360,7 @@ function pushHistory(id, state) {
                     history[_id].list.push(history[_id].state);
 
                     if (history[id].list.length > _settings.maxLength) {
-                        adapter.log.info('moving ' + history[id].list.length + ' entries to file');
+                        adapter.log.info('moving ' + history[id].list.length + ' entries from '+ id +' to file');
                         appendFile(_id, history[_id].list);
                         checkRetention(_id);
                     }
@@ -446,12 +450,6 @@ function appendFile(id, states) {
     }
 }
 
-function sortByTs(a, b) {
-    var aTs = a.ts;
-    var bTs = b.ts;
-    return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
-}
-
 function getCachedData(options, callback) {
     var res = [];
     var cache = [];
@@ -494,54 +492,57 @@ function getCachedData(options, callback) {
 }
 
 function getFileData(options, callback) {
-
-    var day_start = parseInt(options.start ? ts2day(options.start) : null);
-    var day_end = parseInt(ts2day(options.end));
-    var data = [];
+    var dayEnd = parseInt(ts2day(options.end));
+    var data   = [];
 
     // get list of directories
     var dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
-        return a - b;
+        return b - a;
     });
 
     // get all files in directory
-    for (var i = dayList.length - 1; i >= 0; i--) {
+    for (var i in dayList) {
         var day = parseInt(dayList[i]);
 
-        //if (!isNaN(day)){
-            //if (day_start && day < day_start) {
-            //    break;
-            //} else
-            if ((!day_start || day >= day_start) && day <= day_end) {
-                var file = adapter.config.storeDir + dayList[i].toString() + '/history.' + options.id + '.json';
-                if (fs.existsSync(file)) {
-                    try {
-                        data = data.concat(JSON.parse(fs.readFileSync(file)));
-                    } catch (e) {
-                        adapter.log.error('Cannot parse file ' + file + ': ' + e.message);
+        if (!isNaN(day) && day > 20100101 && day <= dayEnd) {
+            var file = options.path + dayList[i].toString() + '/history.' + options.id + '.json';
+
+            if (fs.existsSync(file)) {
+                try {
+                    var _data = JSON.parse(fs.readFileSync(file)).sort(function (a, b) {
+                        return b.ts - a.ts;
+                    });
+
+                    for (var ii in _data) {
+                        data.push(_data[ii]);
+                        if (data.length >= options.count) break;
                     }
-                    // if we need "count" entries
-                    if (!day_start && (options.length + data.length > options.count)) {
-                        break;
-                    }
+                } catch (e) {
+                    console.log('Cannot parse file ' + file + ': ' + e.message);
                 }
             }
-        //}
-
+        }
+        if (data.length >= options.count) break;
     }
-
+    
     callback(data);
+}
+
+function sortByTs(a, b) {
+    var aTs = a.ts;
+    var bTs = b.ts;
+    return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
 }
 
 function getHistory(msg) {
     var startTime = new Date().getTime();
-    var id = msg.message.id;
     var options = {
-        id:         msg.message.id ? msg.message.id : null,
+        id:         msg.message.id,
+        path:       adapter.config.storeDir,
         start:      msg.message.options.start,
         end:        msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
         step:       parseInt(msg.message.options.step) || null,
-        count:      parseInt(msg.message.options.count) || 500,
+        count:      parseInt(msg.message.options.count) || 300,
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
         limit:      msg.message.options.limit || adapter.config.limit || 2000
@@ -553,23 +554,63 @@ function getHistory(msg) {
         options.start = _end;
     }
 
-    if (!options.start && !options.count) {
-        options.start = Math.round((new Date()).getTime() / 1000) - 5030; // - 1 year
-    }
-
-    getCachedData(options, function (cacheData, isFull) {
-        // if all data read
-        if (isFull && cacheData.length) {
-            cacheData = cacheData.sort(sortByTs);
-            common.sendResponse(adapter, msg, options, cacheData, startTime);
-        } else {
-            getFileData(options, function (fileData) {
-                cacheData = cacheData.concat(fileData);
+    if (!options.start && options.count) {
+        getCachedData(options, function (cacheData, isFull) {
+            // if all data read
+            if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
-                common.sendResponse(adapter, msg, options, cacheData, startTime);
-            });
-        }
-    });
+                adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
+                adapter.sendTo(msg.from, msg.command, {
+                    result: cacheData,
+                    step: null,
+                    error: null
+                }, msg.callback);
+            } else {
+                options.count -= cacheData.length;
+                getFileData(options, function (fileData) {
+                    cacheData = cacheData.concat(fileData);
+                    cacheData = cacheData.sort(sortByTs);
+                    adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
+                    adapter.sendTo(msg.from, msg.command, {
+                        result: cacheData,
+                        step:   null,
+                        error:  null
+                    }, msg.callback);
+                });
+            }
+        });
+    }else{
+        var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
+
+        gh.on('message', function (data) {
+            if (data[0] == 'getCache') {
+                getCachedData(options, function (cacheData) {
+                    gh.send(['cacheData', cacheData]);
+                });
+            } else if (data[0] == 'response') {
+                if (data[1]) {
+                    adapter.log.debug('Send: ' + data[1].length + ' of: ' + data[2] + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                    adapter.sendTo(msg.from, msg.command, {
+                        result: data[1],
+                        step:   data[3],
+                        error:  null
+                    }, msg.callback);
+                } else {
+                    adapter.log.info('No Data');
+                    adapter.sendTo(msg.from, msg.command, {result: [].result, step: null, error: null}, msg.callback);
+                }
+            }
+        });
+
+        setTimeout(function(){
+            try {
+                gh.kill('SIGINT')
+            }
+            catch (err){
+                adapter.log.error(err);
+            }
+        }, 120000);
+    }
 }
 
 function getDirectories(path) {
