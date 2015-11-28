@@ -563,7 +563,7 @@ function getHistory(msg) {
         options.start = _end;
     }
 
-    if (!options.start && options.count) {
+    if ((!options.start && options.count) || options.aggregate == 'onchange') {
         getCachedData(options, function (cacheData, isFull) {
             // if all data read
             if (isFull && cacheData.length) {
