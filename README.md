@@ -15,6 +15,14 @@ To setup some datapoints to be stored they must be configured in admin "Objects"
 - **Storage retention** - How many values in the past will be stored on disk.
 
 ## Changelog
+### 0.2.1 (2015-12-14)
+* (bluefox) add description of settings
+* (bluefox) place aggregate function into separate file to enable sharing with other adapters
+* (smiling-Jack) Add generate Demo data
+* (smiling-Jack) get history in own fork
+* (bluefox) add storeAck flag
+* (bluefox) mockup for onchange
+
 ### 0.2.0 (2015-11-15)
 * (Smiling_Jack) save and load in adapter and not in js-controller
 * (Smiling_Jack) aggregation of data points
