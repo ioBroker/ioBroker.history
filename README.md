@@ -2,9 +2,9 @@
 # ioBroker.history
 
 This adapter saves state history in a two-staged process. 
-At first datapoints are stored in RAM, as soon as they reach maxLength they will be stored on disk.
+At first data points are stored in RAM, as soon as they reach maxLength they will be stored on disk.
 
-To setup some datapoints to be stored they must be configured in admin "Objects" Tab (last button).
+To set up some data points to be stored they must be configured in admin "Objects" Tab (last button).
 
 ## Settings
 
