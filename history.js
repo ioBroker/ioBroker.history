@@ -9,6 +9,7 @@ var fs      = require('fs');
 
 var history = {};
 var subscribeAll = false;
+var bufferChecker = null;
 
 var adapter = utils.adapter({
 
@@ -76,13 +77,19 @@ process.on('SIGINT', function () {
     }
 });
 
-function finish(callback) {
+function storeCached() {
     for (var id in history) {
         if (history[id][adapter.namespace].list && history[id][adapter.namespace].list.length) {
-            adapter.log.debug('Store th rest for ' + id);
+            adapter.log.debug('Store the rest for ' + id);
             appendFile(id, history[id][adapter.namespace].list);
         }
     }
+}
+
+function finish(callback) {
+    if (bufferChecker) clearInterval(bufferChecker);
+
+    storeCached();
     if (callback) callback();
 }
 
@@ -97,6 +104,7 @@ function processMessage(msg) {
 function main() {
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
+
     // remove last "/"
     if (adapter.config.storeDir[adapter.config.storeDir.length - 1] == '/') {
         adapter.config.storeDir = adapter.config.storeDir.substring(0, adapter.config.storeDir.length - 1);
@@ -153,6 +161,11 @@ function main() {
             subscribeAll = true;
             adapter.subscribeForeignStates('*');
         }
+
+        // store all buffered data every 10 minutes to not lost the data
+        bufferChecker = setInterval(function () {
+            storeCached();
+        }, 10 * 60000);
     });
 
     adapter.subscribeForeignObjects('*');
