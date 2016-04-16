@@ -25,7 +25,8 @@
         "icon":                     "history.png",
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
 		"type":                     "storage",
-		"dependencies":             [{"js-controller": ">=0.8.0"}]
+		"dependencies":             [{"js-controller": ">=0.8.0"}],
+        "stopTimeout":              10000
     },
     "native": {
         "maxLength": 960,

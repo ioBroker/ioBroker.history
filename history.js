@@ -1,11 +1,12 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 "use strict";
-var cp      = require('child_process');
-var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
-var path    = require('path');
-var dataDir = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
-var fs      = require('fs');
+var cp         = require('child_process');
+var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
+var path       = require('path');
+var dataDir    = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
+var fs         = require('fs');
+var GetHistory = require(__dirname + '/lib/getHistory.js');
 
 var history = {};
 var subscribeAll = false;
@@ -246,22 +247,22 @@ function generateDemo(msg) {
 
         function save() {
             try {
-                if (!fs.existsSync(path + ts2day(start))) {
-                    fs.mkdirSync(path + ts2day(start));
+                if (!fs.existsSync(path + GetHistory.ts2day(start))) {
+                    fs.mkdirSync(path + GetHistory.ts2day(start));
                 } 
             } catch (err) {
                 adapter.log.error(err);
             }
 
-            fs.writeFile(path + ts2day(start) + fileName, JSON.stringify(data), 'utf8', function (err, res) {
+            fs.writeFile(path + GetHistory.ts2day(start) + fileName, JSON.stringify(data), 'utf8', function (err, res) {
                 data = [];
                 up = !up;
 
                 data.push({
-                    'ts':   new Date(start).getTime() / 1000,
-                    'val':  value,
-                    'q':    0,
-                    'ack':  true
+                    ts:   new Date(start).getTime() / 1000,
+                    val:  value,
+                    q:    0,
+                    ack:  true
                 });
 
                 if (curve == 'sin') {
@@ -310,21 +311,6 @@ function generateDemo(msg) {
                 }
             });
         }
-
-        function ts2day(ts) {
-            var dateObj = new Date(ts);
-
-            var text = dateObj.getFullYear().toString();
-            var v = dateObj.getMonth() + 1;
-            if (v < 10) text += '0';
-            text += v.toString();
-
-            v = dateObj.getDate();
-            if (v < 10) text += '0';
-            text += v.toString();
-
-            return text;
-        }
         
         //var x = new Date().getTime();
         
@@ -342,6 +328,7 @@ function pushHistory(id, state) {
         if (!settings || !state) return;
         
         if (history[id].state && settings.changesOnly && (state.ts !== state.lc)) return;
+        if (state.ts < 946681200000) state.ts *= 1000;
 
         history[id].state = state;
 
@@ -400,7 +387,7 @@ function checkRetention(id) {
             });
             // calculate date
             d.setSeconds(-(history[id][adapter.namespace].retention));
-            var day = ts2day(Math.round(d.getTime() / 1000));
+            var day = GetHistory.ts2day(d.getTime());
             for (var i = 0; i < dayList.length; i++) {
                 if (dayList[i] < day) {
                     var file = adapter.config.storeDir + dayList[i] + '/history.' + id + '.json';
@@ -430,7 +417,7 @@ function checkRetention(id) {
 }
 
 function appendFile(id, states) {
-    var day = ts2day(states[states.length - 1].ts);
+    var day = GetHistory.ts2day(states[states.length - 1].ts);
 
     var file = adapter.config.storeDir + day + '/history.' + id + '.json';
     var data;
@@ -438,7 +425,7 @@ function appendFile(id, states) {
     var i;
     for (i = states.length - 1; i >= 0; i--) {
         if (!states[i]) continue;
-        if (ts2day(states[i].ts) !== day) {
+        if (GetHistory.ts2day(states[i].ts) !== day) {
             break;
         }
     }
@@ -468,25 +455,39 @@ function appendFile(id, states) {
 }
 
 function getCachedData(options, callback) {
-    var res = [];
+    var res   = [];
     var cache = [];
+
     if (history[options.id]) {
          res = history[options.id].list;
          cache = [];
         // todo can be optimized
         if (res) {
             var iProblemCount = 0;
+            var vLast = null;
             for (var i = res.length - 1; i >= 0 ; i--) {
                 if (!res[i]) {
                     iProblemCount++;
                     continue;
                 }
                 if (options.start && res[i].ts < options.start) {
+                    if (options.ack) res[i].ack = !!res[i].ack;
+                    // add one before start
+                    cache.unshift(res[i]);
                     break;
                 } else if (res[i].ts > options.end) {
+                    // add one after end
+                    vLast = res[i];
                     continue;
                 }
-                if (options.ack) res[i].ack = !!res[i];
+                if (options.ack) res[i].ack = !!res[i].ack;
+
+                if (vLast) {
+                    if (options.ack) vLast.ack = !!vLast.ack;
+                    cache.unshift(vLast);
+                    vLast = null;
+                }
+
                 cache.unshift(res[i]);
 
                 if (!options.start && cache.length >= options.count) {
@@ -510,8 +511,9 @@ function getCachedData(options, callback) {
 }
 
 function getFileData(options, callback) {
-    var dayEnd = parseInt(ts2day(options.end));
-    var data   = [];
+    var dayStart = GetHistory.ts2day(options.start);
+    var dayEnd   = parseInt(GetHistory.ts2day(options.end));
+    var data     = [];
 
     // get list of directories
     var dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
@@ -520,9 +522,9 @@ function getFileData(options, callback) {
 
     // get all files in directory
     for (var i in dayList) {
-        var day = parseInt(dayList[i]);
+        var day = parseInt(dayList[i], 10);
 
-        if (!isNaN(day) && day > 20100101 && day <= dayEnd) {
+        if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
             var file = options.path + dayList[i].toString() + '/history.' + options.id + '.json';
 
             if (fs.existsSync(file)) {
@@ -532,7 +534,7 @@ function getFileData(options, callback) {
                     });
 
                     for (var ii in _data) {
-                        if (options.ack) _data[ii].ack = !!_data[ii];
+                        if (options.ack) _data[ii].ack = !!_data[ii].ack;
                         data.push(_data[ii]);
                         if (data.length >= options.count) break;
                     }
@@ -559,15 +561,15 @@ function getHistory(msg) {
         id:         msg.message.id ? msg.message.id : null,
         path:       adapter.config.storeDir,
         start:      msg.message.options.start,
-        end:        msg.message.options.end || Math.round((new Date()).getTime() / 1000) + 5000,
-        step:       parseInt(msg.message.options.step) || null,
-        count:      parseInt(msg.message.options.count) || 300,
+        end:        msg.message.options.end || ((new Date()).getTime() + 5000000),
+        step:       parseInt(msg.message.options.step,  10) || null,
+        count:      parseInt(msg.message.options.count, 10) || 300,
         from:       msg.message.options.from || false,
         ack:        msg.message.options.ack  || false,
         q:          msg.message.options.from || false,
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
-        limit:      msg.message.options.limit || adapter.config.limit || 2000
+        limit:      parseInt(msg.message.options.limit || adapter.config.limit || 2000, 10)
     };
 
     if (options.start > options.end) {
@@ -575,6 +577,15 @@ function getHistory(msg) {
         options.end   = options.start;
         options.start = _end;
     }
+
+    // if less 2000.01.01 00:00:00
+    if (options.start < 946681200000) {
+        options.start *= 1000;
+        if (options.step !== null && options.step !== undefined) options.step *= 1000;
+    }
+
+    // if less 2000.01.01 00:00:00
+    if (options.end < 946681200000) options.end *= 1000;
 
     if ((!options.start && options.count) || options.aggregate == 'onchange') {
         getCachedData(options, function (cacheData, isFull) {
@@ -593,6 +604,7 @@ function getHistory(msg) {
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
+
                     adapter.sendTo(msg.from, msg.command, {
                         result: cacheData,
                         step:   null,
@@ -601,37 +613,77 @@ function getHistory(msg) {
                 });
             }
         });
-    }else{
-        var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
+    } else {
+        // to use parallel requests activate this.
+        if (1 || typeof GetHistory === 'undefined') {
+            var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
-        gh.on('message', function (data) {
-            if (data[0] == 'getCache') {
-                getCachedData(options, function (cacheData) {
-                    gh.send(['cacheData', cacheData]);
-                });
-            } else if (data[0] == 'response') {
-                if (data[1]) {
-                    adapter.log.debug('Send: ' + data[1].length + ' of: ' + data[2] + ' in: ' + (new Date().getTime() - startTime) + 'ms');
-                    adapter.sendTo(msg.from, msg.command, {
-                        result: data[1],
-                        step:   data[3],
-                        error:  null
-                    }, msg.callback);
-                } else {
-                    adapter.log.info('No Data');
-                    adapter.sendTo(msg.from, msg.command, {result: [].result, step: null, error: null}, msg.callback);
+            var ghTimeout = setTimeout(function () {
+                try {
+                    gh.kill('SIGINT');
                 }
-            }
-        });
+                catch (err) {
+                    adapter.log.error(err);
+                }
+            }, 120000);
 
-        setTimeout(function(){
-            try {
-                gh.kill('SIGINT')
-            }
-            catch (err){
-                adapter.log.error(err);
-            }
-        }, 120000);
+            gh.on('message', function (data) {
+                var cmd = data[0];
+                if (cmd === 'getCache') {
+                    var settings = data[1];
+                    getCachedData(settings, function (cacheData) {
+                        gh.send(['cacheData', cacheData]);
+                    });
+                } else if (cmd === 'response') {
+                    clearTimeout(ghTimeout);
+                    ghTimeout = null;
+
+                    var result          = data[1];
+                    var overallLength   = data[2];
+                    var step            = data[3];
+                    if (result) {
+                        adapter.log.debug('Send: ' + result.length + ' of: ' + overallLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                        adapter.sendTo(msg.from, msg.command, {
+                            result:     result,
+                            step:       step,
+                            error:      null
+                        }, msg.callback);
+                    } else {
+                        adapter.log.info('No Data');
+                        adapter.sendTo(msg.from, msg.command, {
+                            result:     [],
+                            step:       null,
+                            error:      null
+                        }, msg.callback);
+                    }
+                }
+            });
+        } else {
+            var settings = GetHistory.initAggregate(options);
+            GetHistory.getFileData(settings);
+            getCachedData(settings, function (cachedData) {
+                GetHistory.aggregation(cachedData, settings);
+                var data = GetHistory.response(settings);
+
+                if (data[0] == 'response') {
+                    if (data[1]) {
+                        adapter.log.debug('Send: ' + data[1].length + ' of: ' + data[2] + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                        adapter.sendTo(msg.from, msg.command, {
+                            result: data[1],
+                            step:   data[3],
+                            error:  null
+                        }, msg.callback);
+                    } else {
+                        adapter.log.info('No Data');
+                        adapter.sendTo(msg.from, msg.command, {
+                            result: [],
+                            step:   null,
+                            error:  null
+                        }, msg.callback);
+                    }
+                }
+            });
+        }
     }
 }
 
@@ -639,20 +691,5 @@ function getDirectories(path) {
     return fs.readdirSync(path).filter(function (file) {
         return fs.statSync(path + '/' + file).isDirectory();
     });
-}
-
-function ts2day(ts) {
-    var dateObj = new Date(ts * 1000);
-
-    var text = dateObj.getFullYear().toString();
-    var v = dateObj.getMonth() + 1;
-    if (v < 10) text += '0';
-    text += v.toString();
-
-    v = dateObj.getDate();
-    if (v < 10) text += '0';
-    text += v.toString();
-
-    return text;
 }
 
