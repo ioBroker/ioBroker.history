@@ -1,5 +1,10 @@
 ![Logo](admin/history.png)
 # ioBroker.history
+===============================
+[![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
+
+[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/)
 
 This adapter saves state history in a two-staged process. 
 At first data points are stored in RAM, as soon as they reach maxLength they will be stored on disk.

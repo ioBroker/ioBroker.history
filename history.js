@@ -36,9 +36,21 @@ var adapter = utils.adapter({
             history[id].list    = list;
             history[id].timeout = timeout;
 
-            history[id][adapter.namespace].maxLength   = parseInt(history[id][adapter.namespace].maxLength || adapter.config.maxLength, 10) || 960;
-            history[id][adapter.namespace].retention   = parseInt(history[id][adapter.namespace].retention || adapter.config.retention, 10) || 0;
-            history[id][adapter.namespace].debounce    = parseInt(history[id][adapter.namespace].debounce  || adapter.config.debounce,  10) || 1000;
+            if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
+                history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+            } else {
+                history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
+            }
+            if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
+                history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+            } else {
+                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || parseInt(adapter.config.retention, 10) || 0;
+            }
+            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+            } else {
+                history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
+            }
             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
 
             // add one day if retention is too small
@@ -141,9 +153,21 @@ function main() {
                     } else {
                         count++;
                         adapter.log.info('enabled logging of ' + id);
-                        history[id][adapter.namespace].maxLength   = parseInt(history[id][adapter.namespace].maxLength || adapter.config.maxLength, 10) || 960;
-                        history[id][adapter.namespace].retention   = parseInt(history[id][adapter.namespace].retention || adapter.config.retention, 10) || 0;
-                        history[id][adapter.namespace].debounce    = parseInt(history[id][adapter.namespace].debounce  || adapter.config.debounce,  10) || 1000;
+                        if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
+                            history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                        } else {
+                            history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
+                        }
+                        if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
+                            history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                        } else {
+                            history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || parseInt(adapter.config.retention, 10) || 0;
+                        }
+                        if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                            history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                        } else {
+                            history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
+                        }
                         history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
 
                         // add one day if retention is too small
@@ -329,12 +353,12 @@ function pushHistory(id, state) {
         
         if (history[id].state && settings.changesOnly && (state.ts !== state.lc)) return;
         if (state.ts < 946681200000) state.ts *= 1000;
+        if (state.lc < 946681200000) state.lc *= 1000;
 
         history[id].state = state;
 
         // Do not store values ofter than 1 second
         if (!history[id].timeout) {
-
             history[id].timeout = setTimeout(function (_id) {
                 if (!history[_id] || !history[_id].state) return;
 
@@ -562,11 +586,11 @@ function getHistory(msg) {
         path:       adapter.config.storeDir,
         start:      msg.message.options.start,
         end:        msg.message.options.end || ((new Date()).getTime() + 5000000),
-        step:       parseInt(msg.message.options.step,  10) || null,
+        step:       parseInt(msg.message.options.step,  10000) || null,
         count:      parseInt(msg.message.options.count, 10) || 300,
         from:       msg.message.options.from || false,
         ack:        msg.message.options.ack  || false,
-        q:          msg.message.options.from || false,
+        q:          msg.message.options.q    || false,
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
         limit:      parseInt(msg.message.options.limit || adapter.config.limit || 2000, 10)
