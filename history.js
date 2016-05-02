@@ -217,10 +217,10 @@ function generateDemo(msg) {
                 }
 
                 data.push({
-                    'ts': new Date(start).getTime() / 1000,
-                    'val': value,
-                    'q': 0,
-                    'ack': true
+                    ts:  new Date(start).getTime(),
+                    val: value,
+                    q:   0,
+                    ack: true
                 });
 
                 if (curve =='sin') {
@@ -259,7 +259,7 @@ function generateDemo(msg) {
                 up = !up;
 
                 data.push({
-                    ts:   new Date(start).getTime() / 1000,
+                    ts:   new Date(start).getTime(),
                     val:  value,
                     q:    0,
                     ack:  true
