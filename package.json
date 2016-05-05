@@ -4,8 +4,9 @@
   "version": "0.4.0",
   "author": "hobbyquaker <hq@ccu.io>",
   "contributors": [
-    "hobbyquaker <hq@ccu.io>",
-    "bluefox <bluefox@ccu.io>"
+    "bluefox <dogafox@gmail.com.io>",
+    "smiling-Jack",
+    "hobbyquaker <hq@ccu.io>"
   ],
   "homepage": "https://github.com/ioBroker/ioBroker.history",
   "repository": {
@@ -29,16 +30,12 @@
     "grunt-replace": "^0.9.3",
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-jscs": "^2.0.0",
-    "grunt-http": "^1.6.0",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-compress": "^0.13.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-exec": "^0.4.6"
+    "grunt-http": "^1.6.0"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/ioBroker.history/issues"
   },
-  "main": "Gruntfile.js",
+  "main": "history.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -14,7 +14,7 @@
         "messagebox":               true,
         "subscribe":                "messagebox",
         "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
-        "main":                     "main.js",
+        "main":                     "history.js",
         "enabled":                  true,
         "preserveSettings":         "history",
         "authors": [

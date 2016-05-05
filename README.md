@@ -23,6 +23,8 @@ To set up some data points to be stored they must be configured in admin "Object
 ### 0.4.0 (2016-05-05)
 * (bluefox) use aggregation file from sql adapter
 * (bluefox) fix the values storage on exit
+* (bluefox) store all cached data every 5 minutes
+* (bluefox) support of ms
 
 ### 0.2.1 (2015-12-14)
 * (bluefox) add description of settings
