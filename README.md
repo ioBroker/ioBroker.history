@@ -20,6 +20,10 @@ To set up some data points to be stored they must be configured in admin "Object
 - **Storage retention** - How many values in the past will be stored on disk.
 
 ## Changelog
+### 0.4.0 (2016-05-05)
+* (bluefox) use aggregation file from sql adapter
+* (bluefox) fix the values storage on exit
+
 ### 0.2.1 (2015-12-14)
 * (bluefox) add description of settings
 * (bluefox) place aggregate function into separate file to enable sharing with other adapters

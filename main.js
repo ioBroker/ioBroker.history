@@ -92,9 +92,9 @@ process.on('SIGINT', function () {
 
 function storeCached() {
     for (var id in history) {
-        if (history[id][adapter.namespace].list && history[id][adapter.namespace].list.length) {
+        if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
-            appendFile(id, history[id][adapter.namespace].list);
+            appendFile(id, history[id].list);
         }
     }
 }
@@ -388,7 +388,7 @@ function pushHistory(id, state) {
                     history[_id].list.push(history[_id].state);
 
                     if (history[id].list.length > _settings.maxLength) {
-                        adapter.log.info('moving ' + history[id].list.length + ' entries from '+ id +' to file');
+                        adapter.log.debug('moving ' + history[id].list.length + ' entries from '+ id +' to file');
                         appendFile(_id, history[_id].list);
                         checkRetention(_id);
                     }
@@ -514,9 +514,7 @@ function getCachedData(options, callback) {
 
                 cache.unshift(res[i]);
 
-                if (!options.start && cache.length >= options.count) {
-                    break;
-                }
+                if (!options.start && cache.length >= options.count) break;
             }
             if (iProblemCount) adapter.log.warn('got null states ' + iProblemCount + ' times for ' + options.id);
 
@@ -540,7 +538,7 @@ function getFileData(options, callback) {
     var data     = [];
 
     // get list of directories
-    var dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
+    var dayList = getDirectories(options.path).sort(function (a, b) {
         return b - a;
     });
 
@@ -560,14 +558,15 @@ function getFileData(options, callback) {
                     for (var ii in _data) {
                         if (options.ack) _data[ii].ack = !!_data[ii].ack;
                         data.push(_data[ii]);
-                        if (data.length >= options.count) break;
+                        if (!options.start && data.length >= options.count) break;
                     }
                 } catch (e) {
                     console.log('Cannot parse file ' + file + ': ' + e.message);
                 }
             }
         }
-        if (data.length >= options.count) break;
+        if (!options.start && data.length >= options.count) break;
+        if (day > dayEnd) break;
     }
     
     callback(data);
@@ -587,7 +586,7 @@ function getHistory(msg) {
         start:      msg.message.options.start,
         end:        msg.message.options.end || ((new Date()).getTime() + 5000000),
         step:       parseInt(msg.message.options.step,  10000) || null,
-        count:      parseInt(msg.message.options.count, 10) || 300,
+        count:      parseInt(msg.message.options.count, 10)    || 500,
         from:       msg.message.options.from || false,
         ack:        msg.message.options.ack  || false,
         q:          msg.message.options.q    || false,
@@ -611,7 +610,7 @@ function getHistory(msg) {
     // if less 2000.01.01 00:00:00
     if (options.end < 946681200000) options.end *= 1000;
 
-    if ((!options.start && options.count) || options.aggregate == 'onchange') {
+    if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, function (cacheData, isFull) {
             // if all data read
             if (isFull && cacheData.length) {
@@ -683,11 +682,12 @@ function getHistory(msg) {
                 }
             });
         } else {
-            var settings = GetHistory.initAggregate(options);
-            GetHistory.getFileData(settings);
-            getCachedData(settings, function (cachedData) {
-                GetHistory.aggregation(cachedData, settings);
-                var data = GetHistory.response(settings);
+            GetHistory.initAggregate(options);
+            GetHistory.getFileData(options);
+            getCachedData(options, function (cachedData) {
+                GetHistory.aggregation(options, cachedData);
+                GetHistory.finishAggregation(options);
+                var data = GetHistory.response(options);
 
                 if (data[0] == 'response') {
                     if (data[1]) {
@@ -705,6 +705,8 @@ function getHistory(msg) {
                             error:  null
                         }, msg.callback);
                     }
+                } else {
+                    adapter.log.error('Unknown response type: ' + data[0]);
                 }
             });
         }

@@ -7,14 +7,14 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "0.3.0",
+        "version":                  "0.4.0",
         "mode":                     "daemon",
         "platform":                 "Javascript/Node.js",
         "loglevel":                 "info",
         "messagebox":               true,
         "subscribe":                "messagebox",
         "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
-        "main":                     "history.js",
+        "main":                     "main.js",
         "enabled":                  true,
         "preserveSettings":         "history",
         "authors": [
