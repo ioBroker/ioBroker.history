@@ -477,14 +477,11 @@ function appendFile(id, states) {
         appendFile(id, states);
     }
 }
+function getOneCachedData(id, options, cache, addId) {
+    addId = addId || options.addId;
 
-function getCachedData(options, callback) {
-    var res   = [];
-    var cache = [];
-
-    if (history[options.id]) {
-         res = history[options.id].list;
-         cache = [];
+    if (history[id]) {
+        var res = history[id].list;
         // todo can be optimized
         if (res) {
             var iProblemCount = 0;
@@ -496,6 +493,7 @@ function getCachedData(options, callback) {
                 }
                 if (options.start && res[i].ts < options.start) {
                     if (options.ack) res[i].ack = !!res[i].ack;
+                    if (addId) res[i].id = id;
                     // add one before start
                     cache.unshift(res[i]);
                     break;
@@ -508,10 +506,12 @@ function getCachedData(options, callback) {
 
                 if (vLast) {
                     if (options.ack) vLast.ack = !!vLast.ack;
+                    if (addId) res[i].id = id;
                     cache.unshift(vLast);
                     vLast = null;
                 }
 
+                if (addId) res[i].id = id;
                 cache.unshift(res[i]);
 
                 if (!options.start && cache.length >= options.count) break;
@@ -520,34 +520,34 @@ function getCachedData(options, callback) {
 
             adapter.log.debug('got ' + res.length + ' datapoints for ' + options.id);
         } else {
-            //if (err != 'Not exists') {
-            //    adapter.log.error(err);
-            //} else {
             adapter.log.debug('datapoints for ' + options.id + ' do not yet exist');
-            //}
         }
     }
+}
 
+function getCachedData(options, callback) {
+    var cache = [];
+
+    if (options.id && options.id !== '*') {
+        getOneCachedData(options.id, options, cache);
+    } else {
+        for (var id in history) {
+            getOneCachedData(id, options, cache, true);
+        }
+    }
     options.length = cache.length;
     callback(cache, !options.start && cache.length >= options.count);
 }
 
-function getFileData(options, callback) {
-    var dayStart = GetHistory.ts2day(options.start);
-    var dayEnd   = parseInt(GetHistory.ts2day(options.end));
-    var data     = [];
-
-    // get list of directories
-    var dayList = getDirectories(options.path).sort(function (a, b) {
-        return b - a;
-    });
+function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
+    addId = addId || options.addId;
 
     // get all files in directory
-    for (var i in dayList) {
+    for (var i = 0; i < dayList.length; i++) {
         var day = parseInt(dayList[i], 10);
 
         if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
-            var file = options.path + dayList[i].toString() + '/history.' + options.id + '.json';
+            var file = options.path + dayList[i].toString() + '/history.' + id + '.json';
 
             if (fs.existsSync(file)) {
                 try {
@@ -557,6 +557,7 @@ function getFileData(options, callback) {
 
                     for (var ii in _data) {
                         if (options.ack) _data[ii].ack = !!_data[ii].ack;
+                        if (addId) _data[ii].id = id;
                         data.push(_data[ii]);
                         if (!options.start && data.length >= options.count) break;
                     }
@@ -568,7 +569,26 @@ function getFileData(options, callback) {
         if (!options.start && data.length >= options.count) break;
         if (day > dayEnd) break;
     }
-    
+}
+
+function getFileData(options, callback) {
+    var dayStart = options.start ? GetHistory.ts2day(options.start) : 0;
+    var dayEnd   = parseInt(GetHistory.ts2day(options.end));
+    var data     = [];
+
+    // get list of directories
+    var dayList = getDirectories(options.path).sort(function (a, b) {
+        return b - a;
+    });
+
+    if (options.id && options.id !== '*') {
+        getOneFileData(dayList, dayStart, dayEnd, options.id, options, data);
+    } else {
+        for (var id in history) {
+            getOneFileData(dayList, dayStart, dayEnd, id, options, data, true);
+        }
+    }
+
     callback(data);
 }
 
@@ -592,7 +612,8 @@ function getHistory(msg) {
         q:          msg.message.options.q    || false,
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
-        limit:      parseInt(msg.message.options.limit || adapter.config.limit || 2000, 10)
+        limit:      parseInt(msg.message.options.limit || adapter.config.limit || 2000, 10),
+        addId:      msg.message.options.addId || false
     };
 
     if (options.start > options.end) {

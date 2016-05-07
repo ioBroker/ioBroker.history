@@ -19,6 +19,59 @@ To set up some data points to be stored they must be configured in admin "Object
 - **De-bounce interval** - Protection against too often changes of some value. 
 - **Storage retention** - How many values in the past will be stored on disk.
 
+## Access values from Javascript adapter
+The sotred values can be accessed from Javascript adapter. E.g. with following code you can read the list of events for last hour:
+
+```
+// Get 50 last stored events for all IDs
+sendTo('history.0', 'getHistory', {
+    id: '*',
+    options: {
+        end:       new Date().getTime(),
+        count:     50,
+        aggregate: 'onchange'
+    }
+}, function (result) {
+    for (var i = 0; i < result.result.length; i++) {
+        console.log(result.result[i].id + ' ' + new Date(result.result[i].ts).toISOString());
+    }
+});
+
+// Get stored values for "system.adapter.admin.0.memRss" in last hour
+var end = new Date().getTime();
+sendTo('history.0', 'getHistory', {
+    id: 'system.adapter.admin.0.memRss',
+    options: {
+        start:      end - 3600000,
+        end:        end,
+        aggregate: 'onchange'
+    }
+}, function (result) {
+    for (var i = 0; i < result.result.length; i++) {
+        console.log(result.result[i].id + ' ' + new Date(result.result[i].ts).toISOString());
+    }
+});
+```
+
+Possible options:
+- **start** - (optional) time in ms - *new Date().getTime()*'
+- **end** - (optional) time in ms - *new Date().getTime()*', by default is (now + 5000 seconds)
+- **step** - (optional) used in aggregate (m4, max, min, average, total) step in ms of intervals
+- **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set.
+- **from** - if *from* field should be included in answer
+- **ack** - if *ack* field should be included in answer
+- **q** - if *q* field should be included in answer
+- **addId** - if *id* field should be included in answer
+- **limit** - do not return more entries than limit
+- **ignoreNull** - if null values should be include (false), replaced by last not null value (true) or replaced with 0 (0)
+- **aggregate** - aggregate method:
+    - *m4* - used M4 algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
+    - *max* - Splice the whole time range in small intervals and find for every interval max value and use it for this interval (nulls will be ignored).
+    - *min* - Same as max, but take minimal value.
+    - *average* - Same as max, but take average value.
+    - *total* - Same as max, but calculate total value.
+    - *count* - Same as max, but calculate number of values (nulls will be calculated).
+
 ## Changelog
 ### 0.4.0 (2016-05-05)
 * (bluefox) use aggregation file from sql adapter
