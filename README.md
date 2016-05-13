@@ -73,6 +73,9 @@ Possible options:
     - *count* - Same as max, but calculate number of values (nulls will be calculated).
 
 ## Changelog
+### 0.4.1 (2016-05-14)
+* (bluefox) support sessionId
+
 ### 0.4.0 (2016-05-05)
 * (bluefox) use aggregation file from sql adapter
 * (bluefox) fix the values storage on exit

@@ -613,7 +613,8 @@ function getHistory(msg) {
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
         limit:      parseInt(msg.message.options.limit || adapter.config.limit || 2000, 10),
-        addId:      msg.message.options.addId || false
+        addId:      msg.message.options.addId || false,
+        sessionId:  msg.message.options.sessionId
     };
 
     if (options.start > options.end) {
