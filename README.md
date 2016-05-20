@@ -65,7 +65,7 @@ Possible options:
 - **limit** - do not return more entries than limit
 - **ignoreNull** - if null values should be include (false), replaced by last not null value (true) or replaced with 0 (0)
 - **aggregate** - aggregate method:
-    - *m4* - used M4 algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
+    - *minmax* - used special algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
     - *max* - Splice the whole time range in small intervals and find for every interval max value and use it for this interval (nulls will be ignored).
     - *min* - Same as max, but take minimal value.
     - *average* - Same as max, but take average value.
@@ -73,6 +73,9 @@ Possible options:
     - *count* - Same as max, but calculate number of values (nulls will be calculated).
 
 ## Changelog
+### 1.0.0 (2016-05-20)
+* (bluefox) change default aggregation name
+
 ### 0.4.1 (2016-05-14)
 * (bluefox) support sessionId
 
