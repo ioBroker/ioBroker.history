@@ -7,6 +7,7 @@ var path       = require('path');
 var dataDir    = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
 var fs         = require('fs');
 var GetHistory = require(__dirname + '/lib/getHistory.js');
+var Aggregate = require(__dirname + '/lib/aggregate.js');
 
 var history = {};
 var subscribeAll = false;
@@ -273,7 +274,7 @@ function generateDemo(msg) {
             try {
                 if (!fs.existsSync(path + GetHistory.ts2day(start))) {
                     fs.mkdirSync(path + GetHistory.ts2day(start));
-                } 
+                }
             } catch (err) {
                 adapter.log.error(err);
             }
@@ -335,12 +336,12 @@ function generateDemo(msg) {
                 }
             });
         }
-        
+
         //var x = new Date().getTime();
-        
+
         generate();
     }
-    
+
     fork(options);
 }
 
@@ -350,7 +351,7 @@ function pushHistory(id, state) {
         var settings = history[id][adapter.namespace];
 
         if (!settings || !state) return;
-        
+
         if (history[id].state && settings.changesOnly && (state.ts !== state.lc)) return;
         if (state.ts < 946681200000) state.ts *= 1000;
         if (state.lc < 946681200000) state.lc *= 1000;
@@ -554,12 +555,15 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                     var _data = JSON.parse(fs.readFileSync(file)).sort(function (a, b) {
                         return b.ts - a.ts;
                     });
+                    var last = false;
 
                     for (var ii in _data) {
                         if (options.ack) _data[ii].ack = !!_data[ii].ack;
                         if (addId) _data[ii].id = id;
                         data.push(_data[ii]);
                         if (!options.start && data.length >= options.count) break;
+                        if (last) break;
+                        if (options.start && _data[ii].ts < options.start) last = true;
                     }
                 } catch (e) {
                     console.log('Cannot parse file ' + file + ': ' + e.message);
@@ -649,6 +653,8 @@ function getHistory(msg) {
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
+                    options.result = cacheData;
+                    Aggregate.beautify(options);
 
                     adapter.sendTo(msg.from, msg.command, {
                         result: cacheData,

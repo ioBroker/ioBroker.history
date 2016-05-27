@@ -7,12 +7,19 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
+        "version":                  "1.0.1",
         "news": {
-            "en": "(bluefox) change default aggregation name",
-            "de": "(bluefox) change default aggregation name",
-            "ru": "(bluefox) change default aggregation name"
+            "1.0.1": {
+                "en": "calculate end/start values for on change too",
+                "de": "calculate end/start values for on change too",
+                "ru": "calculate end/start values for on change too"
+            },
+            "1.0.0": {
+                "en": "change default aggregation name",
+                "de": "change default aggregation name",
+                "ru": "change default aggregation name"
+            }
         },
-        "version":                  "1.0.0",
         "mode":                     "daemon",
         "platform":                 "Javascript/Node.js",
         "loglevel":                 "info",
@@ -23,14 +30,14 @@
         "enabled":                  true,
         "preserveSettings":         "history",
         "authors": [
-            "hobbyquaker <hq@ccu.io>", "bluefox <bluefox@ccu.io>"
+            "bluefox <dogafox@gmail.com>", "hobbyquaker <hq@ccu.io>"
         ],
         "license":                  "MIT",
         "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
         "icon":                     "history.png",
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
 		"type":                     "storage",
-		"dependencies":             [{"js-controller": ">=0.8.0"}],
+		"dependencies":             [{"js-controller": ">=0.9.0"}],
         "stopTimeout":              10000
     },
     "native": {
