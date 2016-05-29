@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.0.1",
+        "version":                  "1.0.2",
         "news": {
+            "1.0.2": {
+                "en": "switch max and min with each other",
+                "de": "switch max and min with each other",
+                "ru": "switch max and min with each other"
+            },
             "1.0.1": {
                 "en": "calculate end/start values for on change too",
                 "de": "calculate end/start values for on change too",

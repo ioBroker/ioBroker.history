@@ -73,6 +73,9 @@ Possible options:
     - *count* - Same as max, but calculate number of values (nulls will be calculated).
 
 ## Changelog
+### 1.0.2 (2016-05-29)
+* (bluefox) switch max and min with each other
+
 ### 1.0.1 (2016-05-28)
 * (bluefox) calculate end/start values for "on change" too
 
