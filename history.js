@@ -609,8 +609,8 @@ function getHistory(msg) {
         path:       adapter.config.storeDir,
         start:      msg.message.options.start,
         end:        msg.message.options.end || ((new Date()).getTime() + 5000000),
-        step:       parseInt(msg.message.options.step,  10000) || null,
-        count:      parseInt(msg.message.options.count, 10)    || 500,
+        step:       parseInt(msg.message.options.step,  10) || null,
+        count:      parseInt(msg.message.options.count, 10) || 500,
         from:       msg.message.options.from || false,
         ack:        msg.message.options.ack  || false,
         q:          msg.message.options.q    || false,
@@ -714,7 +714,6 @@ function getHistory(msg) {
             GetHistory.getFileData(options);
             getCachedData(options, function (cachedData) {
                 GetHistory.aggregation(options, cachedData);
-                GetHistory.finishAggregation(options);
                 var data = GetHistory.response(options);
 
                 if (data[0] == 'response') {

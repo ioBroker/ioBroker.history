@@ -7,14 +7,18 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.0.3",
+        "version":                  "1.0.4",
         "news": {
+            "1.0.4": {
+                "en": "fix aggregation on seconds",
+                "de": "fix aggregation on seconds",
+                "ru": "fix aggregation on seconds"
+            },
             "1.0.3": {
                 "en": "draw line to the end if ignore null",
                 "de": "draw line to the end if ignore null",
                 "ru": "draw line to the end if ignore null"
-            },
-            "1.0.2": {
+            },"1.0.2": {
                 "en": "switch max and min with each other",
                 "de": "switch max and min with each other",
                 "ru": "switch max and min with each other"
