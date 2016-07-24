@@ -73,6 +73,9 @@ Possible options:
     - *count* - Same as max, but calculate number of values (nulls will be calculated).
 
 ## Changelog
+### 1.0.5 (2016-07-24)
+* (bluefox) fix aggregation on large intervals
+
 ### 1.0.4 (2016-07-05)
 * (bluefox) fix aggregation on seconds
 

@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.0.4",
+        "version":                  "1.0.5",
         "news": {
+            "1.0.5": {
+                "en": "fix aggregation on large intervals",
+                "de": "fix aggregation on large intervals",
+                "ru": "fix aggregation on large intervals"
+            },
             "1.0.4": {
                 "en": "fix aggregation on seconds",
                 "de": "fix aggregation on seconds",
