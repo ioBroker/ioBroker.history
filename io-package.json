@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.0.5",
+        "version":                  "1.1.0",
         "news": {
+            "1.1.0": {
+                "en": "fix aggregation of last point\naggregation none just deliver the raw data without any aggregation",
+                "de": "Geändert die Aggregation vom letzten Punkt\nAggregation none liefert nur raw Daten",
+                "ru": "Изменено вычисление последней точки\nТип агрегации none возвращяет только реальные значения"
+            },
             "1.0.5": {
                 "en": "fix aggregation on large intervals",
                 "de": "fix aggregation on large intervals",

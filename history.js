@@ -540,6 +540,10 @@ function getCachedData(options, callback) {
     callback(cache, !options.start && cache.length >= options.count);
 }
 
+function tsSort(a, b) {
+    return b.ts - a.ts;
+}
+
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
@@ -552,9 +556,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
 
             if (fs.existsSync(file)) {
                 try {
-                    var _data = JSON.parse(fs.readFileSync(file)).sort(function (a, b) {
-                        return b.ts - a.ts;
-                    });
+                    var _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
                     var last = false;
 
                     for (var ii in _data) {
@@ -576,9 +578,9 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
 }
 
 function getFileData(options, callback) {
-    var dayStart = options.start ? GetHistory.ts2day(options.start) : 0;
-    var dayEnd   = parseInt(GetHistory.ts2day(options.end));
-    var data     = [];
+    var dayStart = options.start ? parseInt(GetHistory.ts2day(options.start), 10) : 0;
+    var dayEnd   = parseInt(GetHistory.ts2day(options.end), 10);
+    var fileData = [];
 
     // get list of directories
     var dayList = getDirectories(options.path).sort(function (a, b) {
@@ -586,14 +588,14 @@ function getFileData(options, callback) {
     });
 
     if (options.id && options.id !== '*') {
-        getOneFileData(dayList, dayStart, dayEnd, options.id, options, data);
+        getOneFileData(dayList, dayStart, dayEnd, options.id, options, fileData);
     } else {
         for (var id in history) {
-            getOneFileData(dayList, dayStart, dayEnd, id, options, data, true);
+            getOneFileData(dayList, dayStart, dayEnd, id, options, fileData, true);
         }
     }
 
-    callback(data);
+    callback(fileData);
 }
 
 function sortByTs(a, b) {
@@ -716,7 +718,7 @@ function getHistory(msg) {
                 GetHistory.aggregation(options, cachedData);
                 var data = GetHistory.response(options);
 
-                if (data[0] == 'response') {
+                if (data[0] === 'response') {
                     if (data[1]) {
                         adapter.log.debug('Send: ' + data[1].length + ' of: ' + data[2] + ' in: ' + (new Date().getTime() - startTime) + 'ms');
                         adapter.sendTo(msg.from, msg.command, {

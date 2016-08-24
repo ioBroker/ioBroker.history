@@ -71,8 +71,16 @@ Possible options:
     - *average* - Same as max, but take average value.
     - *total* - Same as max, but calculate total value.
     - *count* - Same as max, but calculate number of values (nulls will be calculated).
+    - *none* - No aggregation at all. Only raw values in given period.
+
+The first and last points will be calculated for aggregations, except aggregation "none".
+If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
 ## Changelog
+### 1.1.0 (2016-08-27)
+* (bluefox) fix aggregation of last point
+* (bluefox) aggregation none just deliver the raw data without any aggregation
+
 ### 1.0.5 (2016-07-24)
 * (bluefox) fix aggregation on large intervals
 
