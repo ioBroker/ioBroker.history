@@ -18,7 +18,11 @@ var adapter = utils.adapter({
     name: 'history',
 
     objectChange: function (id, obj) {
-        if (obj && obj.common && obj.common.history && obj.common.history[adapter.namespace]) {
+        if (obj && obj.common && (
+                // todo remove history somewhen (2016.08) - Do not forget object selector in io-package.json
+            (obj.common.history && obj.common.history[adapter.namespace]) ||
+            (obj.common.custom && obj.common.custom[adapter.namespace]))
+        ) {
             var state   = history[id] ? history[id].state   : null;
             var list    = history[id] ? history[id].list    : null;
             var timeout = history[id] ? history[id].timeout : null;
@@ -32,7 +36,8 @@ var adapter = utils.adapter({
                 adapter.subscribeForeignStates('*');
             }
 
-            history[id] = obj.common.history;
+            // todo remove history somewhen (2016.08)
+            history[id] = obj.common.custom || obj.common.history;
             history[id].state   = state;
             history[id].list    = list;
             history[id].timeout = timeout;
@@ -134,13 +139,15 @@ function main() {
         fs.mkdirSync(adapter.config.storeDir);
     }
 
-    adapter.objects.getObjectView('history', 'state', {}, function (err, doc) {
+    adapter.objects.getObjectView('custom', 'state', {}, function (err, doc) {
         var count = 0;
         if (doc && doc.rows) {
             for (var i = 0, l = doc.rows.length; i < l; i++) {
                 if (doc.rows[i].value) {
                     var id = doc.rows[i].id;
                     history[id] = doc.rows[i].value;
+
+                    // todo remove it somewhen (2016.08)
                     // convert old value
                     if (history[id].enabled !== undefined) {
                         history[id] = history[id].enabled ? {'history.0': history[id]} : null;

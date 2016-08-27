@@ -77,6 +77,9 @@ The first and last points will be calculated for aggregations, except aggregatio
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
 ## Changelog
+### 1.2.0 (2016-08-27)
+* (bluefox) change name of object from history to custom
+
 ### 1.1.0 (2016-08-27)
 * (bluefox) fix aggregation of last point
 * (bluefox) aggregation none just deliver the raw data without any aggregation

@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.1.0",
+        "version":                  "1.2.0",
         "news": {
+            "1.2.0": {
+                "en": "change name of object from history to custom",
+                "de": "Ändere Name vom Storage-Object von history nach custom",
+                "ru": "Изменено имя объекта для настроек с history на custom"
+            },
             "1.1.0": {
                 "en": "fix aggregation of last point\naggregation none just deliver the raw data without any aggregation",
                 "de": "Geändert die Aggregation vom letzten Punkt\nAggregation none liefert nur raw Daten",
@@ -52,7 +57,7 @@
         "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
         "main":                     "history.js",
         "enabled":                  true,
-        "preserveSettings":         "history",
+        "preserveSettings":         "custom",
         "authors": [
             "bluefox <dogafox@gmail.com>", "hobbyquaker <hq@ccu.io>"
         ],
@@ -61,7 +66,8 @@
         "icon":                     "history.png",
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
 		"type":                     "storage",
-		"dependencies":             [{"js-controller": ">=0.9.0"}],
+        "supportCustoms":           true,
+		"dependencies":             [{"js-controller": ">=0.11.3"}],
         "stopTimeout":              10000
     },
     "native": {
@@ -75,11 +81,11 @@
     },
     "objects": [
         {
-            "_id": "_design/history",
+            "_id": "_design/custom",
             "language": "javascript",
             "views": {
                 "state": {
-                    "map": "function(doc) { if (doc.type=='state' && doc.common.history) emit(doc._id, doc.common.history) }"
+                    "map": "function(doc) { if (doc.type==='state' && (doc.common.custom || doc.common.history)) emit(doc._id, doc.common.custom || doc.common.history) }"
                 }
             }
         }
