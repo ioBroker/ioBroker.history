@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.2.0",
+        "version":                  "1.3.0",
         "news": {
+		    "1.3.0": {
+                "en": "Compatible only with new admin",
+                "de": "Nur mit neuem Admin kompatibel",
+                "ru": "Совместимо только с новым админ-драйвером"
+            },
             "1.2.0": {
                 "en": "change name of object from history to custom",
                 "de": "Ändere Name vom Storage-Object von history nach custom",
@@ -67,7 +72,8 @@
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
 		"type":                     "storage",
         "supportCustoms":           true,
-		"dependencies":             [{"js-controller": ">=0.11.3"}],
+        "getHistory":           	true,
+		"dependencies":             [{"js-controller": ">=0.12.0"}],
         "stopTimeout":              10000
     },
     "native": {
