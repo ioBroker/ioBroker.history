@@ -353,7 +353,7 @@ function generateDemo(msg) {
 }
 
 function pushHistory(id, state) {
-    // Push into redis
+    // Push into history
     if (history[id]) {
         var settings = history[id][adapter.namespace];
 
@@ -754,4 +754,3 @@ function getDirectories(path) {
         return fs.statSync(path + '/' + file).isDirectory();
     });
 }
-
