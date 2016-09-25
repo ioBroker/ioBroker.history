@@ -77,6 +77,10 @@ The first and last points will be calculated for aggregations, except aggregatio
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
 ## Changelog
+### 1.3.1 (2016-09-25)
+* (Apollon77) Fixed: ts is assigned as val
+* (bluefox) Fix selector for history objects
+
 ### 1.3.0 (2016-08-30)
 * (bluefox) сompatible only with new admin
 
