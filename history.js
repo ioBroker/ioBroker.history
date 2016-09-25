@@ -120,6 +120,28 @@ function processMessage(msg) {
     }
 }
 
+function fixSelector(callback) {
+    // fix _design/custom object
+    adapter.getForeignObject('_design/custom', function (err, obj) {
+        if (!obj || obj.views.state.map.indexOf('common.history') === -1 || obj.views.state.map.indexOf('common.custom') === -1) {
+            obj = {
+                _id: '_design/custom',
+                language: 'javascript',
+                views: {
+                    state: {
+                        map: 'function(doc) { if (doc.type===\'state\' && (doc.common.custom || doc.common.history)) emit(doc._id, doc.common.custom || doc.common.history) }'
+                    }
+                }
+            };
+            adapter.setForeignObject('_design/custom', obj, function (err) {
+                if (callback) callback(err);
+            });
+        } else {
+            if (callback) callback(err);
+        }
+    });
+}
+
 function main() {
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
@@ -139,66 +161,68 @@ function main() {
         fs.mkdirSync(adapter.config.storeDir);
     }
 
-    adapter.objects.getObjectView('custom', 'state', {}, function (err, doc) {
-        var count = 0;
-        if (doc && doc.rows) {
-            for (var i = 0, l = doc.rows.length; i < l; i++) {
-                if (doc.rows[i].value) {
-                    var id = doc.rows[i].id;
-                    history[id] = doc.rows[i].value;
+    fixSelector(function () {
+        adapter.objects.getObjectView('custom', 'state', {}, function (err, doc) {
+            var count = 0;
+            if (doc && doc.rows) {
+                for (var i = 0, l = doc.rows.length; i < l; i++) {
+                    if (doc.rows[i].value) {
+                        var id = doc.rows[i].id;
+                        history[id] = doc.rows[i].value;
 
-                    // todo remove it somewhen (2016.08)
-                    // convert old value
-                    if (history[id].enabled !== undefined) {
-                        history[id] = history[id].enabled ? {'history.0': history[id]} : null;
-                        if (!history[id]) {
+                        // todo remove it somewhen (2016.08)
+                        // convert old value
+                        if (history[id].enabled !== undefined) {
+                            history[id] = history[id].enabled ? {'history.0': history[id]} : null;
+                            if (!history[id]) {
+                                delete history[id];
+                                continue;
+                            }
+                        }
+                        if (!history[id][adapter.namespace] || history[id][adapter.namespace].enabled === false) {
                             delete history[id];
-                            continue;
-                        }
-                    }
-                    if (!history[id][adapter.namespace] || history[id][adapter.namespace].enabled === false) {
-                        delete history[id];
-                    } else {
-                        count++;
-                        adapter.log.info('enabled logging of ' + id);
-                        if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
-                            history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
                         } else {
-                            history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
-                        }
-                        if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
-                            history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
-                        } else {
-                            history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || parseInt(adapter.config.retention, 10) || 0;
-                        }
-                        if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                            history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
-                        } else {
-                            history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
-                        }
-                        history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+                            count++;
+                            adapter.log.info('enabled logging of ' + id);
+                            if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
+                                history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                            } else {
+                                history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
+                            }
+                            if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
+                                history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                            } else {
+                                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || parseInt(adapter.config.retention, 10) || 0;
+                            }
+                            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                                history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                            } else {
+                                history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
+                            }
+                            history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
 
-                        // add one day if retention is too small
-                        if (history[id][adapter.namespace].retention <= 604800) {
-                            history[id][adapter.namespace].retention += 86400;
+                            // add one day if retention is too small
+                            if (history[id][adapter.namespace].retention <= 604800) {
+                                history[id][adapter.namespace].retention += 86400;
+                            }
                         }
                     }
                 }
             }
-        }
-        if (count < 20) {
-            for (var _id in history) {
-                adapter.subscribeForeignStates(_id);
+            if (count < 20) {
+                for (var _id in history) {
+                    adapter.subscribeForeignStates(_id);
+                }
+            } else {
+                subscribeAll = true;
+                adapter.subscribeForeignStates('*');
             }
-        } else {
-            subscribeAll = true;
-            adapter.subscribeForeignStates('*');
-        }
 
-        // store all buffered data every 10 minutes to not lost the data
-        bufferChecker = setInterval(function () {
-            storeCached();
-        }, 10 * 60000);
+            // store all buffered data every 10 minutes to not lost the data
+            bufferChecker = setInterval(function () {
+                storeCached();
+            }, 10 * 60000);
+        });
     });
 
     adapter.subscribeForeignObjects('*');
@@ -485,6 +509,7 @@ function appendFile(id, states) {
         appendFile(id, states);
     }
 }
+
 function getOneCachedData(id, options, cache, addId) {
     addId = addId || options.addId;
 
