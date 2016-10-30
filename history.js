@@ -156,6 +156,12 @@ function main() {
     }
     adapter.config.storeDir += '/';
 
+    if (adapter.config.changesRelogInterval !== null && adapter.config.changesRelogInterval !== undefined) {
+        adapter.config.changesRelogInterval = parseInt(adapter.config.changesRelogInterval, 10);
+    } else {
+        adapter.config.changesRelogInterval = 0;
+    }
+
     // create directory
     if (!fs.existsSync(adapter.config.storeDir)) {
         fs.mkdirSync(adapter.config.storeDir);
@@ -200,6 +206,12 @@ function main() {
                                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                             }
                             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+
+                            if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
+                                history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
+                            } else {
+                                history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                            }
 
                             // add one day if retention is too small
                             if (history[id][adapter.namespace].retention <= 604800) {
@@ -383,11 +395,23 @@ function pushHistory(id, state) {
 
         if (!settings || !state) return;
 
-        if (history[id].state && settings.changesOnly && (state.ts !== state.lc)) return;
         if (state.ts < 946681200000) state.ts *= 1000;
         if (state.lc < 946681200000) state.lc *= 1000;
 
+        if (history[id].state && settings.changesOnly) {
+            if (settings.changesRelogInterval === 0) {
+                if (state.ts !== state.lc) return;
+            }
+            else if (history[id].lastLogTime) {
+                if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) return;
+                if (state.ts !== state.lc) {
+                    adapter.log.debug('relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
+                }
+            }
+        }
+
         history[id].state = state;
+        history[id].lastLogTime = state.ts;
 
         // Do not store values ofter than 1 second
         if (!history[id].timeout) {

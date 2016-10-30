@@ -6,7 +6,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/)
 
-This adapter saves state history in a two-staged process. 
+This adapter saves state history in a two-staged process.
 At first data points are stored in RAM, as soon as they reach maxLength they will be stored on disk.
 
 To set up some data points to be stored they must be configured in admin "Objects" Tab (last button).
@@ -16,8 +16,9 @@ To set up some data points to be stored they must be configured in admin "Object
 - **Storage directory** - Path to the directory, where the files will be stored. It can be done relative to "iobroker-data" or absolute, like "/mnt/history" or "D:/History"
 - **Maximal number of stored in RAM values** - After this number of values reached in RAM they will be saved on disk.
 - **Store origin of value** - If "from" field will be stored too. Can save place on disk.
-- **De-bounce interval** - Protection against too often changes of some value. 
+- **De-bounce interval** - Protection against too often changes of some value.
 - **Storage retention** - How many values in the past will be stored on disk.
+- **Log unchanged values any(s)** - When using "log changes only" you can set a time interval in seconds here after which also unchanged values will be re-logged into the DB
 
 ## Access values from Javascript adapter
 The sotred values can be accessed from Javascript adapter. E.g. with following code you can read the list of events for last hour:
@@ -76,7 +77,39 @@ Possible options:
 The first and last points will be calculated for aggregations, except aggregation "none".
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
+## Data converter
+### Convert History-Data to InfluxDB
+The history2influx.js can be found in the directory "converter".
+
+The script will parse directly the generated history JSON files on disk to transfer them into the Database.
+Additionally it queries all available Measurements(Datapoints) from the InfluxDB and only converts those, so make sure to enable all logging before and make sure there are data in.
+
+The script will query the earliest timestamp per measurement and will only insert data from History before that date. These earliest-Value information is also cached when the converter is aborted, so that this is not needed to be queried again. With new data migrated from history these data will also be updated.
+To reset the data delete the File "earliestDBValues.json".
+
+The Converter then goes backward in time through all the days available as data and will determine which data to transfer to InfluxDB.
+
+If you want to abort the process you can press "x" or "<CTRL-C>" and the converter aborts after the current datafile.
+
+Note: Migrating many data will produce a certain load on the system, especially when converter and target-InfluxDB instance are running on the same machine. Monitor your systems load and performance during the action and maybe use the "delayMultiplicator" to increase delays in the converter.
+
+**Usage:** nodejs history2influx.js [<InfluxDB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(m)>]] [--ignoreExistingDBValues]
+**Example**: nodejs history2influx.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30
+
+Possible options and Parameter:
+- **<InfluxDB-Instance>**: InfluxDB-Instance to send the data to (Default: influxdb.0). If set needs to be first parameter after scriptname.
+- **<Loglevel>**: Loglevel for output (Default: info). If set needs to be second parameter after scriptname.
+- **<Date-to-start>**: Day to start in format yyyymmdd (e.g. 20161028). Use "0" to use detected earliest values. If set needs to be third parameter after scriptname.
+- **<path-to-Data>**: Path to the datafiles. Defauls to <iobroker-install-directory>/iobroker-data/history-data . If set needs to be fourth parameter after scriptname.
+- **<delayMultiplicator>**: Modify the delays between several actions in the script by a multiplicator. "2" would mean that the delays the converted had calculated by itself are doubled. If set needs to be fifth parameter after scriptname.
+- **--logChangesOnly [<relog-Interval(m)>]**: when --logChangesOnly is set the data are parsed and reduced, so that only changed values are stored in InfluxDB. Additionally a <relog-Interval(s)> can be set in minutes to re-log unchanged values after this interval.
+- **--ignoreExistingDBValues**: With this parameter all existing data are ignored and all data are inserted into DB. Please make sure that no duplicated are generated. This option is usefull to fix "holes" in the data where some data are missing. It still only fills all datapoints that exist in InfluxDB already!
+
 ## Changelog
+### 1.4.0 (2016-10-29)
+* (Apollon77) add option to re-log unchanged values to make it easier for visualization
+* (Apollon77) added converter script to move history data to influxdb
+
 ### 1.3.1 (2016-09-25)
 * (Apollon77) Fixed: ts is assigned as val
 * (bluefox) Fix selector for history objects

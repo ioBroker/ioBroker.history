@@ -12,6 +12,15 @@
                 <td><input type="number" data-field="debounce" min="500" max="86400000" data-default="10000"></td>
             </tr>
             <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="translate">log changes interval(s)</td>
+                <td><input type="number" data-field="changesRelogInterval" min="0" max="86400000" data-default="0"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
                 <td class="translate">maximum datapoint count in RAM</td>
                 <td><input type="number" data-field="maxLength" min="100" max="5000" data-default="960"></td>
                 <td style="width: 40px">&nbsp;</td>
@@ -43,6 +52,11 @@
     systemDictionary = $.extend(systemDictionary, {
         "enabled":                {"en": "enabled",               "de": "Aktiviert",                    "ru": "активно"},
         "De-bounce interval(ms)": {"en": "De-bounce interval(ms)", "de": "Entprellzeit(ms)",            "ru": "Минимальный интервал(ms)"},
+        "log changes interval(s)": {
+            "en": "Log unchanged values any(s)",
+            "de": "Gleiche Werte aufzeichnen(s)",
+            "ru": "Запись неизменённых значений каждые (сек)"
+        },
         "log changes only":       {"en": "log changes only",      "de": "Nur Änderungen aufzeichnen",   "ru": "Только изменения"},
         "maximum datapoint count in RAM": {
             "en": "maximum datapoint count in RAM",
@@ -74,7 +88,8 @@
                     changesOnly: false,
                     debounce:    0,
                     maxLength:   10,
-                    retention:   instanceObj.native.retention
+                    retention:   instanceObj.native.retention,
+                    changesRelogInterval: instanceObj.native.changesRelogInterval
                 };
             }
             return {
@@ -82,7 +97,8 @@
                 changesOnly: true,
                 debounce:    instanceObj.native.debounce,
                 maxLength:   instanceObj.native.maxLength,
-                retention:   instanceObj.native.retention
+                retention:   instanceObj.native.retention,
+                changesRelogInterval: instanceObj.native.changesRelogInterval
             };
         }
     }

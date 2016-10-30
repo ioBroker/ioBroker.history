@@ -4,7 +4,7 @@
 
 //noinspection JSUnresolvedFunction
 
-//usage: nodejs history2influx.js [<InfluxDB-Instance>] [<Loglevel>] [<DatePath-to-end>] [</path-to-Data>]
+//usage: nodejs history2influx.js [<InfluxDB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
 //usage: nodejs history2influx.js influxdb.0 info 20161001 /path/to/data
 var utils  = require(__dirname + '/../lib/utils'); // Get common adapter utils
 
@@ -18,15 +18,34 @@ var earliesValCachefile = __dirname + '/earliestDBValues.json'
 
 var influxInstance = "influxdb.0";
 var endDay = 0; // 20160917; // or 0
+var ignoreEarliesDBValues = false;
+var logChangesOnly = false;
+var logChangesOnlyTime = 60*60*1000;
+var delayMultiplicator = 1;
 if (process.argv[2] && (process.argv[2].indexOf('influxdb') === 0)) {
     influxInstance = process.argv[2];
-    if (process.argv[4]) endDay = parseInt(process.argv[4], 10);
+    if ((process.argv[4]) && (parseInt(process.argv[4],10) > 0)) endDay = parseInt(process.argv[4], 10);
     if (process.argv[5]) historydir = process.argv[5];
+    if ((process.argv[6]) && (!isNaN(parseFloat(process.argv[6])))) delayMultiplicator = parseFloat(process.argv[6]);
+    if (process.argv.indexOf('--ignoreExistingDBValues') !== -1) ignoreEarliesDBValues = true;
+    var logchangesPos = process.argv.indexOf('--logChangesOnly');
+    if (logchangesPos !== -1) {
+        logChangesOnly = true;
+        if (process.argv[logchangesPos+1]) {
+            var logTime = parseInt(process.argv[logchangesPos+1], 10);
+            if ((! isNaN(logTime)) &&  (logTime > 0)) {
+                logChangesOnlyTime = logTime * 60000;
+            }
+        }
+    }
     process.argv[2] = "--install";
 }
 console.log('Send Data to ' + influxInstance);
 if (endDay !== 0) console.log('Start at ' + endDay);
 console.log('Use historyDir ' + historydir);
+if (delayMultiplicator != 1) console.log('Use Delay multiplicator ' + delayMultiplicator);
+if (logChangesOnly) console.log('Log changes only once per ' + (logChangesOnlyTime/60000) + ' minutes');
+
 var adapter = utils.adapter('history');
 
 var breakIt = false;
@@ -55,8 +74,23 @@ adapter.on('ready', function () {
 
 function main() {
     var inited = false;
+    if (ignoreEarliesDBValues) {
+        console.log('Ignore earliesDBValues - set all to now');
+        adapter.sendTo(influxInstance, "query", "SHOW MEASUREMENTS", function(result) {
+            if (result.error) {
+                console.error(result.error);
+            } else {
+                console.log('Datapoints found: ' + result.result[0].length);
+                var dateNow = new Date().getTime();
+                for (var i = 0; i < result.result[0].length; i++) {
+                    earliestDBValue[result.result[0][i].name] = dateNow;
+                }
+                processFiles();
+            }
+        });
+    }
     try {
-        if (fs.statSync(earliesValCachefile).isFile()) {
+        if ((!ignoreEarliesDBValues) && (fs.statSync(earliesValCachefile).isFile())) {
             var fileContent = fs.readFileSync(earliesValCachefile);
             earliestDBValue = JSON.parse(fileContent);
             console.log('EarliesDBValues initialized from cache ' + Object.keys(earliestDBValue).length);
@@ -71,7 +105,7 @@ function main() {
                 console.error(result.error);
             } else {
                 // show result
-                console.log('Rows: ' + result.result[0].length);
+                console.log('Datapoints found: ' + result.result[0].length);
                 var dp_list = result.result[0];
 
                 function getEarliestDBTime() {
@@ -88,8 +122,8 @@ function main() {
                                     console.error(resultDP.error);
                                 } else {
                                     earliestDBValue[dp.name] = resultDP.result[0][0].ts;
-                                    if (earliestDBValue[dp.name] < 946681200000) earliestDBValue[dp.name] = 0; // mysterious timestamp, ignore
-                                    console.log('ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + earliestDBValue[dp.name]);
+                                    if (earliestDBValue[dp.name] < 946681200000) earliestDBValue[dp.name] = new Date().getTime(); // mysterious timestamp, ignore
+                                    console.log('ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + new Date(earliestDBValue[dp.name]).toString());
                                 }
                                 getEarliestDBTime();
                             });
@@ -153,22 +187,26 @@ function processFile() {
         var dir = allFiles[day].dirname;
         var file = allFiles[day].files.shift();
         var id = file.substring(8,file.length-5);
-        console.log('Day ' + day + ' - ' + file);
+        var weatherunderground_special_handling = ((id.indexOf('weatherunderground') !== -1) && (id.indexOf('current.precip') !== -1));
+        console.log('Day ' + day + ' - ' + file );
 
         if ((!earliestDBValue[id]) || (earliestDBValue[id]==0)) {
             console.log('    Ignore ID ' + file +': ' + id);
-            setTimeout(processFile,0);
+            setTimeout(processFile,10);
         }
 
         try {
             var fileContent = fs.readFileSync(dir + '/' + file);
 
             var fileData = JSON.parse(fileContent, function (key, value) {
-                if (key === 'time') {
+                if (key === 'ts') {
                     if (value < 946681200000) value *= 1000;
                 }
                 else if (key === 'ack') {
                     value = !!value;
+                }
+                else if (key === 'val') {
+                    if ((weatherunderground_special_handling) && (typeof value === 'string')) value = parseInt(value, 10);
                 }
                 return value;
             });
@@ -186,36 +224,57 @@ function processFile() {
             fileData = fileData.slice(0,k);
             console.log('cut filedata to ' + fileData.length);
         }
+        var lastValue = null;
+        var lastTime = null;
         if (fileData.length > 0) {
             var sendData = {};
             sendData.id = id;
-            sendData.state = fileData;
-            for (var j = 0; j< sendData.state.length; j++) {
-                if (sendData.state[j].ts < earliestDBValue[id]) earliestDBValue[id] = sendData.state[j].ts;
+            sendData.state = [];
+            for (var j = 0; j< fileData.length; j++) {
+                if (fileData[j].ts < earliestDBValue[id]) earliestDBValue[id] = fileData[j].ts;
+                if ((lastValue === null) || (fileData[j].val != lastValue) || (!logChangesOnly) || ((logChangesOnly) && (Math.abs(fileData[j].ts-lastTime) > logChangesOnlyTime))) {
+                    sendData.state.push(fileData[j]);
+                    lastValue = fileData[j].val;
+                    lastTime = fileData[j].ts;
+                    //console.log('use value = ' + fileData[j].val)
+                }
+                //else console.log('not use value = ' + fileData[j].val)
             }
+            console.log('  datapoints reduced from ' + fileData.length + ' --> ' + sendData.state.length);
             adapter.sendTo(influxInstance, "storeState", sendData, function (result) {
                 if (result.error) {
                     console.error(result.error);
                     finish(false);
                 }
-                setTimeout(processFile,200);
+                if (result.success && !result.connected) {
+                    console.error('Data stored but InfluxDB not available anymore, break.');
+                    finish(true);
+                }
+                var delay = 300;
+                if (result.success && result.seriesBufferFlushPlanned) {
+                    delay = 1500; // 2 seconds
+                    if (result.seriesBufferCounter > 1000) delay += 500*(result.seriesBufferCounter/1000);
+                }
+                delay = delay * delayMultiplicator;
+                setTimeout(processFile, delay);
             });
 
         }
         else {
-            setTimeout(processFile,0);
+            setTimeout(processFile,10);
         }
     }
     else {
         delete allFiles[day];
-        setTimeout(processFile,0);
+        if (! ignoreEarliesDBValues) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
+        setTimeout(processFile,60000);
     }
 }
 
 
 function finish(updateData) {
     console.log('DONE');
-    if (updateData) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
+    if ((updateData) && (! ignoreEarliesDBValues)) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
     process.exit();
 }
 

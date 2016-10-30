@@ -7,11 +7,16 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.3.1",
+        "version":                  "1.4.0",
         "news": {
+            "1.4.0": {
+                "en": "add option to re-log unchanged values to make it easier for visualization",
+                "de": "Neue Option hinzugefügt um nicht-geänderte Werte in definierten Abständen zu loggen um Visualisierungen einfacher zu machen.",
+                "ru": "add option to re-log unchanged values to make it easier for visualization"
+            },
             "1.3.1": {
                 "en": "Fixed: ts is assigned as val",
-                "de": "Korrigiert: ts war als val benuztz",
+                "de": "Korrigiert: ts war als val benutzt",
                 "ru": "Исправлено: ts использовался вместо val"
             },
             "1.3.0": {
@@ -88,7 +93,8 @@
         "debounce":  10000,
         "retention": 31536000,
         "storeFrom": false,
-        "storeAck":  true
+        "storeAck":  true,
+        "changesRelogInterval":      0
     },
     "objects": [
         {
