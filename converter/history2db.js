@@ -4,8 +4,8 @@
 
 //noinspection JSUnresolvedFunction
 
-//usage: nodejs history2influx.js [<InfluxDB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
-//usage: nodejs history2influx.js influxdb.0 info 20161001 /path/to/data
+//usage: nodejs history2db.js [<DB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
+//usage: nodejs history2db.js influxdb.0 info 20161001 /path/to/data
 var utils  = require(__dirname + '/../lib/utils'); // Get common adapter utils
 
 var fs        = require('fs');
@@ -14,20 +14,36 @@ var dataDir   = path.normalize(utils.controllerDir + '/' + require(utils.control
 var historydir = dataDir + 'history-data';
 
 var earliestDBValue = {};
-var earliesValCachefile = __dirname + '/earliestDBValues.json'
+var earliesValCachefile = __dirname + '/earliestDBValues.json';
+var earliesValCachefileExists = false;
 
-var influxInstance = "influxdb.0";
+var existingDBValues = {};
+var existingDataCachefile = __dirname + '/existingDBValues.json';
+var processNonExistingValues = false;
+
+var processAllDPs = false;
+var simulate = false;
+
+var dbInstance = "";
 var endDay = 0; // 20160917; // or 0
 var ignoreEarliesDBValues = false;
 var logChangesOnly = false;
 var logChangesOnlyTime = 60*60*1000;
 var delayMultiplicator = 1;
-if (process.argv[2] && (process.argv[2].indexOf('influxdb') === 0)) {
-    influxInstance = process.argv[2];
+var processCounter = 0;
+
+if (process.argv[2]) {
+    dbInstance = process.argv[2];
     if ((process.argv[4]) && (parseInt(process.argv[4],10) > 0)) endDay = parseInt(process.argv[4], 10);
     if (process.argv[5]) historydir = process.argv[5];
     if ((process.argv[6]) && (!isNaN(parseFloat(process.argv[6])))) delayMultiplicator = parseFloat(process.argv[6]);
     if (process.argv.indexOf('--ignoreExistingDBValues') !== -1) ignoreEarliesDBValues = true;
+    if (process.argv.indexOf('--processNonExistingValuesOnly') !== -1) {
+        ignoreEarliesDBValues = true;
+        processNonExistingValues = true;
+    }
+    if (process.argv.indexOf('--processAllDPs') !== -1) processAllDPs = true;
+    if (process.argv.indexOf('--simulate') !== -1) simulate = true;
     var logchangesPos = process.argv.indexOf('--logChangesOnly');
     if (logchangesPos !== -1) {
         logChangesOnly = true;
@@ -40,7 +56,11 @@ if (process.argv[2] && (process.argv[2].indexOf('influxdb') === 0)) {
     }
     process.argv[2] = "--install";
 }
-console.log('Send Data to ' + influxInstance);
+else {
+    console.log("ERROR: DB-Instance missing");
+    process.exit();
+}
+console.log('Send Data to ' + dbInstance);
 if (endDay !== 0) console.log('Start at ' + endDay);
 console.log('Use historyDir ' + historydir);
 if (delayMultiplicator != 1) console.log('Use Delay multiplicator ' + delayMultiplicator);
@@ -73,73 +93,43 @@ adapter.on('ready', function () {
 });
 
 function main() {
-    var inited = false;
-    if (ignoreEarliesDBValues) {
-        console.log('Ignore earliesDBValues - set all to now');
-        adapter.sendTo(influxInstance, "query", "SHOW MEASUREMENTS", function(result) {
-            if (result.error) {
-                console.error(result.error);
-            } else {
-                console.log('Datapoints found: ' + result.result[0].length);
-                var dateNow = new Date().getTime();
-                for (var i = 0; i < result.result[0].length; i++) {
-                    earliestDBValue[result.result[0][i].name] = dateNow;
-                }
-                processFiles();
+    if (processNonExistingValues) {
+        try {
+            if (fs.statSync(existingDataCachefile).isFile()) {
+                var exFileContent = fs.readFileSync(existingDataCachefile);
+                existingDBValues = JSON.parse(exFileContent);
+                ignoreEarliesDBValues = true;
+                console.log('ExistingDBValues initialized from cache ' + Object.keys(existingDBValues).length);
             }
-        });
+        }
+        catch (err) {
+            console.log("ExistingValues File not existing, but should be used. EXIT");
+            process.exit();
+        }
     }
     try {
-        if ((!ignoreEarliesDBValues) && (fs.statSync(earliesValCachefile).isFile())) {
+        if (fs.statSync(earliesValCachefile).isFile()) {
             var fileContent = fs.readFileSync(earliesValCachefile);
             earliestDBValue = JSON.parse(fileContent);
             console.log('EarliesDBValues initialized from cache ' + Object.keys(earliestDBValue).length);
-            inited= true;
+            earliesValCachefileExists = true;
+            if (ignoreEarliesDBValues) {
+                var dateNow = new Date().getTime();
+                for (var id in earliestDBValue) {
+                    if (!earliestDBValue.hasOwnProperty(id)) continue;
+                    earliestDBValue[id] = dateNow;
+                }
+                console.log('EarliesDBValues overwritten with ' + dateNow);
+            }
+        }
+        else {
+            earliesValCachefileExists = false;
         }
     }
     catch (err) {
         console.log('No stored earliesDBValues found');
-        var counter = 0;
-        adapter.sendTo(influxInstance, "query", "SHOW MEASUREMENTS", function(result) {
-            if (result.error) {
-                console.error(result.error);
-            } else {
-                // show result
-                console.log('Datapoints found: ' + result.result[0].length);
-                var dp_list = result.result[0];
-
-                function getEarliestDBTime() {
-                    if (breakIt) process.exit();
-                    if (dp_list.length>0) {
-                        counter++;
-                        if (counter%100 === 0) {
-                            setTimeout(getEarliestDBTime,5000);
-                        }
-                        else {
-                            var dp = dp_list.shift();
-                            adapter.sendTo(influxInstance, "query", "SELECT FIRST(value) AS val FROM \"" + dp.name + "\"", function(resultDP) {
-                                if (resultDP.error) {
-                                    console.error(resultDP.error);
-                                } else {
-                                    earliestDBValue[dp.name] = resultDP.result[0][0].ts;
-                                    if (earliestDBValue[dp.name] < 946681200000) earliestDBValue[dp.name] = new Date().getTime(); // mysterious timestamp, ignore
-                                    console.log('ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + new Date(earliestDBValue[dp.name]).toString());
-                                }
-                                getEarliestDBTime();
-                            });
-                        }
-                    }
-                    else {
-                        fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
-                        processFiles();
-                    }
-                }
-
-                getEarliestDBTime();
-            }
-        });
     }
-    if (inited) processFiles();
+    processFiles();
 }
 
 var allFiles = {};
@@ -190,15 +180,30 @@ function processFile() {
         var weatherunderground_special_handling = ((id.indexOf('weatherunderground') !== -1) && (id.indexOf('current.precip') !== -1));
         console.log('Day ' + day + ' - ' + file );
 
-        if ((!earliestDBValue[id]) || (earliestDBValue[id]==0)) {
-            console.log('    Ignore ID ' + file +': ' + id);
-            setTimeout(processFile,10);
+        if (earliesValCachefileExists) {
+            if ((!earliestDBValue[id]) || (earliestDBValue[id] === 0)) {
+                console.log('    Ignore ID ' + file +': ' + id);
+                setTimeout(processFile,10);
+                return;
+            }
+        }
+        if (!earliesValCachefileExists || processAllDPs) {
+            if (!earliestDBValue[id]) earliestDBValue[id] = new Date().getTime();
+        }
+        if (processNonExistingValues) {
+            console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(""+day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
+            if ((existingDBValues[id]) && (existingDBValues[id].indexOf(""+day) !== -1)) {
+                console.log('    Ignore existing ID ' + file +': ' + id);
+                setTimeout(processFile,10);
+                return;
+            }
         }
 
+        var fileData;
         try {
             var fileContent = fs.readFileSync(dir + '/' + file);
 
-            var fileData = JSON.parse(fileContent, function (key, value) {
+            fileData = JSON.parse(fileContent, function (key, value) {
                 if (key === 'ts') {
                     if (value < 946681200000) value *= 1000;
                 }
@@ -227,6 +232,7 @@ function processFile() {
         var lastValue = null;
         var lastTime = null;
         if (fileData.length > 0) {
+            processCounter++;
             var sendData = {};
             sendData.id = id;
             sendData.state = [];
@@ -241,24 +247,32 @@ function processFile() {
                 //else console.log('not use value = ' + fileData[j].val)
             }
             console.log('  datapoints reduced from ' + fileData.length + ' --> ' + sendData.state.length);
-            adapter.sendTo(influxInstance, "storeState", sendData, function (result) {
-                if (result.error) {
-                    console.error(result.error);
-                    finish(false);
-                }
-                if (result.success && !result.connected) {
-                    console.error('Data stored but InfluxDB not available anymore, break.');
-                    finish(true);
-                }
-                var delay = 300;
-                if (result.success && result.seriesBufferFlushPlanned) {
-                    delay = 1500; // 2 seconds
-                    if (result.seriesBufferCounter > 1000) delay += 500*(result.seriesBufferCounter/1000);
-                }
-                delay = delay * delayMultiplicator;
-                setTimeout(processFile, delay);
-            });
-
+            if (processNonExistingValues) {
+                if (!existingDBValues[id]) existingDBValues[id] = [];
+                existingDBValues[id].push(""+day);
+            }
+            if (!simulate) {
+                adapter.sendTo(dbInstance, "storeState", sendData, function (result) {
+                    if (result.error) {
+                        console.error(result.error);
+                        finish(false);
+                    }
+                    if (result.success && !result.connected) {
+                        console.error('Data stored but dbDB not available anymore, break.');
+                        finish(true);
+                    }
+                    var delay = 300;
+                    if (result.success && result.seriesBufferFlushPlanned) {
+                        delay = 1500; // 1,5 seconds
+                        if (result.seriesBufferCounter > 1000) delay += 500*(result.seriesBufferCounter/1000);
+                    }
+                    delay = delay * delayMultiplicator;
+                    setTimeout(processFile, delay);
+                });
+            } else {
+                console.log('  SIMULATE: Not really writing ... ' + sendData.state.length + ' values for ' + id);
+                setTimeout(processFile, 10);
+            }
         }
         else {
             setTimeout(processFile,10);
@@ -266,15 +280,21 @@ function processFile() {
     }
     else {
         delete allFiles[day];
-        if (! ignoreEarliesDBValues) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
-        setTimeout(processFile,60000);
+        if (!ignoreEarliesDBValues && !simulate) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
+        if (processNonExistingValues && !simulate) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues));
+        console.log("Day end");
+        var dayDelay = 30000;
+        if (processCounter < 10) dayDelay = 1000;
+        processCounter = 0;
+        setTimeout(processFile, dayDelay);
     }
 }
 
 
 function finish(updateData) {
     console.log('DONE');
-    if ((updateData) && (! ignoreEarliesDBValues)) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
+    if (updateData && !ignoreEarliesDBValues && !simulate) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
+    if (updateData && processNonExistingValues && !simulate) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues));
     process.exit();
 }
 
