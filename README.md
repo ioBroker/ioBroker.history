@@ -122,20 +122,20 @@ The Converter then goes backward in time through all the days available as data 
 
 If you want to abort the process you can press "x" or "<CTRL-C>" and the converter aborts after the current datafile.
 
-The converter script itself should work with all History adapters that support "storeState" methods. 
+The converter script itself should work with all History adapters that support "storeState" methods.
 
 Note: Migrating many data will produce a certain load on the system, especially when converter and target database instance are running on the same machine. Monitor your systems load and performance during the action and maybe use the "delayMultiplicator" parameter to increase delays in the converter.
 
-**Usage:** nodejs history2influx.js <DB-Instance> [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(m)>]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs]  [--simulate]
+**Usage:** nodejs history2influx.js DB-Instance [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs]  [--simulate]
 **Example**: nodejs history2influx.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly
 
 Possible options and Parameter:
-- **<DB-Instance>**: DB-Instance to send the data to.Required parameter. Needs to be first parameter after scriptname.
-- **<Loglevel>**: Loglevel for output (Default: info). If set needs to be second parameter after scriptname.
-- **<Date-to-start>**: Day to start in format yyyymmdd (e.g. 20161028). Use "0" to use detected earliest values. If set needs to be third parameter after scriptname.
-- **<path-to-Data>**: Path to the datafiles. Defauls to <iobroker-install-directory>/iobroker-data/history-data . If set needs to be fourth parameter after scriptname.
+- **DB-Instance**: DB-Instance to send the data to.Required parameter. Needs to be first parameter after scriptname.
+- **Loglevel**: Loglevel for output (Default: info). If set needs to be second parameter after scriptname.
+- **Date-to-start**: Day to start in format yyyymmdd (e.g. 20161028). Use "0" to use detected earliest values. If set needs to be third parameter after scriptname.
+- **path-to-Data**: Path to the datafiles. Defauls to iobroker-install-directory/iobroker-data/history-data . If set needs to be fourth parameter after scriptname.
 - **<delayMultiplicator>**: Modify the delays between several actions in the script by a multiplicator. "2" would mean that the delays the converted had calculated by itself are doubled. If set needs to be fifth parameter after scriptname.
-- **--logChangesOnly [<relog-Interval(m)>]**: when --logChangesOnly is set the data are parsed and reduced, so that only changed values are stored in InfluxDB. Additionally a <relog-Interval(s)> can be set in minutes to re-log unchanged values after this interval.
+- **--logChangesOnly [relog-Interval(m)]**: when --logChangesOnly is set the data are parsed and reduced, so that only changed values are stored in InfluxDB. Additionally a "relog-Interval(s)"" can be set in minutes to re-log unchanged values after this interval.
 - **--ignoreExistingDBValues**: With this parameter all existing data are ignored and all data are inserted into DB. Please make sure that no duplicates are generated. This option is usefull to fix "holes" in the data where some data are missing. By default it only fills all datapoints with at least one entry in the DB. This can be overwritten by --processAllDPs
 - **--processNonExistingValuesOnly**: With this parameter the "existing datapoints by day" file from the analyze script is used and checked for each day and datapoint. In this mode the existing-DB-Values are always ignored, and also not updated, so please do another analyze run after using that mode!!!
 - **--processAllDPs**: With this parameter you make sure that all existing datapoints from the history files is transferred into the DB, also if these are not existing in that DB so far.
