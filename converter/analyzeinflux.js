@@ -13,18 +13,20 @@ var path      = require('path');
 
 var deepAnalyze = false;
 var influxInstance = "influxdb.0";
-if (process.argv.indexOf('--deepAnalyze')) deepAnalyze = true;
+if (process.argv.indexOf('--deepAnalyze') !== -1) deepAnalyze = true;
 if (process.argv[2] && (process.argv[2].indexOf('influxdb') === 0)) {
     influxInstance = process.argv[2];
-    process.argv[2] = "--install";
 }
-console.log('Send Data to ' + influxInstance);
+process.argv[2] = "--install";
+console.log('Query Data from ' + influxInstance);
 if (deepAnalyze) console.log('Do deep analysis to find holes in data');
 
 var earliestDBValue = {};
 var earliesValCachefile = __dirname + '/earliestDBValues.json';
 var existingData = {};
 var existingDataCachefile = __dirname + '/existingDBValues.json';
+var existingTypes = {};
+var existingTypesCachefile = __dirname + '/existingDBTypes.json';
 
 var adapter = utils.adapter('history');
 
@@ -73,7 +75,10 @@ function main() {
                     else {
                         var dp = dp_list.shift();
                         var query = "SELECT FIRST(ack) AS val FROM \"" + dp.name + "\"";
-                        if (deepAnalyze) query += ";SELECT count(ack) AS val FROM \"" + dp.name + "\" where time<now() group by time(1d)";
+                        if (deepAnalyze) {
+                            query += ";SELECT count(ack) AS val FROM \"" + dp.name + "\" where time<now() group by time(1d)";
+                            query += ";SELECT LAST(value) as val FROM \"" + dp.name + "\"";
+                        }
                         adapter.sendTo(influxInstance, "query", query, function(resultDP) {
                             if (resultDP.error) {
                                 console.error(resultDP.error);
@@ -81,7 +86,7 @@ function main() {
                                 if (resultDP.result[0]) {
                                     earliestDBValue[dp.name] = resultDP.result[0][0].ts;
                                     if (earliestDBValue[dp.name] < 946681200000) earliestDBValue[dp.name] = new Date().getTime(); // mysterious timestamp, ignore
-                                    console.log('ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + new Date(earliestDBValue[dp.name]).toString());
+                                    console.log('FirstVal ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + new Date(earliestDBValue[dp.name]).toString());
                                 }
                                 if ((deepAnalyze) && (resultDP.result[1])) {
                                     existingData[dp.name]=[];
@@ -91,7 +96,11 @@ function main() {
                                             existingData[dp.name].push(parseInt(ts2day(ts), 10));
                                         }
                                     }
-                                    console.log('ID: '+dp.name+': '+JSON.stringify(existingData[dp.name]));
+                                    console.log('DayVals ID: '+dp.name+': '+JSON.stringify(existingData[dp.name]));
+                                }
+                                if ((deepAnalyze) && (resultDP.result[2]) && (resultDP.result[2][0])) {
+                                    existingTypes[dp.name]=typeof resultDP.result[2][0].val;
+                                    console.log('ValType ID: '+dp.name+': '+JSON.stringify(existingTypes[dp.name]));
                                 }
                             }
                             setTimeout(analyze,500);
@@ -99,7 +108,10 @@ function main() {
                     }
                 }
                 else {
-                    if (deepAnalyze) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingData));
+                    if (deepAnalyze) {
+                        fs.writeFileSync(existingDataCachefile, JSON.stringify(existingData));
+                        fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes));
+                    }
                     fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
                     process.exit();
                 }
@@ -132,5 +144,6 @@ process.on('SIGINT', function () {
 });
 
 process.on('uncaughtException', function (err) {
+    console.log(err);
     breakIt = true;
 });

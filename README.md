@@ -102,10 +102,21 @@ Parameters:
 - **<Loglevel>**: Loglevel for output (Default: info). If set needs to be second parameter after scriptname.
 - **--deepAnalyze**: collect the existing values per day too, by default only the earliest value is queried.
 
-The script will then generate one or two .json files with the collected data. These files are then used by the real converter script.
+The script will then generate one or three .json files with the collected data. These files are then used by the real converter script.
 
 #### analyzesql.js
-This script does not exist so far and needs to be created!!
+The analyzesql.js can be found in the directory "converter".
+This script will collect parts of the above mentioned data for an SQL instance.
+
+**Usage**: nodejs analyzesql.js [<SQL-Instance>] [<Loglevel>]
+**Example**: nodejs analyzesql.js sql.0 info
+
+Parameters:
+- **<SQL-Instance>**: which SQL-Adapter instance should be used? (Default: sql.0) If set needs to be first parameter after scriptname.
+- **<Loglevel>**: Loglevel for output (Default: info). If set needs to be second parameter after scriptname.
+
+The script will then generate two .json files with the collected data. These files are then used by the real converter script.
+Currently --processNonExistingValuesOnly for converter script can not be used because the data are not collected.
 
 ### Convert History-Data to a DB
 The history2db.js can be found in the directory "converter".
@@ -115,8 +126,8 @@ Additionally it uses the pre-generated data files for already existing values in
 
 The script can be run without any analyze step beforehand then you need to set the startdata as parameter and it will simply convert anything from that timepoint backwards in time.
 When you have run an analyze before and the earliestDBValues.json file exists then only these datapoints are converted, unless you use parameters to change that.
-When an analyze was run before and the datafiles are used, they are also updated with all converted data , so a second run will normally not generate duplicates.
-To reset the data delete the File "earliestDBValues.json" and/or "existingDBValues.json".
+When an analyze was run before and the datafiles are used, they are also updated with all converted data, so a second run will normally not generate duplicates.
+To reset the data delete the File "earliestDBValues.json", "existingDBValues.json" and/or "existingDBTypes.json".
 
 The Converter then goes backward in time through all the days available as data and will determine which data to transfer to InfluxDB.
 
