@@ -191,8 +191,8 @@ function processFile() {
             if (!earliestDBValue[id]) earliestDBValue[id] = new Date().getTime();
         }
         if (processNonExistingValues) {
-            console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(""+day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
-            if ((existingDBValues[id]) && (existingDBValues[id].indexOf(""+day) !== -1)) {
+            console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
+            if ((existingDBValues[id]) && (existingDBValues[id].indexOf(day) !== -1)) {
                 console.log('    Ignore existing ID ' + file +': ' + id);
                 setTimeout(processFile,10);
                 return;
@@ -249,7 +249,7 @@ function processFile() {
             console.log('  datapoints reduced from ' + fileData.length + ' --> ' + sendData.state.length);
             if (processNonExistingValues) {
                 if (!existingDBValues[id]) existingDBValues[id] = [];
-                existingDBValues[id].push(""+day);
+                existingDBValues[id].push(day);
             }
             if (!simulate) {
                 adapter.sendTo(dbInstance, "storeState", sendData, function (result) {

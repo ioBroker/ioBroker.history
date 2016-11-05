@@ -79,6 +79,8 @@ var adapter = utils.adapter({
         } else {
             if (history[id]) {
                 adapter.log.info('disabled logging of ' + id);
+                if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
+                if (history[id].timeout) clearTimeout(history[id].timeout);
                 delete history[id];
             }
         }
