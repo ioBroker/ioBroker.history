@@ -280,7 +280,17 @@ function processFile() {
                                                     case 'boolean': if (sendData.state[jj].val === false) sendData.state[jj].val = 0;
                                                                         else sendData.state[jj].val = 1;
                                                                     break;
-                                                    case 'string':  sendData.state[jj].val = parseFloat(sendData.state[jj].val);
+                                                    case 'string':  if (sendData.state[jj].val === "true") {
+                                                                        sendData.state[jj].val = 1;
+                                                                    } else if (sendData.state[jj].val === "false") {
+                                                                        sendData.state[jj].val = 0;
+                                                                    } else {
+                                                                        sendData.state[jj].val = parseFloat(sendData.state[jj].val);
+                                                                        if (isNaN(sendData.state[jj].val)) {
+                                                                            sendData.state[jj].val = null;
+                                                                            sortedOut++;
+                                                                        }
+                                                                    }
                                                                     break;
                                                     default:        sendData.state[jj].val = null; // value will be sorted out!
                                                                     sortedOut++;
@@ -290,9 +300,15 @@ function processFile() {
                                                     case 'number':  if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
                                                                         else sendData.state[jj].val = true;
                                                                     break;
-                                                    case 'string':  sendData.state[jj].val = parseInt(sendData.state[jj].val);
-                                                                    if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
-                                                                        else sendData.state[jj].val = true;
+                                                    case 'string':  if (sendData.state[jj].val === "true") {
+                                                                        sendData.state[jj].val = true;
+                                                                    } else if (sendData.state[jj].val === "false") {
+                                                                        sendData.state[jj].val = false;
+                                                                    } else {
+                                                                        sendData.state[jj].val = parseInt(sendData.state[jj].val);
+                                                                        if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
+                                                                            else sendData.state[jj].val = true;
+                                                                    }
                                                                     break;
                                                     default:        sendData.state[jj].val = null; // value will be sorted out!
                                                                     sortedOut++;
