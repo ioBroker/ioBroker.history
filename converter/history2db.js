@@ -21,6 +21,10 @@ var existingDBValues = {};
 var existingDataCachefile = __dirname + '/existingDBValues.json';
 var processNonExistingValues = false;
 
+var existingTypes = {};
+var existingTypesCachefile = __dirname + '/existingDBTypes.json';
+var existingTypesCachefileExists = false;
+
 var processAllDPs = false;
 var simulate = false;
 
@@ -107,9 +111,10 @@ function main() {
             process.exit();
         }
     }
+    var fileContent;
     try {
         if (fs.statSync(earliesValCachefile).isFile()) {
-            var fileContent = fs.readFileSync(earliesValCachefile);
+            fileContent = fs.readFileSync(earliesValCachefile);
             earliestDBValue = JSON.parse(fileContent);
             console.log('EarliesDBValues initialized from cache ' + Object.keys(earliestDBValue).length);
             earliesValCachefileExists = true;
@@ -128,6 +133,20 @@ function main() {
     }
     catch (err) {
         console.log('No stored earliesDBValues found');
+    }
+    try {
+        if (fs.statSync(existingTypesCachefile).isFile()) {
+            fileContent = fs.readFileSync(existingTypesCachefile);
+            existingTypes = JSON.parse(fileContent);
+            console.log('ExistingDBTypes initialized from cache ' + Object.keys(existingTypes).length);
+            existingTypesCachefileExists = true;
+        }
+        else {
+            existingTypesCachefileExists = false;
+        }
+    }
+    catch (err) {
+        console.log('No stored existingDBTypes found');
     }
     processFiles();
 }
@@ -191,8 +210,8 @@ function processFile() {
             if (!earliestDBValue[id]) earliestDBValue[id] = new Date().getTime();
         }
         if (processNonExistingValues) {
-            console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(""+day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
-            if ((existingDBValues[id]) && (existingDBValues[id].indexOf(""+day) !== -1)) {
+            console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
+            if ((existingDBValues[id]) && (existingDBValues[id].indexOf(day) !== -1)) {
                 console.log('    Ignore existing ID ' + file +': ' + id);
                 setTimeout(processFile,10);
                 return;
@@ -247,9 +266,47 @@ function processFile() {
                 //else console.log('not use value = ' + fileData[j].val)
             }
             console.log('  datapoints reduced from ' + fileData.length + ' --> ' + sendData.state.length);
+            if (existingTypesCachefileExists) {
+                if (!existingTypes[id]) {
+                    existingTypes[id] = typeof sendData.state[sendData.state.length-1].val;
+                    console.log('  used last value to initialize type: ' + existingTypes[id]);
+                }
+                var sortedOut = 0;
+                for (var jj = 0; jj< sendData.state.length; jj++) {
+                    var currType = typeof sendData.state[jj].val;
+                    if (currType != existingTypes[id]) {
+                        switch (existingTypes[id]) {
+                            case 'number':      switch (currType) {
+                                                    case 'boolean': if (sendData.state[jj].val === false) sendData.state[jj].val = 0;
+                                                                        else sendData.state[jj].val = 1;
+                                                                    break;
+                                                    case 'string':  sendData.state[jj].val = parseFloat(sendData.state[jj].val);
+                                                                    break;
+                                                    default:        sendData.state[jj].val = null; // value will be sorted out!
+                                                                    sortedOut++;
+                                                }
+                                                break;
+                            case 'boolean':     switch (currType) {
+                                                    case 'number':  if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
+                                                                        else sendData.state[jj].val = true;
+                                                                    break;
+                                                    case 'string':  sendData.state[jj].val = parseInt(sendData.state[jj].val);
+                                                                    if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
+                                                                        else sendData.state[jj].val = true;
+                                                                    break;
+                                                    default:        sendData.state[jj].val = null; // value will be sorted out!
+                                                                    sortedOut++;
+                                                }
+                                                break;
+                        }
+                        console.log('  type mismatch ' + existingTypes[id] + ' vs. ' + currType + ': fixed=' + (sendData.state[jj].val !== null) + ' --> ' + sendData.state[jj].val);
+                    }
+                }
+                console.log('  sorted out ' + sortedOut + ' values');
+            }
             if (processNonExistingValues) {
                 if (!existingDBValues[id]) existingDBValues[id] = [];
-                existingDBValues[id].push(""+day);
+                existingDBValues[id].push(day);
             }
             if (!simulate) {
                 adapter.sendTo(dbInstance, "storeState", sendData, function (result) {
@@ -282,6 +339,7 @@ function processFile() {
         delete allFiles[day];
         if (!ignoreEarliesDBValues && !simulate) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
         if (processNonExistingValues && !simulate) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues));
+        if (existingTypesCachefileExists && !simulate) fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes));
         console.log("Day end");
         var dayDelay = 30000;
         if (processCounter < 10) dayDelay = 1000;
@@ -295,6 +353,7 @@ function finish(updateData) {
     console.log('DONE');
     if (updateData && !ignoreEarliesDBValues && !simulate) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
     if (updateData && processNonExistingValues && !simulate) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues));
+    if (updateData && existingTypesCachefileExists && !simulate) fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes));
     process.exit();
 }
 
