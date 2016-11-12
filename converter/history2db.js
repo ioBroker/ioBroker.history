@@ -251,7 +251,6 @@ function processFile() {
         var lastValue = null;
         var lastTime = null;
         if (fileData.length > 0) {
-            processCounter++;
             var sendData = {};
             sendData.id = id;
             sendData.state = [];
@@ -319,32 +318,41 @@ function processFile() {
                     }
                 }
                 console.log('  sorted out ' + sortedOut + ' values');
+                if (sortedOut === sendData.state.length) {
+                    sendData.state = [];
+                }
             }
-            if (processNonExistingValues) {
-                if (!existingDBValues[id]) existingDBValues[id] = [];
-                existingDBValues[id].push(day);
+            if (sendData.state.length > 0) {
+                processCounter++;
+                if (processNonExistingValues) {
+                    if (!existingDBValues[id]) existingDBValues[id] = [];
+                    existingDBValues[id].push(day);
+                }
+                if (!simulate) {
+                    adapter.sendTo(dbInstance, "storeState", sendData, function (result) {
+                        if (result.error) {
+                            console.error(result.error);
+                            finish(false);
+                        }
+                        if (result.success && !result.connected) {
+                            console.error('Data stored but dbDB not available anymore, break.');
+                            finish(true);
+                        }
+                        var delay = 300;
+                        if (result.success && result.seriesBufferFlushPlanned) {
+                            delay = 1500; // 1,5 seconds
+                            if (result.seriesBufferCounter > 1000) delay += 500*(result.seriesBufferCounter/1000);
+                        }
+                        delay = delay * delayMultiplicator;
+                        setTimeout(processFile, delay);
+                    });
+                } else {
+                    console.log('  SIMULATE: Not really writing ... ' + sendData.state.length + ' values for ' + id);
+                    setTimeout(processFile, 10);
+                }
             }
-            if (!simulate) {
-                adapter.sendTo(dbInstance, "storeState", sendData, function (result) {
-                    if (result.error) {
-                        console.error(result.error);
-                        finish(false);
-                    }
-                    if (result.success && !result.connected) {
-                        console.error('Data stored but dbDB not available anymore, break.');
-                        finish(true);
-                    }
-                    var delay = 300;
-                    if (result.success && result.seriesBufferFlushPlanned) {
-                        delay = 1500; // 1,5 seconds
-                        if (result.seriesBufferCounter > 1000) delay += 500*(result.seriesBufferCounter/1000);
-                    }
-                    delay = delay * delayMultiplicator;
-                    setTimeout(processFile, delay);
-                });
-            } else {
-                console.log('  SIMULATE: Not really writing ... ' + sendData.state.length + ' values for ' + id);
-                setTimeout(processFile, 10);
+            else {
+                setTimeout(processFile,10);
             }
         }
         else {
@@ -359,6 +367,7 @@ function processFile() {
         console.log("Day end");
         var dayDelay = 30000;
         if (processCounter < 10) dayDelay = 1000;
+        if (processCounter === 0) dayDelay = 10;
         processCounter = 0;
         setTimeout(processFile, dayDelay);
     }
