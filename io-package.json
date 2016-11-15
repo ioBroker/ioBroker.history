@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.4.0",
+        "version":                  "1.4.1",
         "news": {
+            "1.4.1": {
+                "en": "Fix Retentiuon handling, Optimize Converter script",
+                "de": "Fehler bei Automatischer Lösung behoben, Daten-Konvertierungsskript optimiert",
+                "ru": "Fix Retentiuon handling, Optimize Converter script"
+            },
             "1.4.0": {
                 "en": "add option to re-log unchanged values to make it easier for visualization",
                 "de": "Neue Option hinzugefügt um nicht-geänderte Werte in definierten Abständen zu loggen um Visualisierungen einfacher zu machen.",

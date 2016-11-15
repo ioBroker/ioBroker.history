@@ -71,7 +71,7 @@ var adapter = utils.adapter({
             }
 
             // add one day if retention is too small
-            if ((history[id][adapter.namespace].retention > 0) && (history[id][adapter.namespace].retention <= 604800)) {
+            if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
                 history[id][adapter.namespace].retention += 86400;
             }
 
@@ -240,7 +240,7 @@ function main() {
                             }
 
                             // add one day if retention is too small
-                            if ((history[id][adapter.namespace].retention > 0) && (history[id][adapter.namespace].retention <= 604800)) {
+                            if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
                                 history[id][adapter.namespace].retention += 86400;
                             }
                         }
