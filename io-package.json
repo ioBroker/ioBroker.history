@@ -10,9 +10,9 @@
         "version":                  "1.4.1",
         "news": {
             "1.4.1": {
-                "en": "Fix Retentiuon handling, Optimize Converter script",
-                "de": "Fehler bei Automatischer Lösung behoben, Daten-Konvertierungsskript optimiert",
-                "ru": "Fix Retentiuon handling, Optimize Converter script"
+                "en": "Fix Retentiuon handling, Optimize Converter script, add storeState message",
+                "de": "Fehler bei Automatischer Lösung behoben, Daten-Konvertierungsskript optimiert, storeState Funktion hinzugefügt",
+                "ru": "Fix Retentiuon handling, Optimize Converter script, add storeState message"
             },
             "1.4.0": {
                 "en": "add option to re-log unchanged values to make it easier for visualization",

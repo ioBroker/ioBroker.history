@@ -139,6 +139,8 @@ function processMessage(msg) {
         getHistory(msg);
     } else if (msg.command == 'generateDemo') {
         generateDemo(msg);
+    } else if (msg.command === 'storeState') {
+        storeState(msg);
     }
 }
 
@@ -876,4 +878,51 @@ function getDirectories(path) {
     return fs.readdirSync(path).filter(function (file) {
         return fs.statSync(path + '/' + file).isDirectory();
     });
+}
+
+function storeState(msg) {
+    if (!msg.message || !msg.message.id || !msg.message.state) {
+        adapter.log.error('storeState called with invalid data');
+        adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call'
+        }, msg.callback);
+        return;
+    }
+
+    if (Array.isArray(msg.message)) {
+        adapter.log.debug('storeState: store ' + msg.message.length + ' states for multiple ids');
+        for (var i = 0; i < msg.message.length; i++) {
+            if (history[msg.message[i].id]) {
+                history[msg.message[i].id].state = msg.message[i].state;
+                pushHelper(msg.message[i].id);
+            }
+            else {
+                adapter.log.warn('storeState: history not enabled for ' + msg.message[i].id + '. Ignoring');
+            }
+        }
+    } else if (Array.isArray(msg.message.state)) {
+        adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
+        for (var j = 0; j < msg.message.state.length; j++) {
+            if (history[msg.message.id]) {
+                history[msg.message.id].state = msg.message.state[j];
+                pushHelper(msg.message.id);
+            }
+            else {
+                adapter.log.warn('storeState: history not enabled for ' + msg.message.id + '. Ignoring');
+            }
+        }
+    } else {
+        adapter.log.debug('storeState: store 1 state for ' + msg.message.id);
+        if (history[msg.message.id]) {
+            history[msg.message.id].state = msg.message.state;
+            pushHelper(msg.message.id);
+        }
+        else {
+            adapter.log.warn('storeState: history not enabled for ' + msg.message.id + '. Ignoring');
+        }
+    }
+
+    adapter.sendTo(msg.from, msg.command, {
+        success:                  true
+    }, msg.callback);
 }
