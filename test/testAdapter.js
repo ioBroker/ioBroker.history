@@ -150,25 +150,23 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             if (err) {
                                 console.log(err);
                             }
-                            setTimeout(function () {
-                                sendTo('history.0', 'getHistory', {
-                                    id: 'system.adapter.history.0.memRss',
-                                    options: {
-                                        end:       now,
-                                        count:     50,
-                                        aggregate: 'onchange'
-                                    }
-                                }, function (result) {
-                                    console.log(JSON.stringify(result.result, null, 2));
-                                    expect(result.result.length).to.be.at.least(3);
-                                    var found = 0;
-                                    for (var i = 0; i < result.result.length; i++) {
-                                        if (result.result[i].val >= 1 && result.result[i].val <= 3) found ++;
-                                    }
-                                    expect(found).to.be.equal(3);
-                                    done();
-                                });
-                            }, 100);
+                            sendTo('history.0', 'getHistory', {
+                                id: 'system.adapter.history.0.memRss',
+                                options: {
+                                    end:       now,
+                                    count:     50,
+                                    aggregate: 'onchange'
+                                }
+                            }, function (result) {
+                                console.log(JSON.stringify(result.result, null, 2));
+                                expect(result.result.length).to.be.at.least(3);
+                                var found = 0;
+                                for (var i = 0; i < result.result.length; i++) {
+                                    if (result.result[i].val >= 1 && result.result[i].val <= 3) found ++;
+                                }
+                                expect(found).to.be.equal(3);
+                                done();
+                            });
                         });
                     }, 100);
                 });
