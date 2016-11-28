@@ -113,7 +113,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 function () {
                     states.subscribeMessage('system.adapter.test.0');
                     objects.getObject('system.adapter.history.0.memRss', function (err, obj) {
-                        obj.common.history = {
+                        obj.common.custom = {
                             'history.0': {
                                 enabled:      true,
                                 changesOnly:  false,
