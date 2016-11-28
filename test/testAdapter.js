@@ -17,8 +17,8 @@ function checkConnectionOfAdapter(cb, counter) {
         return;
     }
 
-    console.log('Checking alive key for key : ' + setup.adapterName);
-    states.getState('system.adapter.' + setup.adapterName + '.0.alive', function (err, state) {
+    console.log('Checking alive key for key : ' + setup.adapterName.substring(setup.adapterName.indexOf('.')+1));
+    states.getState('system.adapter.' + setup.adapterName.substring(setup.adapterName.indexOf('.')+1) + '.0.alive', function (err, state) {
         if (err) console.error(err);
         if (state && state.val) {
             if (cb) cb();
