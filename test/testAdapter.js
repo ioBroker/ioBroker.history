@@ -17,7 +17,7 @@ function checkConnectionOfAdapter(cb, counter) {
         return;
     }
 
-    states.getState('system.adapter.nut.0.alive', function (err, state) {
+    states.getState('system.adapter.' + adapterName + '.0.alive', function (err, state) {
         if (err) console.error(err);
         if (state && state.val) {
             if (cb) cb();
