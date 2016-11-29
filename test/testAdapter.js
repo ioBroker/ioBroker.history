@@ -11,6 +11,8 @@ var sendToID = 1;
 
 var adapterShortName = setup.adapterName.substring(setup.adapterName.indexOf('.')+1);
 
+var now;
+
 function checkConnectionOfAdapter(cb, counter) {
     counter = counter || 0;
     console.log('Try check #' + counter);
@@ -134,7 +136,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     });
     it('Test ' + adapterShortName + ': Write values into DB', function (done) {
         this.timeout(25000);
-        var now = new Date().getTime();
+        now = new Date().getTime();
 
         states.setState('system.adapter.history.0.memRss', {val: 1, ts: now - 2000}, function (err) {
             if (err) {
@@ -163,8 +165,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         sendTo('history.0', 'getHistory', {
             id: 'system.adapter.history.0.memRss',
             options: {
-                start:     new Date().getTime()-1000000,
-                end:       new Date().getTime(),
+                start:     now-5000,
                 count:     50,
                 aggregate: 'onchange'
             }
@@ -180,19 +181,13 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             sendTo('history.0', 'getHistory', {
                 id: 'system.adapter.history.0.memRss',
                 options: {
-                    start:     new Date().getTime()-1000000,
-                    end:       new Date().getTime(),
+                    start:     now-5000,
                     count:     2,
                     aggregate: 'onchange'
                 }
             }, function (result) {
                 console.log(JSON.stringify(result.result, null, 2));
-                expect(result.result.length).to.be.at.least(2);
-                var found = 0;
-                for (var i = 0; i < result.result.length; i++) {
-                    if (result.result[i].val >= 1 && result.result[i].val <= 2) found ++;
-                }
-                expect(found).to.be.equal(2);
+                expect(result.result.length).to.be.equal(2);
                 done();
             });
         });
