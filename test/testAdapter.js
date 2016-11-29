@@ -159,9 +159,11 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     });
     it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
         this.timeout(25000);
+
         sendTo('history.0', 'getHistory', {
             id: 'system.adapter.history.0.memRss',
             options: {
+                start:     new Date().getTime()-1000000,
                 end:       new Date().getTime(),
                 count:     50,
                 aggregate: 'onchange'
@@ -178,6 +180,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             sendTo('history.0', 'getHistory', {
                 id: 'system.adapter.history.0.memRss',
                 options: {
+                    start:     new Date().getTime()-1000000,
                     end:       new Date().getTime(),
                     count:     2,
                     aggregate: 'onchange'
