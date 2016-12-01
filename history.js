@@ -805,6 +805,7 @@ function getHistory(msg) {
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, function (cacheData, isFull) {
+            adapter.log.debug('cacheData length = ' + cacheData.length + ', isFull=' + isFull);
             // if all data read
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
