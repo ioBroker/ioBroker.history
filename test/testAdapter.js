@@ -250,8 +250,10 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(1);
-            expect(result.result[1].val).to.be.equal(2.13);
+            expect(result.result.length).to.be.equal(3);
+            expect(result.result[0].val).to.be.equal(2.13);
+            expect(result.result[2].val).to.be.equal(2.13);
+            expect(result.result[3].val).to.be.equal(2.13);
         });
     });
     it('Test ' + adapterShortName + ': Disable Datapoint again', function (done) {
