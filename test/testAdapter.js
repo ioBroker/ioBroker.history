@@ -156,7 +156,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         this.timeout(5000);
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
-            console.log(JSON.stringify(data));
+            console.log(JSON.stringify(result));
             expect(Object.keys(result).length).to.be.equal(1);
             expect(result['system.adapter.history.0.memRss'].enabled).to.be.true;
             done();
@@ -282,7 +282,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         this.timeout(5000);
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
-            console.log(JSON.stringify(data));
+            console.log(JSON.stringify(result));
             expect(Object.keys(result).length).to.be.equal(0);
             done();
         });
