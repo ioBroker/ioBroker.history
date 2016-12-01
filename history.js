@@ -21,7 +21,8 @@ var adapter = utils.adapter({
         if (obj && obj.common && (
                 // todo remove history somewhen (2016.08) - Do not forget object selector in io-package.json
             (obj.common.history && obj.common.history[adapter.namespace]) ||
-            (obj.common.custom && obj.common.custom[adapter.namespace]))
+            (obj.common.custom && obj.common.custom[adapter.namespace])) &&
+            (obj.common.custom[adapter.namespace].enabled)
         ) {
             var state   = history[id] ? history[id].state   : null;
             var list    = history[id] ? history[id].list    : null;
@@ -58,17 +59,21 @@ var adapter = utils.adapter({
                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
             }
             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-
             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
             } else {
                 history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
             }
-
             if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
             if (history[id][adapter.namespace].changesRelogInterval > 0) {
                 history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
             }
+            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
+                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+            } else {
+                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+            }
+
 
             // add one day if retention is too small
             if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
@@ -141,6 +146,10 @@ function processMessage(msg) {
         generateDemo(msg);
     } else if (msg.command === 'storeState') {
         storeState(msg);
+    } else if (msg.command === 'enableHistory') {
+        enableHistory(msg);
+    } else if (msg.command === 'disableHistory') {
+        disableHistory(msg);
     }
 }
 
@@ -184,6 +193,12 @@ function main() {
         adapter.config.changesRelogInterval = parseInt(adapter.config.changesRelogInterval, 10);
     } else {
         adapter.config.changesRelogInterval = 0;
+    }
+
+    if (adapter.config.changesMinDelta !== null && adapter.config.changesMinDelta !== undefined) {
+        adapter.config.changesMinDelta = parseFloat(adapter.config.changesMinDelta);
+    } else {
+        adapter.config.changesMinDelta = 0;
     }
 
     // create directory
@@ -230,15 +245,18 @@ function main() {
                                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                             }
                             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-
                             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
                             } else {
                                 history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
                             }
-
                             if (history[id][adapter.namespace].changesRelogInterval > 0) {
                                 history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
+                            }
+                            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
+                                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+                            } else {
+                                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
                             }
 
                             // add one day if retention is too small
@@ -437,18 +455,34 @@ function pushHistory(id, state, timerRelog) {
 
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
-                if (state.ts !== state.lc) return;
+                if (state.ts !== state.lc) {
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                    return;
+                }
             } else if (history[id].lastLogTime) {
-                if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) return;
+                if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                    return;
+                }
                 if (state.ts !== state.lc) {
                     adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
                 }
+            }
+            if ((settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
+                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                return;
+            }
+            else if (typeof state.val === 'number') {
+                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+            }
+            else {
+                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
         }
 
         if (timerRelog) {
             state.ts = new Date().getTime();
-            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
+            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts + ', ts=' + state.ts);
         } else {
             // only store state if really changed
             history[id].state = state;
@@ -772,9 +806,14 @@ function getHistory(msg) {
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, function (cacheData, isFull) {
+            adapter.log.debug('after getCachedData: length = ' + cacheData.length + ', isFull=' + isFull);
             // if all data read
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
+                if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
+                    cacheData = cacheData.slice(0, options.count);
+                    adapter.log.debug('cut cacheData to ' + options.count + ' values');
+                }
                 adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                 adapter.sendTo(msg.from, msg.command, {
                     result: cacheData,
@@ -782,16 +821,19 @@ function getHistory(msg) {
                     error:  null
                 }, msg.callback);
             } else {
+                var origCount = options.count;
                 options.count -= cacheData.length;
                 getFileData(options, function (fileData) {
+                    adapter.log.debug('after getFileData: cacheData.length = ' + cacheData.length + ', fileData.length = ' + fileData.length);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
-                    adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                     options.result = cacheData;
+                    options.count = origCount;
                     Aggregate.beautify(options);
 
+                    adapter.log.debug('Send: ' + options.result.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                     adapter.sendTo(msg.from, msg.command, {
-                        result: cacheData,
+                        result: options.result,
                         step:   null,
                         error:  null
                     }, msg.callback);
@@ -801,6 +843,7 @@ function getHistory(msg) {
     } else {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
+            adapter.log.debug('use parallel requests');
             var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
             var ghTimeout = setTimeout(function () {
@@ -925,4 +968,65 @@ function storeState(msg) {
     adapter.sendTo(msg.from, msg.command, {
         success:                  true
     }, msg.callback);
+}
+
+function enableHistory(msg) {
+    if (!msg.message || !msg.message.id) {
+        adapter.log.error('enableHistory called with invalid data');
+        adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call'
+        }, msg.callback);
+        return;
+    }
+    var obj = {};
+    obj.common = {};
+    obj.common.custom = {};
+    if (msg.message.options) {
+        obj.common.custom[adapter.namespace] = msg.message.options;
+    }
+    else {
+        obj.common.custom[adapter.namespace] = {};
+    }
+    obj.common.custom[adapter.namespace].enabled = true;
+    adapter.extendForeignObject(msg.message.id, obj, function (err) {
+        if (err) {
+            adapter.log.error('enableHistory: ' + err);
+            adapter.sendTo(msg.from, msg.command, {
+                error:  err
+            }, msg.callback);
+        } else {
+            adapter.log.info(JSON.stringify(obj));
+            adapter.sendTo(msg.from, msg.command, {
+                success:                  true
+            }, msg.callback);
+        }
+    });
+}
+
+function disableHistory(msg) {
+    if (!msg.message || !msg.message.id) {
+        adapter.log.error('disableHistory called with invalid data');
+        adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call'
+        }, msg.callback);
+        return;
+    }
+    var obj = {};
+    obj.common = {};
+    obj.common.custom = {};
+    obj.common.custom[adapter.namespace] = {};
+    obj.common.custom[adapter.namespace].enabled = false;
+    adapter.extendForeignObject(msg.message.id, obj, function (err) {
+        if (err) {
+            adapter.log.error('disableHistory: ' + err);
+            adapter.sendTo(msg.from, msg.command, {
+                error:  err
+            }, msg.callback);
+        } else {
+            adapter.log.info(JSON.stringify(obj));
+            adapter.sendTo(msg.from, msg.command, {
+                success:                  true
+            }, msg.callback);
+        }
+    });
 }
