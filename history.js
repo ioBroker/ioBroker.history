@@ -842,6 +842,7 @@ function getHistory(msg) {
     } else {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
+            adapter.log.debug('use parallel requests');
             var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
             var ghTimeout = setTimeout(function () {
@@ -858,9 +859,11 @@ function getHistory(msg) {
                 if (cmd === 'getCache') {
                     var settings = data[1];
                     getCachedData(settings, function (cacheData) {
+                        adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData));
                         gh.send(['cacheData', cacheData]);
                     });
                 } else if (cmd === 'response') {
+                    adapter.log.debug('after response:' + JSON.stringify(data));
                     clearTimeout(ghTimeout);
                     ghTimeout = null;
 
