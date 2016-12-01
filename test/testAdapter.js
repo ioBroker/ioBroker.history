@@ -243,6 +243,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             id: 'system.adapter.history.0.memRss',
             options: {
                 start:     now-30000,
+                end:       now+1,
                 count:     1,
                 aggregate: 'average'
             }
