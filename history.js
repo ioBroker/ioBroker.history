@@ -150,6 +150,8 @@ function processMessage(msg) {
         enableHistory(msg);
     } else if (msg.command === 'disableHistory') {
         disableHistory(msg);
+    } else if (msg.command === 'getEnabledDPs') {
+        getEnabledDPs(msg);
     }
 }
 
@@ -1029,4 +1031,14 @@ function disableHistory(msg) {
             }, msg.callback);
         }
     });
+}
+
+function getEnabledDPs(msg) {
+    var data = {};
+    for (var id in history) {
+        if (!history.hasOwnProperty(id)) continue;
+        data[id] = history[id][adapter.namespace];
+    }
+
+    adapter.sendTo(msg.from, msg.command, data, msg.callback);
 }

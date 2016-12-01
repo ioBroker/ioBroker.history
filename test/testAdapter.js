@@ -152,6 +152,16 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 });
         });
     });
+    it('Test ' + adapterShortName + ': Check Enabled Points after Enable', function (done) {
+        this.timeout(5000);
+
+        sendTo('history.0', 'getEnabledDPs', function (result) {
+            console.log(JSON.stringify(data));
+            expect(Object.keys(result).length).to.be.equal(1);
+            expect(result['system.adapter.history.0.memRss'].enabled).to.be.true;
+            done();
+        });
+    });
     it('Test ' + adapterShortName + ': Write values into DB', function (done) {
         this.timeout(25000);
         now = new Date().getTime();
@@ -265,7 +275,15 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, function (result) {
             expect(result.error).to.be.undefined;
             expect(result.success).to.be.true;
-            // wait till adapter receives the new settings
+            done();
+        });
+    });
+    it('Test ' + adapterShortName + ': Check Enabled Points after Disable', function (done) {
+        this.timeout(5000);
+
+        sendTo('history.0', 'getEnabledDPs', function (result) {
+            console.log(JSON.stringify(data));
+            expect(Object.keys(result).length).to.be.equal(0);
             done();
         });
     });

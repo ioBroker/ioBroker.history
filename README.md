@@ -78,8 +78,8 @@ Possible options:
 The first and last points will be calculated for aggregations, except aggregation "none".
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
-## Enable/Disable History Logging via Javascript
-The adapter supports enabling and disabling of history logging via JavaScript.
+## History Logging Management via Javascript
+The adapter supports enabling and disabling of history logging via JavaScript and also retrieving the list of enabled datapoints with their settings.
 
 ### enable
 The message requires to have the "id" of the datapoint.Additionally optional "options" to define the datapoint specific settings:
@@ -120,6 +120,15 @@ sendTo('history.0', 'disableHistory', {
 });
 ```
 
+### get List
+The message has no parameters.
+
+```
+sendTo('history.0', 'getEnabledDPs', function (result) {
+    //result is object like:
+    
+});
+```
 ## Data converter
 ### General idea
 When you have more data over time then the history adapter may not be the best choice and a real database is better. For this there are two more History-Adapters for SQL databases (PostgreSQL, MS-SQL, MySQL, SQLite) and InfluxDB.
