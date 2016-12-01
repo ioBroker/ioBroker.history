@@ -220,13 +220,18 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             sendTo('history.0', 'getHistory', {
                 id: 'system.adapter.history.0.memRss',
                 options: {
-                    start:     now-30000,
+                    start:     now-15000,
                     count:     2,
                     aggregate: 'none'
                 }
             }, function (result) {
                 console.log(JSON.stringify(result.result, null, 2));
                 expect(result.result.length).to.be.equal(2);
+                var found = 0;
+                for (var i = 0; i < result.result.length; i++) {
+                    if (result.result[i].val >= 2 && result.result[i].val < 3) found ++;
+                }
+                expect(found).to.be.equal(2);
                 done();
             });
         });

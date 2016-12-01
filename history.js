@@ -809,6 +809,10 @@ function getHistory(msg) {
             // if all data read
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
+                if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
+                    cacheData = cacheData.slice(0, options.count);
+                    adapter.log.debug('cut cacheData to ' + options.count + ' values');
+                }
                 adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                 adapter.sendTo(msg.from, msg.command, {
                     result: cacheData,
@@ -822,12 +826,9 @@ function getHistory(msg) {
                     adapter.log.debug('after getFileData: cacheData.length = ' + cacheData.length + ', fileData.length = ' + fileData.length);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
-                    if ((origCount) && (cacheData.length > origCount) && (options.aggregate === 'none')) {
-                        cacheData = cacheData.slice(0, origCount);
-                        adapter.log.debug('cut cacheData to ' + origCount + ' values');
-                    }
                     adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                     options.result = cacheData;
+                    options.count = origCount;
                     Aggregate.beautify(options);
 
                     adapter.sendTo(msg.from, msg.command, {
