@@ -141,6 +141,10 @@ function processMessage(msg) {
         generateDemo(msg);
     } else if (msg.command === 'storeState') {
         storeState(msg);
+    } else if (msg.command === 'enableHistory') {
+        enableHistory(msg);
+    } else if (msg.command === 'disableHistory') {
+        disableHistory(msg);
     }
 }
 
@@ -925,4 +929,65 @@ function storeState(msg) {
     adapter.sendTo(msg.from, msg.command, {
         success:                  true
     }, msg.callback);
+}
+
+function enableHistory(msg) {
+    if (!msg.message || !msg.message.id) {
+        adapter.log.error('enableHistory called with invalid data');
+        adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call'
+        }, msg.callback);
+        return;
+    }
+    var obj = {};
+    obj.common = {};
+    obj.common.custom = {};
+    if (msg.message.options) {
+        obj.common.custom[adapter.namespace] = msg.message.options;
+    }
+    else {
+        obj.common.custom[adapter.namespace] = {};
+    }
+    obj.common.custom[adapter.namespace].enabled = true;
+    adapter.extendForeignObject(msg.message.id, obj, function (err) {
+        if (err) {
+            adapter.log.error('enableHistory: ' + err);
+            adapter.sendTo(msg.from, msg.command, {
+                error:  err
+            }, msg.callback);
+        } else {
+            adapter.log.info(JSON.stringify(obj));
+            adapter.sendTo(msg.from, msg.command, {
+                success:                  true
+            }, msg.callback);
+        }
+    });
+}
+
+function disableHistory(msg) {
+    if (!msg.message || !msg.message.id) {
+        adapter.log.error('disableHistory called with invalid data');
+        adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call'
+        }, msg.callback);
+        return;
+    }
+    var obj = {};
+    obj.common = {};
+    obj.common.custom = {};
+    obj.common.custom[adapter.namespace] = {};
+    obj.common.custom[adapter.namespace].enabled = false;
+    adapter.extendForeignObject(msg.message.id, obj, function (err) {
+        if (err) {
+            adapter.log.error('disableHistory: ' + err);
+            adapter.sendTo(msg.from, msg.command, {
+                error:  err
+            }, msg.callback);
+        } else {
+            adapter.log.info(JSON.stringify(obj));
+            adapter.sendTo(msg.from, msg.command, {
+                success:                  true
+            }, msg.callback);
+        }
+    });
 }
