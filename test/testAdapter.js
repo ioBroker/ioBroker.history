@@ -245,12 +245,13 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 start:     now-30000,
                 end:       now+1,
                 count:     1,
-                aggregate: 'average'
+                aggregate: 'average',
+                ignoreNull: true
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(3);
-            expect(result.result[1].val).to.be.equal(2.125);
+            expect(result.result.length).to.be.equal(1);
+            expect(result.result[1].val).to.be.equal(2.13);
         });
     });
     it('Test ' + adapterShortName + ': Disable Datapoint again', function (done) {
