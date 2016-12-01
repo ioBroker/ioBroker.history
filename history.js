@@ -841,7 +841,7 @@ function getHistory(msg) {
         });
     } else {
         // to use parallel requests activate this.
-        if (1 || typeof GetHistory === 'undefined') {
+        if (0 || typeof GetHistory === 'undefined') {
             adapter.log.debug('use parallel requests');
             var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
