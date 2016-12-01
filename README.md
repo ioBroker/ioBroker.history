@@ -78,6 +78,48 @@ Possible options:
 The first and last points will be calculated for aggregations, except aggregation "none".
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
+## Enable/Disable History Logging via Javascript
+The adapter supports enabling and disabling of history logging via JavaScript.
+
+### enable
+The message requires to have the "id" of the datapoint.Additionally optional "options" to define the datapoint specific settings:
+
+```
+sendTo('history.0', 'enableHistory', {
+    id: 'system.adapter.history.0.memRss',
+    options: {
+        changesOnly:  true,
+        debounce:     0,
+        retention:    31536000,
+        maxLength:    3,
+        changesMinDelta: 0.5
+    }
+}, function (result) {
+    if (result.error) {
+        console.log(result.error);
+    }
+    if (result.success) {
+        //successfull enabled
+    }
+});
+```
+
+### disable
+The message requires to have the "id" of the datapoint.
+
+```
+sendTo('history.0', 'disableHistory', {
+    id: 'system.adapter.history.0.memRss',
+}, function (result) {
+    if (result.error) {
+        console.log(result.error);
+    }
+    if (result.success) {
+        //successfull enabled
+    }
+});
+```
+
 ## Data converter
 ### General idea
 When you have more data over time then the history adapter may not be the best choice and a real database is better. For this there are two more History-Adapters for SQL databases (PostgreSQL, MS-SQL, MySQL, SQLite) and InfluxDB.
@@ -154,6 +196,11 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+### 1.5.0 (2016-12-01)
+* (Apollon77) Add messages enableHistory/disableHistory
+* (Apollon77) add support to log changes only if value differs a minimum value for numbers
+* (Apollon77) Fixing aggregate calculation
+
 ### 1.4.0 (2016-10-29)
 * (Apollon77) add option to re-log unchanged values to make it easier for visualization
 * (Apollon77) added converter scripts to move history data to db
