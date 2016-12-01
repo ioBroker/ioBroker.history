@@ -225,7 +225,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
     it('Test ' + adapterShortName + ': Disable Datapoint again', function (done) {
-        this.timeout(2000);
+        this.timeout(5000);
 
         sendTo('history.0', 'disableHistory', {
             id: 'system.adapter.history.0.memRss',
@@ -233,9 +233,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             expect(result.error).to.be.undefined;
             expect(result.success).to.be.true;
             // wait till adapter receives the new settings
-            setTimeout(function () {
-                done();
-            }, 2000);
+            done();
         });
     });
 

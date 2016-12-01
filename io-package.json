@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.4.1",
+        "version":                  "1.5.0",
         "news": {
+            "1.5.0": {
+                "en": "Add messages enableHistory/disableHistory, add support to log changes only if value differs a minimum value for numbers",
+                "de": "Messages enableHistory/disableHistory hinzugefügt, Unterstützung zum Loggen wenn der Zahlenwert um einen Mindestwert abweicht",
+                "ru": "Add messages enableHistory/disableHistory, add support to log changes only if value differs a minimum value for numbers"
+            },
             "1.4.1": {
                 "en": "Fix Retentiuon handling, Optimize Converter script, add storeState message",
                 "de": "Fehler bei Automatischer Lösung behoben, Daten-Konvertierungsskript optimiert, storeState Funktion hinzugefügt",
@@ -99,7 +104,8 @@
         "retention": 31536000,
         "storeFrom": false,
         "storeAck":  true,
-        "changesRelogInterval":      0
+        "changesRelogInterval":      0,
+        "changesMinDelta": 0
     },
     "objects": [
         {

@@ -467,12 +467,15 @@ function pushHistory(id, state, timerRelog) {
                     adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
                 }
             }
-            if ((settings.changesMinDelta !== 0) && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
+            if ((settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
                 adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
             }
-            else {
+            else if (typeof state.val === 'number') {
                 adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+            }
+            else {
+                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
         }
 
