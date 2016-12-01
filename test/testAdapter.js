@@ -199,7 +199,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             options: {
                 start:     now-30000,
                 count:     50,
-                aggregate: 'onchange'
+                aggregate: 'none'
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
@@ -215,7 +215,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 options: {
                     start:     now-30000,
                     count:     2,
-                    aggregate: 'onchange'
+                    aggregate: 'none'
                 }
             }, function (result) {
                 console.log(JSON.stringify(result.result, null, 2));
