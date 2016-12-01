@@ -895,23 +895,8 @@ function getHistory(msg) {
                 adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData, null, 2));
                 GetHistory.aggregation(options, cachedData);
                 adapter.log.debug('after aggregation:' + JSON.stringify(options, null, 2));
-
-                for (var k = options.result.length - 1; k >= 0; k--) {
-                    adapter.log.debug('res k=' + k + ': ' + options.result[k].val.ts);
-                    if (options.result[k].val.ts) {
-                        options.result[k] = {
-                            ts:   options.result[k].val.ts,
-                            val: (options.result[k].val.val !== null) ? Math.round(options.result[k].val.val / options.averageCount[k] * 100) / 100 : null
-                        };
-                        adapter.log.debug('res2 k=' + k + ': ' + JSON.stringify(options.result[k]));
-                    } else {
-                        // no one value in this interval
-                        options.result.splice(k, 1);
-                        adapter.log.debug('removed k=' + k);
-                    }
-                }
-                adapter.log.debug('after manual-finalize:' + JSON.stringify(options, null, 2));
                 var data = GetHistory.response(options);
+                adapter.log.debug('after response:' + JSON.stringify(data, null, 2));
 
                 if (data[0] === 'response') {
                     if (data[1]) {
