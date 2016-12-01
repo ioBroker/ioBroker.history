@@ -21,7 +21,8 @@ var adapter = utils.adapter({
         if (obj && obj.common && (
                 // todo remove history somewhen (2016.08) - Do not forget object selector in io-package.json
             (obj.common.history && obj.common.history[adapter.namespace]) ||
-            (obj.common.custom && obj.common.custom[adapter.namespace]))
+            (obj.common.custom && obj.common.custom[adapter.namespace])) &&
+            (obj.common.custom[adapter.namespace].enabled)
         ) {
             var state   = history[id] ? history[id].state   : null;
             var list    = history[id] ? history[id].list    : null;
