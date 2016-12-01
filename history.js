@@ -890,12 +890,14 @@ function getHistory(msg) {
         } else {
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);
+            adapter.log.debug('after getFileData:' + JSON.stringify(options, null, 2));
             getCachedData(options, function (cachedData) {
                 adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData, null, 2));
                 GetHistory.aggregation(options, cachedData);
                 adapter.log.debug('after aggregation:' + JSON.stringify(options, null, 2));
+                Aggregate.finishAggregation(options);
+                adapter.log.debug('after finalize:' + JSON.stringify(options, null, 2));
                 var data = GetHistory.response(options);
-                adapter.log.debug('after response:' + JSON.stringify(data, null, 2));
 
                 if (data[0] === 'response') {
                     if (data[1]) {
