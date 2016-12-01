@@ -126,9 +126,21 @@ The message has no parameters.
 ```
 sendTo('history.0', 'getEnabledDPs', function (result) {
     //result is object like:
-    
+    {
+        "system.adapter.history.0.memRss": {
+            "changesOnly":true,
+            "debounce":0,
+            "retention":31536000,
+            "maxLength":3,
+            "changesMinDelta":0.5,
+            "enabled":true,
+            "changesRelogInterval":0
+        }
+        ...
+    }
 });
 ```
+
 ## Data converter
 ### General idea
 When you have more data over time then the history adapter may not be the best choice and a real database is better. For this there are two more History-Adapters for SQL databases (PostgreSQL, MS-SQL, MySQL, SQLite) and InfluxDB.
