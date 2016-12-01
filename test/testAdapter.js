@@ -254,6 +254,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             expect(result.result[0].val).to.be.equal(2.13);
             expect(result.result[1].val).to.be.equal(2.13);
             expect(result.result[2].val).to.be.equal(2.13);
+            done();
         });
     });
     it('Test ' + adapterShortName + ': Disable Datapoint again', function (done) {
