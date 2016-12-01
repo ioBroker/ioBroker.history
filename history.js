@@ -859,7 +859,7 @@ function getHistory(msg) {
                 if (cmd === 'getCache') {
                     var settings = data[1];
                     getCachedData(settings, function (cacheData) {
-                        adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData, null, 2));
+                        adapter.log.debug('after getCachedData:' + JSON.stringify(cacheData, null, 2));
                         gh.send(['cacheData', cacheData]);
                     });
                 } else if (cmd === 'response') {
@@ -895,8 +895,22 @@ function getHistory(msg) {
                 adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData, null, 2));
                 GetHistory.aggregation(options, cachedData);
                 adapter.log.debug('after aggregation:' + JSON.stringify(options, null, 2));
-                Aggregate.finishAggregation(options);
-                adapter.log.debug('after finalize:' + JSON.stringify(options, null, 2));
+
+                for (var k = options.result.length - 1; k >= 0; k--) {
+                    adapter.log.debug('res k=' + k + ': ' + options.result[k].val.ts);
+                    if (options.result[k].val.ts) {
+                        options.result[k] = {
+                            ts:   options.result[k].val.ts,
+                            val: (options.result[k].val.val !== null) ? Math.round(options.result[k].val.val / options.averageCount[k] * 100) / 100 : null
+                        };
+                        adapter.log.debug('res2 k=' + k + ': ' + JSON.stringify(options.result[k]));
+                    } else {
+                        // no one value in this interval
+                        options.result.splice(k, 1);
+                        adapter.log.debug('removed k=' + k);
+                    }
+                }
+                adapter.log.debug('after manual-finalize:' + JSON.stringify(options, null, 2));
                 var data = GetHistory.response(options);
 
                 if (data[0] === 'response') {
