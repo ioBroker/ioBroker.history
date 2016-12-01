@@ -826,13 +826,13 @@ function getHistory(msg) {
                     adapter.log.debug('after getFileData: cacheData.length = ' + cacheData.length + ', fileData.length = ' + fileData.length);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
-                    adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                     options.result = cacheData;
                     options.count = origCount;
                     Aggregate.beautify(options);
 
+                    adapter.log.debug('Send: ' + options.result.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                     adapter.sendTo(msg.from, msg.command, {
-                        result: cacheData,
+                        result: options.result,
                         step:   null,
                         error:  null
                     }, msg.callback);
