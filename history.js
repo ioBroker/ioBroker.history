@@ -888,8 +888,11 @@ function getHistory(msg) {
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);
             getCachedData(options, function (cachedData) {
+                adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData));
                 GetHistory.aggregation(options, cachedData);
+                adapter.log.debug('after aggregation:' + JSON.stringify(options.result));
                 var data = GetHistory.response(options);
+                adapter.log.debug('after response:' + JSON.stringify(data));
 
                 if (data[0] === 'response') {
                     if (data[1]) {
