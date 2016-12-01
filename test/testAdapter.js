@@ -176,11 +176,18 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                         console.log(err);
                                     }
                                     setTimeout(function () {
-                                        states.setState('system.adapter.history.0.memRss', {val: 3, ts: now - 1000}, function (err) {
+                                        states.setState('system.adapter.history.0.memRss', {val: 2.5, ts: now - 3000}, function (err) {
                                             if (err) {
                                                 console.log(err);
                                             }
-                                            done();
+                                            setTimeout(function () {
+                                                states.setState('system.adapter.history.0.memRss', {val: 3, ts: now - 1000}, function (err) {
+                                                    if (err) {
+                                                        console.log(err);
+                                                    }
+                                                    done();
+                                                });
+                                            }, 100);
                                         });
                                     }, 100);
                                 });
@@ -203,12 +210,12 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(3);
+            expect(result.result.length).to.be.at.least(4);
             var found = 0;
             for (var i = 0; i < result.result.length; i++) {
                 if (result.result[i].val >= 1 && result.result[i].val <= 3) found ++;
             }
-            expect(found).to.be.equal(3);
+            expect(found).to.be.equal(4);
 
             sendTo('history.0', 'getHistory', {
                 id: 'system.adapter.history.0.memRss',
@@ -219,7 +226,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 }
             }, function (result) {
                 console.log(JSON.stringify(result.result, null, 2));
-                expect(result.result.length).to.be.equal(4);
+                expect(result.result.length).to.be.equal(3);
                 done();
             });
         });
