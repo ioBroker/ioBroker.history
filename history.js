@@ -859,7 +859,7 @@ function getHistory(msg) {
                 if (cmd === 'getCache') {
                     var settings = data[1];
                     getCachedData(settings, function (cacheData) {
-                        adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData));
+                        adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData, null, 2));
                         gh.send(['cacheData', cacheData]);
                     });
                 } else if (cmd === 'response') {
@@ -891,11 +891,11 @@ function getHistory(msg) {
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);
             getCachedData(options, function (cachedData) {
-                adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData));
+                adapter.log.debug('after getCachedData:' + JSON.stringify(cachedData, null, 2));
                 GetHistory.aggregation(options, cachedData);
-                adapter.log.debug('after aggregation:' + JSON.stringify(options.result));
+                adapter.log.debug('after aggregation:' + JSON.stringify(options, null, 2));
                 var data = GetHistory.response(options);
-                adapter.log.debug('after response:' + JSON.stringify(data));
+                adapter.log.debug('after response:' + JSON.stringify(data, null, 2));
 
                 if (data[0] === 'response') {
                     if (data[1]) {
