@@ -805,7 +805,7 @@ function getHistory(msg) {
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, function (cacheData, isFull) {
-            adapter.log.debug('cacheData length = ' + cacheData.length + ', isFull=' + isFull);
+            adapter.log.debug('after getCachedData: length = ' + cacheData.length + ', isFull=' + isFull);
             // if all data read
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
@@ -816,10 +816,16 @@ function getHistory(msg) {
                     error:  null
                 }, msg.callback);
             } else {
+                var origCount = options.count;
                 options.count -= cacheData.length;
                 getFileData(options, function (fileData) {
+                    adapter.log.debug('after getFileData: cacheData.length = ' + cacheData.length + ', fileData.length = ' + fileData.length);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
+                    if ((origCount) && (cacheData.length > origCount) && (options.aggregate === 'none')) {
+                        cacheData = cacheData.slice(0, origCount);
+                        adapter.log.debug('cut cacheData to ' + origCount + ' values');
+                    }
                     adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
                     options.result = cacheData;
                     Aggregate.beautify(options);
