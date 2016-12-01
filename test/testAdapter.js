@@ -236,6 +236,22 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             });
         });
     });
+    it('Test ' + adapterShortName + ': Read average from DB using GetHistory', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'system.adapter.history.0.memRss',
+            options: {
+                start:     now-30000,
+                count:     1,
+                aggregate: 'average'
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(3);
+            expect(result.result[1].val).to.be.equal(2.125);
+        });
+    });
     it('Test ' + adapterShortName + ': Disable Datapoint again', function (done) {
         this.timeout(5000);
 
