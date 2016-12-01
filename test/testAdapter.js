@@ -120,10 +120,11 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             changesOnly:  true,
                             debounce:     0,
                             retention:    31536000,
-                            maxLength:    3
+                            maxLength:    3,
+                            changesMinDelta: 0.5
                         }
                     }, function (result) {
-                        expect(result.error).to.not.be.undefined;
+                        expect(result.error).to.be.undefined;
                         expect(result.success).to.be.true;
                         // wait till adapter receives the new settings
                         setTimeout(function () {
@@ -170,11 +171,18 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                 console.log(err);
                             }
                             setTimeout(function () {
-                                states.setState('system.adapter.history.0.memRss', {val: 3, ts: now}, function (err) {
+                                states.setState('system.adapter.history.0.memRss', {val: 2.2, ts: now - 4000}, function (err) {
                                     if (err) {
                                         console.log(err);
                                     }
-                                    done();
+                                    setTimeout(function () {
+                                        states.setState('system.adapter.history.0.memRss', {val: 3, ts: now - 1000}, function (err) {
+                                            if (err) {
+                                                console.log(err);
+                                            }
+                                            done();
+                                        });
+                                    }, 100);
                                 });
                             }, 100);
                         });
@@ -189,7 +197,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         sendTo('history.0', 'getHistory', {
             id: 'system.adapter.history.0.memRss',
             options: {
-                start:     now-5000,
+                start:     now-30000,
                 count:     50,
                 aggregate: 'onchange'
             }
@@ -205,7 +213,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             sendTo('history.0', 'getHistory', {
                 id: 'system.adapter.history.0.memRss',
                 options: {
-                    start:     now-5000,
+                    start:     now-30000,
                     count:     2,
                     aggregate: 'onchange'
                 }
@@ -216,13 +224,13 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             });
         });
     });
-    it('Test ' + adapterShortName + ': DIsable Datapoint again', function (done) {
+    it('Test ' + adapterShortName + ': Disable Datapoint again', function (done) {
         this.timeout(2000);
 
         sendTo('history.0', 'disableHistory', {
             id: 'system.adapter.history.0.memRss',
         }, function (result) {
-            expect(result.error).to.not.be.undefined;
+            expect(result.error).to.be.undefined;
             expect(result.success).to.be.true;
             // wait till adapter receives the new settings
             setTimeout(function () {

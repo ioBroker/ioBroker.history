@@ -58,17 +58,21 @@ var adapter = utils.adapter({
                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
             }
             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-
             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
             } else {
                 history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
             }
-
             if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
             if (history[id][adapter.namespace].changesRelogInterval > 0) {
                 history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
             }
+            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
+                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+            } else {
+                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+            }
+
 
             // add one day if retention is too small
             if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
@@ -190,6 +194,12 @@ function main() {
         adapter.config.changesRelogInterval = 0;
     }
 
+    if (adapter.config.changesMinDelta !== null && adapter.config.changesMinDelta !== undefined) {
+        adapter.config.changesMinDelta = parseFloat(adapter.config.changesMinDelta);
+    } else {
+        adapter.config.changesMinDelta = 0;
+    }
+
     // create directory
     if (!fs.existsSync(adapter.config.storeDir)) {
         fs.mkdirSync(adapter.config.storeDir);
@@ -234,15 +244,18 @@ function main() {
                                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                             }
                             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-
                             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
                             } else {
                                 history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
                             }
-
                             if (history[id][adapter.namespace].changesRelogInterval > 0) {
                                 history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
+                            }
+                            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
+                                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+                            } else {
+                                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
                             }
 
                             // add one day if retention is too small
@@ -441,18 +454,31 @@ function pushHistory(id, state, timerRelog) {
 
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
-                if (state.ts !== state.lc) return;
+                if (state.ts !== state.lc) {
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                    return;
+                }
             } else if (history[id].lastLogTime) {
-                if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) return;
+                if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                    return;
+                }
                 if (state.ts !== state.lc) {
                     adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
                 }
+            }
+            if ((settings.changesMinDelta !== 0) && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
+                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                return;
+            }
+            else {
+                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
         }
 
         if (timerRelog) {
             state.ts = new Date().getTime();
-            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
+            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts + ', ts=' + state.ts);
         } else {
             // only store state if really changed
             history[id].state = state;
