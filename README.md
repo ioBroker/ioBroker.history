@@ -78,6 +78,17 @@ Possible options:
 The first and last points will be calculated for aggregations, except aggregation "none".
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
+## storeState
+If you want to write other data into the InfluxDB you can use the build in system function **storeState**.
+This function can also be used to convert data from other History adapters like History or SQL.
+
+The given ids are not checked against the ioBroker database and do not need to be set up there, but can only be accessed directly.
+
+The Message can have one of the following three formats:
+* one ID and one state object
+* one ID and array of state objects
+* array of multiple IDs with state objects
+
 ## History Logging Management via Javascript
 The adapter supports enabling and disabling of history logging via JavaScript and also retrieving the list of enabled datapoints with their settings.
 

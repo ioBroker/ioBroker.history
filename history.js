@@ -484,7 +484,7 @@ function pushHistory(id, state, timerRelog) {
 
         if (timerRelog) {
             state.ts = new Date().getTime();
-            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts + ', ts=' + state.ts);
+            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
         } else {
             // only store state if really changed
             history[id].state = state;
