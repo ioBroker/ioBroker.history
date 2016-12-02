@@ -150,6 +150,8 @@ function processMessage(msg) {
         enableHistory(msg);
     } else if (msg.command === 'disableHistory') {
         disableHistory(msg);
+    } else if (msg.command === 'getEnabledDPs') {
+        getEnabledDPs(msg);
     }
 }
 
@@ -482,7 +484,7 @@ function pushHistory(id, state, timerRelog) {
 
         if (timerRelog) {
             state.ts = new Date().getTime();
-            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts + ', ts=' + state.ts);
+            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
         } else {
             // only store state if really changed
             history[id].state = state;
@@ -1029,4 +1031,14 @@ function disableHistory(msg) {
             }, msg.callback);
         }
     });
+}
+
+function getEnabledDPs(msg) {
+    var data = {};
+    for (var id in history) {
+        if (!history.hasOwnProperty(id)) continue;
+        data[id] = history[id][adapter.namespace];
+    }
+
+    adapter.sendTo(msg.from, msg.command, data, msg.callback);
 }
