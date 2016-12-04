@@ -458,12 +458,12 @@ function pushHistory(id, state, timerRelog) {
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
                 if (state.ts !== state.lc) {
-                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
             } else if (history[id].lastLogTime) {
                 if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
                 if (state.ts !== state.lc) {
@@ -471,14 +471,14 @@ function pushHistory(id, state, timerRelog) {
                 }
             }
             if ((settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
-                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
             }
             else if (typeof state.val === 'number') {
-                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
             else {
-                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + history[id].state.val.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
         }
 
