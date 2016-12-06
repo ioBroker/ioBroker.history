@@ -135,7 +135,7 @@ sendTo('history.0', 'disableHistory', {
 The message has no parameters.
 
 ```
-sendTo('history.0', 'getEnabledDPs', function (result) {
+sendTo('history.0', 'getEnabledDPs', {}, function (result) {
     //result is object like:
     {
         "system.adapter.history.0.memRss": {
