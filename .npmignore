@@ -3,3 +3,6 @@ tasks
 .idea
 node_modules
 .git
+test
+.travis.yml
+appveyor.yml
