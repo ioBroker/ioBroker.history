@@ -69,7 +69,7 @@ var adapter = utils.adapter({
                 history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
             }
             if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
-                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
             } else {
                 history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
             }
@@ -198,7 +198,7 @@ function main() {
     }
 
     if (adapter.config.changesMinDelta !== null && adapter.config.changesMinDelta !== undefined) {
-        adapter.config.changesMinDelta = parseFloat(adapter.config.changesMinDelta);
+        adapter.config.changesMinDelta = parseFloat(adapter.config.changesMinDelta.toString().replace(/,/g, '.'));
     } else {
         adapter.config.changesMinDelta = 0;
     }

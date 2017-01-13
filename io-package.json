@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.5.0",
+        "version":                  "1.5.1",
         "news": {
+            "1.5.1": {
+                "en": "Fix handling of float values in Adapter config and Datapoint config.",
+                "de": "Fehlerbehebung bei der Eingabe von Zahlen mit Kommastellen in der Adapter- und Datenpunk-Konfiguration.",
+                "ru": "Fix handling of float values in Adapter config and Datapoint config."
+            },
             "1.5.0": {
                 "en": "Add messages enableHistory/disableHistory/getEnabledDPs, add support to log changes only if value differs a minimum value for numbers. Fixing aggregate calculation",
                 "de": "Messages enableHistory/disableHistory/getEnabledDPs hinzugefügt, Unterstützung zum Loggen wenn der Zahlenwert um einen Mindestwert abweicht. Fehler in Aggregationsberechnung behoben",
