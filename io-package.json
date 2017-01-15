@@ -98,7 +98,7 @@
 		"type":                     "storage",
         "supportCustoms":           true,
         "getHistory":           	true,
-		"dependencies":             [{"js-controller": ">=0.12.0"}],
+		"dependencies":             [{"js-controller": ">=0.12.0","admin": ">=1.6.10"}],
         "stopTimeout":              10000
     },
     "native": {
