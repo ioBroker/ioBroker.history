@@ -228,6 +228,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+### 1.5.1 (2017-01-16)
+* (bluefox) Fix handling of float values in Adapter config and Datapoint config.
+
 ### 1.5.0 (2016-12-01)
 * (Apollon77) Add messages enableHistory/disableHistory
 * (Apollon77) add support to log changes only if value differs a minimum value for numbers
