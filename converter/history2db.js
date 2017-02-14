@@ -335,7 +335,7 @@ function processFile() {
                             finish(false);
                         }
                         if (result.success && !result.connected) {
-                            console.error('Data stored but dbDB not available anymore, break.');
+                            console.error('Data stored but db not available anymore, break. ' + JSON.stringify(result));
                             finish(true);
                         }
                         var delay = 300;
