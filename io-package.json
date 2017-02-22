@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.5.2",
+        "version":                  "1.5.3",
         "news": {
+            "1.5.3": {
+                "en": "Small fix for older configurations",
+                "de": "Kleine Fehlerbehebung für ältere Konfigurationen",
+                "ru": "Small fix for older configurations"
+            },
             "1.5.2": {
                 "en": "Enhance Min-Delta logic for datapoints from type mixed",
                 "de": "Min-Delta-Logik verbessert für Mixed-Datenpunkte",

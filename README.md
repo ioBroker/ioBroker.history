@@ -228,6 +228,12 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+### 1.5.3 (2017-02-22)
+* (Apollon77) Small fix for older configurations
+
+### 1.5.2
+* (Apollon77) Enhance Min-Delta logic for datapoints from type mixed
+
 ### 1.5.1 (2017-01-16)
 * (bluefox) Fix handling of float values in Adapter config and Datapoint config.
 
