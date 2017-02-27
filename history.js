@@ -589,7 +589,7 @@ function checkRetention(id) {
             var day = GetHistory.ts2day(d.getTime());
             for (var i = 0; i < dayList.length; i++) {
                 if (dayList[i] < day) {
-                    var file = adapter.config.storeDir + dayList[i] + '/history.' + id + '.json';
+                    var file = adapter.config.storeDir + dayList[i] + '/history.' + id.replace(/[\u0000:\/\\]/g, "~") + '.json';
                     if (fs.existsSync(file)) {
                         adapter.log.info('Delete old history "' + file + '"');
                         try {
@@ -618,7 +618,7 @@ function checkRetention(id) {
 function appendFile(id, states) {
     var day = GetHistory.ts2day(states[states.length - 1].ts);
 
-    var file = adapter.config.storeDir + day + '/history.' + id + '.json';
+    var file = adapter.config.storeDir + day + '/history.' + id.replace(/[\u0000:\/\\]/g, "~") + '.json';
     var data;
 
     var i;

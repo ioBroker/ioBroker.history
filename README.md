@@ -228,6 +228,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+### 1.6.0 (2017-02-28)
+* (Apollon77) Replace some characters in history filenames
+
 ### 1.5.3 (2017-02-22)
 * (Apollon77) Small fix for older configurations
 

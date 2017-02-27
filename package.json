@@ -1,12 +1,13 @@
 {
   "name": "iobroker.history",
   "description": "Log state history in a two-stages process (first to RAM, then to disk)",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "author": "hobbyquaker <hq@ccu.io>",
   "contributors": [
     "bluefox <dogafox@gmail.com>",
     "smiling-Jack",
-    "hobbyquaker <hq@ccu.io>"
+    "hobbyquaker <hq@ccu.io>",
+    "Apollon77"
   ],
   "homepage": "https://github.com/ioBroker/ioBroker.history",
   "repository": {
