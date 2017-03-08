@@ -17,7 +17,7 @@ To set up some data points to be stored they must be configured in admin "Object
 - **Storage directory** - Path to the directory, where the files will be stored. It can be done relative to "iobroker-data" or absolute, like "/mnt/history" or "D:/History"
 - **Maximal number of stored in RAM values** - After this number of values reached in RAM they will be saved on disk.
 - **Store origin of value** - If "from" field will be stored too. Can save place on disk.
-- **De-bounce interval** - Protection against too often changes of some value.
+- **De-bounce interval** - Protection against too often changes of some value and defined tha time in ms in which after one value change other changes are not logged
 - **Storage retention** - How many values in the past will be stored on disk.
 - **Log unchanged values any(s)** - When using "log changes only" you can set a time interval in seconds here after which also unchanged values will be re-logged into the DB
 
