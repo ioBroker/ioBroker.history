@@ -498,10 +498,11 @@ function pushHistory(id, state, timerRelog) {
         }
         history[id].lastLogTime = state.ts;
 
-        // Do not store values ofter than debounce time
-        if (!history[id].timeout && settings.debounce) {
+        if (settings.debounce) {
+            // Discard changes in debounce time to store last stable value
+            if (history[id].timeout) clearTimeout(history[id].timeout);
             history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
-        } else if (!settings.debounce) {
+        } else {
             pushHelper(id);
         }
     }

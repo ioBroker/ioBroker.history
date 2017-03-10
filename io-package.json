@@ -7,12 +7,12 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.6.0",
+        "version":                  "1.6.1",
         "news": {
-            "1.6.0": {
-                "en": "Replace some characters in history filenames",
-                "de": "Ersetzung einiger Zeichen in Dateinamen",
-                "ru": "Replace some characters in history filenames"
+            "1.6.1": {
+                "en": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames",
+                "de": "Debounce-Feature geändert, sodass der letzte Wert der in der angegeben Zeit stabil geblieben ist geloggt wird!! Ersetzung einiger Zeichen in Dateinamen",
+                "ru": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames"
             },
             "1.5.3": {
                 "en": "Small fix for older configurations",
