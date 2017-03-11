@@ -120,7 +120,7 @@
         "maxLength": 960,
         "limit":     2000,
         "storeDir":  "",
-        "debounce":  10000,
+        "debounce":  1000,
         "retention": 31536000,
         "storeFrom": false,
         "storeAck":  true,
