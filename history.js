@@ -458,7 +458,7 @@ function pushHistory(id, state, timerRelog) {
 
         if (typeof state.val === 'string') {
             var f = parseFloat(state.val);
-            if (f.toString() == state.val) {
+            if (f == state.val) {
                 state.val = f;
             }
         }
@@ -548,7 +548,7 @@ function pushHelper(_id) {
 
         if (typeof history[_id].state.val === 'string') {
             var f = parseFloat(history[_id].state.val);
-            if (f.toString() == history[_id].state.val) {
+            if (f == history[_id].state.val) {
                 history[_id].state.val = f;
             } else if (history[_id].state.val === 'true') {
                 history[_id].state.val = true;
