@@ -448,14 +448,6 @@ function pushHistory(id, state, timerRelog) {
         if (state.ts < 946681200000) state.ts *= 1000;
         if (state.lc < 946681200000) state.lc *= 1000;
 
-        if (history[id].relogTimeout) {
-            clearTimeout(history[id].relogTimeout);
-            history[id].relogTimeout = null;
-        }
-        if (settings.changesRelogInterval > 0) {
-            history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
-        }
-
         if (typeof state.val === 'string') {
             var f = parseFloat(state.val);
             if (f == state.val) {
@@ -489,6 +481,14 @@ function pushHistory(id, state, timerRelog) {
             }
         }
 
+        if (history[id].relogTimeout) {
+            clearTimeout(history[id].relogTimeout);
+            history[id].relogTimeout = null;
+        }
+        if (settings.changesRelogInterval > 0) {
+            history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+        }
+
         if (timerRelog) {
             state.ts = new Date().getTime();
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
@@ -514,28 +514,22 @@ function reLogHelper(_id) {
         return;
     }
     history[_id].relogTimeout = null;
-    if (!history[_id].state) {
-        //we have a not-that-often-updated state to log, so get the last state
-        adapter.getForeignState(_id, function (err, state) {
-            if (err) {
-                adapter.log.info('init timed Relog: can not get State for ' + _id + ' : ' + err);
+    adapter.getForeignState(_id, function (err, state) {
+        if (err) {
+            adapter.log.info('init timed Relog: can not get State for ' + _id + ' : ' + err);
+        }
+        else if (!state) {
+            adapter.log.info('init timed Relog: disable relog because state not set so far ' + _id + ': ' + JSON.stringify(state));
+        }
+        else {
+            adapter.log.debug('init timed Relog: getState ' + _id + ':  Value=' + state.val + ', ack=' + state.ack + ', ts=' + state.ts  + ', lc=' + state.lc);
+            // only if state is still not set
+            if (!history[_id].state) {
+                history[_id].state = state;
+                pushHistory(_id, history[_id].state, true);
             }
-            else if (!state) {
-                adapter.log.info('init timed Relog: disable relog because state not set so far ' + _id + ': ' + JSON.stringify(state));
-            }
-            else {
-                adapter.log.debug('init timed Relog: getState ' + _id + ':  Value=' + state.val + ', ack=' + state.ack + ', ts=' + state.ts  + ', lc=' + state.lc);
-                // only if state is still not set
-                if (!history[_id].state) {
-                    history[_id].state = state;
-                    pushHistory(_id, history[_id].state, true);
-                }
-            }
-        });
-    } else {
-        pushHistory(_id, history[_id].state, true);
-    }
-
+        }
+    });
 }
 
 function pushHelper(_id) {

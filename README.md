@@ -228,6 +228,10 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+
+## 1.6.3 (2017-08-03)
+* (Apollon77) fix behaviour of log interval to always log the current value
+
 ## 1.6.2 (2017-04-07)
 * fix in datatype conversions
 

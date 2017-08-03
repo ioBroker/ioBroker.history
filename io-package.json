@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.6.2",
+        "version":                  "1.6.3",
         "news": {
+            "1.6.3": {
+                "en": "fix behaviour of log interval to always log the current value",
+                "de": "Verhalten vom Logging in bestimmten Zeitabständen geändert, sodass immer der aktuellste Wert geloggt wird",
+                "ru": "fix behaviour of log interval to always log the current value"
+            },
             "1.6.2": {
                 "en": "fix in datatype conversions",
                 "de": "Fehlerbehebung in Datentypkonvertierungen",
