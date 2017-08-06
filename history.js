@@ -37,6 +37,8 @@ var adapter = utils.adapter({
                 subscribeAll = true;
                 adapter.subscribeForeignStates('*');
             }
+            if (history[id] && history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
+
 
             // todo remove history somewhen (2016.08)
             history[id] = obj.common.custom || obj.common.history;
@@ -65,7 +67,6 @@ var adapter = utils.adapter({
             } else {
                 history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
             }
-            if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
             if (history[id][adapter.namespace].changesRelogInterval > 0) {
                 history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
             }
