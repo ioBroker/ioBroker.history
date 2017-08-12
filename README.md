@@ -228,6 +228,8 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.6.4 (2017-08-12)
+* (bluefox) add "save last value" option
 
 ## 1.6.3 (2017-08-03)
 * (Apollon77) fix behaviour of log interval to always log the current value

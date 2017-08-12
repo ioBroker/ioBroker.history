@@ -7,8 +7,13 @@
             "de": "Loggt die Historie von einzelnen Zuständen",
             "ru": "Сохранять историю событий для отдельных состояний"
         },
-        "version":                  "1.6.3",
+        "version":                  "1.6.4",
         "news": {
+            "1.6.4": {
+                "en": "add \"save last value\" option",
+                "de": "Die Option um vorheriges Wert zu speichern ist hinzugefügt",
+                "ru": "Возможность сохранять предыдущее значение при сохранении только изменений"
+            },
             "1.6.3": {
                 "en": "fix behaviour of log interval to always log the current value",
                 "de": "Verhalten vom Logging in bestimmten Zeitabständen geändert, sodass immer der aktuellste Wert geloggt wird",
@@ -135,7 +140,8 @@
         "storeFrom": false,
         "storeAck":  true,
         "changesRelogInterval":      0,
-        "changesMinDelta": 0
+        "changesMinDelta": 0,
+        "saveLastValue": false
     },
     "objects": [
         {

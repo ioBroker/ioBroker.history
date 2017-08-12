@@ -62,6 +62,7 @@ var adapter = utils.adapter({
                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
             }
             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+            history[id][adapter.namespace].saveLastValue = history[id][adapter.namespace].saveLastValue === 'true' || history[id][adapter.namespace].saveLastValue === true;
             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
             } else {
@@ -249,6 +250,7 @@ function main() {
                                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                             }
                             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+                            history[id][adapter.namespace].saveLastValue = history[id][adapter.namespace].saveLastValue === 'true' || history[id][adapter.namespace].saveLastValue === true;
                             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
                             } else {
@@ -458,11 +460,13 @@ function pushHistory(id, state, timerRelog) {
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
                 if (state.ts !== state.lc) {
+                    history[id].skipped = true;
                     adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
             } else if (history[id].lastLogTime) {
                 if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                    history[id].skipped = true;
                     adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
@@ -471,6 +475,7 @@ function pushHistory(id, state, timerRelog) {
                 }
             }
             if ((settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
+                history[id].skipped = true;
                 adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
             }
@@ -494,13 +499,16 @@ function pushHistory(id, state, timerRelog) {
             state.ts = new Date().getTime();
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
         } else {
+            if (settings.changesOnly && history[id].skipped && settings.saveLastValue) {
+                pushHelper(id);
+            }
             // only store state if really changed
             history[id].state = state;
         }
         history[id].lastLogTime = state.ts;
-
+        history[id].skipped = false;
         if (settings.debounce) {
-            // Discard changes in debounce time to store last stable value
+            // Discard changes in de-bounce time to store last stable value
             if (history[id].timeout) clearTimeout(history[id].timeout);
             history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
         } else {
