@@ -53,6 +53,8 @@
             convertComma = systemConfig.common.isFloatComma;
         }
 
+        if (settings.saveLastValue === undefined) settings.saveLastValue = false;
+
         for (var key in settings) {
             setValue(key, settings[key], onChange);
         }
