@@ -1,6 +1,8 @@
 ![Logo](admin/history.png)
 # ioBroker.history
+
 ===============================
+
 [![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Tests](http://img.shields.io/travis/ioBroker/ioBroker.history/master.svg)](https://travis-ci.org/ioBroker/ioBroker.history)
