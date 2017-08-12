@@ -7,7 +7,7 @@ var path       = require('path');
 var dataDir    = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
 var fs         = require('fs');
 var GetHistory = require(__dirname + '/lib/getHistory.js');
-var Aggregate = require(__dirname + '/lib/aggregate.js');
+var Aggregate  = require(__dirname + '/lib/aggregate.js');
 
 var history = {};
 var subscribeAll = false;
@@ -25,20 +25,23 @@ var adapter = utils.adapter({
                 (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled)
             )
         ) {
-            var state   = history[id] ? history[id].state   : null;
-            var list    = history[id] ? history[id].list    : null;
-            var timeout = history[id] ? history[id].timeout : null;
+            var writeNull = !history[id];
+            var state     = history[id] ? history[id].state   : null;
+            var list      = history[id] ? history[id].list    : null;
+            var timeout   = history[id] ? history[id].timeout : null;
 
             if (!history[id] && !subscribeAll) {
                 // unsubscribe
                 for (var _id in history) {
-                    adapter.unsubscribeForeignStates(_id);
+                    if (history.hasOwnProperty(_id)) {
+                        adapter.unsubscribeForeignStates(_id);
+                    }
                 }
                 subscribeAll = true;
                 adapter.subscribeForeignStates('*');
             }
-            if (history[id] && history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
 
+            if (history[id] && history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
 
             // todo remove history somewhen (2016.08)
             history[id] = obj.common.custom || obj.common.history;
@@ -81,6 +84,9 @@ var adapter = utils.adapter({
             // add one day if retention is too small
             if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
                 history[id][adapter.namespace].retention += 86400;
+            }
+            if (writeNull) {
+                writeNulls(id);
             }
 
             adapter.log.info('enabled logging of ' + id);
@@ -143,9 +149,9 @@ function finish(callback) {
 }
 
 function processMessage(msg) {
-    if (msg.command == 'getHistory') {
+    if (msg.command === 'getHistory') {
         getHistory(msg);
-    } else if (msg.command == 'generateDemo') {
+    } else if (msg.command === 'generateDemo') {
         generateDemo(msg);
     } else if (msg.command === 'storeState') {
         storeState(msg);
@@ -180,12 +186,26 @@ function fixSelector(callback) {
     });
 }
 
+function writeNulls(id, now) {
+    if (!id) {
+        now = new Date().getTime();
+        for (var _id in history) {
+            if (history.hasOwnProperty(_id)) {
+                writeNulls(_id, now);
+            }
+        }
+    } else {
+        now = now || new Date().getTime();
+        pushHistory(id, {val: null, ts: now, ack: true});
+    }
+}
+
 function main() {
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
 
     // remove last "/"
-    if (adapter.config.storeDir[adapter.config.storeDir.length - 1] == '/') {
+    if (adapter.config.storeDir[adapter.config.storeDir.length - 1] === '/') {
         adapter.config.storeDir = adapter.config.storeDir.substring(0, adapter.config.storeDir.length - 1);
     }
 
@@ -282,6 +302,8 @@ function main() {
                 adapter.subscribeForeignStates('*');
             }
 
+            writeNulls();
+
             // store all buffered data every 10 minutes to not lost the data
             bufferChecker = setInterval(function () {
                 storeCached();
@@ -331,7 +353,7 @@ function generateDemo(msg) {
             for (start; start <= end;) {
 
                 newDay = new Date(start + step).getDay();
-                if (newDay != oldDay) {
+                if (newDay !== oldDay) {
                     save();
                     break;
                 }
@@ -343,16 +365,16 @@ function generateDemo(msg) {
                     ack: true
                 });
 
-                if (curve =='sin') {
-                    if (sin == 6.2) {
+                if (curve === 'sin') {
+                    if (sin === 6.2) {
                         sin = 0;
                     } else {
                         sin = Math.round((sin + 0.1) * 10) / 10;
                     }
                     value = Math.round(Math.sin(sin) * 10000) / 100;
-                } else if (curve == 'dec') {
+                } else if (curve === 'dec') {
                     value++;
-                } else if (curve == 'inc') {
+                } else if (curve === 'inc') {
                     value--;
                 } else {
                     if (up === true) {
