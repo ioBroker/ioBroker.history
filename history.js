@@ -122,6 +122,11 @@ process.on('SIGINT', function () {
         finish();
     }
 });
+process.on('SIGTERM', function () {
+    if (adapter && adapter.setState) {
+        finish();
+    }
+});
 
 function storeCached() {
     for (var id in history) {
@@ -133,19 +138,26 @@ function storeCached() {
 }
 
 function finish(callback) {
-    if (bufferChecker) clearInterval(bufferChecker);
+    if (bufferChecker) {
+        clearInterval(bufferChecker);
+        bufferChecker = null;
+    }
     for (var id in history) {
         if (history[id].relogTimeout) {
             clearTimeout(history[id].relogTimeout);
+            history[id].relogTimeout = null;
         }
         if (history[id].timeout) {
             clearTimeout(history[id].timeout);
+            history[id].timeout = null;
         }
     }
 
-
     storeCached();
-    if (callback) callback();
+
+    if (callback) {
+        callback();
+    }
 }
 
 function processMessage(msg) {
@@ -161,6 +173,15 @@ function processMessage(msg) {
         disableHistory(msg);
     } else if (msg.command === 'getEnabledDPs') {
         getEnabledDPs(msg);
+    } else if (msg.command === 'stopInstance') {
+        finish(function () {
+            if (msg.callback) {
+                adapter.sendTo(msg.from, msg.command, 'stopped', msg.callback);
+                setTimeout(function () {
+                    process.exit(0);
+                }, 200);
+            }
+        });
     }
 }
 
@@ -313,7 +334,7 @@ function main() {
 
     adapter.subscribeForeignObjects('*');
 }
-
+/*
 function generateDemo(msg) {
     var options = [
         msg.message.curve   || 'sin',                         // 0 curve
@@ -407,16 +428,16 @@ function generateDemo(msg) {
                     ack:  true
                 });
 
-                if (curve == 'sin') {
-                    if (sin == 6.2) {
+                if (curve === 'sin') {
+                    if (sin === 6.2) {
                         sin = 0;
                     } else {
                         sin = Math.round((sin + 0.1) * 10) / 10;
                     }
                     value = Math.round(Math.sin(sin) * 10000) / 100;
-                } else if (curve == 'dec') {
+                } else if (curve === 'dec') {
                     value++;
-                } else if (curve == 'inc') {
+                } else if (curve === 'inc') {
                     value--;
                 } else {
                     if (up === true) {
@@ -461,7 +482,7 @@ function generateDemo(msg) {
 
     fork(options);
 }
-
+*/
 function pushHistory(id, state, timerRelog) {
     if (timerRelog === undefined) timerRelog = false;
     // Push into history
@@ -481,13 +502,13 @@ function pushHistory(id, state, timerRelog) {
         }
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
-                if (state.ts !== state.lc) {
+                if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
                     history[id].skipped = state; // remember new timestamp
                     adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
             } else if (history[id].lastLogTime) {
-                if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
                     history[id].skipped = state; // remember new timestamp
                     adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
@@ -496,7 +517,7 @@ function pushHistory(id, state, timerRelog) {
                     adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
                 }
             }
-            if ((settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
+            if (history[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
                 history[id].skipped = state; // remember new timestamp
                 adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
@@ -762,8 +783,13 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                     var last = false;
 
                     for (var ii in _data) {
-                        if (options.ack) _data[ii].ack = !!_data[ii].ack;
-                        if (addId) _data[ii].id = id;
+                        if (!_data.hasOwnProperty(ii)) continue;
+                        if (options.ack) {
+                            _data[ii].ack = !!_data[ii].ack;
+                        }
+                        if (addId) {
+                            _data[ii].id = id;
+                        }
                         data.push(_data[ii]);
                         if (!options.start && data.length >= options.count) break;
                         if (last) break;
