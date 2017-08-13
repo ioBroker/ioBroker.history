@@ -482,15 +482,13 @@ function pushHistory(id, state, timerRelog) {
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
                 if (state.ts !== state.lc) {
-                    history[id].skipped = true;
-                    history[id].state = state; // remember new timestamp
+                    history[id].skipped = state; // remember new timestamp
                     adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
             } else if (history[id].lastLogTime) {
                 if ((state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    history[id].skipped = true;
-                    history[id].state = state; // remember new timestamp
+                    history[id].skipped = state; // remember new timestamp
                     adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
@@ -499,8 +497,7 @@ function pushHistory(id, state, timerRelog) {
                 }
             }
             if ((settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
-                history[id].skipped = true;
-                history[id].state = state; // remember new timestamp
+                history[id].skipped = state; // remember new timestamp
                 adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
             }
@@ -525,13 +522,14 @@ function pushHistory(id, state, timerRelog) {
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
         } else {
             if (settings.changesOnly && history[id].skipped && settings.saveLastValue) {
+                history[id].state = history[id].skipped;
                 pushHelper(id);
             }
             // only store state if really changed
             history[id].state = state;
         }
         history[id].lastLogTime = state.ts;
-        history[id].skipped = false;
+        history[id].skipped = null;
         if (settings.debounce) {
             // Discard changes in de-bounce time to store last stable value
             if (history[id].timeout) clearTimeout(history[id].timeout);
