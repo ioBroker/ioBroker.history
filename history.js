@@ -9,9 +9,11 @@ var fs         = require('fs');
 var GetHistory = require(__dirname + '/lib/getHistory.js');
 var Aggregate  = require(__dirname + '/lib/aggregate.js');
 
-var history = {};
+var history    = {};
 var subscribeAll = false;
 var bufferChecker = null;
+var tasksStart = [];
+var finished   = false;
 
 var adapter = utils.adapter({
 
@@ -129,11 +131,17 @@ process.on('SIGTERM', function () {
 });
 
 function storeCached() {
+    var now = new Date().getTime();
+
     for (var id in history) {
         if (history[id].skipped) {
             history[id].list.push(history[id].skipped);
             history[id].skipped = null;
         }
+
+        // terminate values with null to indicate adapter stop.
+        history[id].list.push({val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace});
+
         if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
             appendFile(id, history[id].list);
@@ -157,7 +165,10 @@ function finish(callback) {
         }
     }
 
-    storeCached();
+    if (!finished) {
+        finished = true;
+        storeCached();
+    }
 
     if (callback) {
         callback();
@@ -211,6 +222,22 @@ function fixSelector(callback) {
     });
 }
 
+function processStartValues() {
+    if (tasksStart && tasksStart.length) {
+        var task = tasksStart.shift();
+        adapter.getForeignState(task.id, function (err, state) {
+            var now = task.now || new Date().getTime();
+            pushHistory(task.id, {val: null, ts: state ? now - 1 : now, ack: true, q: 0x40, from: 'system.adapter.' + adapter.namespace});
+            if (state) {
+                state.ts   = now;
+                state.from = 'system.adapter.' + adapter.namespace;
+                pushHistory(task.id, state);
+            }
+            setTimeout(processStartValues, 0);
+        });
+    }
+}
+
 function writeNulls(id, now) {
     if (!id) {
         now = new Date().getTime();
@@ -221,7 +248,10 @@ function writeNulls(id, now) {
         }
     } else {
         now = now || new Date().getTime();
-        pushHistory(id, {val: null, ts: now, ack: true});
+        tasksStart.push({id: id, now: now});
+        if (tasksStart.length === 1) {
+            processStartValues();
+        }
     }
 }
 
@@ -542,6 +572,7 @@ function pushHistory(id, state, timerRelog) {
             history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
         }
 
+        var ignoreDebonce = false;
         if (timerRelog) {
             state.ts = new Date().getTime();
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
@@ -550,12 +581,17 @@ function pushHistory(id, state, timerRelog) {
                 history[id].state = history[id].skipped;
                 pushHelper(id);
             }
+            if (history[id].state && ((history[id].state.val === null && state.val !== null) || (history[id].state.val !== null && state.val === null))) {
+                ignoreDebonce = true;
+            } else if (!history[id].state && state.val === null) {
+                ignoreDebonce = true;
+            }
             // only store state if really changed
             history[id].state = state;
         }
         history[id].lastLogTime = state.ts;
         history[id].skipped = null;
-        if (settings.debounce) {
+        if (settings.debounce && !ignoreDebonce) {
             // Discard changes in de-bounce time to store last stable value
             if (history[id].timeout) clearTimeout(history[id].timeout);
             history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
