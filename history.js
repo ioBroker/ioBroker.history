@@ -138,15 +138,18 @@ function storeCached() {
             history[id].list.push(history[id].skipped);
             history[id].skipped = null;
         }
-
-        if (history[id][adapter.namespace].changesOnly && history[id].state) {
-            history[id].state.ts = now;
-            history[id].state.from = 'system.adapter.' + adapter.namespace;
-            history[id].list.push(history[id].state);
+        var nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
+        if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
+            var state = Object.assign({}, history[id].state);
+            state.ts   = now;
+            state.from = 'system.adapter.' + adapter.namespace;
+            history[id].list.push(state);
+            nullValue.ts += 4;
+            nullValue.lc += 4;
         }
 
         // terminate values with null to indicate adapter stop.
-        history[id].list.push({val: null, ts: now, lc: now, q: 0x40, ack: true, from: 'system.adapter.' + adapter.namespace});
+        history[id].list.push(nullValue);
 
         if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
@@ -236,7 +239,7 @@ function processStartValues() {
                 var now = task.now || new Date().getTime();
                 pushHistory(task.id, {
                     val:  null,
-                    ts:   state ? now - 1 : now,
+                    ts:   state ? now - 4 : now, // 4ms because of MS-SQL
                     ack:  true,
                     q:    0x40,
                     from: 'system.adapter.' + adapter.namespace});
