@@ -139,8 +139,14 @@ function storeCached() {
             history[id].skipped = null;
         }
 
+        if (history[id][adapter.namespace].changesOnly && history[id].state) {
+            history[id].state.ts = now;
+            history[id].state.from = 'system.adapter.' + adapter.namespace;
+            history[id].list.push(history[id].state);
+        }
+
         // terminate values with null to indicate adapter stop.
-        history[id].list.push({val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace});
+        history[id].list.push({val: null, ts: now, lc: now, q: 0x40, ack: true, from: 'system.adapter.' + adapter.namespace});
 
         if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
@@ -225,16 +231,32 @@ function fixSelector(callback) {
 function processStartValues() {
     if (tasksStart && tasksStart.length) {
         var task = tasksStart.shift();
-        adapter.getForeignState(task.id, function (err, state) {
-            var now = task.now || new Date().getTime();
-            pushHistory(task.id, {val: null, ts: state ? now - 1 : now, ack: true, q: 0x40, from: 'system.adapter.' + adapter.namespace});
-            if (state) {
-                state.ts   = now;
-                state.from = 'system.adapter.' + adapter.namespace;
-                pushHistory(task.id, state);
-            }
+        if (history[task.id][adapter.namespace].changesOnly) {
+            adapter.getForeignState(task.id, function (err, state) {
+                var now = task.now || new Date().getTime();
+                pushHistory(task.id, {
+                    val:  null,
+                    ts:   state ? now - 1 : now,
+                    ack:  true,
+                    q:    0x40,
+                    from: 'system.adapter.' + adapter.namespace});
+
+                if (state) {
+                    state.ts   = now;
+                    state.from = 'system.adapter.' + adapter.namespace;
+                    pushHistory(task.id, state);
+                }
+                setTimeout(processStartValues, 0);
+            });
+        } else {
+            pushHistory(task.id, {
+                val:  null,
+                ts:   task.now || new Date().getTime(),
+                ack:  true,
+                q:    0x40,
+                from: 'system.adapter.' + adapter.namespace});
             setTimeout(processStartValues, 0);
-        });
+        }
     }
 }
 
