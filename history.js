@@ -130,6 +130,10 @@ process.on('SIGTERM', function () {
 
 function storeCached() {
     for (var id in history) {
+        if (history[id].skipped) {
+            history[id].list.push(history[id].skipped);
+            history[id].skipped = null;
+        }
         if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
             appendFile(id, history[id].list);
