@@ -130,26 +130,28 @@ process.on('SIGTERM', function () {
     }
 });
 
-function storeCached() {
+function storeCached(isFinishing) {
     var now = new Date().getTime();
 
     for (var id in history) {
-        if (history[id].skipped) {
-            history[id].list.push(history[id].skipped);
-            history[id].skipped = null;
-        }
-        var nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
-        if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
-            var state = Object.assign({}, history[id].state);
-            state.ts   = now;
-            state.from = 'system.adapter.' + adapter.namespace;
-            history[id].list.push(state);
-            nullValue.ts += 4;
-            nullValue.lc += 4;
-        }
+        if (isFinishing) {
+            if (history[id].skipped) {
+                history[id].list.push(history[id].skipped);
+                history[id].skipped = null;
+            }
+            var nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
+            if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
+                var state = Object.assign({}, history[id].state);
+                state.ts   = now;
+                state.from = 'system.adapter.' + adapter.namespace;
+                history[id].list.push(state);
+                nullValue.ts += 4;
+                nullValue.lc += 4;
+            }
 
-        // terminate values with null to indicate adapter stop.
-        history[id].list.push(nullValue);
+            // terminate values with null to indicate adapter stop.
+            history[id].list.push(nullValue);
+        }
 
         if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
@@ -176,7 +178,7 @@ function finish(callback) {
 
     if (!finished) {
         finished = true;
-        storeCached();
+        storeCached(true);
     }
 
     if (callback) {
