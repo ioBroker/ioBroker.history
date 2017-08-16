@@ -66,9 +66,6 @@ systemDictionary = {
         "ru": "Сохранять подтверждение события:"
     },
     "Storage settings:":        {"en": "Storage settings:",     "de": "Storage-Einstellungen:",  "ru": "Настройки сохранения:"},
-    "Save last previous value": {"en": "Save last previous value", "de": "Speichere letztes Wert bei Änderung", "ru": "Сохранять предыдущее значение"},
-    "Save last previous value:": {"en": "Save last previous value:", "de": "Speichere letztes Wert bei Änderung:", "ru": "Сохранять предыдущее значение:"},    "Demo Data:":               {"en": "Demo Data:",            "de": "Demo Data:",         "ru": "Демо данные:"},
-    "Demo Data:":               {"en": "Demo Data:",            "de": "Demo Data:",         "ru": "Демо данные:"},
     "ID":                       {"en": "ID",                    "de": "ID",                 "ru": "ID"},
     "Start":                    {"en": "Start",                 "de": "Start",              "ru": "Начало"},
     "End":                      {"en": "End",                   "de": "Ende",               "ru": "Конец"},

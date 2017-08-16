@@ -67,7 +67,6 @@ var adapter = utils.adapter({
                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
             }
             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-            history[id][adapter.namespace].saveLastValue = history[id][adapter.namespace].saveLastValue === 'true' || history[id][adapter.namespace].saveLastValue === true;
             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
             } else {
@@ -352,7 +351,6 @@ function main() {
                                 history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                             }
                             history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-                            history[id][adapter.namespace].saveLastValue = history[id][adapter.namespace].saveLastValue === 'true' || history[id][adapter.namespace].saveLastValue === true;
                             if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
                                 history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
                             } else {
@@ -604,7 +602,7 @@ function pushHistory(id, state, timerRelog) {
             state.ts = new Date().getTime();
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
         } else {
-            if (settings.changesOnly && history[id].skipped && settings.saveLastValue) {
+            if (settings.changesOnly && history[id].skipped) {
                 history[id].state = history[id].skipped;
                 pushHelper(id);
             }
