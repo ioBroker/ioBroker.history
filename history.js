@@ -278,6 +278,10 @@ function writeNulls(id, now) {
         if (tasksStart.length === 1) {
             processStartValues();
         }
+        if (history[id][adapter.namespace].changesRelogInterval > 0) {
+            if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
+            history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
+        }
     }
 }
 
