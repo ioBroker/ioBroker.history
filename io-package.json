@@ -65,7 +65,9 @@
         "enabled":                  true,
         "preserveSettings":         "custom",
         "authors": [
-            "bluefox <dogafox@gmail.com>", "hobbyquaker <hq@ccu.io>"
+            "bluefox <dogafox@gmail.com>",
+            "hobbyquaker <hq@ccu.io>",
+            "Apollon77 <ingo@fischer-ka.de>"
         ],
         "license":                  "MIT",
         "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
