@@ -24,7 +24,7 @@ To set up some data points to be stored they must be configured in admin "Object
 - **Log unchanged values any(s)** - When using "log changes only" you can set a time interval in seconds here after which also unchanged values will be re-logged into the DB
 
 ## Access values from Javascript adapter
-The sotred values can be accessed from Javascript adapter. E.g. with following code you can read the list of events for last hour:
+The sorted values can be accessed from Javascript adapter. E.g. with following code you can read the list of events for last hour:
 
 ```
 // Get 50 last stored events for all IDs
