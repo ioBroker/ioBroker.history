@@ -230,6 +230,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.6.6 (2017-12-20)
+* (bluefox) translations
+
 ## 1.6.5 (2017-10-05)
 * (Apollon77) fix relog value feature
 

@@ -3,12 +3,25 @@
         "name":                     "history",
         "title":                    "History",
         "desc":                     {
-            "en": "Logging of state history",
-            "de": "Loggt die Historie von einzelnen Zuständen",
-            "ru": "Сохранять историю событий для отдельных состояний"
+            "en": "Logging of the state history in files",
+            "de": "Protokollierung der Zustandsgeschichte in Dateien",
+            "ru": "Ведение истории событий в файлах",
+            "pt": "Registro do histórico de estado em arquivos",
+            "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
+            "fr": "Consignation de l'historique des états dans les fichiers",
+            "it": "Registrazione della cronologia di stato nei file"
         },
-        "version":                  "1.6.5",
+        "version":                  "1.6.6",
         "news": {
+            "1.6.6": {
+                "en": "Translations",
+                "de": "Übersetzungen",
+                "ru": "Переводы",
+                "pt": "Traduções",
+                "nl": "vertaalwerk",
+                "fr": "Traductions",
+                "it": "Traduzioni"
+            },
             "1.6.5": {
                 "en": "fix relog value feature",
                 "de": "Erneutes Logging korrigiert",
