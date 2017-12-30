@@ -15,7 +15,7 @@ var bufferChecker = null;
 var tasksStart = [];
 var finished   = false;
 
-var adapter = utils.adapter({
+var adapter = new utils.Adapter({
 
     name: 'history',
 
