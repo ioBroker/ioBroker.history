@@ -1,6 +1,6 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
-"use strict";
+'use strict';
 var cp         = require('child_process');
 var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
 var path       = require('path');
