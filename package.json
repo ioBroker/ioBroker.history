@@ -28,7 +28,7 @@
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.1",
-    "mocha": "^3.5.3",
+    "mocha": "^4.1.0",
     "chai": "^4.1.2"
   },
   "bugs": {
@@ -36,7 +36,7 @@
   },
   "main": "history.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha"
+    "test": "node node_modules/mocha/bin/mocha --exit"
   },
   "license": "MIT"
 }
