@@ -70,7 +70,7 @@ console.log('Use historyDir ' + historydir);
 if (delayMultiplicator != 1) console.log('Use Delay multiplicator ' + delayMultiplicator);
 if (logChangesOnly) console.log('Log changes only once per ' + (logChangesOnlyTime/60000) + ' minutes');
 
-var adapter = utils.adapter('history');
+var adapter = utils.Adapter('history');
 
 var breakIt = false;
 
