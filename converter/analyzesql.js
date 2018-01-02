@@ -31,7 +31,7 @@ var earliesValCachefile = __dirname + '/earliestDBValues.json';
 var existingTypes = {};
 var existingTypesCachefile = __dirname + '/existingDBTypes.json';
 
-var adapter = utils.adapter('history');
+var adapter = utils.Adapter('history');
 
 adapter.on('ready', function () {
     main();
