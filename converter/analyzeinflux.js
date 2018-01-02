@@ -28,7 +28,7 @@ var existingDataCachefile = __dirname + '/existingDBValues.json';
 var existingTypes = {};
 var existingTypesCachefile = __dirname + '/existingDBTypes.json';
 
-var adapter = utils.adapter('history');
+var adapter = utils.Adapter('history');
 
 var breakIt = false;
 
