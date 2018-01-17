@@ -11,8 +11,19 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version":                  "1.6.6",
+        "version":                  "1.7.0",
         "news": {
+            "1.7.0": {
+                "en": "Ready for Admin3",
+                "de": "Bereit für Admin3",
+                "ru": "Готово для Admin3",
+                "pt": "Pronto para Admin3",
+                "nl": "Klaar voor Admin3",
+                "fr": "Prêt pour Admin3",
+                "it": "Pronto per Admin3",
+                "es": "Listo para Admin3",
+                "pl": "Gotowy na Admin3"
+            },
             "1.6.6": {
                 "en": "Translations",
                 "de": "Übersetzungen",
@@ -88,6 +99,7 @@
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
 		"type":                     "storage",
         "supportCustoms":           true,
+        "materialize":              true,
         "getHistory":           	true,
 		"dependencies":             [{"js-controller": ">=0.12.0","admin": ">=1.6.10"}],
         "supportStopInstance":      2000,

@@ -1,4 +1,5 @@
 <html>
+<head>
 <meta charset="UTF-8">
 <title></title>
 <!-- these 4 files always have to be included -->
@@ -17,13 +18,13 @@
 <script type="text/javascript">
     var convertComma = null;
     function setValue(id, value, onChange) {
-        // example: select elements with id=key and class=value and insert value
-        if ($('#' + id + '.value').attr('type') === 'checkbox') {
-            $('#' + id + '.value').prop('checked', value).change(function () {
+        var $value = $('#' + id + '.value');
+        if ($value.attr('type') === 'checkbox') {
+            $value.prop('checked', value).change(function () {
                 onChange();
             });
         } else {
-            $('#' + id + '.value').val(value).change(function() {
+            $value.val(value).change(function() {
                 onChange();
             }).keyup(function() {
                 // Check that only numbers entered
@@ -33,13 +34,15 @@
                         var newVal = '';
                         for (var i = 0; i < val.length; i++) {
                             if ((val[i] >= '0' && val[i] <= '9') || val[i] === '-' || val[i] === '+' || val[i] === '.' || val[i] === ',') {
-                                if (val[i] === '.' && convertComma === true)  val[i] === ',';
-                                if (val[i] === ',' && convertComma === false) val[i] === '.';
+                                if (val[i] === '.' && convertComma === true)  val[i] = ',';
+                                if (val[i] === ',' && convertComma === false) val[i] = '.';
                                 newVal += val[i];
                             }
                         }
 
-                        if (val != newVal) $(this).val(newVal);
+                        if (val != newVal) {
+                            $(this).val(newVal);
+                        }
                     }
                 }
                 $(this).trigger('change');
@@ -48,6 +51,8 @@
     }
 
     function load(settings, onChange) {
+        $('#tabs').tabs();
+
         // works only with newest admin adapter
         if (typeof systemConfig !== 'undefined') {
             convertComma = systemConfig.common.isFloatComma;
@@ -56,32 +61,15 @@
         if (settings.saveLastValue === undefined) settings.saveLastValue = false;
 
         for (var key in settings) {
-            setValue(key, settings[key], onChange);
+            if (settings.hasOwnProperty(key)) {
+                setValue(key, settings[key], onChange);
+            }
         }
-
-        $('#demoStart, #demoEnd').datepicker().val(new Date().toDateString());
-
-        $('#generateDemo').button().click(function () {
-            $(".loader").show();
-            sendTo("", "generateDemo", {
-                id: $('#demoID').val(),
-                start: $('#demoStart').val(),
-                end: $('#demoEnd').val(),
-                step: $('#demoStep').val(),
-                curve: $('#demoCurve').val()
-            }, function (e) {
-                $(".loader").hide();
-            })
-        });
 
         onChange(false);
     }
 
-    // ... and the function save has to exist.
-    // you have to make sure the callback is called with the settings object as first param!
     function save(callback) {
-        // example: select elements with class=value and build settings object
-        changed = false;
         var settings = {};
         $('.value').each(function () {
             var $this = $(this);
@@ -96,147 +84,90 @@
         callback(settings);
     }
 </script>
-
-<style>
-    .loader {
-        display: none;
-        position: absolute;
-        left: calc(50% - 0.5em);
-        top: calc(50% - 0.5em - 72px);
-        font-size: 90px;
-        text-indent: -9999em;
-        overflow: hidden;
-        width: 1em;
-        height: 1em;
-        border-radius: 50%;
-        margin: 72px auto;
-        -webkit-transform: translateZ(0);
-        -ms-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-animation: load6 1.7s infinite ease;
-        animation: load6 1.7s infinite ease;
-    }
-
-    @-webkit-keyframes load6 {
-        0% {
-            -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, 0 -0.83em 0 -0.42em #00ffff, 0 -0.83em 0 -0.44em #00ffff, 0 -0.83em 0 -0.46em #00ffff, 0 -0.83em 0 -0.477em #00ffff;
-        }
-        5%,
-        95% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, 0 -0.83em 0 -0.42em #00ffff, 0 -0.83em 0 -0.44em #00ffff, 0 -0.83em 0 -0.46em #00ffff, 0 -0.83em 0 -0.477em #00ffff;
-        }
-        10%,
-        59% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, -0.087em -0.825em 0 -0.42em #00ffff, -0.173em -0.812em 0 -0.44em #00ffff, -0.256em -0.789em 0 -0.46em #00ffff, -0.297em -0.775em 0 -0.477em #00ffff;
-        }
-        20% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, -0.338em -0.758em 0 -0.42em #00ffff, -0.555em -0.617em 0 -0.44em #00ffff, -0.671em -0.488em 0 -0.46em #00ffff, -0.749em -0.34em 0 -0.477em #00ffff;
-        }
-        38% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, -0.377em -0.74em 0 -0.42em #00ffff, -0.645em -0.522em 0 -0.44em #00ffff, -0.775em -0.297em 0 -0.46em #00ffff, -0.82em -0.09em 0 -0.477em #00ffff;
-        }
-        100% {
-            -webkit-transform: rotate(360deg);
-            transform: rotate(360deg);
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, 0 -0.83em 0 -0.42em #00ffff, 0 -0.83em 0 -0.44em #00ffff, 0 -0.83em 0 -0.46em #00ffff, 0 -0.83em 0 -0.477em #00ffff;
-        }
-    }
-
-    @keyframes load6 {
-        0% {
-            -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, 0 -0.83em 0 -0.42em #00ffff, 0 -0.83em 0 -0.44em #00ffff, 0 -0.83em 0 -0.46em #00ffff, 0 -0.83em 0 -0.477em #00ffff;
-        }
-        5%,
-        95% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, 0 -0.83em 0 -0.42em #00ffff, 0 -0.83em 0 -0.44em #00ffff, 0 -0.83em 0 -0.46em #00ffff, 0 -0.83em 0 -0.477em #00ffff;
-        }
-        10%,
-        59% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, -0.087em -0.825em 0 -0.42em #00ffff, -0.173em -0.812em 0 -0.44em #00ffff, -0.256em -0.789em 0 -0.46em #00ffff, -0.297em -0.775em 0 -0.477em #00ffff;
-        }
-        20% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, -0.338em -0.758em 0 -0.42em #00ffff, -0.555em -0.617em 0 -0.44em #00ffff, -0.671em -0.488em 0 -0.46em #00ffff, -0.749em -0.34em 0 -0.477em #00ffff;
-        }
-        38% {
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, -0.377em -0.74em 0 -0.42em #00ffff, -0.645em -0.522em 0 -0.44em #00ffff, -0.775em -0.297em 0 -0.46em #00ffff, -0.82em -0.09em 0 -0.477em #00ffff;
-        }
-        100% {
-            -webkit-transform: rotate(360deg);
-            transform: rotate(360deg);
-            box-shadow: 0 -0.83em 0 -0.4em #00ffff, 0 -0.83em 0 -0.42em #00ffff, 0 -0.83em 0 -0.44em #00ffff, 0 -0.83em 0 -0.46em #00ffff, 0 -0.83em 0 -0.477em #00ffff;
-        }
-    }
-</style>
+</head>
+<body>
 <div id="adapter-container">
-    <div id="loader" class="loader"></div>
     <table>
         <tr>
             <td><img src="history.png"></td>
             <td style="padding-top: 20px;padding-left: 10px"><h3 class="translate">History adapter settings</h3></td>
         </tr>
     </table>
-    <div class="translate" style="margin:20px">note</div>
-    <br>
-    <h4 style="width: calc(100% - 10px)" class="translate">Storage settings:</h4>
-    <table>
-        <tr>
-            <td class="translate">storeDir</td>
-            <td><input id="storeDir" type="text" class="value"/></td>
-            <td class="translate"></td>
-        </tr>
-        <tr>
-            <td class="translate">storeFrom</td>
-            <td><input id="storeFrom" type="checkbox" class="value"/></td>
-            <td class="translate"></td>
-        </tr>
-        <tr>
-            <td class="translate">storeAck</td>
-            <td><input id="storeAck" type="checkbox" class="value"/></td>
-            <td class="translate"></td>
-        </tr>
-    </table>
-    <h4 style="width: calc(100% - 10px)" class="translate">Default settings:</h4>
-    <table>
-        <tr>
-            <td class="translate">maxLength</td>
-            <td><input id="maxLength" type="text" size="5" class="value number"/></td>
-            <td class="translate"></td>
-        </tr>
-        <tr>
-            <td class="translate">debounce</td>
-            <td><input id="debounce" type="text" size="5" class="value number"/></td>
-            <td class="translate"></td>
-        </tr>
-        <tr>
-            <td class="translate">log changes interval(s)</td>
-            <td><input id="changesRelogInterval" type="text" size="5" class="value number"/></td>
-            <td class="translate">0 = disable</td>
-        </tr>
-        <tr>
-            <td class="translate">log changes minimal delta</td>
-            <td><input id="changesMinDelta" type="text" size="5" class="value number"/></td>
-            <td class="translate">0 = disable delta check</td>
-        </tr>
-        <tr>
-            <td class="translate" >retention</td>
-            <td><select id="retention" class="value">
-                <option value="0"           class="translate">keep forever</option>
-                <option value="63072000"    class="translate">2 years</option>
-                <option value="31536000"    class="translate">1 year</option>
-                <option value="15811200"    class="translate">6 months</option>
-                <option value="7948800"     class="translate">3 months</option>
-                <option value="2678400"     class="translate">1 months</option>
-                <option value="1209600"     class="translate">2 weeks</option>
-                <option value="604800"      class="translate">1 week</option>
-                <option value="432000"      class="translate">5 days</option>
-                <option value="259200"      class="translate">3 days</option>
-                <option value="86400"       class="translate">1 day</option>
-            </select></td>
-        </tr>
-    </table>
+    <div id="tabs">
+        <ul>
+            <li><a href="#tab-main" class="translate">Storage settings</a></li>
+            <li><a href="#tab-default" class="translate">Default settings</a></li>
+        </ul>
+        <div id="tab-main">
+            <table>
+                <tr>
+                    <td colspan="3">
+                        <h4 style="width: calc(100% - 10px)" class="translate">Storage settings:</h4>
+                        <div class="translate" style="margin:20px">note</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="storeDir" class="translate">storeDir</label></td>
+                    <td><input id="storeDir" class="value"/></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><label for="storeFrom" class="translate">storeFrom</label></td>
+                    <td><input id="storeFrom" type="checkbox" class="value"/></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><label for="storeAck" class="translate">storeAck</label></td>
+                    <td><input id="storeAck" type="checkbox" class="value"/></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div id="tab-default">
+            <table>
+                <tr>
+                    <td colspan="3"><h4 class="translate">Default settings:</h4></td>
+                </tr>
+                <tr>
+                    <td><label for="maxLength" class="translate">maxLength</label></td>
+                    <td><input id="maxLength"  size="5" class="value number"/></td>
+                    <td class="translate"></td>
+                </tr>
+                <tr>
+                    <td><label for="debounce" class="translate">debounce</label></td>
+                    <td><input id="debounce"  size="5" class="value number"/></td>
+                    <td class="translate"></td>
+                </tr>
+                <tr>
+                    <td><label for="changesRelogInterval" class="translate">log changes interval(s)</label></td>
+                    <td><input id="changesRelogInterval"  size="5" class="value number"/></td>
+                    <td class="translate">0 = disable</td>
+                </tr>
+                <tr>
+                    <td><label for="changesMinDelta" class="translate">log changes minimal delta</label></td>
+                    <td><input id="changesMinDelta"  size="5" class="value number"/></td>
+                    <td class="translate">0 = disable delta check</td>
+                </tr>
+                <tr>
+                    <td><label class="translate" for="retention">retention</label></td>
+                    <td><select id="retention" class="value">
+                        <option value="0" class="translate">keep forever</option>
+                        <option value="63072000" class="translate">2 years</option>
+                        <option value="31536000" class="translate">1 year</option>
+                        <option value="15811200" class="translate">6 months</option>
+                        <option value="7948800" class="translate">3 months</option>
+                        <option value="2678400" class="translate">1 months</option>
+                        <option value="1209600" class="translate">2 weeks</option>
+                        <option value="604800" class="translate">1 week</option>
+                        <option value="432000" class="translate">5 days</option>
+                        <option value="259200" class="translate">3 days</option>
+                        <option value="86400" class="translate">1 day</option>
+                    </select></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
+</body>
 </html>

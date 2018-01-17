@@ -1,6 +1,5 @@
 ![Logo](admin/history.png)
 # ioBroker.history
-
 ===============================
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
@@ -230,6 +229,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.7.0 (2018-01-17)
+* (bluefox) Ready for Admin3
+
 ## 1.6.6 (2017-12-20)
 * (bluefox) translations
 
