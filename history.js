@@ -638,8 +638,10 @@ function reLogHelper(_id) {
     }
     history[_id].relogTimeout = null;
     if (history[_id].skipped) {
-        pushHistory(_id, history[_id].skipped, true);
+        history[_id].state = history[_id].skipped;
+        history[_id].state.from = 'system.adapter.' + adapter.namespace;
         history[_id].skipped = null;
+        pushHistory(_id, history[_id].state, true);
     }
     else {
         adapter.getForeignState(_id, function (err, state) {

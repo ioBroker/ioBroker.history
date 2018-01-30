@@ -11,8 +11,13 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version":                  "1.7.0",
+        "version":                  "1.7.1",
         "news": {
+            "1.7.1": {
+                "en": "fix relog value feature",
+                "de": "Erneutes Logging korrigiert",
+                "ru": "fix relog value feature"
+            },
             "1.7.0": {
                 "en": "Ready for Admin3",
                 "de": "Bereit für Admin3",
