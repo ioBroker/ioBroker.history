@@ -229,6 +229,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.7.1 (2018-01-31)
+* (Bluefox) Admin3 Fixes
+
 ## 1.7.0 (2018-01-17)
 * (bluefox) Ready for Admin3
 
