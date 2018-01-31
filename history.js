@@ -96,6 +96,7 @@ var adapter = new utils.Adapter({
                 adapter.log.info('disabled logging of ' + id);
                 if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
                 if (history[id].timeout) clearTimeout(history[id].timeout);
+                storeCached(true, id);
                 delete history[id];
             }
         }
@@ -129,10 +130,11 @@ process.on('SIGTERM', function () {
     }
 });
 
-function storeCached(isFinishing) {
+function storeCached(isFinishing, onlyId) {
     var now = new Date().getTime();
 
     for (var id in history) {
+        if (onlyId !== undefined && onlyId !== id) continue;
         if (isFinishing) {
             if (history[id].skipped) {
                 history[id].list.push(history[id].skipped);
@@ -144,8 +146,8 @@ function storeCached(isFinishing) {
                 state.ts   = now;
                 state.from = 'system.adapter.' + adapter.namespace;
                 history[id].list.push(state);
-                nullValue.ts += 4;
-                nullValue.lc += 4;
+                nullValue.ts += 1;
+                nullValue.lc += 1;
             }
 
             // terminate values with null to indicate adapter stop.
@@ -160,6 +162,7 @@ function storeCached(isFinishing) {
 }
 
 function finish(callback) {
+    adapter.unsubscribeForeignStates('*');
     if (bufferChecker) {
         clearInterval(bufferChecker);
         bufferChecker = null;
