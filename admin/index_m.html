@@ -23,7 +23,7 @@
                 onChange();
             });
         } else {
-            $value.val(value).change(function() {
+            $value.val(value).on('change', function() {
                 onChange();
             }).keyup(function() {
                 // Check that only numbers entered
