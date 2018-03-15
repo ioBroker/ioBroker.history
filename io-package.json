@@ -11,8 +11,19 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version":                  "1.7.1",
+        "version":                  "1.7.2",
         "news": {
+            "1.7.2": {
+                "en": "Admin3 Fixes",
+                "de": "Admin3-Korrekturen",
+                "ru": "Исправления Admin3",
+                "pt": "Admin3 Fixes",
+                "nl": "Admin3 Fixes",
+                "fr": "Corrections Admin3",
+                "it": "Correzioni di Admin3",
+                "es": "Correcciones de Admin3",
+                "pl": "Poprawki Admin3"
+            },
             "1.7.1": {
                 "en": "Admin3 Fixes",
                 "de": "Admin3-Korrekturen",
