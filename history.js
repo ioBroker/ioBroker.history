@@ -59,7 +59,7 @@ var adapter = new utils.Adapter({
             if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
                 history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
             } else {
-                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || parseInt(adapter.config.retention, 10) || 0;
+                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
             }
             if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
                 history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
@@ -350,7 +350,7 @@ function main() {
                             if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
                                 history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
                             } else {
-                                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || parseInt(adapter.config.retention, 10) || 0;
+                                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
                             }
                             if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
                                 history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
