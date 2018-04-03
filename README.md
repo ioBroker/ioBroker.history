@@ -229,6 +229,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.7.4 (2018-04-03)
+* (AlCalzone) Fix filename handling for states with special characters
+
 ## 1.7.3 (2018-03-28)
 * (Apollon77) Respect 'keep forever' setting for retention from datapoint configuration
 

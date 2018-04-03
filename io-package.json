@@ -11,8 +11,19 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version":                  "1.7.3",
+        "version":                  "1.7.4",
         "news": {
+            "1.7.4": {
+                "en": "Fix filename handling for states with special characters",
+                "de": "Behebt die Behandlung von Dateinamen für Zustände mit Sonderzeichen",
+                "ru": "Исправить обработку имен файлов для состояний со специальными символами",
+                "pt": "Corrigir manipulação de nome de arquivo para estados com caracteres especiais",
+                "nl": "Bestandsnaamafhandeling voor staten met speciale tekens oplossen",
+                "fr": "Correction de la gestion des noms de fichiers pour les états avec des caractères spéciaux",
+                "it": "Correggere la gestione dei nomi dei file per gli stati con caratteri speciali",
+                "es": "Corregir el manejo del nombre de archivo para estados con caracteres especiales",
+                "pl": "Popraw obsługę plików dla stanów ze znakami specjalnymi"
+            },
             "1.7.3": {
                 "en": "Respect 'keep forever' setting for retention from datapoint configuration",
                 "de": "Beachten der 'Keep forever' Einstellung für die Aufbewahrung von Datenpunktkonfiguration",
