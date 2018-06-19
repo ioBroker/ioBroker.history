@@ -22,6 +22,9 @@ To set up some data points to be stored they must be configured in admin "Object
 - **Storage retention** - How many values in the past will be stored on disk.
 - **Log unchanged values any(s)** - When using "log changes only" you can set a time interval in seconds here after which also unchanged values will be re-logged into the DB
 
+Most of these values will be pre filled on the detail settings for the datapoint and can be changed there. Additionally you can an "alias ID" on the datapoint page. With this you can, e.g. after switching a device and datapoint names changed, still log the data to the former ID by just entering this ID there and all data will be logged as this one.
+
+
 ## Access values from Javascript adapter
 The sorted values can be accessed from Javascript adapter. E.g. with following code you can read the list of events for last hour:
 
@@ -232,7 +235,7 @@ Possible options and Parameter:
 
 ## Changelog
 ## 1.8.0 (2018-06-19)
-* (Apollon77) Add option to log datapoints as other ID (alias) to easier migrate devices and such
+* (Apollon77) Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs
 
 ## 1.7.4 (2018-04-03)
 * (AlCalzone) Fix filename handling for states with special characters
