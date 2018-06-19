@@ -99,7 +99,7 @@ var adapter = new utils.Adapter({
                 writeNulls(id);
             }
 
-            adapter.log.info('enabled logging of ' + id + ' (Count=' + count + '), Alias=' + (id !== realId));
+            adapter.log.info('enabled logging of ' + id + ' (Count=' + Object.keys(history).length + '), Alias=' + (id !== realId));
         } else {
             if (history[id]) {
                 adapter.log.info('disabled logging of ' + id);
