@@ -135,34 +135,33 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             }, function (result) {
                                 expect(result.error).to.be.undefined;
                                 expect(result.success).to.be.true;
-                                // wait till adapter receives the new settings
                                 objects.setObject('history.0.testValue2', {
-                                        common: {
-                                            type: 'number',
-                                            role: 'state'
-                                        },
-                                        type: 'state'
+                                    common: {
+                                        type: 'number',
+                                        role: 'state'
                                     },
-                                    function () {
-                                        sendTo('history.0', 'enableHistory', {
-                                            id: 'history.0.testValue2',
-                                            options: {
-                                                changesOnly:  true,
-                                                debounce:     0,
-                                                retention:    31536000,
-                                                maxLength:    3,
-                                                changesMinDelta: 0.5,
-                                                aliasId: 'history.0.testValue2-alias'
-                                            }
-                                        }, function (result) {
-                                            expect(result.error).to.be.undefined;
-                                            expect(result.success).to.be.true;
-                                            // wait till adapter receives the new settings
-                                            setTimeout(function () {
-                                                done();
-                                            }, 2000);
-                                        });
+                                    type: 'state'
+                                },
+                                function () {
+                                    sendTo('history.0', 'enableHistory', {
+                                        id: 'history.0.testValue2',
+                                        options: {
+                                            changesOnly:  true,
+                                            debounce:     0,
+                                            retention:    31536000,
+                                            maxLength:    3,
+                                            changesMinDelta: 0.5,
+                                            aliasId: 'history.0.testValue2-alias'
+                                        }
+                                    }, function (result) {
+                                        expect(result.error).to.be.undefined;
+                                        expect(result.success).to.be.true;
+                                        // wait till adapter receives the new settings
+                                        setTimeout(function () {
+                                            done();
+                                        }, 2000);
                                     });
+                                });
                             });
                         });
                 });
