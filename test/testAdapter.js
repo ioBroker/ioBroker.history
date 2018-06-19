@@ -147,7 +147,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                         sendTo('history.0', 'enableHistory', {
                                             id: 'history.0.testValue2',
                                             options: {
-                                                changesOnly:  false,
+                                                changesOnly:  true,
                                                 debounce:     0,
                                                 retention:    31536000,
                                                 maxLength:    3,

@@ -99,10 +99,11 @@ var adapter = new utils.Adapter({
                 writeNulls(id);
             }
 
-            adapter.log.info('enabled logging of ' + id + ' (Count=' + Object.keys(history).length + '), Alias=' + (id !== realId));
+            adapter.log.info('enabled logging of ' + id + ', Alias=' + (id !== realId) + ', ' + Object.keys(history).length + ' points now activated');
         } else {
+            id = aliasMap[id] ? aliasMap[id] : id;
             if (history[id]) {
-                adapter.log.info('disabled logging of ' + id);
+                adapter.log.info('disabled logging of ' + id + ', ' + Object.keys(history).length + ' points now activated');
                 if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
                 if (history[id].timeout) clearTimeout(history[id].timeout);
                 storeCached(true, id);
@@ -201,8 +202,6 @@ function finish(callback) {
 function processMessage(msg) {
     if (msg.command === 'getHistory') {
         getHistory(msg);
-    } else if (msg.command === 'generateDemo') {
-        generateDemo(msg);
     } else if (msg.command === 'storeState') {
         storeState(msg);
     } else if (msg.command === 'enableHistory') {
@@ -400,7 +399,9 @@ function main() {
             }
             if (count < 20) {
                 for (var _id in history) {
-                    adapter.subscribeForeignStates(history[_id].realId);
+                    if (history.hasOwnProperty(_id)) {
+                        adapter.subscribeForeignStates(history[_id].realId);
+                    }
                 }
             } else {
                 subscribeAll = true;
