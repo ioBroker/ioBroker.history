@@ -334,7 +334,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 console.log(JSON.stringify(result2.result, null, 2));
                 expect(result2.result.length).to.be.equal(2);
                 for (var i = 0; i < result2.result.length; i++) {
-                    expect(result2.result[i]).to.be.equal(result.result[i]);
+                    expect(result2.result[i].val).to.be.equal(result.result[i].val);
                 }
 
                 done();
