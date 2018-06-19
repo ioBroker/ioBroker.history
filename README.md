@@ -104,7 +104,8 @@ sendTo('history.0', 'enableHistory', {
         debounce:     0,
         retention:    31536000,
         maxLength:    3,
-        changesMinDelta: 0.5
+        changesMinDelta: 0.5,
+        aliasId: ''
     }
 }, function (result) {
     if (result.error) {
@@ -146,7 +147,8 @@ sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             "maxLength":3,
             "changesMinDelta":0.5,
             "enabled":true,
-            "changesRelogInterval":0
+            "changesRelogInterval":0,
+            "aliasId": ""
         }
         ...
     }
@@ -229,6 +231,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.8.0 (2018-06-19)
+* (Apollon77) Add option to log datapoints as other ID (alias) to easier migrate devices and such
+
 ## 1.7.4 (2018-04-03)
 * (AlCalzone) Fix filename handling for states with special characters
 

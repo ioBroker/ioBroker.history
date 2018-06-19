@@ -136,30 +136,35 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                 expect(result.error).to.be.undefined;
                                 expect(result.success).to.be.true;
                                 // wait till adapter receives the new settings
-                                setTimeout(function () {
-                                    done();
-                                }, 2000);
+                                objects.setObject('history.0.testValue2', {
+                                        common: {
+                                            type: 'number',
+                                            role: 'state'
+                                        },
+                                        type: 'state'
+                                    },
+                                    function () {
+                                        sendTo('history.0', 'enableHistory', {
+                                            id: 'history.0.testValue2',
+                                            options: {
+                                                changesOnly:  false,
+                                                debounce:     0,
+                                                retention:    31536000,
+                                                maxLength:    3,
+                                                changesMinDelta: 0.5,
+                                                aliasId: 'history.0.testValue2-alias'
+                                            }
+                                        }, function (result) {
+                                            expect(result.error).to.be.undefined;
+                                            expect(result.success).to.be.true;
+                                            // wait till adapter receives the new settings
+                                            setTimeout(function () {
+                                                done();
+                                            }, 2000);
+                                        });
+                                    });
                             });
                         });
-
-                    /*objects.getObject('history.0.testValue', function (err, obj) {
-                        obj.common.custom = {
-                            'history.0': {
-                                enabled:      true,
-                                changesOnly:  false,
-                                debounce:     0,
-                                retention:    31536000,
-                                maxLength:    3
-                            }
-                        };
-                        objects.setObject('history.0.testValue', obj, function (err) {
-                            // wait till adapter receives the new settings
-                            setTimeout(function () {
-                                done();
-                            }, 2000);
-                        });
-                    });*/
-
                 });
         });
     });
@@ -211,7 +216,21 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                                             if (err) {
                                                                 console.log(err);
                                                             }
-                                                            done();
+                                                            setTimeout(function () {
+                                                                states.setState('history.0.testValue2', {val: 1, ts: now + 12000}, function (err) {
+                                                                    if (err) {
+                                                                        console.log(err);
+                                                                    }
+                                                                    setTimeout(function () {
+                                                                        states.setState('history.0.testValue2', {val: 3, ts: now + 19000}, function (err) {
+                                                                            if (err) {
+                                                                                console.log(err);
+                                                                            }
+                                                                            done();
+                                                                        });
+                                                                    }, 100);
+                                                                });
+                                                            }, 100);
                                                         });
                                                     }, 100);
                                                 });
@@ -285,6 +304,41 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             expect(result.result[1].val).to.be.equal(2.14);
             expect(result.result[2].val).to.be.equal(2.14);
             done();
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Read values from DB using GetHistory for aliased testValue2', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValue2',
+            options: {
+                start:     now,
+                end:       now + 30000,
+                count:     50,
+                aggregate: 'none'
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(2);
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValue2-alias',
+                options: {
+                    start:     now,
+                    end:       now + 30000,
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result2) {
+                console.log(JSON.stringify(result2.result, null, 2));
+                expect(result2.result.length).to.be.equal(2);
+                for (var i = 0; i < result2.result.length; i++) {
+                    expect(result2.result[i]).to.be.equal(result.result[i]);
+                }
+                
+                done();
+            });
         });
     });
 

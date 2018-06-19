@@ -10,6 +10,7 @@ var GetHistory = require(__dirname + '/lib/getHistory.js');
 var Aggregate  = require(__dirname + '/lib/aggregate.js');
 
 var history    = {};
+var aliasMap   = {};
 var subscribeAll = false;
 var bufferChecker = null;
 var tasksStart = [];
@@ -27,6 +28,13 @@ var adapter = new utils.Adapter({
                 (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled)
             )
         ) {
+            var realId = id;
+            if (obj.common.custom && obj.common.custom[adapter.namespace] && obj.common.custom[adapter.namespace].aliasId) {
+                aliasMap[id] = obj.common.custom[adapter.namespace].aliasId;
+                adapter.log.debug('Found Alias: ' + id + ' --> ' + aliasMap[id]);
+                id = aliasMap[id];
+            }
+
             var writeNull = !history[id];
             var state     = history[id] ? history[id].state   : null;
             var list      = history[id] ? history[id].list    : null;
@@ -35,8 +43,8 @@ var adapter = new utils.Adapter({
             if (!history[id] && !subscribeAll) {
                 // unsubscribe
                 for (var _id in history) {
-                    if (history.hasOwnProperty(_id)) {
-                        adapter.unsubscribeForeignStates(_id);
+                    if (history.hasOwnProperty(history[_id].realId)) {
+                        adapter.unsubscribeForeignStates(history[_id].realId);
                     }
                 }
                 subscribeAll = true;
@@ -50,6 +58,7 @@ var adapter = new utils.Adapter({
             history[id].state   = state;
             history[id].list    = list;
             history[id].timeout = timeout;
+            history[id].realId  = realId;
 
             if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
                 history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
@@ -90,7 +99,7 @@ var adapter = new utils.Adapter({
                 writeNulls(id);
             }
 
-            adapter.log.info('enabled logging of ' + id);
+            adapter.log.info('enabled logging of ' + id + ' (Count=' + count + '), Alias=' + (id !== realId));
         } else {
             if (history[id]) {
                 adapter.log.info('disabled logging of ' + id);
@@ -103,6 +112,7 @@ var adapter = new utils.Adapter({
     },
 
     stateChange: function (id, state) {
+        id = aliasMap[id] ? aliasMap[id] : id;
         pushHistory(id, state);
     },
 
@@ -239,7 +249,7 @@ function processStartValues() {
     if (tasksStart && tasksStart.length) {
         var task = tasksStart.shift();
         if (history[task.id][adapter.namespace].changesOnly) {
-            adapter.getForeignState(task.id, function (err, state) {
+            adapter.getForeignState(history[task.id].realId, function (err, state) {
                 var now = task.now || new Date().getTime();
                 pushHistory(task.id, {
                     val:  null,
@@ -326,6 +336,12 @@ function main() {
                 for (var i = 0, l = doc.rows.length; i < l; i++) {
                     if (doc.rows[i].value) {
                         var id = doc.rows[i].id;
+                        var realId = id;
+                        if (doc.rows[i].value[adapter.namespace] && doc.rows[i].value[adapter.namespace].aliasId) {
+                            aliasMap[id] = doc.rows[i].value[adapter.namespace].aliasId;
+                            adapter.log.debug('Found Alias: ' + id + ' --> ' + aliasMap[id]);
+                            id = aliasMap[id];
+                        }
                         history[id] = doc.rows[i].value;
 
                         // todo remove it somewhen (2016.08)
@@ -341,7 +357,7 @@ function main() {
                             delete history[id];
                         } else {
                             count++;
-                            adapter.log.info('enabled logging of ' + id);
+                            adapter.log.info('enabled logging of ' + id + ' (Count=' + count + '), Alias=' + (id !== realId));
                             if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
                                 history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
                             } else {
@@ -376,13 +392,15 @@ function main() {
                             if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
                                 history[id][adapter.namespace].retention += 86400;
                             }
+
+                            history[id].realId  = realId;
                         }
                     }
                 }
             }
             if (count < 20) {
                 for (var _id in history) {
-                    adapter.subscribeForeignStates(_id);
+                    adapter.subscribeForeignStates(history[_id].realId);
                 }
             } else {
                 subscribeAll = true;
@@ -400,155 +418,7 @@ function main() {
 
     adapter.subscribeForeignObjects('*');
 }
-/*
-function generateDemo(msg) {
-    var options = [
-        msg.message.curve   || 'sin',                         // 0 curve
-        msg.message.end     || new Date().toDateString(),     // 1 end
-        msg.message.start   || new Date().setDate(-1),        // 2 start
-        msg.message.step    || 60,                            // 3 step
-        msg.message.id      || 'Demo_Data',                   // 4 id
-        adapter.config.storeDir                               // 5 path
-    ];
 
-    function fork(options) {
-
-        var newDay;
-
-        var path = options[5];
-        var fileName = '/history.' + adapter.namespace + '.' + options[4] + '.json';
-
-        var data    = [];
-        var start   = new Date(options[2]).getTime();
-        var end     = new Date(options[1]).getTime();
-        var value   = 1;
-        var sin     = 0.1;
-        var up      = true;
-        var curve   = options[0];
-
-        var step    = options[3] * 1000;
-        var oldDay;
-
-        if (end < start) {
-            var tmp = end; end = start; start = tmp;
-        }
-
-        end = new Date(end).setHours(24);
-
-        function generate() {
-            oldDay = new Date(start).getDay();
-            for (start; start <= end;) {
-
-                newDay = new Date(start + step).getDay();
-                if (newDay !== oldDay) {
-                    save();
-                    break;
-                }
-
-                data.push({
-                    ts:  new Date(start).getTime(),
-                    val: value,
-                    q:   0,
-                    ack: true
-                });
-
-                if (curve === 'sin') {
-                    if (sin === 6.2) {
-                        sin = 0;
-                    } else {
-                        sin = Math.round((sin + 0.1) * 10) / 10;
-                    }
-                    value = Math.round(Math.sin(sin) * 10000) / 100;
-                } else if (curve === 'dec') {
-                    value++;
-                } else if (curve === 'inc') {
-                    value--;
-                } else {
-                    if (up === true) {
-                        value++;
-                    } else {
-                        value--;
-                    }
-                }
-                start += step;
-            }
-        }
-
-        function save() {
-            try {
-                if (!fs.existsSync(path + GetHistory.ts2day(start))) {
-                    fs.mkdirSync(path + GetHistory.ts2day(start));
-                }
-            } catch (err) {
-                adapter.log.error(err);
-            }
-
-            fs.writeFile(path + GetHistory.ts2day(start) + fileName, JSON.stringify(data), 'utf8', function (err, res) {
-                data = [];
-                up = !up;
-
-                data.push({
-                    ts:   new Date(start).getTime(),
-                    val:  value,
-                    q:    0,
-                    ack:  true
-                });
-
-                if (curve === 'sin') {
-                    if (sin === 6.2) {
-                        sin = 0;
-                    } else {
-                        sin = Math.round((sin + 0.1) * 10) / 10;
-                    }
-                    value = Math.round(Math.sin(sin) * 10000) / 100;
-                } else if (curve === 'dec') {
-                    value++;
-                } else if (curve === 'inc') {
-                    value--;
-                } else {
-                    if (up === true) {
-                        value++;
-                    } else {
-                        value--;
-                    }
-                }
-
-                start += step;
-
-                if (start < end){
-                    generate();
-                } else {
-                    var history = {};
-                    history[adapter.namespace] = {
-                        enabled:        false,
-                        changesOnly:    true,
-                        debounce:       1000,
-                        maxLength:      960,
-                        retention:      0
-                    };
-
-                    adapter.setObject('demo.' + options[4], {
-                        type: 'state',
-                        common: {
-                            name:       options[4],
-                            type:       'state',
-                            enabled:    false,
-                            history:    history
-                        }
-                    });
-                    adapter.sendTo(msg.from, msg.command, 'finish', msg.callback);
-                }
-            });
-        }
-
-        //var x = new Date().getTime();
-
-        generate();
-    }
-
-    fork(options);
-}
-*/
 function pushHistory(id, state, timerRelog) {
     if (timerRelog === undefined) timerRelog = false;
     // Push into history
@@ -647,7 +517,7 @@ function reLogHelper(_id) {
         pushHistory(_id, history[_id].state, true);
     }
     else {
-        adapter.getForeignState(_id, function (err, state) {
+        adapter.getForeignState(history[_id].realId, function (err, state) {
             if (err) {
                 adapter.log.info('init timed Relog: can not get State for ' + _id + ' : ' + err);
             }
@@ -928,7 +798,9 @@ function getHistory(msg) {
         addId:      msg.message.options.addId || false,
         sessionId:  msg.message.options.sessionId
     };
-
+    if (options.id && aliasMap[options.id]) {
+        options.id = aliasMap[options.id];
+    }
     if (options.start > options.end) {
         var _end      = options.end;
         options.end   = options.start;
@@ -1071,13 +943,14 @@ function storeState(msg) {
         }, msg.callback);
         return;
     }
-
+    var id;
     if (Array.isArray(msg.message)) {
         adapter.log.debug('storeState: store ' + msg.message.length + ' states for multiple ids');
         for (var i = 0; i < msg.message.length; i++) {
-            if (history[msg.message[i].id]) {
-                history[msg.message[i].id].state = msg.message[i].state;
-                pushHelper(msg.message[i].id);
+            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+            if (history[id]) {
+                history[id].state = msg.message[i].state;
+                pushHelper(id);
             }
             else {
                 adapter.log.warn('storeState: history not enabled for ' + msg.message[i].id + '. Ignoring');
@@ -1086,9 +959,10 @@ function storeState(msg) {
     } else if (Array.isArray(msg.message.state)) {
         adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
         for (var j = 0; j < msg.message.state.length; j++) {
-            if (history[msg.message.id]) {
-                history[msg.message.id].state = msg.message.state[j];
-                pushHelper(msg.message.id);
+            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message[i].id;
+            if (history[id]) {
+                history[id].state = msg.message.state[j];
+                pushHelper(id);
             }
             else {
                 adapter.log.warn('storeState: history not enabled for ' + msg.message.id + '. Ignoring');
@@ -1096,9 +970,10 @@ function storeState(msg) {
         }
     } else {
         adapter.log.debug('storeState: store 1 state for ' + msg.message.id);
-        if (history[msg.message.id]) {
-            history[msg.message.id].state = msg.message.state;
-            pushHelper(msg.message.id);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message[i].id;
+        if (history[id]) {
+            history[id].state = msg.message.state;
+            pushHelper(id);
         }
         else {
             adapter.log.warn('storeState: history not enabled for ' + msg.message.id + '. Ignoring');
@@ -1106,7 +981,7 @@ function storeState(msg) {
     }
 
     adapter.sendTo(msg.from, msg.command, {
-        success:                  true
+        success: true
     }, msg.callback);
 }
 
@@ -1175,7 +1050,7 @@ function getEnabledDPs(msg) {
     var data = {};
     for (var id in history) {
         if (!history.hasOwnProperty(id)) continue;
-        data[id] = history[id][adapter.namespace];
+        data[history[id].realId] = history[id][adapter.namespace];
     }
 
     adapter.sendTo(msg.from, msg.command, data, msg.callback);

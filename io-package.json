@@ -11,7 +11,7 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version":                  "1.7.4",
+        "version":                  "1.8.0",
         "news": {
             "1.7.4": {
                 "en": "Fix filename handling for states with special characters",
