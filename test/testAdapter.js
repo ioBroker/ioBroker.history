@@ -173,7 +173,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(1);
+            expect(Object.keys(result).length).to.be.equal(2);
             expect(result['history.0.testValue'].enabled).to.be.true;
             done();
         });
@@ -336,7 +336,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 for (var i = 0; i < result2.result.length; i++) {
                     expect(result2.result[i]).to.be.equal(result.result[i]);
                 }
-                
+
                 done();
             });
         });
@@ -358,7 +358,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(0);
+            expect(Object.keys(result).length).to.be.equal(1);
             done();
         });
     });
