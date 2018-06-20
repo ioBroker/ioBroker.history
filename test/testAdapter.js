@@ -103,6 +103,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             role: 'state',
                             custom: {
                                 "history.0": {
+                                    enabled: true,
                                     changesOnly:  true,
                                     debounce:     0,
                                     retention:    31536000,
