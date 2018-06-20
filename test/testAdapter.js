@@ -108,63 +108,59 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             if (res) console.log(res);
             expect(res).not.to.be.equal('Cannot check connection');
             objects.setObject('system.adapter.test.0', {
-                    common: {
+                common: {
 
+                },
+                type: 'instance'
+            },
+            function () {
+                states.subscribeMessage('system.adapter.test.0');
+                objects.setObject('history.0.testValue', {
+                    common: {
+                        type: 'number',
+                        role: 'state',
+                        custom: {
+                            "history.0": {
+                                changesOnly:  true,
+                                debounce:     0,
+                                retention:    31536000,
+                                maxLength:    3,
+                                changesMinDelta: 0.5
+                            }
+                        }
                     },
-                    type: 'instance'
+                    type: 'state'
                 },
                 function () {
-                    states.subscribeMessage('system.adapter.test.0');
-                    objects.setObject('history.0.testValue', {
-                            common: {
-                                type: 'number',
-                                role: 'state'
-                            },
-                            type: 'state'
+                    objects.setObject('history.0.testValue2', {
+                        common: {
+                            type: 'number',
+                            role: 'state'
                         },
-                        function () {
-                            sendTo('history.0', 'enableHistory', {
-                                id: 'history.0.testValue',
-                                options: {
-                                    changesOnly:  true,
-                                    debounce:     0,
-                                    retention:    31536000,
-                                    maxLength:    3,
-                                    changesMinDelta: 0.5
-                                }
-                            }, function (result) {
-                                expect(result.error).to.be.undefined;
-                                expect(result.success).to.be.true;
-                                objects.setObject('history.0.testValue2', {
-                                    common: {
-                                        type: 'number',
-                                        role: 'state'
-                                    },
-                                    type: 'state'
-                                },
-                                function () {
-                                    sendTo('history.0', 'enableHistory', {
-                                        id: 'history.0.testValue2',
-                                        options: {
-                                            changesOnly:  true,
-                                            debounce:     0,
-                                            retention:    31536000,
-                                            maxLength:    3,
-                                            changesMinDelta: 0.5,
-                                            aliasId: 'history.0.testValue2-alias'
-                                        }
-                                    }, function (result) {
-                                        expect(result.error).to.be.undefined;
-                                        expect(result.success).to.be.true;
-                                        // wait till adapter receives the new settings
-                                        setTimeout(function () {
-                                            done();
-                                        }, 2000);
-                                    });
-                                });
-                            });
+                        type: 'state'
+                    },
+                    function () {
+                        sendTo('history.0', 'enableHistory', {
+                            id: 'history.0.testValue2',
+                            options: {
+                                changesOnly:  true,
+                                debounce:     0,
+                                retention:    31536000,
+                                maxLength:    3,
+                                changesMinDelta: 0.5,
+                                aliasId: 'history.0.testValue2-alias'
+                            }
+                        }, function (result) {
+                            expect(result.error).to.be.undefined;
+                            expect(result.success).to.be.true;
+                            // wait till adapter receives the new settings
+                            setTimeout(function () {
+                                done();
+                            }, 2000);
                         });
+                    });
                 });
+            });
         });
     });
     it('Test ' + adapterShortName + ': Check Enabled Points after Enable', function (done) {
