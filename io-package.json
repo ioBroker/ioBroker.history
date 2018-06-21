@@ -22,18 +22,18 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.8.2",
+        "version": "1.8.3",
         "news": {
-            "1.8.2": {
-                "en": "Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs",
-                "de": "Option zum Schreiben von Daten in eine andere ID hinzufügen, um Geräteänderungen zu vereinfachen. Das Abrufen von Daten funktioniert für beide IDs",
-                "ru": "Добавьте параметр для записи данных на другой идентификатор, чтобы упростить внесение изменений. Получение данных для обоих ID",
-                "pt": "Adicione a opção de gravar dados em um ID diferente para facilitar as alterações no dispositivo. Recuperar dados funciona para os dois IDs",
-                "nl": "Optie toevoegen om gegevens naar een andere ID te schrijven om apparaatwijzigingen gemakkelijker te maken. Het ophalen van gegevens werkt voor beide ID's",
-                "fr": "Ajoutez une option pour écrire des données sur un ID différent afin de faciliter les changements de périphérique. Récupération des données fonctionne pour les deux ID",
-                "it": "Aggiungi l'opzione per scrivere i dati su un ID diverso per facilitare le modifiche ai dispositivi. Il recupero dei dati funziona per entrambi gli ID",
-                "es": "Agregue la opción para escribir datos en una ID diferente para facilitar los cambios en el dispositivo. La recuperación de datos funciona para ambos ID",
-                "pl": "Dodaj opcję zapisywania danych do innego identyfikatora, aby ułatwić zmianę urządzenia. Pobieranie danych działa dla obu identyfikatorów"
+            "1.8.3": {
+                "en": "Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs, also allow to disable writing of start and end values",
+                "de": "Option zum Schreiben von Daten in eine andere ID hinzufügen, um Geräteänderungen zu vereinfachen. Das Abrufen von Daten funktioniert für beide IDs und ermöglicht auch das Schreiben von Start- und Endwerten zu deaktivieren",
+                "ru": "Добавьте параметр для записи данных на другой идентификатор, чтобы упростить внесение изменений. Получение данных для обоих идентификаторов также позволяет отключить запись начальных и конечных значений",
+                "pt": "Adicione a opção de gravar dados em um ID diferente para facilitar as alterações no dispositivo. Recuperar dados funciona para ambos os IDs, também permite desativar a gravação de valores iniciais e finais",
+                "nl": "Optie toevoegen om gegevens naar een andere ID te schrijven om apparaatwijzigingen gemakkelijker te maken. Het ophalen van gegevens werkt voor beide ID's en staat ook toe om het schrijven van begin- en eindwaarden uit te schakelen",
+                "fr": "Ajoutez une option pour écrire des données sur un ID différent afin de faciliter les changements de périphérique. La récupération des données pour les deux ID permet également de désactiver l'écriture des valeurs de début et de fin",
+                "it": "Aggiungi l'opzione per scrivere i dati su un ID diverso per facilitare le modifiche ai dispositivi. Il recupero dei dati funziona per entrambi gli ID, inoltre consente di disabilitare la scrittura dei valori iniziali e finali",
+                "es": "Agregue la opción para escribir datos en una ID diferente para facilitar los cambios en el dispositivo. La recuperación de datos funciona para ambos ID, también permite deshabilitar la escritura de los valores de inicio y fin",
+                "pl": "Dodaj opcję zapisywania danych do innego identyfikatora, aby ułatwić zmianę urządzenia. Pobieranie danych działa dla obu identyfikatorów, pozwala również wyłączyć zapisywanie wartości początkowej i końcowej"
             },
             "1.7.4": {
                 "en": "Fix filename handling for states with special characters",
@@ -180,7 +180,8 @@
         "storeFrom": false,
         "storeAck":  true,
         "changesRelogInterval":      0,
-        "changesMinDelta": 0
+        "changesMinDelta": 0,
+        "writeNulls": true
     },
     "objects": [
         {

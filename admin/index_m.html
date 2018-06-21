@@ -58,6 +58,7 @@
         if (settings.saveLastValue === undefined) {
             settings.saveLastValue = false;
         }
+        if (settings.writeNulls === undefined) settings.writeNulls = true;
 
         for (var key in settings) {
             if (settings.hasOwnProperty(key)) {
@@ -111,12 +112,12 @@
                         <img src="history.png" class="logo">
                     </div>
                 </div>
-                <div class="row">   
+                <div class="row">
                     <div class="col s12">
                         <div class="translate" style="margin: 20px">note</div>
                     </div>
                 </div>
-                    
+
                 <div class="row">
                     <div class="input-field col s12 m12 l4">
                         <input id="storeDir" type="text" class="value" />
@@ -167,6 +168,12 @@
                             <option value="86400"       class="translate">1 day</option>
                         </select>
                         <label class="translate" for="retention">retention</label>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12 m4">
+                            <input id="writeNulls" type="checkbox" class="value" />
+                            <label class="translate" for="writeNulls">Write NULL values on start/stop boundaries:</label>
+                        </div>
                     </div>
                 </div>
             </div>

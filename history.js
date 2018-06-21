@@ -108,7 +108,7 @@ var adapter = new utils.Adapter({
             if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
                 history[id][adapter.namespace].retention += 86400;
             }
-            if (writeNull) {
+            if (writeNull && adapter.config.writeNulls) {
                 writeNulls(id);
             }
 
@@ -317,6 +317,7 @@ function writeNulls(id, now) {
 function main() {
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
+    if (adapter.config.writeNulls === undefined) adapter.config.writeNulls = true;
 
     // remove last "/"
     if (adapter.config.storeDir[adapter.config.storeDir.length - 1] === '/') {
@@ -425,7 +426,7 @@ function main() {
                 adapter.subscribeForeignStates('*');
             }
 
-            writeNulls();
+            if (adapter.config.writeNulls) writeNulls();
 
             // store all buffered data every 10 minutes to not lost the data
             bufferChecker = setInterval(function () {

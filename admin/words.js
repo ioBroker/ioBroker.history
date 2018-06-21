@@ -37,5 +37,17 @@ systemDictionary = {
     "retention": {                                   "en": "Storage retention",                               "de": "Storage Vorhaltezeit",                            "ru": "Время хранения в базе",                           "pt": "Retenção de armazenamento",                       "nl": "Opslag retentie",                                 "fr": "Conservation du stockage",                        "it": "Conservazione di memoria",                        "es": "Storage retention",                               "pl": "Przechowywanie danych"},
     "storeAck": {                                    "en": "Store acknowledge of value",                     "de": "Speichere ACK vom Ereigniss mit",                "ru": "Сохранять подтверждение события",                "pt": "Recorde de valor",                               "nl": "Bewaar erkenning van waarde",                    "fr": "Enregistrer la confirmation (ACK) de la valeur", "it": "Memorizza valore di negozio",                    "es": "Store acknowledge of value",                     "pl": "Zapisz potwierdzenie wartości"},
     "storeDir": {                                    "en": "Storage directory",                              "de": "Speicherverzeichnis",                            "ru": "Путь для файлов",                                "pt": "Diretório de armazenamento",                     "nl": "Opslagmap",                                      "fr": "Répertoire de stockage",                         "it": "Directory di archiviazione",                     "es": "Storage directory",                              "pl": "Katalog pamięci"},
-    "storeFrom": {                                   "en": "Store origin of value",                          "de": "Speichere Quelle vom Ereigniss mit",             "ru": "Сохранять источник события",                     "pt": "Armazenar origem do valor",                      "nl": "Bewaar oorsprong van waarde",                    "fr": "Enregistrer l'origine de la valeur",             "it": "Memorizza l'origine del valore",                 "es": "Store origin of value",                          "pl": "Przechowuj pochodzenie wartości:"}
+    "storeFrom": {                                   "en": "Store origin of value",                          "de": "Speichere Quelle vom Ereigniss mit",             "ru": "Сохранять источник события",                     "pt": "Armazenar origem do valor",                      "nl": "Bewaar oorsprong van waarde",                    "fr": "Enregistrer l'origine de la valeur",             "it": "Memorizza l'origine del valore",                 "es": "Store origin of value",                          "pl": "Przechowuj pochodzenie wartości:",
+    "Write NULL values on start/stop boundaries:": {
+        "en": "Write NULL values on start/stop boundaries:",
+        "de": "Schreibe NULL-Werte an Start- / Stop-Grenzen:",
+        "ru": "Запись значений NULL на границах начала / остановки:",
+        "pt": "Escreva valores NULL nos limites de início / parada:",
+        "nl": "Schrijf NULL-waarden op start / stop-grenzen:",
+        "fr": "Écrire des valeurs NULL sur les limites de démarrage / arrêt:",
+        "it": "Scrivi valori NULL sui limiti di avvio / arresto:",
+        "es": "Escribe valores NULL en los límites de inicio / finalización:",
+        "pl": "Napisz wartości NULL na granicach start / stop:"
+    }
+}
 };
