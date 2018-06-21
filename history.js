@@ -112,7 +112,7 @@ var adapter = new utils.Adapter({
                 writeNulls(id);
             }
 
-            adapter.log.info('enabled logging of ' + id + ', Alias=' + (id !== realId) + ', ' + Object.keys(history).length + ' points now activated');
+            adapter.log.info('enabled logging of ' + id + ', Alias=' + (id !== realId));
         } else {
             if (aliasMap[id]) {
                 adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
@@ -120,7 +120,7 @@ var adapter = new utils.Adapter({
             }
             id = formerAliasId;
             if (history[id]) {
-                adapter.log.info('disabled logging of ' + id + ', ' + Object.keys(history).length + ' points now activated');
+                adapter.log.info('disabled logging of ' + id);
                 if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
                 if (history[id].timeout) clearTimeout(history[id].timeout);
                 storeCached(true, id);
