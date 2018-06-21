@@ -21,6 +21,7 @@ var adapter = new utils.Adapter({
     name: 'history',
 
     objectChange: function (id, obj) {
+        var formerAliasId = aliasMap[id] ? aliasMap[id] : id;
         if (obj && obj.common &&
             (
                 // todo remove history sometime (2016.08) - Do not forget object selector in io-package.json
@@ -29,10 +30,22 @@ var adapter = new utils.Adapter({
             )
         ) {
             var realId = id;
+            var checkForRemove = true;
             if (obj.common.custom && obj.common.custom[adapter.namespace] && obj.common.custom[adapter.namespace].aliasId) {
-                aliasMap[id] = obj.common.custom[adapter.namespace].aliasId;
-                adapter.log.debug('Found Alias: ' + id + ' --> ' + aliasMap[id]);
-                id = aliasMap[id];
+                if (obj.common.custom[adapter.namespace].aliasId !== id) {
+                    aliasMap[id] = obj.common.custom[adapter.namespace].aliasId;
+                    adapter.log.debug('Registered Alias: ' + id + ' --> ' + aliasMap[id]);
+                    id = aliasMap[id];
+                    checkForRemove = false;
+                }
+                else {
+                    adapter.log.warn('Ignoring Alias-ID because identical to ID for ' + id);
+                    obj.common.custom[adapter.namespace].aliasId = '';
+                }
+            }
+            if (checkForRemove && aliasMap[id]) {
+                adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
+                delete aliasMap[id];
             }
 
             var writeNull = !history[id];
@@ -40,7 +53,7 @@ var adapter = new utils.Adapter({
             var list      = history[id] ? history[id].list    : null;
             var timeout   = history[id] ? history[id].timeout : null;
 
-            if (!history[id] && !subscribeAll) {
+            if (!history[formerAliasId] && !subscribeAll) {
                 // unsubscribe
                 for (var _id in history) {
                     if (history.hasOwnProperty(history[_id].realId)) {
@@ -51,7 +64,7 @@ var adapter = new utils.Adapter({
                 adapter.subscribeForeignStates('*');
             }
 
-            if (history[id] && history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
+            if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
 
             // todo remove history somewhen (2016.08)
             history[id] = obj.common.custom || obj.common.history;
@@ -101,7 +114,11 @@ var adapter = new utils.Adapter({
 
             adapter.log.info('enabled logging of ' + id + ', Alias=' + (id !== realId) + ', ' + Object.keys(history).length + ' points now activated');
         } else {
-            id = aliasMap[id] ? aliasMap[id] : id;
+            if (aliasMap[id]) {
+                adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
+                delete aliasMap[id];
+            }
+            id = formerAliasId;
             if (history[id]) {
                 adapter.log.info('disabled logging of ' + id + ', ' + Object.keys(history).length + ' points now activated');
                 if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
