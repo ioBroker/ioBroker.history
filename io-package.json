@@ -22,8 +22,19 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.8.3",
+        "version": "1.8.4",
         "news": {
+            "1.8.4": {
+                "en": "error fixed for allow to disable writing of start and end values",
+                "de": "Fehler behoben für das Schreiben von Start- und Endwerten zu deaktivieren",
+                "ru": "исправлена ​​ошибка, позволяющая отключить запись начальных и конечных значений",
+                "pt": "erro corrigido para permitir desativar a escrita dos valores inicial e final",
+                "nl": "error fixed for allow om schrijven van begin- en eindwaarden uit te schakelen",
+                "fr": "erreur corrigée pour permettre de désactiver l'écriture des valeurs de début et de fin",
+                "it": "errore risolto per consentire di disabilitare la scrittura dei valori iniziali e finali",
+                "es": "error corregido para permitir deshabilitar la escritura de los valores de inicio y fin",
+                "pl": "błąd został usunięty, aby umożliwić wyłączenie zapisywania wartości początkowej i końcowej"
+            },
             "1.8.3": {
                 "en": "Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs, also allow to disable writing of start and end values",
                 "de": "Option zum Schreiben von Daten in eine andere ID hinzufügen, um Geräteänderungen zu vereinfachen. Das Abrufen von Daten funktioniert für beide IDs und ermöglicht auch das Schreiben von Start- und Endwerten zu deaktivieren",

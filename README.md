@@ -234,7 +234,10 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
-## 1.8.0 (2018-06-19)
+## 1.8.4 (2018-06-24)
+* (Apollon77) Fixing/allow to disable writing of start and end values
+
+## 1.8.0 (2018-06-19/24)
 * (Apollon77) Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs
 
 ## 1.7.4 (2018-04-03)

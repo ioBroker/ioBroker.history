@@ -168,18 +168,20 @@ function storeCached(isFinishing, onlyId) {
                 history[id].list.push(history[id].skipped);
                 history[id].skipped = null;
             }
-            var nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
-            if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
-                var state = Object.assign({}, history[id].state);
-                state.ts   = now;
-                state.from = 'system.adapter.' + adapter.namespace;
-                history[id].list.push(state);
-                nullValue.ts += 1;
-                nullValue.lc += 1;
-            }
+            if (adapter.config.writeNulls) {
+                var nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
+                if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
+                    var state = Object.assign({}, history[id].state);
+                    state.ts   = now;
+                    state.from = 'system.adapter.' + adapter.namespace;
+                    history[id].list.push(state);
+                    nullValue.ts += 1;
+                    nullValue.lc += 1;
+                }
 
-            // terminate values with null to indicate adapter stop.
-            history[id].list.push(nullValue);
+                // terminate values with null to indicate adapter stop.
+                history[id].list.push(nullValue);
+            }
         }
 
         if (history[id].list && history[id].list.length) {
