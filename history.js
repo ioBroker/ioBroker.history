@@ -980,7 +980,7 @@ function storeState(msg) {
     } else if (Array.isArray(msg.message.state)) {
         adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
         for (var j = 0; j < msg.message.state.length; j++) {
-            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message[i].id;
+            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
             if (history[id]) {
                 history[id].state = msg.message.state[j];
                 pushHelper(id);
@@ -991,7 +991,7 @@ function storeState(msg) {
         }
     } else {
         adapter.log.debug('storeState: store 1 state for ' + msg.message.id);
-        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message[i].id;
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         if (history[id]) {
             history[id].state = msg.message.state;
             pushHelper(id);

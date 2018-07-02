@@ -22,8 +22,19 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.8.4",
+        "version": "1.8.5",
         "news": {
+            "1.8.5": {
+                "en": "error fixed in storeState",
+                "de": "Fehler in storeState behoben",
+                "ru": "исправлена ​​ошибка в storeState",
+                "pt": "erro corrigido no storeState",
+                "nl": "fout opgelost in storeState",
+                "fr": "erreur corrigée dans storeState",
+                "it": "errore riparato in storeState",
+                "es": "error corregido en storeState",
+                "pl": "błąd został naprawiony w storeState"
+            },
             "1.8.4": {
                 "en": "error fixed for allow to disable writing of start and end values",
                 "de": "Fehler behoben für das Schreiben von Start- und Endwerten zu deaktivieren",

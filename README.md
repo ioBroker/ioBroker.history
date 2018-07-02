@@ -234,6 +234,9 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.8.5 (2018-07-02)
+* (Apollon77) Error fixed in storeState
+
 ## 1.8.4 (2018-06-24)
 * (Apollon77) Fixing/allow to disable writing of start and end values
 
