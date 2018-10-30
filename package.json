@@ -28,7 +28,7 @@
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.1",
-    "mocha": "^4.1.0",
+    "mocha": "^5.2.0",
     "chai": "^4.1.2"
   },
   "bugs": {
