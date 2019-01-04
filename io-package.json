@@ -173,8 +173,9 @@
         "messagebox":               true,
         "subscribe":                "messagebox",
         "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
-        "main":                     "history.js",
+        "main":                     "main.js",
         "enabled":                  true,
+        "compact":                  true,
         "preserveSettings":         "custom",
         "authors": [
             "bluefox <dogafox@gmail.com>",

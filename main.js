@@ -1,192 +1,191 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 'use strict';
-var cp         = require('child_process');
-var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
-var path       = require('path');
-var dataDir    = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
-var fs         = require('fs');
-var GetHistory = require(__dirname + '/lib/getHistory.js');
-var Aggregate  = require(__dirname + '/lib/aggregate.js');
+const cp          = require('child_process');
+const utils       = require('./lib/utils'); // Get common adapter utils
+const path        = require('path');
+const dataDir     = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
+const fs          = require('fs');
+const GetHistory  = require('./lib/getHistory.js');
+const Aggregate   = require('./lib/aggregate.js');
+const adapterName = require('./package.json').name.split('.').pop();
 
-var history    = {};
-var aliasMap   = {};
-var subscribeAll = false;
-var bufferChecker = null;
-var tasksStart = [];
-var finished   = false;
+const main       = {};
+const aliasMap   = {};
+let subscribeAll = false;
+let bufferChecker = null;
+const tasksStart = [];
+let finished   = false;
 
-var adapter = new utils.Adapter({
+let adapter;
+function startAdapter(options) {
+    options = options || {};
 
-    name: 'history',
+    Object.assign(options, {
 
-    objectChange: function (id, obj) {
-        var formerAliasId = aliasMap[id] ? aliasMap[id] : id;
-        if (obj && obj.common &&
-            (
-                // todo remove history sometime (2016.08) - Do not forget object selector in io-package.json
-                (obj.common.history && obj.common.history[adapter.namespace] && obj.common.history[adapter.namespace].enabled) ||
-                (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled)
-            )
-        ) {
-            var realId = id;
-            var checkForRemove = true;
-            if (obj.common.custom && obj.common.custom[adapter.namespace] && obj.common.custom[adapter.namespace].aliasId) {
-                if (obj.common.custom[adapter.namespace].aliasId !== id) {
-                    aliasMap[id] = obj.common.custom[adapter.namespace].aliasId;
-                    adapter.log.debug('Registered Alias: ' + id + ' --> ' + aliasMap[id]);
-                    id = aliasMap[id];
-                    checkForRemove = false;
-                }
-                else {
-                    adapter.log.warn('Ignoring Alias-ID because identical to ID for ' + id);
-                    obj.common.custom[adapter.namespace].aliasId = '';
-                }
-            }
-            if (checkForRemove && aliasMap[id]) {
-                adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
-                delete aliasMap[id];
-            }
+        name: adapterName,
 
-            var writeNull = !history[id];
-            var state     = history[id] ? history[id].state   : null;
-            var list      = history[id] ? history[id].list    : null;
-            var timeout   = history[id] ? history[id].timeout : null;
-
-            if (!history[formerAliasId] && !subscribeAll) {
-                // unsubscribe
-                for (var _id in history) {
-                    if (history.hasOwnProperty(history[_id].realId)) {
-                        adapter.unsubscribeForeignStates(history[_id].realId);
+        objectChange: (id, obj) => {
+            const formerAliasId = aliasMap[id] ? aliasMap[id] : id;
+            if (obj && obj.common &&
+                (
+                    // todo remove history sometime (2016.08) - Do not forget object selector in io-package.json
+                    (obj.common.history && obj.common.history[adapter.namespace] && obj.common.history[adapter.namespace].enabled) ||
+                    (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled)
+                )
+            ) {
+                const realId = id;
+                let checkForRemove = true;
+                if (obj.common.custom && obj.common.custom[adapter.namespace] && obj.common.custom[adapter.namespace].aliasId) {
+                    if (obj.common.custom[adapter.namespace].aliasId !== id) {
+                        aliasMap[id] = obj.common.custom[adapter.namespace].aliasId;
+                        adapter.log.debug('Registered Alias: ' + id + ' --> ' + aliasMap[id]);
+                        id = aliasMap[id];
+                        checkForRemove = false;
+                    }
+                    else {
+                        adapter.log.warn('Ignoring Alias-ID because identical to ID for ' + id);
+                        obj.common.custom[adapter.namespace].aliasId = '';
                     }
                 }
-                subscribeAll = true;
-                adapter.subscribeForeignStates('*');
-            }
+                if (checkForRemove && aliasMap[id]) {
+                    adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
+                    delete aliasMap[id];
+                }
 
-            if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
+                const writeNull = !main[id];
+                const state     = main[id] ? main[id].state   : null;
+                const list      = main[id] ? main[id].list    : null;
+                const timeout   = main[id] ? main[id].timeout : null;
 
-            // todo remove history somewhen (2016.08)
-            history[id] = obj.common.custom || obj.common.history;
-            history[id].state   = state;
-            history[id].list    = list;
-            history[id].timeout = timeout;
-            history[id].realId  = realId;
+                if (!main[formerAliasId] && !subscribeAll) {
+                    // unsubscribe
+                    for (const _id in main) {
+                        if (main.hasOwnProperty(_id) && main.hasOwnProperty(main[_id].realId)) {
+                            adapter.unsubscribeForeignStates(main[_id].realId);
+                        }
+                    }
+                    subscribeAll = true;
+                    adapter.subscribeForeignStates('*');
+                }
 
-            if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
-                history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                if (main[formerAliasId] && main[formerAliasId].relogTimeout) clearTimeout(main[formerAliasId].relogTimeout);
+
+                // todo remove history somewhen (2016.08)
+                main[id] = obj.common.custom || obj.common.history;
+                main[id].state   = state;
+                main[id].list    = list;
+                main[id].timeout = timeout;
+                main[id].realId  = realId;
+
+                if (!main[id][adapter.namespace].maxLength && main[id][adapter.namespace].maxLength !== '0' && main[id][adapter.namespace].maxLength !== 0) {
+                    main[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                } else {
+                    main[id][adapter.namespace].maxLength = parseInt(main[id][adapter.namespace].maxLength, 10);
+                }
+                if (!main[id][adapter.namespace].retention && main[id][adapter.namespace].retention !== '0' && main[id][adapter.namespace].retention !== 0) {
+                    main[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                } else {
+                    main[id][adapter.namespace].retention = parseInt(main[id][adapter.namespace].retention, 10) || 0;
+                }
+                if (!main[id][adapter.namespace].debounce && main[id][adapter.namespace].debounce !== '0' && main[id][adapter.namespace].debounce !== 0) {
+                    main[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                } else {
+                    main[id][adapter.namespace].debounce = parseInt(main[id][adapter.namespace].debounce, 10);
+                }
+                main[id][adapter.namespace].changesOnly = main[id][adapter.namespace].changesOnly === 'true' || main[id][adapter.namespace].changesOnly === true;
+                if (main[id][adapter.namespace].changesRelogInterval !== undefined && main[id][adapter.namespace].changesRelogInterval !== null && main[id][adapter.namespace].changesRelogInterval !== '') {
+                    main[id][adapter.namespace].changesRelogInterval = parseInt(main[id][adapter.namespace].changesRelogInterval, 10) || 0;
+                } else {
+                    main[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                }
+                if (main[id][adapter.namespace].changesRelogInterval > 0) {
+                    main[id].relogTimeout = setTimeout(reLogHelper, (main[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + main[id][adapter.namespace].changesRelogInterval * 500, id);
+                }
+                if (main[id][adapter.namespace].changesMinDelta !== undefined && main[id][adapter.namespace].changesMinDelta !== null && main[id][adapter.namespace].changesMinDelta !== '') {
+                    main[id][adapter.namespace].changesMinDelta = parseFloat(main[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
+                } else {
+                    main[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+                }
+
+
+                // add one day if retention is too small
+                if (main[id][adapter.namespace].retention && main[id][adapter.namespace].retention <= 604800) {
+                    main[id][adapter.namespace].retention += 86400;
+                }
+                if (writeNull && adapter.config.writeNulls) {
+                    writeNulls(id);
+                }
+
+                adapter.log.info('enabled logging of ' + id + ', Alias=' + (id !== realId));
             } else {
-                history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
+                if (aliasMap[id]) {
+                    adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
+                    delete aliasMap[id];
+                }
+                id = formerAliasId;
+                if (main[id]) {
+                    adapter.log.info('disabled logging of ' + id);
+                    if (main[id].relogTimeout) clearTimeout(main[id].relogTimeout);
+                    if (main[id].timeout) clearTimeout(main[id].timeout);
+                    storeCached(true, id);
+                    delete main[id];
+                }
             }
-            if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
-                history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
-            } else {
-                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
-            }
-            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
-            } else {
-                history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
-            }
-            history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-            if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
-                history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
-            } else {
-                history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
-            }
-            if (history[id][adapter.namespace].changesRelogInterval > 0) {
-                history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
-            }
-            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
-                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
-            } else {
-                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
-            }
+        },
 
+        stateChange: (id, state) => {
+            id = aliasMap[id] ? aliasMap[id] : id;
+            pushHistory(id, state);
+        },
 
-            // add one day if retention is too small
-            if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
-                history[id][adapter.namespace].retention += 86400;
-            }
-            if (writeNull && adapter.config.writeNulls) {
-                writeNulls(id);
-            }
+        unload: callback => finish(callback),
 
-            adapter.log.info('enabled logging of ' + id + ', Alias=' + (id !== realId));
-        } else {
-            if (aliasMap[id]) {
-                adapter.log.debug('Removed Alias: ' + id + ' !-> ' + aliasMap[id]);
-                delete aliasMap[id];
-            }
-            id = formerAliasId;
-            if (history[id]) {
-                adapter.log.info('disabled logging of ' + id);
-                if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
-                if (history[id].timeout) clearTimeout(history[id].timeout);
-                storeCached(true, id);
-                delete history[id];
-            }
-        }
-    },
+        ready: () => startMain(),
 
-    stateChange: function (id, state) {
-        id = aliasMap[id] ? aliasMap[id] : id;
-        pushHistory(id, state);
-    },
+        message: obj => processMessage(obj)
+    });
+    adapter = new utils.Adapter(options);
 
-    unload: function (callback) {
-        finish(callback);
-    },
+    return adapter;
+}
 
-    ready: function () {
-        main();
-    },
+process.on('SIGINT', () =>
+    adapter && adapter.setState && finish());
 
-    message: function (obj) {
-        processMessage(obj);
-    }
-});
-
-process.on('SIGINT', function () {
-    if (adapter && adapter.setState) {
-        finish();
-    }
-});
-process.on('SIGTERM', function () {
-    if (adapter && adapter.setState) {
-        finish();
-    }
-});
+process.on('SIGTERM', () =>
+    adapter && adapter.setState && finish());
 
 function storeCached(isFinishing, onlyId) {
-    var now = new Date().getTime();
+    const now = new Date().getTime();
 
-    for (var id in history) {
-        if (onlyId !== undefined && onlyId !== id) continue;
+    for (const id in main) {
+        if (!main.hasOwnProperty(id) || (onlyId !== undefined && onlyId !== id)) continue;
+
         if (isFinishing) {
-            if (history[id].skipped) {
-                history[id].list.push(history[id].skipped);
-                history[id].skipped = null;
+            if (main[id].skipped) {
+                main[id].list.push(main[id].skipped);
+                main[id].skipped = null;
             }
             if (adapter.config.writeNulls) {
-                var nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
-                if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
-                    var state = Object.assign({}, history[id].state);
+                const nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
+                if (main[id][adapter.namespace].changesOnly && main[id].state && main[id].state !== null) {
+                    const state = Object.assign({}, main[id].state);
                     state.ts   = now;
                     state.from = 'system.adapter.' + adapter.namespace;
-                    history[id].list.push(state);
+                    main[id].list.push(state);
                     nullValue.ts += 1;
                     nullValue.lc += 1;
                 }
 
                 // terminate values with null to indicate adapter stop.
-                history[id].list.push(nullValue);
+                main[id].list.push(nullValue);
             }
         }
 
-        if (history[id].list && history[id].list.length) {
+        if (main[id].list && main[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
-            appendFile(id, history[id].list);
+            appendFile(id, main[id].list);
         }
     }
 }
@@ -197,14 +196,16 @@ function finish(callback) {
         clearInterval(bufferChecker);
         bufferChecker = null;
     }
-    for (var id in history) {
-        if (history[id].relogTimeout) {
-            clearTimeout(history[id].relogTimeout);
-            history[id].relogTimeout = null;
+    for (const id in main) {
+        if (!main.hasOwnProperty(id)) continue;
+
+        if (main[id].relogTimeout) {
+            clearTimeout(main[id].relogTimeout);
+            main[id].relogTimeout = null;
         }
-        if (history[id].timeout) {
-            clearTimeout(history[id].timeout);
-            history[id].timeout = null;
+        if (main[id].timeout) {
+            clearTimeout(main[id].timeout);
+            main[id].timeout = null;
         }
     }
 
@@ -230,12 +231,11 @@ function processMessage(msg) {
     } else if (msg.command === 'getEnabledDPs') {
         getEnabledDPs(msg);
     } else if (msg.command === 'stopInstance') {
-        finish(function () {
+        finish(() => {
             if (msg.callback) {
                 adapter.sendTo(msg.from, msg.command, 'stopped', msg.callback);
-                setTimeout(function () {
-                    process.exit(0);
-                }, 200);
+                setTimeout(() =>
+                    adapter.terminate ? adapter.terminate(0): process.exit(0), 200);
             }
         });
     }
@@ -243,7 +243,7 @@ function processMessage(msg) {
 
 function fixSelector(callback) {
     // fix _design/custom object
-    adapter.getForeignObject('_design/custom', function (err, obj) {
+    adapter.getForeignObject('_design/custom', (err, obj) => {
         if (!obj || obj.views.state.map.indexOf('common.history') === -1 || obj.views.state.map.indexOf('common.custom') === -1) {
             obj = {
                 _id: '_design/custom',
@@ -265,10 +265,10 @@ function fixSelector(callback) {
 
 function processStartValues() {
     if (tasksStart && tasksStart.length) {
-        var task = tasksStart.shift();
-        if (history[task.id][adapter.namespace].changesOnly) {
-            adapter.getForeignState(history[task.id].realId, function (err, state) {
-                var now = task.now || new Date().getTime();
+        const task = tasksStart.shift();
+        if (main[task.id][adapter.namespace].changesOnly) {
+            adapter.getForeignState(main[task.id].realId, (err, state) => {
+                const now = task.now || new Date().getTime();
                 pushHistory(task.id, {
                     val:  null,
                     ts:   state ? now - 4 : now, // 4ms because of MS-SQL
@@ -298,8 +298,8 @@ function processStartValues() {
 function writeNulls(id, now) {
     if (!id) {
         now = new Date().getTime();
-        for (var _id in history) {
-            if (history.hasOwnProperty(_id)) {
+        for (const _id in main) {
+            if (main.hasOwnProperty(_id)) {
                 writeNulls(_id, now);
             }
         }
@@ -309,14 +309,14 @@ function writeNulls(id, now) {
         if (tasksStart.length === 1) {
             processStartValues();
         }
-        if (history[id][adapter.namespace].changesRelogInterval > 0) {
-            if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
-            history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
+        if (main[id][adapter.namespace].changesRelogInterval > 0) {
+            if (main[id].relogTimeout) clearTimeout(main[id].relogTimeout);
+            main[id].relogTimeout = setTimeout(reLogHelper, (main[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + main[id][adapter.namespace].changesRelogInterval * 500, id);
         }
     }
 }
 
-function main() {
+function startMain() { //start
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
     if (adapter.config.writeNulls === undefined) adapter.config.writeNulls = true;
@@ -349,78 +349,78 @@ function main() {
     }
 
     fixSelector(function () {
-        adapter.objects.getObjectView('custom', 'state', {}, function (err, doc) {
-            var count = 0;
+        adapter.objects.getObjectView('custom', 'state', {}, (err, doc) => {
+            let count = 0;
             if (doc && doc.rows) {
-                for (var i = 0, l = doc.rows.length; i < l; i++) {
+                for (let i = 0, l = doc.rows.length; i < l; i++) {
                     if (doc.rows[i].value) {
-                        var id = doc.rows[i].id;
-                        var realId = id;
+                        let id = doc.rows[i].id;
+                        const realId = id;
                         if (doc.rows[i].value[adapter.namespace] && doc.rows[i].value[adapter.namespace].aliasId) {
                             aliasMap[id] = doc.rows[i].value[adapter.namespace].aliasId;
                             adapter.log.debug('Found Alias: ' + id + ' --> ' + aliasMap[id]);
                             id = aliasMap[id];
                         }
-                        history[id] = doc.rows[i].value;
+                        main[id] = doc.rows[i].value;
 
                         // todo remove it somewhen (2016.08)
                         // convert old value
-                        if (history[id].enabled !== undefined) {
-                            history[id] = history[id].enabled ? {'history.0': history[id]} : null;
-                            if (!history[id]) {
-                                delete history[id];
+                        if (main[id].enabled !== undefined) {
+                            main[id] = main[id].enabled ? {'history.0': main[id]} : null;
+                            if (!main[id]) {
+                                delete main[id];
                                 continue;
                             }
                         }
-                        if (!history[id][adapter.namespace] || history[id][adapter.namespace].enabled === false) {
-                            delete history[id];
+                        if (!main[id][adapter.namespace] || main[id][adapter.namespace].enabled === false) {
+                            delete main[id];
                         } else {
                             count++;
                             adapter.log.info('enabled logging of ' + id + ' (Count=' + count + '), Alias=' + (id !== realId));
-                            if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
-                                history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                            if (!main[id][adapter.namespace].maxLength && main[id][adapter.namespace].maxLength !== '0' && main[id][adapter.namespace].maxLength !== 0) {
+                                main[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
                             } else {
-                                history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
+                                main[id][adapter.namespace].maxLength = parseInt(main[id][adapter.namespace].maxLength, 10);
                             }
-                            if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
-                                history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                            if (!main[id][adapter.namespace].retention && main[id][adapter.namespace].retention !== '0' && main[id][adapter.namespace].retention !== 0) {
+                                main[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
                             } else {
-                                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
+                                main[id][adapter.namespace].retention = parseInt(main[id][adapter.namespace].retention, 10) || 0;
                             }
-                            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                                history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                            if (!main[id][adapter.namespace].debounce && main[id][adapter.namespace].debounce !== '0' && main[id][adapter.namespace].debounce !== 0) {
+                                main[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
                             } else {
-                                history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
+                                main[id][adapter.namespace].debounce = parseInt(main[id][adapter.namespace].debounce, 10);
                             }
-                            history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-                            if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
-                                history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
+                            main[id][adapter.namespace].changesOnly = main[id][adapter.namespace].changesOnly === 'true' || main[id][adapter.namespace].changesOnly === true;
+                            if (main[id][adapter.namespace].changesRelogInterval !== undefined && main[id][adapter.namespace].changesRelogInterval !== null && main[id][adapter.namespace].changesRelogInterval !== '') {
+                                main[id][adapter.namespace].changesRelogInterval = parseInt(main[id][adapter.namespace].changesRelogInterval, 10) || 0;
                             } else {
-                                history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                                main[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
                             }
-                            if (history[id][adapter.namespace].changesRelogInterval > 0) {
-                                history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
+                            if (main[id][adapter.namespace].changesRelogInterval > 0) {
+                                main[id].relogTimeout = setTimeout(reLogHelper, (main[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + main[id][adapter.namespace].changesRelogInterval * 500, id);
                             }
-                            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
-                                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+                            if (main[id][adapter.namespace].changesMinDelta !== undefined && main[id][adapter.namespace].changesMinDelta !== null && main[id][adapter.namespace].changesMinDelta !== '') {
+                                main[id][adapter.namespace].changesMinDelta = parseFloat(main[id][adapter.namespace].changesMinDelta) || 0;
                             } else {
-                                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+                                main[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
                             }
 
                             // add one day if retention is too small
-                            if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
-                                history[id][adapter.namespace].retention += 86400;
+                            if (main[id][adapter.namespace].retention && main[id][adapter.namespace].retention <= 604800) {
+                                main[id][adapter.namespace].retention += 86400;
                             }
 
-                            history[id].realId  = realId;
+                            main[id].realId  = realId;
                         }
                     }
                 }
             }
             if (count < 20) {
-                for (var _id in history) {
-                    if (history.hasOwnProperty(_id)) {
-                        adapter.subscribeForeignStates(history[_id].realId);
+                for (const _id in main) {
+                    if (main.hasOwnProperty(_id)) {
+                        adapter.subscribeForeignStates(main[_id].realId);
                     }
                 }
             } else {
@@ -443,8 +443,8 @@ function main() {
 function pushHistory(id, state, timerRelog) {
     if (timerRelog === undefined) timerRelog = false;
     // Push into history
-    if (history[id]) {
-        var settings = history[id][adapter.namespace];
+    if (main[id]) {
+        const settings = main[id][adapter.namespace];
 
         if (!settings || !state) return;
 
@@ -452,73 +452,73 @@ function pushHistory(id, state, timerRelog) {
         if (state.lc < 946681200000) state.lc *= 1000;
 
         if (typeof state.val === 'string') {
-            var f = parseFloat(state.val);
+            const f = parseFloat(state.val);
             if (f == state.val) {
                 state.val = f;
             }
         }
-        if (history[id].state && settings.changesOnly && !timerRelog) {
+        if (main[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
-                if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
-                    history[id].skipped = state; // remember new timestamp
-                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                if ((main[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
+                    main[id].skipped = state; // remember new timestamp
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
-            } else if (history[id].lastLogTime) {
-                if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    history[id].skipped = state; // remember new timestamp
-                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+            } else if (main[id].lastLogTime) {
+                if ((main[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(main[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                    main[id].skipped = state; // remember new timestamp
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
                 if (state.ts !== state.lc) {
-                    adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
+                    adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + main[id].lastLogTime + ', ts=' + state.ts);
                 }
             }
-            if (history[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
-                history[id].skipped = state; // remember new timestamp
-                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+            if (main[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(main[id].state.val - state.val) < settings.changesMinDelta)) {
+                main[id].skipped = state; // remember new timestamp
+                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
             }
             else if (typeof state.val === 'number') {
-                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
             else {
-                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
         }
 
-        if (history[id].relogTimeout) {
-            clearTimeout(history[id].relogTimeout);
-            history[id].relogTimeout = null;
+        if (main[id].relogTimeout) {
+            clearTimeout(main[id].relogTimeout);
+            main[id].relogTimeout = null;
         }
         if (settings.changesRelogInterval > 0) {
-            history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+            main[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
         }
 
-        var ignoreDebonce = false;
+        let ignoreDebonce = false;
         if (timerRelog) {
             state.ts = new Date().getTime();
-            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
+            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + main[id].lastLogTime + ', ts=' + state.ts);
             ignoreDebonce = true;
         } else {
-            if (settings.changesOnly && history[id].skipped) {
-                history[id].state = history[id].skipped;
+            if (settings.changesOnly && main[id].skipped) {
+                main[id].state = main[id].skipped;
                 pushHelper(id);
             }
-            if (history[id].state && ((history[id].state.val === null && state.val !== null) || (history[id].state.val !== null && state.val === null))) {
+            if (main[id].state && ((main[id].state.val === null && state.val !== null) || (main[id].state.val !== null && state.val === null))) {
                 ignoreDebonce = true;
-            } else if (!history[id].state && state.val === null) {
+            } else if (!main[id].state && state.val === null) {
                 ignoreDebonce = true;
             }
             // only store state if really changed
-            history[id].state = state;
+            main[id].state = state;
         }
-        history[id].lastLogTime = state.ts;
-        history[id].skipped = null;
+        main[id].lastLogTime = state.ts;
+        main[id].skipped = null;
         if (settings.debounce && !ignoreDebonce) {
             // Discard changes in de-bounce time to store last stable value
-            if (history[id].timeout) clearTimeout(history[id].timeout);
-            history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
+            if (main[id].timeout) clearTimeout(main[id].timeout);
+            main[id].timeout = setTimeout(pushHelper, settings.debounce, id);
         } else {
             pushHelper(id);
         }
@@ -526,19 +526,19 @@ function pushHistory(id, state, timerRelog) {
 }
 
 function reLogHelper(_id) {
-    if (!history[_id]) {
+    if (!main[_id]) {
         adapter.log.info('non-existing id ' + _id);
         return;
     }
-    history[_id].relogTimeout = null;
-    if (history[_id].skipped) {
-        history[_id].state = history[_id].skipped;
-        history[_id].state.from = 'system.adapter.' + adapter.namespace;
-        history[_id].skipped = null;
-        pushHistory(_id, history[_id].state, true);
+    main[_id].relogTimeout = null;
+    if (main[_id].skipped) {
+        main[_id].state = main[_id].skipped;
+        main[_id].state.from = 'system.adapter.' + adapter.namespace;
+        main[_id].skipped = null;
+        pushHistory(_id, main[_id].state, true);
     }
     else {
-        adapter.getForeignState(history[_id].realId, function (err, state) {
+        adapter.getForeignState(main[_id].realId, function (err, state) {
             if (err) {
                 adapter.log.info('init timed Relog: can not get State for ' + _id + ' : ' + err);
             }
@@ -547,64 +547,64 @@ function reLogHelper(_id) {
             }
             else {
                 adapter.log.debug('init timed Relog: getState ' + _id + ':  Value=' + state.val + ', ack=' + state.ack + ', ts=' + state.ts  + ', lc=' + state.lc);
-                history[_id].state = state;
-                pushHistory(_id, history[_id].state, true);
+                main[_id].state = state;
+                pushHistory(_id, main[_id].state, true);
             }
         });
     }
 }
 
 function pushHelper(_id) {
-    if (!history[_id] || !history[_id].state) return;
-    var _settings = history[_id][adapter.namespace];
+    if (!main[_id] || !main[_id].state) return;
+    const _settings = main[_id][adapter.namespace];
     // if it was not deleted in this time
     if (_settings) {
-        history[_id].timeout = null;
-        history[_id].list = history[_id].list || [];
+        main[_id].timeout = null;
+        main[_id].list = main[_id].list || [];
 
-        if (typeof history[_id].state.val === 'string') {
-            var f = parseFloat(history[_id].state.val);
-            if (f == history[_id].state.val) {
-                history[_id].state.val = f;
-            } else if (history[_id].state.val === 'true') {
-                history[_id].state.val = true;
-            } else if (history[_id].state.val === 'false') {
-                history[_id].state.val = false;
+        if (typeof main[_id].state.val === 'string') {
+            const f = parseFloat(main[_id].state.val);
+            if (f == main[_id].state.val) {
+                main[_id].state.val = f;
+            } else if (main[_id].state.val === 'true') {
+                main[_id].state.val = true;
+            } else if (main[_id].state.val === 'false') {
+                main[_id].state.val = false;
             }
         }
-        if (history[_id].state.lc !== undefined) delete history[_id].state.lc;
-        if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
-            delete history[_id].state.ack;
+        if (main[_id].state.lc !== undefined) delete main[_id].state.lc;
+        if (!adapter.config.storeAck && main[_id].state.ack !== undefined) {
+            delete main[_id].state.ack;
         } else {
-            history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+            main[_id].state.ack = main[_id].state.ack ? 1 : 0;
         }
-        if (!adapter.config.storeFrom && history[_id].state.from !== undefined) delete history[_id].state.from;
+        if (!adapter.config.storeFrom && main[_id].state.from !== undefined) delete main[_id].state.from;
 
-        history[_id].list.push(history[_id].state);
+        main[_id].list.push(main[_id].state);
 
-        if (history[_id].list.length > _settings.maxLength) {
-            adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
-            appendFile(_id, history[_id].list);
+        if (main[_id].list.length > _settings.maxLength) {
+            adapter.log.debug('moving ' + main[_id].list.length + ' entries from '+ _id +' to file');
+            appendFile(_id, main[_id].list);
             checkRetention(_id);
         }
     }
 }
 
 function checkRetention(id) {
-    if (history[id][adapter.namespace].retention) {
-        var d = new Date();
-        var dt = d.getTime();
+    if (main[id][adapter.namespace].retention) {
+        const d = new Date();
+        const dt = d.getTime();
         // check every 6 hours
-        if (!history[id].lastCheck || dt - history[id].lastCheck >= 21600000/* 6 hours */) {
-            history[id].lastCheck = dt;
+        if (!main[id].lastCheck || dt - main[id].lastCheck >= 21600000/* 6 hours */) {
+            main[id].lastCheck = dt;
             // get list of directories
-            var dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
+            const dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
                 return a - b;
             });
             // calculate date
-            d.setSeconds(-(history[id][adapter.namespace].retention));
-            var day = GetHistory.ts2day(d.getTime());
-            for (var i = 0; i < dayList.length; i++) {
+            d.setSeconds(-(main[id][adapter.namespace].retention));
+            const day = GetHistory.ts2day(d.getTime());
+            for (let i = 0; i < dayList.length; i++) {
                 if (dayList[i] < day) {
                     const file = GetHistory.getFilenameForID(adapter.config.storeDir, dayList[i], id);
                     if (fs.existsSync(file)) {
@@ -614,7 +614,7 @@ function checkRetention(id) {
                         } catch (ex) {
                             adapter.log.error('Cannot delete file "' + file + '": ' + ex);
                         }
-                        var files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
+                        const files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
                         if (!files.length) {
                             adapter.log.info('Delete old history dir "' + adapter.config.storeDir + dayList[i] + '"');
                             try {
@@ -633,12 +633,12 @@ function checkRetention(id) {
 }
 
 function appendFile(id, states) {
-    var day = GetHistory.ts2day(states[states.length - 1].ts);
+    const day = GetHistory.ts2day(states[states.length - 1].ts);
 
     const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
-    var data;
+    let data;
 
-    var i;
+    let i;
     for (i = states.length - 1; i >= 0; i--) {
         if (!states[i]) continue;
         if (GetHistory.ts2day(states[i].ts) !== day) {
@@ -673,13 +673,13 @@ function appendFile(id, states) {
 function getOneCachedData(id, options, cache, addId) {
     addId = addId || options.addId;
 
-    if (history[id]) {
-        var res = history[id].list;
+    if (main[id]) {
+        const res = main[id].list;
         // todo can be optimized
         if (res) {
-            var iProblemCount = 0;
-            var vLast = null;
-            for (var i = res.length - 1; i >= 0 ; i--) {
+            let iProblemCount = 0;
+            let vLast = null;
+            for (let i = res.length - 1; i >= 0 ; i--) {
                 if (!res[i]) {
                     iProblemCount++;
                     continue;
@@ -719,13 +719,15 @@ function getOneCachedData(id, options, cache, addId) {
 }
 
 function getCachedData(options, callback) {
-    var cache = [];
+    const cache = [];
 
     if (options.id && options.id !== '*') {
         getOneCachedData(options.id, options, cache);
     } else {
-        for (var id in history) {
-            getOneCachedData(id, options, cache, true);
+        for (const id in main) {
+            if (main.hasOwnProperty(id)) {
+                getOneCachedData(id, options, cache, true);
+            }
         }
     }
     options.length = cache.length;
@@ -740,18 +742,18 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
     // get all files in directory
-    for (var i = 0; i < dayList.length; i++) {
-        var day = parseInt(dayList[i], 10);
+    for (let i = 0; i < dayList.length; i++) {
+        const day = parseInt(dayList[i], 10);
 
         if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
             const file = GetHistory.getFilenameForID(options.path, dayList[i], id);
 
             if (fs.existsSync(file)) {
                 try {
-                    var _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
-                    var last = false;
+                    const _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+                    let last = false;
 
-                    for (var ii in _data) {
+                    for (const ii in _data) {
                         if (!_data.hasOwnProperty(ii)) continue;
                         if (options.ack) {
                             _data[ii].ack = !!_data[ii].ack;
@@ -775,20 +777,20 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
 }
 
 function getFileData(options, callback) {
-    var dayStart = options.start ? parseInt(GetHistory.ts2day(options.start), 10) : 0;
-    var dayEnd   = parseInt(GetHistory.ts2day(options.end), 10);
-    var fileData = [];
+    const dayStart = options.start ? parseInt(GetHistory.ts2day(options.start), 10) : 0;
+    const dayEnd   = parseInt(GetHistory.ts2day(options.end), 10);
+    const fileData = [];
 
     // get list of directories
-    var dayList = getDirectories(options.path).sort(function (a, b) {
-        return b - a;
-    });
+    const dayList = getDirectories(options.path).sort((a, b) => b - a);
 
     if (options.id && options.id !== '*') {
         getOneFileData(dayList, dayStart, dayEnd, options.id, options, fileData);
     } else {
-        for (var id in history) {
-            getOneFileData(dayList, dayStart, dayEnd, id, options, fileData, true);
+        for (const id in main) {
+            if (main.hasOwnProperty(id)) {
+                getOneFileData(dayList, dayStart, dayEnd, id, options, fileData, true);
+            }
         }
     }
 
@@ -796,14 +798,14 @@ function getFileData(options, callback) {
 }
 
 function sortByTs(a, b) {
-    var aTs = a.ts;
-    var bTs = b.ts;
+    const aTs = a.ts;
+    const bTs = b.ts;
     return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
 }
 
 function getHistory(msg) {
-    var startTime = new Date().getTime();
-    var options = {
+    const startTime = new Date().getTime();
+    const options = {
         id:         msg.message.id ? msg.message.id : null,
         path:       adapter.config.storeDir,
         start:      msg.message.options.start,
@@ -823,7 +825,7 @@ function getHistory(msg) {
         options.id = aliasMap[options.id];
     }
     if (options.start > options.end) {
-        var _end      = options.end;
+        const _end      = options.end;
         options.end   = options.start;
         options.start = _end;
     }
@@ -838,7 +840,7 @@ function getHistory(msg) {
     if (options.end < 946681200000) options.end *= 1000;
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
-        getCachedData(options, function (cacheData, isFull) {
+        getCachedData(options, (cacheData, isFull) => {
             adapter.log.debug('after getCachedData: length = ' + cacheData.length + ', isFull=' + isFull);
             // if all data read
             if (isFull && cacheData.length) {
@@ -854,9 +856,9 @@ function getHistory(msg) {
                     error:  null
                 }, msg.callback);
             } else {
-                var origCount = options.count;
+                const origCount = options.count;
                 options.count -= cacheData.length;
-                getFileData(options, function (fileData) {
+                getFileData(options, fileData => {
                     adapter.log.debug('after getFileData: cacheData.length = ' + cacheData.length + ', fileData.length = ' + fileData.length);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
@@ -877,9 +879,9 @@ function getHistory(msg) {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
             adapter.log.debug('use parallel requests');
-            var gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
+            const gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
-            var ghTimeout = setTimeout(function () {
+            let ghTimeout = setTimeout(() => {
                 try {
                     gh.kill('SIGINT');
                 }
@@ -888,20 +890,19 @@ function getHistory(msg) {
                 }
             }, 120000);
 
-            gh.on('message', function (data) {
-                var cmd = data[0];
+            gh.on('message', data => {
+                const cmd = data[0];
                 if (cmd === 'getCache') {
-                    var settings = data[1];
-                    getCachedData(settings, function (cacheData) {
-                        gh.send(['cacheData', cacheData]);
-                    });
+                    const settings = data[1];
+                    getCachedData(settings, cacheData =>
+                        gh.send(['cacheData', cacheData]));
                 } else if (cmd === 'response') {
                     clearTimeout(ghTimeout);
                     ghTimeout = null;
 
-                    var result          = data[1];
-                    var overallLength   = data[2];
-                    var step            = data[3];
+                    const result          = data[1];
+                    const overallLength   = data[2];
+                    const step            = data[3];
                     if (result) {
                         adapter.log.debug('Send: ' + result.length + ' of: ' + overallLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
                         adapter.sendTo(msg.from, msg.command, {
@@ -922,9 +923,9 @@ function getHistory(msg) {
         } else {
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);
-            getCachedData(options, function (cachedData) {
+            getCachedData(options, cachedData => {
                 GetHistory.aggregation(options, cachedData);
-                var data = GetHistory.response(options);
+                const data = GetHistory.response(options);
 
                 if (data[0] === 'response') {
                     if (data[1]) {
@@ -951,9 +952,8 @@ function getHistory(msg) {
 }
 
 function getDirectories(path) {
-    return fs.readdirSync(path).filter(function (file) {
-        return fs.statSync(path + '/' + file).isDirectory();
-    });
+    return fs.readdirSync(path).filter(file =>
+        fs.statSync(path + '/' + file).isDirectory());
 }
 
 function storeState(msg) {
@@ -964,13 +964,13 @@ function storeState(msg) {
         }, msg.callback);
         return;
     }
-    var id;
+    let id;
     if (Array.isArray(msg.message)) {
         adapter.log.debug('storeState: store ' + msg.message.length + ' states for multiple ids');
-        for (var i = 0; i < msg.message.length; i++) {
+        for (let i = 0; i < msg.message.length; i++) {
             id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
-            if (history[id]) {
-                history[id].state = msg.message[i].state;
+            if (main[id]) {
+                main[id].state = msg.message[i].state;
                 pushHelper(id);
             }
             else {
@@ -979,10 +979,10 @@ function storeState(msg) {
         }
     } else if (Array.isArray(msg.message.state)) {
         adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
-        for (var j = 0; j < msg.message.state.length; j++) {
+        for (let j = 0; j < msg.message.state.length; j++) {
             id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-            if (history[id]) {
-                history[id].state = msg.message.state[j];
+            if (main[id]) {
+                main[id].state = msg.message.state[j];
                 pushHelper(id);
             }
             else {
@@ -992,8 +992,8 @@ function storeState(msg) {
     } else {
         adapter.log.debug('storeState: store 1 state for ' + msg.message.id);
         id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-        if (history[id]) {
-            history[id].state = msg.message.state;
+        if (main[id]) {
+            main[id].state = msg.message.state;
             pushHelper(id);
         }
         else {
@@ -1014,7 +1014,7 @@ function enableHistory(msg) {
         }, msg.callback);
         return;
     }
-    var obj = {};
+    const obj = {};
     obj.common = {};
     obj.common.custom = {};
     if (msg.message.options) {
@@ -1024,7 +1024,7 @@ function enableHistory(msg) {
         obj.common.custom[adapter.namespace] = {};
     }
     obj.common.custom[adapter.namespace].enabled = true;
-    adapter.extendForeignObject(msg.message.id, obj, function (err) {
+    adapter.extendForeignObject(msg.message.id, obj, err => {
         if (err) {
             adapter.log.error('enableHistory: ' + err);
             adapter.sendTo(msg.from, msg.command, {
@@ -1047,12 +1047,12 @@ function disableHistory(msg) {
         }, msg.callback);
         return;
     }
-    var obj = {};
+    const obj = {};
     obj.common = {};
     obj.common.custom = {};
     obj.common.custom[adapter.namespace] = {};
     obj.common.custom[adapter.namespace].enabled = false;
-    adapter.extendForeignObject(msg.message.id, obj, function (err) {
+    adapter.extendForeignObject(msg.message.id, obj, err => {
         if (err) {
             adapter.log.error('disableHistory: ' + err);
             adapter.sendTo(msg.from, msg.command, {
@@ -1068,11 +1068,19 @@ function disableHistory(msg) {
 }
 
 function getEnabledDPs(msg) {
-    var data = {};
-    for (var id in history) {
-        if (!history.hasOwnProperty(id)) continue;
-        data[history[id].realId] = history[id][adapter.namespace];
+    const data = {};
+    for (const id in main) {
+        if (!main.hasOwnProperty(id)) continue;
+        data[main[id].realId] = main[id][adapter.namespace];
     }
 
     adapter.sendTo(msg.from, msg.command, data, msg.callback);
+}
+
+// If started as allInOne/compact mode => return function to create instance
+if (typeof module !== undefined && module.parent) {
+    module.exports = startAdapter;
+} else {
+    // or start the instance directly
+    startAdapter();
 }
