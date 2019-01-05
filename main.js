@@ -10,7 +10,7 @@ const GetHistory  = require('./lib/getHistory.js');
 const Aggregate   = require('./lib/aggregate.js');
 const adapterName = require('./package.json').name.split('.').pop();
 
-const main       = {};
+const history    = {};
 const aliasMap   = {};
 let subscribeAll = false;
 let bufferChecker = null;
@@ -53,65 +53,65 @@ function startAdapter(options) {
                     delete aliasMap[id];
                 }
 
-                const writeNull = !main[id];
-                const state     = main[id] ? main[id].state   : null;
-                const list      = main[id] ? main[id].list    : null;
-                const timeout   = main[id] ? main[id].timeout : null;
+                const writeNull = !history[id];
+                const state     = history[id] ? history[id].state   : null;
+                const list      = history[id] ? history[id].list    : null;
+                const timeout   = history[id] ? history[id].timeout : null;
 
-                if (!main[formerAliasId] && !subscribeAll) {
+                if (!history[formerAliasId] && !subscribeAll) {
                     // unsubscribe
-                    for (const _id in main) {
-                        if (main.hasOwnProperty(_id) && main.hasOwnProperty(main[_id].realId)) {
-                            adapter.unsubscribeForeignStates(main[_id].realId);
+                    for (const _id in history) {
+                        if (history.hasOwnProperty(_id) && history.hasOwnProperty(history[_id].realId)) {
+                            adapter.unsubscribeForeignStates(history[_id].realId);
                         }
                     }
                     subscribeAll = true;
                     adapter.subscribeForeignStates('*');
                 }
 
-                if (main[formerAliasId] && main[formerAliasId].relogTimeout) clearTimeout(main[formerAliasId].relogTimeout);
+                if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
 
                 // todo remove history somewhen (2016.08)
-                main[id] = obj.common.custom || obj.common.history;
-                main[id].state   = state;
-                main[id].list    = list;
-                main[id].timeout = timeout;
-                main[id].realId  = realId;
+                history[id] = obj.common.custom || obj.common.history;
+                history[id].state   = state;
+                history[id].list    = list;
+                history[id].timeout = timeout;
+                history[id].realId  = realId;
 
-                if (!main[id][adapter.namespace].maxLength && main[id][adapter.namespace].maxLength !== '0' && main[id][adapter.namespace].maxLength !== 0) {
-                    main[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
+                    history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
                 } else {
-                    main[id][adapter.namespace].maxLength = parseInt(main[id][adapter.namespace].maxLength, 10);
+                    history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
                 }
-                if (!main[id][adapter.namespace].retention && main[id][adapter.namespace].retention !== '0' && main[id][adapter.namespace].retention !== 0) {
-                    main[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
+                    history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
                 } else {
-                    main[id][adapter.namespace].retention = parseInt(main[id][adapter.namespace].retention, 10) || 0;
+                    history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
                 }
-                if (!main[id][adapter.namespace].debounce && main[id][adapter.namespace].debounce !== '0' && main[id][adapter.namespace].debounce !== 0) {
-                    main[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                    history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
                 } else {
-                    main[id][adapter.namespace].debounce = parseInt(main[id][adapter.namespace].debounce, 10);
+                    history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                 }
-                main[id][adapter.namespace].changesOnly = main[id][adapter.namespace].changesOnly === 'true' || main[id][adapter.namespace].changesOnly === true;
-                if (main[id][adapter.namespace].changesRelogInterval !== undefined && main[id][adapter.namespace].changesRelogInterval !== null && main[id][adapter.namespace].changesRelogInterval !== '') {
-                    main[id][adapter.namespace].changesRelogInterval = parseInt(main[id][adapter.namespace].changesRelogInterval, 10) || 0;
+                history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+                if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
+                    history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
                 } else {
-                    main[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                    history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
                 }
-                if (main[id][adapter.namespace].changesRelogInterval > 0) {
-                    main[id].relogTimeout = setTimeout(reLogHelper, (main[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + main[id][adapter.namespace].changesRelogInterval * 500, id);
+                if (history[id][adapter.namespace].changesRelogInterval > 0) {
+                    history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
                 }
-                if (main[id][adapter.namespace].changesMinDelta !== undefined && main[id][adapter.namespace].changesMinDelta !== null && main[id][adapter.namespace].changesMinDelta !== '') {
-                    main[id][adapter.namespace].changesMinDelta = parseFloat(main[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
+                if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
+                    history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
                 } else {
-                    main[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+                    history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
                 }
 
 
                 // add one day if retention is too small
-                if (main[id][adapter.namespace].retention && main[id][adapter.namespace].retention <= 604800) {
-                    main[id][adapter.namespace].retention += 86400;
+                if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
+                    history[id][adapter.namespace].retention += 86400;
                 }
                 if (writeNull && adapter.config.writeNulls) {
                     writeNulls(id);
@@ -124,12 +124,12 @@ function startAdapter(options) {
                     delete aliasMap[id];
                 }
                 id = formerAliasId;
-                if (main[id]) {
+                if (history[id]) {
                     adapter.log.info('disabled logging of ' + id);
-                    if (main[id].relogTimeout) clearTimeout(main[id].relogTimeout);
-                    if (main[id].timeout) clearTimeout(main[id].timeout);
+                    if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
+                    if (history[id].timeout) clearTimeout(history[id].timeout);
                     storeCached(true, id);
-                    delete main[id];
+                    delete history[id];
                 }
             }
         },
@@ -141,7 +141,7 @@ function startAdapter(options) {
 
         unload: callback => finish(callback),
 
-        ready: () => startMain(),
+        ready: () => main(),
 
         message: obj => processMessage(obj)
     });
@@ -159,33 +159,33 @@ process.on('SIGTERM', () =>
 function storeCached(isFinishing, onlyId) {
     const now = new Date().getTime();
 
-    for (const id in main) {
-        if (!main.hasOwnProperty(id) || (onlyId !== undefined && onlyId !== id)) continue;
+    for (const id in history) {
+        if (!history.hasOwnProperty(id) || (onlyId !== undefined && onlyId !== id)) continue;
 
         if (isFinishing) {
-            if (main[id].skipped) {
-                main[id].list.push(main[id].skipped);
-                main[id].skipped = null;
+            if (history[id].skipped) {
+                history[id].list.push(history[id].skipped);
+                history[id].skipped = null;
             }
             if (adapter.config.writeNulls) {
                 const nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
-                if (main[id][adapter.namespace].changesOnly && main[id].state && main[id].state !== null) {
-                    const state = Object.assign({}, main[id].state);
+                if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
+                    const state = Object.assign({}, history[id].state);
                     state.ts   = now;
                     state.from = 'system.adapter.' + adapter.namespace;
-                    main[id].list.push(state);
+                    history[id].list.push(state);
                     nullValue.ts += 1;
                     nullValue.lc += 1;
                 }
 
                 // terminate values with null to indicate adapter stop.
-                main[id].list.push(nullValue);
+                history[id].list.push(nullValue);
             }
         }
 
-        if (main[id].list && main[id].list.length) {
+        if (history[id].list && history[id].list.length) {
             adapter.log.debug('Store the rest for ' + id);
-            appendFile(id, main[id].list);
+            appendFile(id, history[id].list);
         }
     }
 }
@@ -196,16 +196,16 @@ function finish(callback) {
         clearInterval(bufferChecker);
         bufferChecker = null;
     }
-    for (const id in main) {
-        if (!main.hasOwnProperty(id)) continue;
+    for (const id in history) {
+        if (!history.hasOwnProperty(id)) continue;
 
-        if (main[id].relogTimeout) {
-            clearTimeout(main[id].relogTimeout);
-            main[id].relogTimeout = null;
+        if (history[id].relogTimeout) {
+            clearTimeout(history[id].relogTimeout);
+            history[id].relogTimeout = null;
         }
-        if (main[id].timeout) {
-            clearTimeout(main[id].timeout);
-            main[id].timeout = null;
+        if (history[id].timeout) {
+            clearTimeout(history[id].timeout);
+            history[id].timeout = null;
         }
     }
 
@@ -266,8 +266,8 @@ function fixSelector(callback) {
 function processStartValues() {
     if (tasksStart && tasksStart.length) {
         const task = tasksStart.shift();
-        if (main[task.id][adapter.namespace].changesOnly) {
-            adapter.getForeignState(main[task.id].realId, (err, state) => {
+        if (history[task.id][adapter.namespace].changesOnly) {
+            adapter.getForeignState(history[task.id].realId, (err, state) => {
                 const now = task.now || new Date().getTime();
                 pushHistory(task.id, {
                     val:  null,
@@ -298,8 +298,8 @@ function processStartValues() {
 function writeNulls(id, now) {
     if (!id) {
         now = new Date().getTime();
-        for (const _id in main) {
-            if (main.hasOwnProperty(_id)) {
+        for (const _id in history) {
+            if (history.hasOwnProperty(_id)) {
                 writeNulls(_id, now);
             }
         }
@@ -309,14 +309,14 @@ function writeNulls(id, now) {
         if (tasksStart.length === 1) {
             processStartValues();
         }
-        if (main[id][adapter.namespace].changesRelogInterval > 0) {
-            if (main[id].relogTimeout) clearTimeout(main[id].relogTimeout);
-            main[id].relogTimeout = setTimeout(reLogHelper, (main[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + main[id][adapter.namespace].changesRelogInterval * 500, id);
+        if (history[id][adapter.namespace].changesRelogInterval > 0) {
+            if (history[id].relogTimeout) clearTimeout(history[id].relogTimeout);
+            history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
         }
     }
 }
 
-function startMain() { //start
+function main() { //start
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
     if (adapter.config.writeNulls === undefined) adapter.config.writeNulls = true;
@@ -361,66 +361,66 @@ function startMain() { //start
                             adapter.log.debug('Found Alias: ' + id + ' --> ' + aliasMap[id]);
                             id = aliasMap[id];
                         }
-                        main[id] = doc.rows[i].value;
+                        history[id] = doc.rows[i].value;
 
                         // todo remove it somewhen (2016.08)
                         // convert old value
-                        if (main[id].enabled !== undefined) {
-                            main[id] = main[id].enabled ? {'history.0': main[id]} : null;
-                            if (!main[id]) {
-                                delete main[id];
+                        if (history[id].enabled !== undefined) {
+                            history[id] = history[id].enabled ? {'history.0': history[id]} : null;
+                            if (!history[id]) {
+                                delete history[id];
                                 continue;
                             }
                         }
-                        if (!main[id][adapter.namespace] || main[id][adapter.namespace].enabled === false) {
-                            delete main[id];
+                        if (!history[id][adapter.namespace] || history[id][adapter.namespace].enabled === false) {
+                            delete history[id];
                         } else {
                             count++;
                             adapter.log.info('enabled logging of ' + id + ' (Count=' + count + '), Alias=' + (id !== realId));
-                            if (!main[id][adapter.namespace].maxLength && main[id][adapter.namespace].maxLength !== '0' && main[id][adapter.namespace].maxLength !== 0) {
-                                main[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                            if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
+                                history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
                             } else {
-                                main[id][adapter.namespace].maxLength = parseInt(main[id][adapter.namespace].maxLength, 10);
+                                history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
                             }
-                            if (!main[id][adapter.namespace].retention && main[id][adapter.namespace].retention !== '0' && main[id][adapter.namespace].retention !== 0) {
-                                main[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                            if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
+                                history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
                             } else {
-                                main[id][adapter.namespace].retention = parseInt(main[id][adapter.namespace].retention, 10) || 0;
+                                history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
                             }
-                            if (!main[id][adapter.namespace].debounce && main[id][adapter.namespace].debounce !== '0' && main[id][adapter.namespace].debounce !== 0) {
-                                main[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                                history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
                             } else {
-                                main[id][adapter.namespace].debounce = parseInt(main[id][adapter.namespace].debounce, 10);
+                                history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
                             }
-                            main[id][adapter.namespace].changesOnly = main[id][adapter.namespace].changesOnly === 'true' || main[id][adapter.namespace].changesOnly === true;
-                            if (main[id][adapter.namespace].changesRelogInterval !== undefined && main[id][adapter.namespace].changesRelogInterval !== null && main[id][adapter.namespace].changesRelogInterval !== '') {
-                                main[id][adapter.namespace].changesRelogInterval = parseInt(main[id][adapter.namespace].changesRelogInterval, 10) || 0;
+                            history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
+                            if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
+                                history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
                             } else {
-                                main[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                                history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
                             }
-                            if (main[id][adapter.namespace].changesRelogInterval > 0) {
-                                main[id].relogTimeout = setTimeout(reLogHelper, (main[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + main[id][adapter.namespace].changesRelogInterval * 500, id);
+                            if (history[id][adapter.namespace].changesRelogInterval > 0) {
+                                history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
                             }
-                            if (main[id][adapter.namespace].changesMinDelta !== undefined && main[id][adapter.namespace].changesMinDelta !== null && main[id][adapter.namespace].changesMinDelta !== '') {
-                                main[id][adapter.namespace].changesMinDelta = parseFloat(main[id][adapter.namespace].changesMinDelta) || 0;
+                            if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
+                                history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
                             } else {
-                                main[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+                                history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
                             }
 
                             // add one day if retention is too small
-                            if (main[id][adapter.namespace].retention && main[id][adapter.namespace].retention <= 604800) {
-                                main[id][adapter.namespace].retention += 86400;
+                            if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
+                                history[id][adapter.namespace].retention += 86400;
                             }
 
-                            main[id].realId  = realId;
+                            history[id].realId  = realId;
                         }
                     }
                 }
             }
             if (count < 20) {
-                for (const _id in main) {
-                    if (main.hasOwnProperty(_id)) {
-                        adapter.subscribeForeignStates(main[_id].realId);
+                for (const _id in history) {
+                    if (history.hasOwnProperty(_id)) {
+                        adapter.subscribeForeignStates(history[_id].realId);
                     }
                 }
             } else {
@@ -443,8 +443,8 @@ function startMain() { //start
 function pushHistory(id, state, timerRelog) {
     if (timerRelog === undefined) timerRelog = false;
     // Push into history
-    if (main[id]) {
-        const settings = main[id][adapter.namespace];
+    if (history[id]) {
+        const settings = history[id][adapter.namespace];
 
         if (!settings || !state) return;
 
@@ -457,68 +457,68 @@ function pushHistory(id, state, timerRelog) {
                 state.val = f;
             }
         }
-        if (main[id].state && settings.changesOnly && !timerRelog) {
+        if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
-                if ((main[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
-                    main[id].skipped = state; // remember new timestamp
-                    adapter.log.debug('value not changed ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
+                    history[id].skipped = state; // remember new timestamp
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
-            } else if (main[id].lastLogTime) {
-                if ((main[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(main[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    main[id].skipped = state; // remember new timestamp
-                    adapter.log.debug('value not changed ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+            } else if (history[id].lastLogTime) {
+                if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                    history[id].skipped = state; // remember new timestamp
+                    adapter.log.debug('value not changed ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                     return;
                 }
                 if (state.ts !== state.lc) {
-                    adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + main[id].lastLogTime + ', ts=' + state.ts);
+                    adapter.log.debug('value-changed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
                 }
             }
-            if (main[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(main[id].state.val - state.val) < settings.changesMinDelta)) {
-                main[id].skipped = state; // remember new timestamp
-                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+            if (history[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
+                history[id].skipped = state; // remember new timestamp
+                adapter.log.debug('Min-Delta not reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
                 return;
             }
             else if (typeof state.val === 'number') {
-                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta reached ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
             else {
-                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + main[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
+                adapter.log.debug('Min-Delta ignored because no number ' + id + ', last-value=' + history[id].state.val + ', new-value=' + state.val + ', ts=' + state.ts);
             }
         }
 
-        if (main[id].relogTimeout) {
-            clearTimeout(main[id].relogTimeout);
-            main[id].relogTimeout = null;
+        if (history[id].relogTimeout) {
+            clearTimeout(history[id].relogTimeout);
+            history[id].relogTimeout = null;
         }
         if (settings.changesRelogInterval > 0) {
-            main[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+            history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
         }
 
         let ignoreDebonce = false;
         if (timerRelog) {
             state.ts = new Date().getTime();
-            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + main[id].lastLogTime + ', ts=' + state.ts);
+            adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
             ignoreDebonce = true;
         } else {
-            if (settings.changesOnly && main[id].skipped) {
-                main[id].state = main[id].skipped;
+            if (settings.changesOnly && history[id].skipped) {
+                history[id].state = history[id].skipped;
                 pushHelper(id);
             }
-            if (main[id].state && ((main[id].state.val === null && state.val !== null) || (main[id].state.val !== null && state.val === null))) {
+            if (history[id].state && ((history[id].state.val === null && state.val !== null) || (history[id].state.val !== null && state.val === null))) {
                 ignoreDebonce = true;
-            } else if (!main[id].state && state.val === null) {
+            } else if (!history[id].state && state.val === null) {
                 ignoreDebonce = true;
             }
             // only store state if really changed
-            main[id].state = state;
+            history[id].state = state;
         }
-        main[id].lastLogTime = state.ts;
-        main[id].skipped = null;
+        history[id].lastLogTime = state.ts;
+        history[id].skipped = null;
         if (settings.debounce && !ignoreDebonce) {
             // Discard changes in de-bounce time to store last stable value
-            if (main[id].timeout) clearTimeout(main[id].timeout);
-            main[id].timeout = setTimeout(pushHelper, settings.debounce, id);
+            if (history[id].timeout) clearTimeout(history[id].timeout);
+            history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
         } else {
             pushHelper(id);
         }
@@ -526,19 +526,19 @@ function pushHistory(id, state, timerRelog) {
 }
 
 function reLogHelper(_id) {
-    if (!main[_id]) {
+    if (!history[_id]) {
         adapter.log.info('non-existing id ' + _id);
         return;
     }
-    main[_id].relogTimeout = null;
-    if (main[_id].skipped) {
-        main[_id].state = main[_id].skipped;
-        main[_id].state.from = 'system.adapter.' + adapter.namespace;
-        main[_id].skipped = null;
-        pushHistory(_id, main[_id].state, true);
+    history[_id].relogTimeout = null;
+    if (history[_id].skipped) {
+        history[_id].state = history[_id].skipped;
+        history[_id].state.from = 'system.adapter.' + adapter.namespace;
+        history[_id].skipped = null;
+        pushHistory(_id, history[_id].state, true);
     }
     else {
-        adapter.getForeignState(main[_id].realId, function (err, state) {
+        adapter.getForeignState(history[_id].realId, function (err, state) {
             if (err) {
                 adapter.log.info('init timed Relog: can not get State for ' + _id + ' : ' + err);
             }
@@ -547,62 +547,62 @@ function reLogHelper(_id) {
             }
             else {
                 adapter.log.debug('init timed Relog: getState ' + _id + ':  Value=' + state.val + ', ack=' + state.ack + ', ts=' + state.ts  + ', lc=' + state.lc);
-                main[_id].state = state;
-                pushHistory(_id, main[_id].state, true);
+                history[_id].state = state;
+                pushHistory(_id, history[_id].state, true);
             }
         });
     }
 }
 
 function pushHelper(_id) {
-    if (!main[_id] || !main[_id].state) return;
-    const _settings = main[_id][adapter.namespace];
+    if (!history[_id] || !history[_id].state) return;
+    const _settings = history[_id][adapter.namespace];
     // if it was not deleted in this time
     if (_settings) {
-        main[_id].timeout = null;
-        main[_id].list = main[_id].list || [];
+        history[_id].timeout = null;
+        history[_id].list = history[_id].list || [];
 
-        if (typeof main[_id].state.val === 'string') {
-            const f = parseFloat(main[_id].state.val);
-            if (f == main[_id].state.val) {
-                main[_id].state.val = f;
-            } else if (main[_id].state.val === 'true') {
-                main[_id].state.val = true;
-            } else if (main[_id].state.val === 'false') {
-                main[_id].state.val = false;
+        if (typeof history[_id].state.val === 'string') {
+            const f = parseFloat(history[_id].state.val);
+            if (f == history[_id].state.val) {
+                history[_id].state.val = f;
+            } else if (history[_id].state.val === 'true') {
+                history[_id].state.val = true;
+            } else if (history[_id].state.val === 'false') {
+                history[_id].state.val = false;
             }
         }
-        if (main[_id].state.lc !== undefined) delete main[_id].state.lc;
-        if (!adapter.config.storeAck && main[_id].state.ack !== undefined) {
-            delete main[_id].state.ack;
+        if (history[_id].state.lc !== undefined) delete history[_id].state.lc;
+        if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
+            delete history[_id].state.ack;
         } else {
-            main[_id].state.ack = main[_id].state.ack ? 1 : 0;
+            history[_id].state.ack = history[_id].state.ack ? 1 : 0;
         }
-        if (!adapter.config.storeFrom && main[_id].state.from !== undefined) delete main[_id].state.from;
+        if (!adapter.config.storeFrom && history[_id].state.from !== undefined) delete history[_id].state.from;
 
-        main[_id].list.push(main[_id].state);
+        history[_id].list.push(history[_id].state);
 
-        if (main[_id].list.length > _settings.maxLength) {
-            adapter.log.debug('moving ' + main[_id].list.length + ' entries from '+ _id +' to file');
-            appendFile(_id, main[_id].list);
+        if (history[_id].list.length > _settings.maxLength) {
+            adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
+            appendFile(_id, history[_id].list);
             checkRetention(_id);
         }
     }
 }
 
 function checkRetention(id) {
-    if (main[id][adapter.namespace].retention) {
+    if (history[id][adapter.namespace].retention) {
         const d = new Date();
         const dt = d.getTime();
         // check every 6 hours
-        if (!main[id].lastCheck || dt - main[id].lastCheck >= 21600000/* 6 hours */) {
-            main[id].lastCheck = dt;
+        if (!history[id].lastCheck || dt - history[id].lastCheck >= 21600000/* 6 hours */) {
+            history[id].lastCheck = dt;
             // get list of directories
             const dayList = getDirectories(adapter.config.storeDir).sort(function (a, b) {
                 return a - b;
             });
             // calculate date
-            d.setSeconds(-(main[id][adapter.namespace].retention));
+            d.setSeconds(-(history[id][adapter.namespace].retention));
             const day = GetHistory.ts2day(d.getTime());
             for (let i = 0; i < dayList.length; i++) {
                 if (dayList[i] < day) {
@@ -673,8 +673,8 @@ function appendFile(id, states) {
 function getOneCachedData(id, options, cache, addId) {
     addId = addId || options.addId;
 
-    if (main[id]) {
-        const res = main[id].list;
+    if (history[id]) {
+        const res = history[id].list;
         // todo can be optimized
         if (res) {
             let iProblemCount = 0;
@@ -724,8 +724,8 @@ function getCachedData(options, callback) {
     if (options.id && options.id !== '*') {
         getOneCachedData(options.id, options, cache);
     } else {
-        for (const id in main) {
-            if (main.hasOwnProperty(id)) {
+        for (const id in history) {
+            if (history.hasOwnProperty(id)) {
                 getOneCachedData(id, options, cache, true);
             }
         }
@@ -787,8 +787,8 @@ function getFileData(options, callback) {
     if (options.id && options.id !== '*') {
         getOneFileData(dayList, dayStart, dayEnd, options.id, options, fileData);
     } else {
-        for (const id in main) {
-            if (main.hasOwnProperty(id)) {
+        for (const id in history) {
+            if (history.hasOwnProperty(id)) {
                 getOneFileData(dayList, dayStart, dayEnd, id, options, fileData, true);
             }
         }
@@ -969,8 +969,8 @@ function storeState(msg) {
         adapter.log.debug('storeState: store ' + msg.message.length + ' states for multiple ids');
         for (let i = 0; i < msg.message.length; i++) {
             id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
-            if (main[id]) {
-                main[id].state = msg.message[i].state;
+            if (history[id]) {
+                history[id].state = msg.message[i].state;
                 pushHelper(id);
             }
             else {
@@ -981,8 +981,8 @@ function storeState(msg) {
         adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
         for (let j = 0; j < msg.message.state.length; j++) {
             id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-            if (main[id]) {
-                main[id].state = msg.message.state[j];
+            if (history[id]) {
+                history[id].state = msg.message.state[j];
                 pushHelper(id);
             }
             else {
@@ -992,8 +992,8 @@ function storeState(msg) {
     } else {
         adapter.log.debug('storeState: store 1 state for ' + msg.message.id);
         id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-        if (main[id]) {
-            main[id].state = msg.message.state;
+        if (history[id]) {
+            history[id].state = msg.message.state;
             pushHelper(id);
         }
         else {
@@ -1069,9 +1069,9 @@ function disableHistory(msg) {
 
 function getEnabledDPs(msg) {
     const data = {};
-    for (const id in main) {
-        if (!main.hasOwnProperty(id)) continue;
-        data[main[id].realId] = main[id][adapter.namespace];
+    for (const id in history) {
+        if (!history.hasOwnProperty(id)) continue;
+        data[history[id].realId] = history[id][adapter.namespace];
     }
 
     adapter.sendTo(msg.from, msg.command, data, msg.callback);
