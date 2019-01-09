@@ -13,6 +13,8 @@ At first data points are stored in RAM, as soon as they reach maxLength they wil
 
 To set up some data points to be stored they must be configured in admin "Objects" Tab (last button).
 
+To enable charts you have to install **flot** adapter.
+
 ## Settings
 
 - **Storage directory** - Path to the directory, where the files will be stored. It can be done relative to "iobroker-data" or absolute, like "/mnt/history" or "D:/History"
