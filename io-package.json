@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.8.5",
+        "version": "1.8.6",
         "news": {
+            "1.8.6": {
+                "en": "Fix several smaller issues and optimized some texts ",
+                "de": "Behebt einige kleinere Probleme und optimiert einige Texte",
+                "ru": "Исправлено несколько мелких проблем и оптимизированы некоторые тексты.",
+                "pt": "Corrigir vários problemas menores e otimizou alguns textos",
+                "nl": "Los enkele kleinere problemen op en optimaliseerde sommige teksten",
+                "fr": "Correction de plusieurs petits problèmes et optimisation de certains textes",
+                "it": "Risolve diversi problemi minori e ottimizzava alcuni testi",
+                "es": "Soluciona varios problemas menores y optimiza algunos textos.",
+                "pl": "Napraw kilka mniejszych problemów i zoptymalizuj niektóre teksty",
+                "zh-cn": "修复几个较小的问题并优化一些文本"
+            },
             "1.8.5": {
                 "en": "error fixed in storeState",
                 "de": "Fehler in storeState behoben",

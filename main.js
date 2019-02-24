@@ -2,7 +2,7 @@
 /*jslint node: true */
 'use strict';
 const cp          = require('child_process');
-const utils       = require('./lib/utils'); // Get common adapter utils
+const utils       = require('@iobroker/adapter-core'); // Get common adapter utils
 const path        = require('path');
 const dataDir     = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
 const fs          = require('fs');

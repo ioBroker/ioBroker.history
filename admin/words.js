@@ -279,15 +279,16 @@ systemDictionary = {
         "pl": "Ustawienia pamięci"
     },
     "debounce": {
-        "en": "De-bounce interval (ms)",
-        "de": "Entprellzeit (ms)",
-        "ru": "Минимальный интервал (ms)",
-        "pt": "Intervalo de desvio (ms)",
-        "nl": "De-bounce interval (ms)",
-        "fr": "Intervalle de rebond (ms)",
-        "it": "Intervallo di rimbalzo (ms)",
-        "es": "De-bounce interval (ms)",
-        "pl": "Interwał odbicia (ms)"
+        "en": "Ignore changes till value stays unchanged for X Milliseconds<br>(Debounce Time)",
+        "de": "Änderungen ignorieren, bis der Wert für X Millisekunden unverändert bleibt <br> (Entprellzeit)",
+        "ru": "Игнорировать изменения до тех пор, пока значение не останется неизменным в течение X миллисекунд <br> (время отладки)",
+        "pt": "Ignorar alterações até que o valor permaneça inalterado por X Milissegundos <br> (Tempo de Depuração)",
+        "nl": "Wijzigingen negeren totdat waarde ongewijzigd blijft voor X Milliseconds <br> (Debounce Time)",
+        "fr": "Ignorer les modifications jusqu'à ce que la valeur reste inchangée pour X millisecondes <br> (Debounce Time)",
+        "it": "Ignora le modifiche fino a quando il valore rimane invariato per X Milliseconds <br> (Debounce Time)",
+        "es": "Ignorar cambios hasta que el valor permanezca sin cambios durante X milisegundos <br> (Tiempo de rebote)",
+        "pl": "Zignoruj ​​zmiany, aż wartość pozostanie niezmieniona przez X Milliseconds <br> (Czas odbicia)",
+        "zh-cn": "忽略更改，直到值保持不变为X毫秒<br>（去抖时间）"
     },
     "keep forever": {
         "en": "keep forever",
@@ -301,26 +302,28 @@ systemDictionary = {
         "pl": "zachowaj na zawsze"
     },
     "log changes interval(s)": {
-        "en": "Log unchanged values any (s)",
-        "de": "Gleiche Werte alle x Sekunden aufzeichnen",
-        "ru": "Запись неизменённых значений каждые (сек)",
-        "pt": "Registre valores inalterados qualquer (s)",
-        "nl": "Log onveranderde waarden voor elke",
-        "fr": "Consigner les valeurs inchangées toutes les x secondes",
-        "it": "Registra valori invariati nessuno (i)",
-        "es": "Log unchanged values any (s)",
-        "pl": "Zaloguj niezmienione wartości dowolne (s)"
+        "en": "still record the same values (seconds)",
+        "de": "trotzdem gleiche Werte aufzeichnen (Sekunden)",
+        "ru": "по-прежнему записывать те же значения (в секундах)",
+        "pt": "ainda gravar os mesmos valores (segundos)",
+        "nl": "nog steeds dezelfde waarden (seconden)",
+        "fr": "toujours enregistrer les mêmes valeurs (secondes)",
+        "it": "registra ancora gli stessi valori (secondi)",
+        "es": "sigue registrando los mismos valores (segundos)",
+        "pl": "nadal nagrywaj te same wartości (sekundy)",
+        "zh-cn": "仍记录相同的值（秒"
     },
     "log changes minimal delta": {
-        "en": "Minimum difference from last value to log",
-        "de": "Minimale Abweichung vom letzten Wert für Aufzeichnung",
-        "ru": "Минимальная разница с последним записанным значением",
-        "pt": "Diferença mínima do último valor ao log",
-        "nl": "Minimaal verschil van laatste waarde tot log",
-        "fr": "Différence minimale à la dernière valeur",
-        "it": "Differenza minima dall'ultimo valore da registrare",
-        "es": "Minimum difference from last value to log",
-        "pl": "Minimalna różnica od ostatniej wartości do dziennika"
+        "en": "Minimum difference from last value",
+        "de": "Minimale Differenz zum letzten Wert",
+        "ru": "Минимальное отличие от последнего значения",
+        "pt": "Diferença mínima do último valor",
+        "nl": "Minimaal verschil met laatste waarde",
+        "fr": "Différence minimale par rapport à la dernière valeur",
+        "it": "Differenza minima dall'ultimo valore",
+        "es": "Diferencia mínima desde el último valor",
+        "pl": "Minimalna różnica od ostatniej wartości",
+        "zh-cn": "与上一个值的最小差异"
     },
     "maxLength": {
         "en": "Maximal number of stored in RAM values",
