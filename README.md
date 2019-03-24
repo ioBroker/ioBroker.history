@@ -1,12 +1,13 @@
 ![Logo](admin/history.png)
 # ioBroker.history
-===============================
 
-![Number of Installations](http://iobroker.live/badges/history-installed.svg) ![Number of Installations](http://iobroker.live/badges/history-stable.svg) [![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
+![Number of Installations](http://iobroker.live/badges/history-installed.svg) ![Number of Installations](http://iobroker.live/badges/history-stable.svg) 
+[![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Tests](http://img.shields.io/travis/ioBroker/ioBroker.history/master.svg)](https://travis-ci.org/ioBroker/ioBroker.history)
 
-[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/) [![Greenkeeper badge](https://badges.greenkeeper.io/ioBroker/ioBroker.history.svg)](https://greenkeeper.io/)
+[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/) 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ioBroker/ioBroker.history.svg)](https://greenkeeper.io/)
 
 This adapter saves state history in a two-staged process.
 At first data points are stored in RAM, as soon as they reach maxLength they will be stored on disk.
@@ -236,43 +237,43 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
-## 1.8.5 (2018-07-02)
+### 1.8.5 (2018-07-02)
 * (Apollon77) Error fixed in storeState
 
-## 1.8.4 (2018-06-24)
+### 1.8.4 (2018-06-24)
 * (Apollon77) Fixing/allow to disable writing of start and end values
 
-## 1.8.0 (2018-06-19/24)
+### 1.8.0 (2018-06-19/24)
 * (Apollon77) Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs
 
-## 1.7.4 (2018-04-03)
+### 1.7.4 (2018-04-03)
 * (AlCalzone) Fix filename handling for states with special characters
 
-## 1.7.3 (2018-03-28)
+### 1.7.3 (2018-03-28)
 * (Apollon77) Respect 'keep forever' setting for retention from datapoint configuration
 
-## 1.7.2 (2018-02-05)
+### 1.7.2 (2018-02-05)
 * (bondrogeen) Admin3 Fixes
 
-## 1.7.1 (2018-01-31)
+### 1.7.1 (2018-01-31)
 * (Bluefox) Admin3 Fixes
 
-## 1.7.0 (2018-01-17)
+### 1.7.0 (2018-01-17)
 * (bluefox) Ready for Admin3
 
-## 1.6.6 (2017-12-20)
+### 1.6.6 (2017-12-20)
 * (bluefox) translations
 
-## 1.6.5 (2017-10-05)
+### 1.6.5 (2017-10-05)
 * (Apollon77) fix relog value feature
 
-## 1.6.4 (2017-08-12)
+### 1.6.4 (2017-08-12)
 * (bluefox) add "save last value" option
 
-## 1.6.3 (2017-08-03)
+### 1.6.3 (2017-08-03)
 * (Apollon77) fix behaviour of log interval to always log the current value
 
-## 1.6.2 (2017-04-07)
+### 1.6.2 (2017-04-07)
 * fix in datatype conversions
 
 ### 1.6.0 (2017-02-28)
