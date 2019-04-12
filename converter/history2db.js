@@ -6,7 +6,7 @@
 
 //usage: nodejs history2db.js [<DB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
 //usage: nodejs history2db.js influxdb.0 info 20161001 /path/to/data
-var utils  = require(__dirname + '/../lib/utils'); // Get common adapter utils
+const utils   = require('@iobroker/adapter-core'); // Get common adapter utils
 
 var fs        = require('fs');
 var path      = require('path');
