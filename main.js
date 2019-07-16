@@ -585,7 +585,6 @@ function pushHelper(_id) {
         if (history[_id].list.length > _settings.maxLength) {
             adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
             appendFile(_id, history[_id].list);
-            checkRetention(_id);
         }
     }
 }
@@ -668,6 +667,8 @@ function appendFile(id, states) {
     if (states.length) {
         appendFile(id, states);
     }
+
+    checkRetention(id);
 }
 
 function getOneCachedData(id, options, cache, addId) {
