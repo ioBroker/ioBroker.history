@@ -618,7 +618,7 @@ function checkRetention(id) {
                         if (!files.length) {
                             adapter.log.info('Delete old history dir "' + adapter.config.storeDir + dayList[i] + '"');
                             try {
-                                fs.unlinkSync(adapter.config.storeDir + dayList[i]);
+                                fs.rmdirSync(adapter.config.storeDir + dayList[i]);
                             } catch (ex) {
                                 adapter.log.error('Cannot delete directory "' + adapter.config.storeDir + dayList[i] + '": ' + ex);
                             }
