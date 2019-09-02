@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.8.6",
+        "version": "1.8.7",
         "news": {
+            "1.8.7": {
+                "en": "old files should be deleted automatically",
+                "de": "alte Dateien sollten automatisch gelöscht werden",
+                "ru": "старые файлы должны быть удалены автоматически",
+                "pt": "arquivos antigos devem ser excluídos automaticamente",
+                "nl": "oude bestanden moeten automatisch worden verwijderd",
+                "fr": "les anciens fichiers doivent être supprimés automatiquement",
+                "it": "i vecchi file dovrebbero essere eliminati automaticamente",
+                "es": "los archivos antiguos deben eliminarse automáticamente",
+                "pl": "stare pliki powinny być automatycznie usuwane",
+                "zh-cn": "旧文件应自动删除"
+            },
             "1.8.6": {
                 "en": "Fix several smaller issues and optimized some texts ",
                 "de": "Behebt einige kleinere Probleme und optimiert einige Texte",
