@@ -236,7 +236,7 @@
             "language": "javascript",
             "views": {
                 "state": {
-                    "map": "function(doc) { if (doc.type==='state' && (doc.common.custom || doc.common.history)) emit(doc._id, doc.common.custom || doc.common.history) }"
+                    "map": "function(doc) { doc.type === 'state' && doc.common && doc.common.custom && emit(doc._id, doc.common.custom) }"
                 }
             }
         }
