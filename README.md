@@ -1,17 +1,20 @@
 ![Logo](admin/history.png)
 # ioBroker.history
-===============================
 
+![Number of Installations](http://iobroker.live/badges/history-installed.svg) ![Number of Installations](http://iobroker.live/badges/history-stable.svg) 
 [![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Tests](http://img.shields.io/travis/ioBroker/ioBroker.history/master.svg)](https://travis-ci.org/ioBroker/ioBroker.history)
 
-[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/) [![Greenkeeper badge](https://badges.greenkeeper.io/ioBroker/ioBroker.history.svg)](https://greenkeeper.io/)
+[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/) 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ioBroker/ioBroker.history.svg)](https://greenkeeper.io/)
 
 This adapter saves state history in a two-staged process.
 At first data points are stored in RAM, as soon as they reach maxLength they will be stored on disk.
 
 To set up some data points to be stored they must be configured in admin "Objects" Tab (last button).
+
+To enable charts you have to install **flot** adapter.
 
 ## Settings
 
@@ -238,7 +241,13 @@ Possible options and Parameter:
 * (foxriver76) removed usage of adapter.objects
 * __requires js-controller >= 2.0.0__
 
-## 1.8.5 (2018-07-02)
+### 1.8.7 (2019-09-02)
+* (paul53) old files should be deleted automatically
+
+### 1.8.6 
+* Fix several smaller issues and optimized some texts
+
+### 1.8.5 (2018-07-02)
 * (Apollon77) Error fixed in storeState
 
 ### 1.8.4 (2018-06-24)
@@ -271,7 +280,7 @@ Possible options and Parameter:
 ### 1.6.4 (2017-08-12)
 * (bluefox) add "save last value" option
 
-## 1.6.3 (2017-08-03)
+### 1.6.3 (2017-08-03)
 * (Apollon77) fix behaviour of log interval to always log the current value
 
 ### 1.6.2 (2017-04-07)

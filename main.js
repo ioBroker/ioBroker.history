@@ -2,7 +2,7 @@
 /*jslint node: true */
 'use strict';
 const cp          = require('child_process');
-const utils       = require('./lib/utils'); // Get common adapter utils
+const utils       = require('@iobroker/adapter-core'); // Get common adapter utils
 const path        = require('path');
 const dataDir     = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
 const fs          = require('fs');
@@ -585,7 +585,6 @@ function pushHelper(_id) {
         if (history[_id].list.length > _settings.maxLength) {
             adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
             appendFile(_id, history[_id].list);
-            checkRetention(_id);
         }
     }
 }
@@ -618,7 +617,7 @@ function checkRetention(id) {
                         if (!files.length) {
                             adapter.log.info('Delete old history dir "' + adapter.config.storeDir + dayList[i] + '"');
                             try {
-                                fs.unlinkSync(adapter.config.storeDir + dayList[i]);
+                                fs.rmdirSync(adapter.config.storeDir + dayList[i]);
                             } catch (ex) {
                                 adapter.log.error('Cannot delete directory "' + adapter.config.storeDir + dayList[i] + '": ' + ex);
                             }
@@ -668,6 +667,8 @@ function appendFile(id, states) {
     if (states.length) {
         appendFile(id, states);
     }
+
+    checkRetention(id);
 }
 
 function getOneCachedData(id, options, cache, addId) {
@@ -1078,7 +1079,7 @@ function getEnabledDPs(msg) {
 }
 
 // If started as allInOne/compact mode => return function to create instance
-if (typeof module !== undefined && module.parent) {
+if (module && module.parent) {
     module.exports = startAdapter;
 } else {
     // or start the instance directly

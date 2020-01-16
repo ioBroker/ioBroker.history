@@ -164,7 +164,7 @@ function checkIsControllerInstalled(cb, counter) {
     try {
         var f = fs.readFileSync(dataDir + 'objects.json');
         var objects = JSON.parse(f.toString());
-        if (objects['system.adapter.admin.0']) {
+        if (objects['system.certificates']) {
             console.log('checkIsControllerInstalled: installed!');
             setTimeout(function () {
                 if (cb) cb();
@@ -311,6 +311,7 @@ function installJsController(cb) {
         } else {
             // check if port 9000 is free, else admin adapter will be added to running instance
             var client = new require('net').Socket();
+            client.on('error', () => {});
             client.connect(9000, '127.0.0.1', function() {
                 console.error('Cannot initiate fisrt run of test, because one instance of application is running on this PC. Stop it and repeat.');
                 process.exit(0);

@@ -6,7 +6,7 @@
 
 //usage: nodejs analyzesql.js <SQL-Instance>  [<Loglevel>]
 //usage: nodejs analyzesql.js sql.0 info
-var utils  = require(__dirname + '/../lib/utils'); // Get common adapter utils
+const utils   = require('@iobroker/adapter-core'); // Get common adapter utils
 
 var fs        = require('fs');
 var path      = require('path');
