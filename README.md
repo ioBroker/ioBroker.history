@@ -234,43 +234,47 @@ Possible options and Parameter:
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
 
 ## Changelog
+## 1.9.0 (2020-01-16)
+* (foxriver76) removed usage of adapter.objects
+* __requires js-controller >= 2.0.0__
+
 ## 1.8.5 (2018-07-02)
 * (Apollon77) Error fixed in storeState
 
-## 1.8.4 (2018-06-24)
+### 1.8.4 (2018-06-24)
 * (Apollon77) Fixing/allow to disable writing of start and end values
 
-## 1.8.0 (2018-06-19/24)
+### 1.8.0 (2018-06-19/24)
 * (Apollon77) Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs
 
-## 1.7.4 (2018-04-03)
+### 1.7.4 (2018-04-03)
 * (AlCalzone) Fix filename handling for states with special characters
 
-## 1.7.3 (2018-03-28)
+### 1.7.3 (2018-03-28)
 * (Apollon77) Respect 'keep forever' setting for retention from datapoint configuration
 
-## 1.7.2 (2018-02-05)
+### 1.7.2 (2018-02-05)
 * (bondrogeen) Admin3 Fixes
 
-## 1.7.1 (2018-01-31)
+### 1.7.1 (2018-01-31)
 * (Bluefox) Admin3 Fixes
 
-## 1.7.0 (2018-01-17)
+### 1.7.0 (2018-01-17)
 * (bluefox) Ready for Admin3
 
-## 1.6.6 (2017-12-20)
+### 1.6.6 (2017-12-20)
 * (bluefox) translations
 
-## 1.6.5 (2017-10-05)
+### 1.6.5 (2017-10-05)
 * (Apollon77) fix relog value feature
 
-## 1.6.4 (2017-08-12)
+### 1.6.4 (2017-08-12)
 * (bluefox) add "save last value" option
 
 ## 1.6.3 (2017-08-03)
 * (Apollon77) fix behaviour of log interval to always log the current value
 
-## 1.6.2 (2017-04-07)
+### 1.6.2 (2017-04-07)
 * fix in datatype conversions
 
 ### 1.6.0 (2017-02-28)
@@ -374,7 +378,7 @@ Possible options and Parameter:
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2018 Bluefox <dogafox@gmail.com>, Apollon77
+Copyright (c) 2014-2020 Bluefox <dogafox@gmail.com>, Apollon77
 
 Copyright (c) 2016 Smiling_Jack
 

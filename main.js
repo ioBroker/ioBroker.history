@@ -349,7 +349,7 @@ function main() { //start
     }
 
     fixSelector(function () {
-        adapter.objects.getObjectView('custom', 'state', {}, (err, doc) => {
+        adapter.getObjectView('custom', 'state', {}, (err, doc) => {
             let count = 0;
             if (doc && doc.rows) {
                 for (let i = 0, l = doc.rows.length; i < l; i++) {
