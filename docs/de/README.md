@@ -8,7 +8,7 @@ Werten im RAM in das ausgewählte Speicherverzeichnis geschrieben.
 Eine Instanz des History-Adapters wird über die ioBroker Admin-Oberfläche mit klicken
 auf das + Zeichen installiert.
 
-![](Installation.PNG)
+![](media/Installation.PNG)
 
 Nach der Erstellung der Instanz öffnet sich das Konfigurationsfenster.
 
@@ -16,7 +16,7 @@ Nach der Erstellung der Instanz öffnet sich das Konfigurationsfenster.
 
 ### Storage-Einstellungen
 
-![](KonfigStorage.PNG)
+![](media/KonfigStorage.PNG)
 
 **Speicherverzeichnis**
 Hier den Pfad zu dem Verzeichnis eingeben, in dem die Dateien gespeichert werden
@@ -35,7 +35,7 @@ Legt fest ob das “Ack-Flag” mit gespeichert werden soll.
 Hiermit werden Voreinstellungen für die zu überwachenden Datenpunkte festgelegt.
 Jeder Wert kann im Datenpunkt selbst nachträglich geändert werden.
 
-![](KonfigZustaende.PNG)
+![](media/KonfigZustaende.PNG)
 
 **Maximale Anzahl von Werten im RAM**
 Nach dem Erreichen dieser Anzahl werden die Werte vom RAM ins Speicherverzeichnis
@@ -72,12 +72,12 @@ Schreibe NULL-Werte an Start-Stop-Grenzen
 ##Einstellungen für Datenpunkte
 Die Einstellungen für den zu loggenden Datenpunkt werden in dem Reiter „Objekte“
 bei dem entsprechenden Datenpunkt durchgeführt.
-![](Datenpunkt.PNG)
+![](media/Datenpunkt.PNG)
 
 Dazu beim gewünschten Datenpunkt ganz rechts in der Spalte das Schraubenschlüssel-
 symbol anklicken. Das Konfigurationsmenü öffnet sich:
 
-![](DatenpunktEinstellungen.PNG)
+![](media/DatenpunktEinstellungen.PNG)
 
 **Aktiviert**
 Logging des Datenpunktes aktivieren
@@ -105,23 +105,23 @@ nur als Beispiel!
 2. den Filterbegriff state in der Spalte Typ auswählen
 3. Den Gabelschlüssel rechts oben anklicken und das Konfigurationsmenü für die
 Einstellungen der log-Parameter öffnet sich
-*![](Datenpunkte.PNG)*
+*![](media/Datenpunkte.PNG)*
 4. Das loggen für alle gefilterten Datenpunkte auf einmal aktivieren
 5. Weitere Parameter wie „nur Änderungen“ und Vorhaltezeit für alle gefilterten
 Datenpunkte einheitlich auswählen
 6. Die Änderungen speichern
-![](DatenpunktEinstellungen.PNG)
+![](media/DatenpunktEinstellungen.PNG)
 
 ## Bedienung
 Wird in der Titelzeile unter Einstellungen “mit” oder “history.0” ausgewählt,
 werden nur noch Datenpunkte angezeigt, für die das Logging aktiv ist.
 
-![](Bedienung.PNG)
+![](media/Bedienung.PNG)
 
 Ein Klick auf das Schraubenschlüsselsymbol öffnet die Einstellungen erneut und
 unter Tabelle erscheinen die bereits geloggten Daten:
 
-![](DatenpunktTabelle.PNG)
+![](media/DatenpunktTabelle.PNG)
 
 Mit dem runden Pfeilsymbol können die Daten aktualisiert werden und mit dem Pfeil
 nach unten Symbol die geloggten Daten als csv-Datei heruntergeladen werden.
@@ -130,4 +130,4 @@ nach unten Symbol die geloggten Daten als csv-Datei heruntergeladen werden.
 Bei installiertem flot oder Rickshaw Adapter wird im Reiter Grafik der grafische
 verlauf angezeigt.
 
-![](DatenpunktGrafik.PNG)
+![](media/DatenpunktGrafik.PNG)
