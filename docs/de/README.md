@@ -31,7 +31,7 @@ werden soll.
 **Speichere Ack vom Ereignis mit**
 Legt fest ob das “Ack-Flag” mit gespeichert werden soll.
 
-###Standardeinstellungen für Zustände
+### Standardeinstellungen für Zustände
 Hiermit werden Voreinstellungen für die zu überwachenden Datenpunkte festgelegt.
 Jeder Wert kann im Datenpunkt selbst nachträglich geändert werden.
 
