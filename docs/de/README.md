@@ -113,20 +113,23 @@ Datenpunkte einheitlich auswählen
 ![](media/DatenpunktEinstellungen.PNG)
 
 ## Bedienung
-Wird in der Titelzeile unter Einstellungen “mit” oder “history.0” ausgewählt,
-werden nur noch Datenpunkte angezeigt, für die das Logging aktiv ist.
+### Filtern
+Wird unter Objekte in der Titelzeile rechts unter Einstellungen “mit” oder
+"history.0" ausgewählt, werden nur noch Datenpunkte angezeigt, für die das
+Logging aktiv ist:
 
 ![](media/Bedienung.PNG)
 
-Ein Klick auf das Schraubenschlüsselsymbol öffnet die Einstellungen erneut und
-unter Tabelle erscheinen die bereits geloggten Daten:
+### Werte anzeigen
+Ein Klick auf das Schraubenschlüsselsymbol im Datenpunkt des Objektes öffnet die
+Einstellungen erneut und unter Tabelle erscheinen die bereits geloggten Daten:
 
 ![](media/DatenpunktTabelle.PNG)
 
 Mit dem runden Pfeilsymbol können die Daten aktualisiert werden und mit dem Pfeil
 nach unten Symbol die geloggten Daten als csv-Datei heruntergeladen werden.
 
-
+### Grafiken
 Bei installiertem flot oder Rickshaw Adapter wird im Reiter Grafik der grafische
 verlauf angezeigt:
 
