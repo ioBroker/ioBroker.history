@@ -1,4 +1,5 @@
-# History-Adapter
+![Logo](admin/history.png)
+# ioBroker History-Adapter
 Der history-Adapter dient zum loggen von Datenpunkten. Deren Statusverlauf im
 JSON Format in zwei Schritten gespeichert wird: Zuerst werden die Werte im RAM
 zwischengespeichert und anschließend beim Erreichen der maximalen Anzahl von
