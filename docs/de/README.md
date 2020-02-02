@@ -69,29 +69,29 @@ Schreibe NULL-Werte an Start-Stop-Grenzen
 
 
 
-##Einstellungen für Datenpunkte
+## Einstellungen für Datenpunkte
 Die Einstellungen für den zu loggenden Datenpunkt werden in dem Reiter „Objekte“
-bei dem entsprechenden Datenpunkt durchgeführt.
+bei dem entsprechenden Datenpunkt rechts in der Spalte über das Schraubenschlüssel-
+symbol durchgeführt.
 ![](media/Datenpunkt.PNG)
 
-Dazu beim gewünschten Datenpunkt ganz rechts in der Spalte das Schraubenschlüssel-
-symbol anklicken. Das Konfigurationsmenü öffnet sich:
+Das Konfigurationsmenü öffnet sich:
 
-![](media/DatenpunktEinstellungen.PNG)
+![](media/DatenpunktEinstellung.PNG)
 
 **Aktiviert**
 Logging des Datenpunktes aktivieren
 
 **Nur Änderungen aufzeichnen**
 Es werden nur Werte gespeichert, wenn sich der Wert des Datenpunktes ändert und
-spart somit Speicherplatz. Alle weiteren Einstellungen sind gemäß den
-Standardeinstellungen für Zustände voreingestellt und können hier nochmals
-angepasst werden.
+spart somit Speicherplatz. Alle weiteren Einstellungen sind gemäß den Standard-
+einstellungen für Zustände voreingestellt und können hier nochmals angepasst werden.
 
 **Alias-ID**
 Wenn angeben, werden z.B. nachdem ein Geräte- oder Datenpunktnamen geändert wurde,
 die Daten immer noch mit der alten ID protokolliert.
 
+**Mehrere Datenpunkte loggen**
 Um mehrere Datenpunkte auf einmal zu loggen, lassen sich über Filterfelder in der
 Titelzeile die Datenpunkte so filtern, dass man z.B. nur die „State“ Datenpunkte
 herausfiltert, um sie dann gemeinsam alle zu loggen.
@@ -128,6 +128,6 @@ nach unten Symbol die geloggten Daten als csv-Datei heruntergeladen werden.
 
 
 Bei installiertem flot oder Rickshaw Adapter wird im Reiter Grafik der grafische
-verlauf angezeigt.
+verlauf angezeigt:
 
 ![](media/DatenpunktGrafik.PNG)
