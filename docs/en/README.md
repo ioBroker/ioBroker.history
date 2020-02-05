@@ -18,9 +18,9 @@ Most of these values will be pre filled on the detail settings for the datapoint
 
 
 ## Access values from Javascript adapter
-The sorted values can be accessed from Javascript adapter. E.g. with following code you can read the list of events for last hour:
+The sorted values can be accessed from Javascript adapter.
 
-Get 50 last stored events for all IDs
+* Get 50 last stored events for all IDs
 ```
 sendTo('history.0', 'getHistory', {
     id: '*',
@@ -36,7 +36,7 @@ sendTo('history.0', 'getHistory', {
 });
 ```
 
-// Get stored values for "system.adapter.admin.0.memRss" in last hour
+* Get stored values for "system.adapter.admin.0.memRss" in last hour
 ```
 var end = new Date().getTime();
 sendTo('history.0', 'getHistory', {
