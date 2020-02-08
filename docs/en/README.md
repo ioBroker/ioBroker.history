@@ -169,7 +169,8 @@ Two kind of data are collected:
 The analyzeinflux.js can be found in the directory "converter".
 This script will collect the above mentioned data for an InfluxDB instance.
 
-**Usage**: nodejs analyzeinflux.js [<InfluxDB-Instance>] [<Loglevel>] [--deepAnalyze]
+**Usage**: nodejs analyzeinflux.js [InfluxDB-Instance] [Loglevel] [--deepAnalyze]
+
 **Example**: nodejs analyzeinflux.js influxdb.0 info --deepAnalyze
 
 Parameters:
