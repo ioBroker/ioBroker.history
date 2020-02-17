@@ -213,12 +213,11 @@
         "getHistory":           	true,
 		"dependencies":             [{"js-controller": ">=2.0.0","admin": ">=1.6.10"}],
         "supportStopInstance":      2000,
-        "stopTimeout":              10000
-	},
+        "stopTimeout":              10000,
 	"docs": {
             	"en": ["docs/en/readme.md"],
 		"de": ["docs/de/readme.md"]
-	},
+	}
     },
     "native": {
         "maxLength": 960,
