@@ -76,11 +76,6 @@ function startAdapter(options) {
                 (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled
                 )
             ) {
-                if (history[formerAliasId] && history[formerAliasId][adapter.namespace] && isEqual(obj.common.custom[adapter.namespace], history[formerAliasId][adapter.namespace])) {
-                    adapter.log.debug('Object ' + id + ' unchanged. Ignore');
-                    return;
-                }
-
                 const realId = id;
                 let checkForRemove = true;
                 if (obj.common.custom && obj.common.custom[adapter.namespace] && obj.common.custom[adapter.namespace].aliasId) {
@@ -116,50 +111,55 @@ function startAdapter(options) {
                     adapter.subscribeForeignStates('*');
                 }
 
-                if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
+                if (!obj.common.custom[adapter.namespace].maxLength && obj.common.custom[adapter.namespace].maxLength !== '0' && obj.common.custom[adapter.namespace].maxLength !== 0) {
+                    obj.common.custom[adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                } else {
+                    obj.common.custom[adapter.namespace].maxLength = parseInt(obj.common.custom[adapter.namespace].maxLength, 10);
+                }
+                if (!obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention !== '0' && obj.common.custom[adapter.namespace].retention !== 0) {
+                    obj.common.custom[adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].retention = parseInt(obj.common.custom[adapter.namespace].retention, 10) || 0;
+                }
+                if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
+                    obj.common.custom[adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                } else {
+                    obj.common.custom[adapter.namespace].debounce = parseInt(obj.common.custom[adapter.namespace].debounce, 10);
+                }
+                obj.common.custom[adapter.namespace].changesOnly = obj.common.custom[adapter.namespace].changesOnly === 'true' || obj.common.custom[adapter.namespace].changesOnly === true;
+                if (obj.common.custom[adapter.namespace].changesRelogInterval !== undefined && obj.common.custom[adapter.namespace].changesRelogInterval !== null && obj.common.custom[adapter.namespace].changesRelogInterval !== '') {
+                    obj.common.custom[adapter.namespace].changesRelogInterval = parseInt(obj.common.custom[adapter.namespace].changesRelogInterval, 10) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                }
+                if (obj.common.custom[adapter.namespace].changesMinDelta !== undefined && obj.common.custom[adapter.namespace].changesMinDelta !== null && obj.common.custom[adapter.namespace].changesMinDelta !== '') {
+                    obj.common.custom[adapter.namespace].changesMinDelta = parseFloat(obj.common.custom[adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+                }
 
-                // todo remove history somewhen (2016.08)
-                history[id] = obj.common.custom || obj.common.history;
+                // add one day if retention is too small
+                if (obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention <= 604800) {
+                    obj.common.custom[adapter.namespace].retention += 86400;
+                }
+
+                if (history[formerAliasId] && history[formerAliasId][adapter.namespace] && isEqual(obj.common.custom[adapter.namespace], history[formerAliasId][adapter.namespace])) {
+                    adapter.log.debug('Object ' + id + ' unchanged. Ignore');
+                    return;
+                }
+
+                history[id] = obj.common.custom;
                 history[id].state   = state;
                 history[id].list    = list;
                 history[id].timeout = timeout;
                 history[id].realId  = realId;
 
-                if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
-                    history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
-                } else {
-                    history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
-                }
-                if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
-                    history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
-                } else {
-                    history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
-                }
-                if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                    history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
-                } else {
-                    history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
-                }
-                history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-                if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
-                    history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
-                } else {
-                    history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
-                }
+                if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
+
                 if (history[id][adapter.namespace].changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
                 }
-                if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
-                    history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
-                } else {
-                    history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
-                }
 
-
-                // add one day if retention is too small
-                if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
-                    history[id][adapter.namespace].retention += 86400;
-                }
                 if (writeNull && adapter.config.writeNulls) {
                     writeNulls(id);
                 }
