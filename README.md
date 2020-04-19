@@ -18,7 +18,7 @@ This adapter saves state history in a two-staged process.
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
-### 1.9.1 (2020-04-19)
+### 1.9.2 (2020-04-19)
 * __Requires js-controller >= 2.0.0__
 * (foxriver76) removed usage of adapter.objects
 * (Apollon77) check if objects have changed and ignore unchanged

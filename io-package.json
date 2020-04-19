@@ -22,9 +22,9 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.1",
+        "version": "1.9.2",
         "news": {
-            "1.9.1": {
+            "1.9.2": {
                 "en": "removed usage of adapter.objects",
                 "de": "Verwendung von adapter.objects entfernt",
                 "ru": "удалено использование файла adapter.objects",
