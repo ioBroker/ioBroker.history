@@ -11,15 +11,20 @@
 
 This adapter saves state history in a two-staged process.
 
+**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
 
 ## Configuration
 * [English description](docs/en/README.md)
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
-### 1.9.0 (2020-01-16)
+### 1.9.1 (2020-04-19)
+* __Requires js-controller >= 2.0.0__
 * (foxriver76) removed usage of adapter.objects
-* __requires js-controller >= 2.0.0__
+* (Apollon77) check if objects have changed and ignore unchanged
+* (Apollon77) adjust allowed file system names
+* (Apollon77) Add Sentry for Error Reporting with js-controller 3.0
+* (Apollon77) Make sure value undefined is ignored
 
 ### 1.8.7 (2019-09-02)
 * (paul53) old files should be deleted automatically

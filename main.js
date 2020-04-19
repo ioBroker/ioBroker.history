@@ -17,6 +17,50 @@ let bufferChecker = null;
 const tasksStart = [];
 let finished   = false;
 
+function isEqual(a, b) {
+    //console.log('Compare ' + JSON.stringify(a) + ' with ' +  JSON.stringify(b));
+    // Create arrays of property names
+    if (a === null || a === undefined || b === null || b === undefined) {
+        return (a === b);
+    }
+
+    const aProps = Object.getOwnPropertyNames(a);
+    const bProps = Object.getOwnPropertyNames(b);
+
+    // If number of properties is different,
+    // objects are not equivalent
+    if (aProps.length !== bProps.length) {
+        //console.log('num props different: ' + JSON.stringify(aProps) + ' / ' + JSON.stringify(bProps));
+        return false;
+    }
+
+    for (var i = 0; i < aProps.length; i++) {
+        const propName = aProps[i];
+
+        if (typeof a[propName] !== typeof b[propName]) {
+            //console.log('type props ' + propName + ' different');
+            return false;
+        }
+        if (typeof a[propName] === 'object') {
+            if (!isEqual(a[propName], b[propName])) {
+                return false;
+            }
+        }
+        else {
+            // If values of same property are not equal,
+            // objects are not equivalent
+            if (a[propName] !== b[propName]) {
+                //console.log('props ' + propName + ' different');
+                return false;
+            }
+        }
+    }
+
+    // If we made it this far, objects
+    // are considered equivalent
+    return true;
+}
+
 let adapter;
 function startAdapter(options) {
     options = options || {};
@@ -27,13 +71,16 @@ function startAdapter(options) {
 
         objectChange: (id, obj) => {
             const formerAliasId = aliasMap[id] ? aliasMap[id] : id;
+
             if (obj && obj.common &&
-                (
-                    // todo remove history sometime (2016.08) - Do not forget object selector in io-package.json
-                    (obj.common.history && obj.common.history[adapter.namespace] && obj.common.history[adapter.namespace].enabled) ||
-                    (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled)
+                (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled
                 )
             ) {
+                if (history[formerAliasId] && history[formerAliasId][adapter.namespace] && isEqual(obj.common.custom[adapter.namespace], history[formerAliasId][adapter.namespace])) {
+                    adapter.log.debug('Object ' + id + ' unchanged. Ignore');
+                    return;
+                }
+
                 const realId = id;
                 let checkForRemove = true;
                 if (obj.common.custom && obj.common.custom[adapter.namespace] && obj.common.custom[adapter.namespace].aliasId) {
@@ -244,21 +291,19 @@ function processMessage(msg) {
 function fixSelector(callback) {
     // fix _design/custom object
     adapter.getForeignObject('_design/custom', (err, obj) => {
-        if (!obj || obj.views.state.map.indexOf('common.history') === -1 || obj.views.state.map.indexOf('common.custom') === -1) {
+        if (!obj || !obj.views.state.map.includes('common.custom')) {
             obj = {
                 _id: '_design/custom',
                 language: 'javascript',
                 views: {
                     state: {
-                        map: 'function(doc) { if (doc.type===\'state\' && (doc.common.custom || doc.common.history)) emit(doc._id, doc.common.custom || doc.common.history) }'
+                        map: 'function(doc) { doc.type === \'state\' && doc.common.custom && emit(doc._id, doc.common.custom) }'
                     }
                 }
             };
-            adapter.setForeignObject('_design/custom', obj, function (err) {
-                if (callback) callback(err);
-            });
+            adapter.setForeignObject('_design/custom', obj, err => callback && callback(err));
         } else {
-            if (callback) callback(err);
+            callback && callback(err);
         }
     });
 }
@@ -271,7 +316,7 @@ function processStartValues() {
                 const now = task.now || new Date().getTime();
                 pushHistory(task.id, {
                     val:  null,
-                    ts:   state ? now - 4 : now, // 4ms because of MS-SQL
+                    ts:   now,
                     ack:  true,
                     q:    0x40,
                     from: 'system.adapter.' + adapter.namespace});
@@ -281,7 +326,7 @@ function processStartValues() {
                     state.from = 'system.adapter.' + adapter.namespace;
                     pushHistory(task.id, state);
                 }
-                setTimeout(processStartValues, 0);
+                setImmediate(processStartValues);
             });
         } else {
             pushHistory(task.id, {
@@ -290,7 +335,7 @@ function processStartValues() {
                 ack:  true,
                 q:    0x40,
                 from: 'system.adapter.' + adapter.namespace});
-            setTimeout(processStartValues, 0);
+            setImmediate(processStartValues);
         }
     }
 }
@@ -447,6 +492,11 @@ function pushHistory(id, state, timerRelog) {
         const settings = history[id][adapter.namespace];
 
         if (!settings || !state) return;
+
+        if (state && state.val === undefined) {
+            adapter.log.warn(`state value undefined received for ${id} which is not allowed. Ignoring.`);
+            return;
+        }
 
         if (state.ts < 946681200000) state.ts *= 1000;
         if (state.lc < 946681200000) state.lc *= 1000;
@@ -960,6 +1010,7 @@ function getDirectories(path) {
 function storeState(msg) {
     if (!msg.message || !msg.message.id || !msg.message.state) {
         adapter.log.error('storeState called with invalid data');
+        adapter.log.error('storeState Incoming Object: ' + JSON.stringify(msg));
         adapter.sendTo(msg.from, msg.command, {
             error:  'Invalid call'
         }, msg.callback);
@@ -978,7 +1029,7 @@ function storeState(msg) {
                 adapter.log.warn('storeState: history not enabled for ' + msg.message[i].id + '. Ignoring');
             }
         }
-    } else if (Array.isArray(msg.message.state)) {
+    } else if (msg.message.state && Array.isArray(msg.message.state)) {
         adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
         for (let j = 0; j < msg.message.state.length; j++) {
             id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
