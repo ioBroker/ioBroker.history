@@ -1009,6 +1009,9 @@ function getHistory(msg) {
 }
 
 function getDirectories(path) {
+    if (!fs.existsSync(path)) {
+        return [];
+    }
     return fs.readdirSync(path).filter(file =>
         fs.statSync(path + '/' + file).isDirectory());
 }

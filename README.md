@@ -22,6 +22,7 @@ This adapter saves state history in a two-staged process.
 ### 1.9.4 (2020-04-23)
 * Catch error when Storage directory can not be created (Sentry IOBROKER-HISTORY-1)
 * make sure internal structures are initialized correctly (Sentry IOBROKER-HISTORY-2)
+* make sure to handle cases where retention directory is not existing (Sentry IOBROKER-HISTORY-3)
 
 ### 1.9.3 (2020-04-19)
 * __Requires js-controller >= 2.0.0__
