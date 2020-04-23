@@ -150,7 +150,7 @@ function startAdapter(options) {
 
                 history[id] = obj.common.custom;
                 history[id].state   = state;
-                history[id].list    = list;
+                history[id].list    = list || [];
                 history[id].timeout = timeout;
                 history[id].realId  = realId;
 
@@ -388,9 +388,13 @@ function main() { //start
         adapter.config.changesMinDelta = 0;
     }
 
-    // create directory
-    if (!fs.existsSync(adapter.config.storeDir)) {
-        fs.mkdirSync(adapter.config.storeDir);
+    try {
+        // create directory
+        if (!fs.existsSync(adapter.config.storeDir)) {
+            fs.mkdirSync(adapter.config.storeDir);
+        }
+    } catch (err) {
+        adapter.log.error('Could not create Storage directory: ' + err);
     }
 
     fixSelector(function () {
@@ -457,7 +461,8 @@ function main() { //start
                                 history[id][adapter.namespace].retention += 86400;
                             }
 
-                            history[id].realId  = realId;
+                            history[id].realId = realId;
+                            history[id].list = history[id].list || [];
                         }
                     }
                 }

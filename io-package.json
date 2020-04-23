@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.3",
+        "version": "1.9.4",
         "news": {
+            "1.9.4": {
+                "en": "potential crash case fixed",
+                "de": "Möglicher Crash-Fall behoben",
+                "ru": "случай возможного сбоя исправлен",
+                "pt": "possível caso de falha corrigido",
+                "nl": "mogelijke crash case opgelost",
+                "fr": "cas de crash potentiel corrigé",
+                "it": "potenziale caso di crash risolto",
+                "es": "caso de bloqueo potencial solucionado",
+                "pl": "naprawiono potencjalną awarię",
+                "zh-cn": "修复潜在的崩溃案例"
+            },
             "1.9.3": {
                 "en": "REQUIRES at least js-controller 2.0, fixes and optimizations, ready for js-controller 3.0, Sentry added for Error reporting",
                 "de": "ERFORDERT mindestens js-controller 2.0, Korrekturen und Optimierungen, bereit für js-controller 3.0, Sentry für Fehlerberichterstattung hinzugefügt",
