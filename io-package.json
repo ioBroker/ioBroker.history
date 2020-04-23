@@ -234,7 +234,9 @@
         "dependencies": [
             {
                 "js-controller": ">=2.0.0"
-            },
+            }
+        ],
+        "globalDependencies": [
             {
                 "admin": ">=1.6.10"
             }
