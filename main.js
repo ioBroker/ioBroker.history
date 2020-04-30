@@ -1012,8 +1012,14 @@ function getDirectories(path) {
     if (!fs.existsSync(path)) {
         return [];
     }
-    return fs.readdirSync(path).filter(file =>
-        fs.statSync(path + '/' + file).isDirectory());
+    return fs.readdirSync(path).filter(file => {
+        try {
+            fs.statSync(path + '/' + file).isDirectory()
+        } catch {
+            //ignore entry
+            return false;
+        }
+    });
 }
 
 function storeState(msg) {
