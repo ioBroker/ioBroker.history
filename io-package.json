@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.5",
+        "version": "1.9.6",
         "news": {
+            "1.9.6": {
+                "en": "optimize retention directory logic again (Sentry IOBROKER-HISTORY-A)",
+                "de": "Optimieren Sie die Aufbewahrungsverzeichnislogik erneut (Sentry IOBROKER-HISTORY-A).",
+                "ru": "снова оптимизировать логику каталога хранения (Sentry IOBROKER-HISTORY-A)",
+                "pt": "otimizar a lógica do diretório de retenção novamente (Sentry IOBROKER-HISTORY-A)",
+                "nl": "de logica van de retentiemap opnieuw optimaliseren (Sentry IOBROKER-HISTORY-A)",
+                "fr": "optimiser à nouveau la logique du répertoire de rétention (Sentry IOBROKER-HISTORY-A)",
+                "it": "ottimizzare nuovamente la logica della directory di conservazione (Sentry IOBROKER-HISTORY-A)",
+                "es": "optimizar nuevamente la lógica del directorio de retención (Sentry IOBROKER-HISTORY-A)",
+                "pl": "ponownie zoptymalizuj logikę katalogu przechowywania (Sentry IOBROKER-HISTORY-A)",
+                "zh-cn": "再次优化保留目录逻辑（Sentry IOBROKER-HISTORY-A）"
+            },
             "1.9.5": {
                 "en": "potential crash case fixed",
                 "de": "Möglicher Crash-Fall behoben",
@@ -205,11 +217,6 @@
                 "en": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames",
                 "de": "Debounce-Feature geändert, sodass der letzte Wert der in der angegeben Zeit stabil geblieben ist geloggt wird!! Ersetzung einiger Zeichen in Dateinamen",
                 "ru": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames"
-            },
-            "1.5.3": {
-                "en": "Small fix for older configurations",
-                "de": "Kleine Fehlerbehebung für ältere Konfigurationen",
-                "ru": "Small fix for older configurations"
             }
         },
         "mode": "daemon",

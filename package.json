@@ -1,38 +1,38 @@
 {
-    "name": "iobroker.history",
-    "description": "Log state history in a two-stages process (first to RAM, then to disk)",
-    "version": "1.9.5",
-    "author": "hobbyquaker <hq@ccu.io>",
-    "contributors": [
-        "bluefox <dogafox@gmail.com>",
-        "smiling-Jack",
-        "hobbyquaker <hq@ccu.io>",
-        "Apollon77"
-    ],
-    "homepage": "https://github.com/ioBroker/ioBroker.history",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ioBroker/ioBroker.history"
-    },
-    "keywords": [
-        "ioBroker",
-        "log data",
-        "home automation"
-    ],
-    "dependencies": {
-        "@iobroker/adapter-core": "^2.3.1"
-    },
-    "devDependencies": {
-        "gulp": "^4.0.2",
-        "mocha": "^7.1.2",
-        "chai": "^4.2.0"
-    },
-    "bugs": {
-        "url": "https://github.com/ioBroker/ioBroker.history/issues"
-    },
-    "main": "main.js",
-    "scripts": {
-        "test": "node node_modules/mocha/bin/mocha --exit"
-    },
-    "license": "MIT"
+  "name": "iobroker.history",
+  "description": "Log state history in a two-stages process (first to RAM, then to disk)",
+  "version": "1.9.6",
+  "author": "hobbyquaker <hq@ccu.io>",
+  "contributors": [
+    "bluefox <dogafox@gmail.com>",
+    "smiling-Jack",
+    "hobbyquaker <hq@ccu.io>",
+    "Apollon77"
+  ],
+  "homepage": "https://github.com/ioBroker/ioBroker.history",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ioBroker/ioBroker.history"
+  },
+  "keywords": [
+    "ioBroker",
+    "log data",
+    "home automation"
+  ],
+  "dependencies": {
+    "@iobroker/adapter-core": "^2.3.1"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "mocha": "^7.1.2",
+    "chai": "^4.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/ioBroker/ioBroker.history/issues"
+  },
+  "main": "main.js",
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha --exit"
+  },
+  "license": "MIT"
 }
