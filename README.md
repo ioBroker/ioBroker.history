@@ -19,6 +19,9 @@ This adapter saves state history in a two-staged process.
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* (Apollon77) optimize retention directory logic again (Sentry IOBROKER-HISTORY-A)
+
 ### 1.9.5 (2020-04-30)
 * (Apollon77) optimize retention directory logic again (Sentry IOBROKER-HISTORY-7)
 

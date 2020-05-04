@@ -1010,16 +1010,23 @@ function getHistory(msg) {
 
 function getDirectories(path) {
     if (!fs.existsSync(path)) {
+        adapter.log.warn('Data directory ' + path + ' does not exist');
         return [];
     }
-    return fs.readdirSync(path).filter(file => {
-        try {
-            return fs.statSync(path + '/' + file).isDirectory()
-        } catch {
-            //ignore entry
-            return false;
-        }
-    });
+    try {
+        return fs.readdirSync(path).filter(file => {
+            try {
+                return fs.statSync(path + '/' + file).isDirectory()
+            } catch {
+                //ignore entry
+                return false;
+            }
+        });
+    } catch(err) {
+        //ignore
+        adapter.log.warn('Error reading data directory ' + path + ': ' + err);
+        return [];
+    }
 }
 
 function storeState(msg) {
