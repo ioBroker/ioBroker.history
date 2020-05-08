@@ -1,7 +1,7 @@
 {
     "common": {
-        "name":                     "history",
-        "title":                    "History",
+        "name": "history",
+        "title": "History",
         "titleLang": {
             "en": "History",
             "de": "History",
@@ -22,19 +22,55 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.0",
+        "version": "1.9.6",
         "news": {
-            "1.9.0": {
-              "en": "removed usage of adapter.objects",
-              "de": "Verwendung von adapter.objects entfernt",
-              "ru": "удалено использование файла adapter.objects",
-              "pt": "removido o uso de adapter.objects",
-              "nl": "gebruik van adapter.objects verwijderd",
-              "fr": "utilisation supprimée de adapter.objects",
-              "it": "rimosso l'utilizzo di adapter.objects",
-              "es": "uso eliminado de adaptador.objetos",
-              "pl": "usunięto użycie adapter.objects",
-              "zh-cn": "删除了adapter.objects的用法"
+            "1.9.6": {
+                "en": "optimize retention directory logic again (Sentry IOBROKER-HISTORY-A)",
+                "de": "Optimieren Sie die Aufbewahrungsverzeichnislogik erneut (Sentry IOBROKER-HISTORY-A).",
+                "ru": "снова оптимизировать логику каталога хранения (Sentry IOBROKER-HISTORY-A)",
+                "pt": "otimizar a lógica do diretório de retenção novamente (Sentry IOBROKER-HISTORY-A)",
+                "nl": "de logica van de retentiemap opnieuw optimaliseren (Sentry IOBROKER-HISTORY-A)",
+                "fr": "optimiser à nouveau la logique du répertoire de rétention (Sentry IOBROKER-HISTORY-A)",
+                "it": "ottimizzare nuovamente la logica della directory di conservazione (Sentry IOBROKER-HISTORY-A)",
+                "es": "optimizar nuevamente la lógica del directorio de retención (Sentry IOBROKER-HISTORY-A)",
+                "pl": "ponownie zoptymalizuj logikę katalogu przechowywania (Sentry IOBROKER-HISTORY-A)",
+                "zh-cn": "再次优化保留目录逻辑（Sentry IOBROKER-HISTORY-A）"
+            },
+            "1.9.5": {
+                "en": "potential crash case fixed",
+                "de": "Möglicher Crash-Fall behoben",
+                "ru": "случай возможного сбоя исправлен",
+                "pt": "possível caso de falha corrigido",
+                "nl": "mogelijke crash case opgelost",
+                "fr": "cas de crash potentiel corrigé",
+                "it": "potenziale caso di crash risolto",
+                "es": "caso de bloqueo potencial solucionado",
+                "pl": "naprawiono potencjalną awarię",
+                "zh-cn": "修复潜在的崩溃案例"
+            },
+            "1.9.4": {
+                "en": "potential crash case fixed",
+                "de": "Möglicher Crash-Fall behoben",
+                "ru": "случай возможного сбоя исправлен",
+                "pt": "possível caso de falha corrigido",
+                "nl": "mogelijke crash case opgelost",
+                "fr": "cas de crash potentiel corrigé",
+                "it": "potenziale caso di crash risolto",
+                "es": "caso de bloqueo potencial solucionado",
+                "pl": "naprawiono potencjalną awarię",
+                "zh-cn": "修复潜在的崩溃案例"
+            },
+            "1.9.3": {
+                "en": "REQUIRES at least js-controller 2.0, fixes and optimizations, ready for js-controller 3.0, Sentry added for Error reporting",
+                "de": "ERFORDERT mindestens js-controller 2.0, Korrekturen und Optimierungen, bereit für js-controller 3.0, Sentry für Fehlerberichterstattung hinzugefügt",
+                "ru": "ТРЕБУЕТ как минимум js-controller 2.0, исправления и оптимизации, готов для js-controller 3.0, добавлен Sentry для отчетов об ошибках",
+                "pt": "EXIGE pelo menos o js-controller 2.0, correções e otimizações, pronto para o controller 3.0, acrescentou o Sentry para o relatório de erros",
+                "nl": "VEREIST minimaal js-controller 2.0, fixes en optimalisaties, klaar voor js-controller 3.0, Sentry toegevoegd voor foutrapportage",
+                "fr": "NÉCESSITE au moins js-controller 2.0, des corrections et des optimisations, prêt pour js-controller 3.0, Sentry ajouté pour le rapport d'erreurs",
+                "it": "RICHIEDE almeno js-controller 2.0, correzioni e ottimizzazioni, pronto per js-controller 3.0, aggiunta Sentry per la segnalazione degli errori",
+                "es": "REQUIERE al menos js-controller 2.0, correcciones y optimizaciones, listo para js-controller 3.0, Sentry agregado para informes de errores",
+                "pl": "WYMAGA co najmniej js-kontrolera 2.0, poprawek i optymalizacji, gotowy do js-kontrolera 3.0, dodano Sentry do raportowania błędów",
+                "zh-cn": "至少需要js-controller 2.0，修复和优化，为js-controller 3.0做好准备，并添加了Sentry以进行错误报告"
             },
             "1.8.7": {
                 "en": "old files should be deleted automatically",
@@ -181,53 +217,74 @@
                 "en": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames",
                 "de": "Debounce-Feature geändert, sodass der letzte Wert der in der angegeben Zeit stabil geblieben ist geloggt wird!! Ersetzung einiger Zeichen in Dateinamen",
                 "ru": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames"
-            },
-            "1.5.3": {
-                "en": "Small fix for older configurations",
-                "de": "Kleine Fehlerbehebung für ältere Konfigurationen",
-                "ru": "Small fix for older configurations"
             }
         },
-        "mode":                     "daemon",
-        "platform":                 "Javascript/Node.js",
-        "loglevel":                 "info",
-        "messagebox":               true,
-        "subscribe":                "messagebox",
-        "keywords":                 ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
-        "main":                     "main.js",
-        "enabled":                  true,
-        "compact":                  true,
-        "preserveSettings":         "custom",
+        "mode": "daemon",
+        "platform": "Javascript/Node.js",
+        "loglevel": "info",
+        "messagebox": true,
+        "subscribe": "messagebox",
+        "keywords": [
+            "charts",
+            "history",
+            "logging",
+            "graphs",
+            "Graphen",
+            "data",
+            "archive"
+        ],
+        "main": "main.js",
+        "enabled": true,
+        "compact": true,
+        "preserveSettings": "custom",
         "authors": [
             "bluefox <dogafox@gmail.com>",
             "hobbyquaker <hq@ccu.io>",
             "Apollon77 <ingo@fischer-ka.de>"
         ],
-        "license":                  "MIT",
-        "readme":                   "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
-        "icon":                     "history.png",
-        "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
-		"type":                     "storage",
-        "supportCustoms":           true,
-        "materialize":              true,
-        "getHistory":           	true,
-		"dependencies":             [{"js-controller": ">=2.0.0","admin": ">=1.6.10"}],
-        "supportStopInstance":      2000,
-        "stopTimeout":              10000,
-	"docs": {
-            	"en": ["docs/en/readme.md"],
-		"de": ["docs/de/readme.md"]
-	}
+        "license": "MIT",
+        "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
+        "icon": "history.png",
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
+        "type": "storage",
+        "supportCustoms": true,
+        "materialize": true,
+        "getHistory": true,
+        "dependencies": [
+            {
+                "js-controller": ">=2.0.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=1.6.10"
+            }
+        ],
+        "supportStopInstance": 2000,
+        "stopTimeout": 10000,
+        "docs": {
+            "en": [
+                "docs/en/readme.md"
+            ],
+            "de": [
+                "docs/de/readme.md"
+            ]
+        },
+        "plugins": {
+            "sentry": {
+                "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
+            }
+        }
     },
     "native": {
         "maxLength": 960,
-        "limit":     2000,
-        "storeDir":  "",
-        "debounce":  1000,
+        "limit": 2000,
+        "storeDir": "",
+        "debounce": 1000,
         "retention": 31536000,
         "storeFrom": false,
-        "storeAck":  true,
-        "changesRelogInterval":      0,
+        "storeAck": true,
+        "changesRelogInterval": 0,
         "changesMinDelta": 0,
         "writeNulls": true
     },

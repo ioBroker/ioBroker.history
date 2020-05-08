@@ -1,7 +1,7 @@
 {
   "name": "iobroker.history",
   "description": "Log state history in a two-stages process (first to RAM, then to disk)",
-  "version": "1.9.0",
+  "version": "1.9.6",
   "author": "hobbyquaker <hq@ccu.io>",
   "contributors": [
     "bluefox <dogafox@gmail.com>",
@@ -14,24 +14,18 @@
     "type": "git",
     "url": "https://github.com/ioBroker/ioBroker.history"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/ioBroker/ioBroker.history/blob/master/LICENSE"
-    }
-  ],
   "keywords": [
     "ioBroker",
     "log data",
     "home automation"
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^2.0.0"
+    "@iobroker/adapter-core": "^2.3.1"
   },
   "devDependencies": {
-    "gulp": "^4.0.0",
-    "mocha": "^7.0.1",
-    "chai": "^4.1.2"
+    "gulp": "^4.0.2",
+    "mocha": "^7.1.2",
+    "chai": "^4.2.0"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/ioBroker.history/issues"

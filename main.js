@@ -17,6 +17,50 @@ let bufferChecker = null;
 const tasksStart = [];
 let finished   = false;
 
+function isEqual(a, b) {
+    //console.log('Compare ' + JSON.stringify(a) + ' with ' +  JSON.stringify(b));
+    // Create arrays of property names
+    if (a === null || a === undefined || b === null || b === undefined) {
+        return (a === b);
+    }
+
+    const aProps = Object.getOwnPropertyNames(a);
+    const bProps = Object.getOwnPropertyNames(b);
+
+    // If number of properties is different,
+    // objects are not equivalent
+    if (aProps.length !== bProps.length) {
+        //console.log('num props different: ' + JSON.stringify(aProps) + ' / ' + JSON.stringify(bProps));
+        return false;
+    }
+
+    for (var i = 0; i < aProps.length; i++) {
+        const propName = aProps[i];
+
+        if (typeof a[propName] !== typeof b[propName]) {
+            //console.log('type props ' + propName + ' different');
+            return false;
+        }
+        if (typeof a[propName] === 'object') {
+            if (!isEqual(a[propName], b[propName])) {
+                return false;
+            }
+        }
+        else {
+            // If values of same property are not equal,
+            // objects are not equivalent
+            if (a[propName] !== b[propName]) {
+                //console.log('props ' + propName + ' different');
+                return false;
+            }
+        }
+    }
+
+    // If we made it this far, objects
+    // are considered equivalent
+    return true;
+}
+
 let adapter;
 function startAdapter(options) {
     options = options || {};
@@ -27,11 +71,9 @@ function startAdapter(options) {
 
         objectChange: (id, obj) => {
             const formerAliasId = aliasMap[id] ? aliasMap[id] : id;
+
             if (obj && obj.common &&
-                (
-                    // todo remove history sometime (2016.08) - Do not forget object selector in io-package.json
-                    (obj.common.history && obj.common.history[adapter.namespace] && obj.common.history[adapter.namespace].enabled) ||
-                    (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled)
+                (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled
                 )
             ) {
                 const realId = id;
@@ -69,50 +111,55 @@ function startAdapter(options) {
                     adapter.subscribeForeignStates('*');
                 }
 
-                if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
+                if (!obj.common.custom[adapter.namespace].maxLength && obj.common.custom[adapter.namespace].maxLength !== '0' && obj.common.custom[adapter.namespace].maxLength !== 0) {
+                    obj.common.custom[adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
+                } else {
+                    obj.common.custom[adapter.namespace].maxLength = parseInt(obj.common.custom[adapter.namespace].maxLength, 10);
+                }
+                if (!obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention !== '0' && obj.common.custom[adapter.namespace].retention !== 0) {
+                    obj.common.custom[adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].retention = parseInt(obj.common.custom[adapter.namespace].retention, 10) || 0;
+                }
+                if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
+                    obj.common.custom[adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                } else {
+                    obj.common.custom[adapter.namespace].debounce = parseInt(obj.common.custom[adapter.namespace].debounce, 10);
+                }
+                obj.common.custom[adapter.namespace].changesOnly = obj.common.custom[adapter.namespace].changesOnly === 'true' || obj.common.custom[adapter.namespace].changesOnly === true;
+                if (obj.common.custom[adapter.namespace].changesRelogInterval !== undefined && obj.common.custom[adapter.namespace].changesRelogInterval !== null && obj.common.custom[adapter.namespace].changesRelogInterval !== '') {
+                    obj.common.custom[adapter.namespace].changesRelogInterval = parseInt(obj.common.custom[adapter.namespace].changesRelogInterval, 10) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
+                }
+                if (obj.common.custom[adapter.namespace].changesMinDelta !== undefined && obj.common.custom[adapter.namespace].changesMinDelta !== null && obj.common.custom[adapter.namespace].changesMinDelta !== '') {
+                    obj.common.custom[adapter.namespace].changesMinDelta = parseFloat(obj.common.custom[adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
+                }
 
-                // todo remove history somewhen (2016.08)
-                history[id] = obj.common.custom || obj.common.history;
+                // add one day if retention is too small
+                if (obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention <= 604800) {
+                    obj.common.custom[adapter.namespace].retention += 86400;
+                }
+
+                if (history[formerAliasId] && history[formerAliasId][adapter.namespace] && isEqual(obj.common.custom[adapter.namespace], history[formerAliasId][adapter.namespace])) {
+                    adapter.log.debug('Object ' + id + ' unchanged. Ignore');
+                    return;
+                }
+
+                history[id] = obj.common.custom;
                 history[id].state   = state;
-                history[id].list    = list;
+                history[id].list    = list || [];
                 history[id].timeout = timeout;
                 history[id].realId  = realId;
 
-                if (!history[id][adapter.namespace].maxLength && history[id][adapter.namespace].maxLength !== '0' && history[id][adapter.namespace].maxLength !== 0) {
-                    history[id][adapter.namespace].maxLength = parseInt(adapter.config.maxLength, 10) || 960;
-                } else {
-                    history[id][adapter.namespace].maxLength = parseInt(history[id][adapter.namespace].maxLength, 10);
-                }
-                if (!history[id][adapter.namespace].retention && history[id][adapter.namespace].retention !== '0' && history[id][adapter.namespace].retention !== 0) {
-                    history[id][adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
-                } else {
-                    history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
-                }
-                if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                    history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
-                } else {
-                    history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
-                }
-                history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
-                if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
-                    history[id][adapter.namespace].changesRelogInterval = parseInt(history[id][adapter.namespace].changesRelogInterval, 10) || 0;
-                } else {
-                    history[id][adapter.namespace].changesRelogInterval = adapter.config.changesRelogInterval;
-                }
+                if (history[formerAliasId] && history[formerAliasId].relogTimeout) clearTimeout(history[formerAliasId].relogTimeout);
+
                 if (history[id][adapter.namespace].changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
                 }
-                if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
-                    history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
-                } else {
-                    history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
-                }
 
-
-                // add one day if retention is too small
-                if (history[id][adapter.namespace].retention && history[id][adapter.namespace].retention <= 604800) {
-                    history[id][adapter.namespace].retention += 86400;
-                }
                 if (writeNull && adapter.config.writeNulls) {
                     writeNulls(id);
                 }
@@ -244,21 +291,19 @@ function processMessage(msg) {
 function fixSelector(callback) {
     // fix _design/custom object
     adapter.getForeignObject('_design/custom', (err, obj) => {
-        if (!obj || obj.views.state.map.indexOf('common.history') === -1 || obj.views.state.map.indexOf('common.custom') === -1) {
+        if (!obj || !obj.views.state.map.includes('common.custom')) {
             obj = {
                 _id: '_design/custom',
                 language: 'javascript',
                 views: {
                     state: {
-                        map: 'function(doc) { if (doc.type===\'state\' && (doc.common.custom || doc.common.history)) emit(doc._id, doc.common.custom || doc.common.history) }'
+                        map: 'function(doc) { doc.type === \'state\' && doc.common.custom && emit(doc._id, doc.common.custom) }'
                     }
                 }
             };
-            adapter.setForeignObject('_design/custom', obj, function (err) {
-                if (callback) callback(err);
-            });
+            adapter.setForeignObject('_design/custom', obj, err => callback && callback(err));
         } else {
-            if (callback) callback(err);
+            callback && callback(err);
         }
     });
 }
@@ -271,7 +316,7 @@ function processStartValues() {
                 const now = task.now || new Date().getTime();
                 pushHistory(task.id, {
                     val:  null,
-                    ts:   state ? now - 4 : now, // 4ms because of MS-SQL
+                    ts:   now,
                     ack:  true,
                     q:    0x40,
                     from: 'system.adapter.' + adapter.namespace});
@@ -281,7 +326,7 @@ function processStartValues() {
                     state.from = 'system.adapter.' + adapter.namespace;
                     pushHistory(task.id, state);
                 }
-                setTimeout(processStartValues, 0);
+                setImmediate(processStartValues);
             });
         } else {
             pushHistory(task.id, {
@@ -290,7 +335,7 @@ function processStartValues() {
                 ack:  true,
                 q:    0x40,
                 from: 'system.adapter.' + adapter.namespace});
-            setTimeout(processStartValues, 0);
+            setImmediate(processStartValues);
         }
     }
 }
@@ -343,9 +388,13 @@ function main() { //start
         adapter.config.changesMinDelta = 0;
     }
 
-    // create directory
-    if (!fs.existsSync(adapter.config.storeDir)) {
-        fs.mkdirSync(adapter.config.storeDir);
+    try {
+        // create directory
+        if (!fs.existsSync(adapter.config.storeDir)) {
+            fs.mkdirSync(adapter.config.storeDir);
+        }
+    } catch (err) {
+        adapter.log.error('Could not create Storage directory: ' + err);
     }
 
     fixSelector(function () {
@@ -412,7 +461,8 @@ function main() { //start
                                 history[id][adapter.namespace].retention += 86400;
                             }
 
-                            history[id].realId  = realId;
+                            history[id].realId = realId;
+                            history[id].list = history[id].list || [];
                         }
                     }
                 }
@@ -447,6 +497,11 @@ function pushHistory(id, state, timerRelog) {
         const settings = history[id][adapter.namespace];
 
         if (!settings || !state) return;
+
+        if (state && state.val === undefined) {
+            adapter.log.warn(`state value undefined received for ${id} which is not allowed. Ignoring.`);
+            return;
+        }
 
         if (state.ts < 946681200000) state.ts *= 1000;
         if (state.lc < 946681200000) state.lc *= 1000;
@@ -498,6 +553,7 @@ function pushHistory(id, state, timerRelog) {
         let ignoreDebonce = false;
         if (timerRelog) {
             state.ts = new Date().getTime();
+            state.from = 'system.adapter.' + adapter.namespace;
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
             ignoreDebonce = true;
         } else {
@@ -953,11 +1009,30 @@ function getHistory(msg) {
 }
 
 function getDirectories(path) {
-    return fs.readdirSync(path).filter(file =>
-        fs.statSync(path + '/' + file).isDirectory());
+    if (!fs.existsSync(path)) {
+        adapter.log.warn('Data directory ' + path + ' does not exist');
+        return [];
+    }
+    try {
+        return fs.readdirSync(path).filter(file => {
+            try {
+                return fs.statSync(path + '/' + file).isDirectory()
+            } catch {
+                //ignore entry
+                return false;
+            }
+        });
+    } catch(err) {
+        //ignore
+        adapter.log.warn('Error reading data directory ' + path + ': ' + err);
+        return [];
+    }
 }
 
 function storeState(msg) {
+    if (msg.message && (msg.message.success || msg.message.error)) { // Seems we got a callback from running converter
+        return;
+    }
     if (!msg.message || !msg.message.id || !msg.message.state) {
         adapter.log.error('storeState called with invalid data');
         adapter.sendTo(msg.from, msg.command, {
@@ -978,7 +1053,7 @@ function storeState(msg) {
                 adapter.log.warn('storeState: history not enabled for ' + msg.message[i].id + '. Ignoring');
             }
         }
-    } else if (Array.isArray(msg.message.state)) {
+    } else if (msg.message.state && Array.isArray(msg.message.state)) {
         adapter.log.debug('storeState: store ' + msg.message.state.length + ' states for ' + msg.message.id);
         for (let j = 0; j < msg.message.state.length; j++) {
             id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
