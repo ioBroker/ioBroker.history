@@ -18,6 +18,8 @@ This adapter saves state history in a two-staged process.
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
+### 1.9.7 (2020-05-08)
+* (bluefox) set default history if not yet set
 
 ### 1.9.6 (2020-05-04)
 * (Apollon77) optimize retention directory logic again (Sentry IOBROKER-HISTORY-A)

@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.6",
+        "version": "1.9.7",
         "news": {
+            "1.9.7": {
+                "en": "set default history if not yet set",
+                "de": "Standardverlauf festlegen, falls noch nicht festgelegt",
+                "ru": "установить историю по умолчанию, если еще не установлено",
+                "pt": "definir histórico padrão se ainda não estiver definido",
+                "nl": "stel de standaardgeschiedenis in als deze nog niet is ingesteld",
+                "fr": "définir l'historique par défaut s'il n'est pas encore défini",
+                "it": "imposta la cronologia predefinita se non ancora impostata",
+                "es": "establecer el historial predeterminado si aún no está configurado",
+                "pl": "ustaw domyślną historię, jeśli jeszcze nie została ustawiona",
+                "zh-cn": "设置默认历史记录（如果尚未设置）"
+            },
             "1.9.6": {
                 "en": "optimize retention directory logic again (Sentry IOBROKER-HISTORY-A)",
                 "de": "Optimieren Sie die Aufbewahrungsverzeichnislogik erneut (Sentry IOBROKER-HISTORY-A).",

@@ -362,6 +362,21 @@ function writeNulls(id, now) {
 }
 
 function main() { //start
+    // set default history if not yet set
+    adapter.getForeignObject('system.config', (err, obj) => {
+        if (obj && obj.common && !obj.common.defaultHistory) {
+            obj.common.defaultHistory = adapter.namespace;
+            adapter.setForeignObject('system.config', obj, err => {
+                if (err) {
+                    adapter.log.error('Cannot set default history instance: ' + err);
+                } else {
+                    adapter.log.info('Set default history instance to "' + adapter.namespace + '"');
+                }
+            });
+        }
+    });
+
+
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
     if (adapter.config.writeNulls === undefined) adapter.config.writeNulls = true;
