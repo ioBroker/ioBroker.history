@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.7",
+        "version": "1.9.8",
         "news": {
+            "1.9.8": {
+                "en": "added command to read supported features",
+                "de": "Befehl zum Lesen der unterstützten Funktionen hinzugefügt",
+                "ru": "добавлена команда для чтения поддерживаемых функций",
+                "pt": "comando adicionado para ler os recursos suportados",
+                "nl": "opdracht toegevoegd om ondersteunde functies te lezen",
+                "fr": "commande ajoutée pour lire les fonctionnalités prises en charge",
+                "it": "aggiunto comando per leggere le funzionalità supportate",
+                "es": "comando agregado para leer las funciones compatibles",
+                "pl": "dodano polecenie odczytu obsługiwanych funkcji",
+                "zh-cn": "添加了命令以读取支持的功能"
+            },
             "1.9.7": {
                 "en": "set default history if not yet set",
                 "de": "Standardverlauf festlegen, falls noch nicht festgelegt",

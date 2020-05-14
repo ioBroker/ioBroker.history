@@ -18,6 +18,9 @@ This adapter saves state history in a two-staged process.
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
+### 1.9.8 (2020-05-14)
+* (bluefox) added command to read supported features
+
 ### 1.9.7 (2020-05-08)
 * (bluefox) set default history if not yet set
 

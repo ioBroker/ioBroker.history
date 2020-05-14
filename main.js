@@ -267,6 +267,9 @@ function finish(callback) {
 }
 
 function processMessage(msg) {
+    if (msg.command === 'features') {
+        adapter.sendTo(msg.from, msg.command, {supportedFeatures: []}, msg.callback);
+    } else
     if (msg.command === 'getHistory') {
         getHistory(msg);
     } else if (msg.command === 'storeState') {
