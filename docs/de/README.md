@@ -20,6 +20,7 @@
 	* [Schritt 2: History-Daten konvertieren](#schritt-2:-history-daten-konvertieren)
 
 
+
 ## Beschreibung
 Der history-Adapter dient zum loggen von Datenpunkten. Deren Statusverlauf im
 JSON Format in zwei Schritten gespeichert wird: Zuerst werden die Werte im RAM
