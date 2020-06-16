@@ -16,9 +16,6 @@
 * [Zugriff auf History Werte mit JavaScript](#zugriff-auf-history-werte-mit-javascript)
 * [Verlaufsprotokollierung über JavaScript](#verlaufsprotokollierung-über-javascript)
 * [History-Daten in SQL oder InfluxDB übernehmen](#history-daten-in-sql-oder-influxdb-übernehmen)
-	* [Schritt 1: Aufbereiten und analysieren von vorhandenen Daten](#schritt-1:-aufbereiten-und-analysieren-von-vorhandenen-daten)
-	* [Schritt 2: History-Daten konvertieren](#schritt-2:-history-daten-konvertieren)
-
 
 
 ## Beschreibung
@@ -389,9 +386,11 @@ untersucht um nur nicht bereits vorhandene Daten zu konvertieren.
 Das Skript kann auch ohne vorherigen Analyseschritt 1 ausgeführt werden. Dann müssen
 jedoch die Startdaten [Date-to-start] als Parameter festgelegt werden und alle vor
 diesem Zeitpunkt liegende Daten werden konvertiert.
+
 Wenn zuvor eine Analyse ausgeführt wurde und die Datei **earliestDBValues.json**
 vorhanden ist, werden nur diese Datenpunkte konvertiert, außer es werden Parameter
 verwendet, um dies abzuändern.
+
 Wenn zuvor eine Analyse ausgeführt wurde und die Datendateien wurden verwendet,
 werden diese auch mit allen konvertierten Daten aktualisiert, sodass bei einer
 zweiten Ausführung normalerweise keine Duplikate generiert werden sollten. Um die
@@ -441,7 +440,7 @@ Wenn gesetzt, muss dies der vierte Parameter nach dem Skriptnamen sein.
  Diese Option ist nützlich, um unvollständige Daten zu vervollständigen.
  Standardmäßig werden nur alle Datenpunkte mit mindestens einem Eintrag in der Datenbank gefüllt.
  Dies kann von **--processAllDPs** überschrieben werden
-- **--processNonExistingValuesOnly**: Mit diesem Parameter wird die Datei ```existingDBValues.json```
+- **--processNonExistingValuesOnly**: Mit diesem Parameter wird die Datei **existingDBValues.json**
  aus dem Analyseskript verwendet und für jeden Tag und Datenpunkt geprüft.
  In diesem Modus werden die vorhandenen Werte in der DB immer ignoriert und auch nicht aktualisiert.
  >Nach Verwendung dieses Modus bitte einen weiteren Analyselauf durchführen!!!
