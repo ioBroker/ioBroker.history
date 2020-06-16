@@ -17,8 +17,6 @@
 * [Verlaufsprotokollierung über JavaScript](#verlaufsprotokollierung-über-javascript)
 * [History-Daten in SQL oder InfluxDB übernehmen](#history-daten-in-sql-oder-influxdb-übernehmen)
 	* [Schritt 1: Aufbereiten und analysieren von vorhandenen Daten](#schritt-1:-aufbereiten-und-analysieren-von-vorhandenen-daten)
-		* [analyzeinflux.js](#analyzeinflux.js)
-		* [analyzesql.js](#analyzesql.js)
 	* [Schritt 2: History-Daten konvertieren](#schritt-2:-history-daten-konvertieren)
 
 
@@ -162,7 +160,7 @@ Datenpunkte einheitlich auswählen
 
 ## Zugriff auf History Werte mit JavaScript
 Mit installiertem JavaScript-Adapter kann auf die sortierten Werte des Adapters
-zugegriffen werden. Beipiele:
+zugegriffen werden. Beispiele:
 
 - Die 50 zuletzt gespeicherte Ereignisse für alle IDs holen:
 ```
@@ -428,13 +426,13 @@ Mögliche Optionen und Parameter:
 - **Date-to-start**: Startdatum im Format yyyymmdd (z. B. 20191028).
  "0" verwenden um erkannte früheste Werte zu verwenden. Wenn gesetzt, muss dies der dritte
  Parameter nach dem Skriptnamen sein.
-- **path-to-Data** Pfad zu den Datendateien. 
-Standard: iobroker-Installationsverzeichnis/iobroker-data/history-data.
+- **path-to-Data** Pfad zu den Datendateien.
+Standard iobroker-Installationsverzeichnis: /iobroker-data/history-data.
 Wenn gesetzt, muss dies der vierte Parameter nach dem Skriptnamen sein.
 - **delayMultiplicator**: Ändert die Verzögerungen zwischen den Aktionen im Skript durch einen
  Multiplikator. "2" würde bedeuten, dass sich die Verzögerungen verdoppeln, die der Konverter
  berechnet hat. Wenn gesetzt, muss dies der fünfte Parameter nach dem Skriptnamen sein.
-- **--logChangesOnly [relog-Interval (m)]]** Wenn gesetzt, werden die Daten analysiert und reduziert,
+- **--logChangesOnly [relog-Interval (m)]** Wenn gesetzt, werden die Daten analysiert und reduziert,
  so dass nur geänderte Werte in InfluxDB gespeichert werden. Zusätzlich kann ein "relog-Interval"
  in Minuten eingestellt werden, um unveränderte Werte nach diesem Intervall neu zu protokollieren.
 - **--ignoreExistingDBValues**: Mit diesem Parameter werden bereits vorhandene Daten ignoriert und
