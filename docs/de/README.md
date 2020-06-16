@@ -1,5 +1,28 @@
 ![Logo](media/history.png)
 # ioBroker History-Adapter
+
+# Inhalt
+* [Beschreibung](#beschreibung)
+* [Installation](#installation)
+* [Konfiguration](#konfiguration)
+	* [Storage-Einstellungen](#storage-einstellungen)
+	* [Standardeinstellungen für Zustände](#standardeinstellungen-für-zustände)
+	* [Einstellungen für Datenpunkte](#einstellungen-für-datenpunkte)
+* [Bedienung](#bedienung)
+	* [Filtern](#filtern)
+	* [Werte anzeigen](#werte-anzeigen)
+	* [Grafiken](#grafiken)
+	* [Mehrere Datenpunkte auf einmal loggen](#mehrere-datenpunkte-auf-einmal-loggen)
+* [Zugriff auf History Werte mit JavaScript](#zugriff-auf-history-werte-mit-javascript)
+* [Verlaufsprotokollierung über JavaScript](#verlaufsprotokollierung-über-javascript)
+* [History-Daten in SQL oder InfluxDB übernehmen](#history-daten-in-sql-oder-influxdb-übernehmen)
+	* [Schritt 1: Aufbereiten und analysieren von vorhandenen Daten](#schritt-1:-aufbereiten-und-analysieren-von-vorhandenen-daten)
+		* [analyzeinflux.js](#analyzeinflux.js)
+		* [analyzesql.js](#analyzesql.js)
+	* [Schritt 2: History-Daten konvertieren](#schritt-2:-history-daten-konvertieren)
+
+
+## Beschreibung
 Der history-Adapter dient zum loggen von Datenpunkten. Deren Statusverlauf im
 JSON Format in zwei Schritten gespeichert wird: Zuerst werden die Werte im RAM
 zwischengespeichert und anschließend beim Erreichen der maximalen Anzahl von
@@ -23,7 +46,8 @@ Nach der Erstellung der Instanz öffnet sich das Konfigurationsfenster.
 Hier den Pfad zu dem Verzeichnis eingeben, in dem die Dateien gespeichert werden
 sollen. Standardeinstellung ist das /iobroker-data Verzeichnis. Absolute
 Verzeichnisse wie z.B.: /mnt/history (Linux) oder D:/history (Windows) können
-ebenso eingegeben werden.
+ebenso eingegeben werden. In diesem Verzeichnis wird jeden Tag ein neuer Ordner
+erstellt in dem die geloggten Daten gespeichert werden.
 
 **Speichere Quelle vom Ereignis mit**
 Legt fest ob die Quelle der Datenänderung (der auslösende Adapter) mit gespeichert
@@ -40,8 +64,8 @@ Jeder Wert kann im Datenpunkt selbst nachträglich geändert werden.
 
 **Maximale Anzahl von Werten im RAM**
 Nach dem Erreichen dieser Anzahl werden die Werte vom RAM ins Speicherverzeichnis
-geschoben. Besonders bei bei Systemen mit SD-Karte kann ein höherer Wert die
-Lebensdauer der SD-Karte erhöhen.
+geschoben. Besonders bei Systemen mit SD-Karte kann ein hoher Wert die Lebensdauer
+der SD-Karte erhöhen.
 
 **Änderungen ignorieren, bis der Wert für X Millisekunden unverändert bleibt (Entprellzeit)**
 Dies ist der Mindestabstand in Millisekunden bis wieder ein Wert geschrieben
@@ -72,8 +96,7 @@ Zeit werden sie gelöscht (keine automatische Löschung, 2 Jahre, 1 Jahre, …, 
 
 ## Einstellungen für Datenpunkte
 Die Einstellungen für den zu loggenden Datenpunkt werden in dem Reiter „Objekte“
-bei dem entsprechenden Datenpunkt rechts in der Spalte über das Schraubenschlüssel-
-symbol durchgeführt.
+bei dem entsprechenden Datenpunkt in der Spalte rechts über das Schraubenschlüsselsymbol durchgeführt.
 ![](media/Datenpunkt.PNG)
 
 Das Konfigurationsmenü öffnet sich:
@@ -92,26 +115,6 @@ einstellungen für Zustände voreingestellt und können hier nochmals angepasst 
 Wenn angeben, werden z.B. nachdem ein Geräte- oder Datenpunktnamen geändert wurde,
 die Daten immer noch mit der alten ID protokolliert.
 
-**Mehrere Datenpunkte loggen**
-Um mehrere Datenpunkte auf einmal zu loggen, lassen sich über Filterfelder in der
-Titelzeile die Datenpunkte so filtern, dass man z.B. nur die „State“ Datenpunkte
-herausfiltert, um sie dann gemeinsam alle zu loggen.
-
->Vorsicht: Bei großen Installationen kann es viele tausend Datenpunkte vom Typ State
-geben und das erstellen dauert entsprechend lange. Das beschriebene Vorgehen dient
-nur als Beispiel!
-
-
-1. Hierzu die Ansicht der Objekte in Listenansicht ändern
-2. den Filterbegriff state in der Spalte Typ auswählen
-3. Den Gabelschlüssel rechts oben anklicken und das Konfigurationsmenü für die
-Einstellungen der log-Parameter öffnet sich
-*![](media/Datenpunkte.PNG)*
-4. Das loggen für alle gefilterten Datenpunkte auf einmal aktivieren
-5. Weitere Parameter wie „nur Änderungen“ und Vorhaltezeit für alle gefilterten
-Datenpunkte einheitlich auswählen
-6. Die Änderungen speichern
-![](media/DatenpunktEinstellungen.PNG)
 
 ## Bedienung
 ### Filtern
@@ -135,6 +138,27 @@ Bei installiertem flot oder Rickshaw Adapter wird im Reiter Grafik der grafische
 verlauf angezeigt:
 
 ![](media/DatenpunktGrafik.PNG)
+
+### Mehrere Datenpunkte auf einmal loggen
+Um mehrere Datenpunkte auf einmal zu loggen, lassen sich über Filterfelder in der
+Titelzeile die Datenpunkte so filtern, dass man z.B. nur die „State“ Datenpunkte
+herausfiltert, um sie dann gemeinsam alle zu loggen.
+
+>Vorsicht: Bei großen Installationen kann es viele tausend Datenpunkte vom Typ State
+geben und das erstellen dauert entsprechend lange. Das beschriebene Vorgehen dient
+nur als Beispiel!
+
+
+1. Hierzu die Ansicht der Objekte in Listenansicht ändern
+2. den Filterbegriff state in der Spalte Typ auswählen
+3. Den Gabelschlüssel rechts oben anklicken und das Konfigurationsmenü für die
+Einstellungen der log-Parameter öffnet sich
+*![](media/Datenpunkte.PNG)*
+4. Das loggen für alle gefilterten Datenpunkte auf einmal aktivieren
+5. Weitere Parameter wie „nur Änderungen“ und Vorhaltezeit für alle gefilterten
+Datenpunkte einheitlich auswählen
+6. Die Änderungen speichern
+![](media/DatenpunktEinstellungen.PNG)
 
 ## Zugriff auf History Werte mit JavaScript
 Mit installiertem JavaScript-Adapter kann auf die sortierten Werte des Adapters
@@ -222,7 +246,7 @@ Die Nachricht kann eines der folgenden drei Formate haben:
 - eine ID und ein Array von Objektstatus
 - Array von mehreren IDs mit Objektstatus
 
-## Verlaufsprotokollierung über Javascript
+## Verlaufsprotokollierung über JavaScript
 Der Adapter unterstützt das Aktivieren/Deaktivieren der Verlaufsprotokollierung
 über JavaScript sowie das Abrufen der Liste der aktivierten Datenpunkte mit
 ihren Einstellungen.
@@ -268,7 +292,7 @@ sendTo('history.0', 'disableHistory', {
 });
 ```
 
-### Liste aktivierter Datenpunkte anrufen
+### Liste aktivierter Datenpunkte aufrufen
 Es werden keine Parameter benötigt.
 
 ```
@@ -292,22 +316,23 @@ sendTo('history.0', 'getEnabledDPs', {}, function (result) {
 ## History-Daten in SQL oder InfluxDB übernehmen
 
 Wenn im Laufe der Zeit viele Daten anfallen, ist der History-Adapter möglicherweise
-nicht die beste Wahl und eine echte Datenbank zu nutzen wäre besser. Da es Adapter
-für SQL-Datenbanken wie PostgreSQL, MS-SQL, MySQL, SQLite und für InfluxDB für
-ioBroker verfügbar sind, wäre es sinnvoll bereits gesammelte Daten des History-
-Adapters in die neue Datenbank übernehmen zu können.
+nicht die beste Wahl und es wäre besser eine echte Datenbank zu nutzen. Da es ioBroker-
+Adapter für SQL-Datenbanken wie PostgreSQL, MS-SQL, MySQL, SQLite und für InfluxDB
+gibt, wäre es sinnvoll bereits gesammelte Daten des History-Adapters in die neue
+Zieldatenbank übernehmen zu können.
 
-Diese Aufgabe wird mit von Skripts automatisiert erledigt. Diese liegen im Linux
-Verzeichnis  ```/opt/iobroker/node_modules/iobroker.history/converter```
-und werden über die Kommandozeile dort ausgeführt.
+Diese Aufgabe wird von Skripts im Linux Verzeichnis ```/opt/iobroker/node_modules/iobroker.history/converter```
+erledigt. Die Ausführung erfolgt dort über die Kommandozeile mit vorangesetzten
+Befehl nodejs.
 
-### Aufbereiten und analysieren von vorhandenen Daten in der Zieldatenbank
+### Schritt 1: Aufbereiten und analysieren von vorhandenen Daten
 Beim Konvertieren von Daten sollten nur die Daten übertragen werden, die noch nicht
-in der Zieldatenbank vorhanden sind. Dafür werden die Skripte **analyzeinflux.js** oder
-**analyzesql.js** genutzt. Hiermit wird zu beginn einer Datenübernahme geprüft, welche
-Daten bereits vorhanden sind, um diese dann in lokalen .json Dateien zu speichern.  Die
-.json Dateien werden dann vom eigentlichen Konverter Skript verwendet.
-Es werden zwei .json Dateien erstellt:
+in der Zieldatenbank vorhanden sind. Dafür werden je nach gewünschter Zieldatenbank
+die Skripte **analyzeinflux.js** oder **analyzesql.js** genutzt. Hiermit wird zu
+Beginn einer Datenübernahme geprüft, welche Daten bereits vorhanden sind, um diese
+lokal in .json Dateien zu speichern. Die .json Dateien werden dann vom eigentlichen
+Konverter **history2db.js** Skript verwendet.
+Folgende .json Dateien werden erstellt:
 
 - **frühester Wert für Datenpunkt-ID** Der Zeitstempel des allerersten Eintrags für
  jeden vorhandenen Datenpunkt wird gespeichert und beim Importieren verwendet,
@@ -321,10 +346,11 @@ Es werden zwei .json Dateien erstellt:
  kann alternativ zu den ersten Daten verwendet werden, um auch "Löcher" in die Daten
  füllen zu können.
 
-#### analyzeinflux.js
+### analyzeinflux.js
 Dieses Skript sammelt die oben genannten Daten für eine InfluxDB-Instanz.
 
 **Verwendung**: nodejs analyzeinflux.js [InfluxDB-Instanz] [Loglevel] [--deepAnalyze]
+
 **Beispiel**: nodejs analyzeinflux.js influxdb.0 info --deepAnalyze
 
 Parameter:
@@ -339,35 +365,32 @@ nur der früheste Wert abgefragt.
 Das Skript generiert dann eine oder drei .json-Dateien mit den gesammelten Daten.
 Diese Dateien werden dann vom eigentlichen Konverter Skript verwendet.
 
-#### analyzesql.js
+### analyzesql.js
 Dieses Skript sammelt Teile der oben genannten Daten für eine SQL-Instanz.
 
 **Verwendung**: nodejs analyzesql.js [SQL-Instanz] [Loglevel]
+
 **Beispiel**: nodejs analyzesql.js sql.0 info
 
 Parameter:
 - Welche SQL-Adapter-Instanz soll verwendet werden?
-(Standard: sql.0) Wenn benutzt, muss dies der erste Parameter nach dem Skriptnamen
-sein.
+(Standard: sql.0) Wenn benutzt, muss dies der erste Parameter nach dem
+Skriptnamen sein.
 - Loglevel für die Ausgabe (Standard: info). Wenn gesetzt, muss dies der
 zweite Parameter nach dem Skriptnamen sein.
 
 Das Skript generiert dann zwei .json-Dateien mit den gesammelten Daten. Diese
 Dateien werden dann vom eigentlichen Konverter Skript verwendet.
 
-### History-Daten nach DB konvertieren
-Das dafür benötigte Skript **history2db.js** ist im Verzeichnis
-```/opt/iobroker/node_modules/iobroker.history/converter``` zu finden.
+### Schritt 2: History-Daten konvertieren
+Das Skript **history2db.js** verwendet die in Schritt 1 generierten .json Dateien
+um sie in die Zieldatenbank zu konvertieren. Dabei werden die generierten Dateien
+untersucht um nur nicht bereits vorhandene Daten zu konvertieren.
 
-Das Skript verwendet direkt die generierten json Dateien vom History-Adapter auf
-der Festplatte, um sie in die Datenbank zu übertragen. Außerdem werden die vor-
-generierten Datendateien für bereits vorhandene Werte in der Ziel-DB verwendet,
-um nur nicht vorhandene Daten zu konvertieren.
-
-Das Skript kann auch ohne vorherigen Analyseschritt ausgeführt werden. Dann müssen
-jedoch die Startdaten als Parameter festgelegt werden und alle vor diesem Zeitpunkt
-liegende Daten werden konvertiert.
-Wenn zuvor eine Analyse ausgeführt wurde und die Datei earliestDBValues.json
+Das Skript kann auch ohne vorherigen Analyseschritt 1 ausgeführt werden. Dann müssen
+jedoch die Startdaten [Date-to-start] als Parameter festgelegt werden und alle vor
+diesem Zeitpunkt liegende Daten werden konvertiert.
+Wenn zuvor eine Analyse ausgeführt wurde und die Datei **earliestDBValues.json**
 vorhanden ist, werden nur diese Datenpunkte konvertiert, außer es werden Parameter
 verwendet, um dies abzuändern.
 Wenn zuvor eine Analyse ausgeführt wurde und die Datendateien wurden verwendet,
@@ -387,14 +410,14 @@ Das Konverter Skript selbst sollte mit allen Verlaufs-Adaptern funktionieren, di
 >Hinweis: Die Migration vieler Daten führt zu einer bestimmten Systemlast, insbesondere
 >wenn Konverter und Zieldatenbankinstanz auf demselben Computer ausgeführt werden.
 >Die Auslastung und Leistung des Systems während der Aktion sollte überwacht werden
->und möglicherweise der Parameter "delayMultiplicator" verwendet werden, um ein
+>und möglicherweise der Parameter [delayMultiplicator] verwendet werden, um ein
 >verzögertes Abarbeiten der Daten zu nutzen.
 
 **Verwendung:**
-```nodejs history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]```
+nodejs history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]
 
 **Beispiel**:
-```nodejs history2influx.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly```
+nodejs history2influx.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly
 
 Mögliche Optionen und Parameter:
 
