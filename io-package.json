@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.8",
+        "version": "1.9.9",
         "news": {
+            "1.9.9": {
+                "en": "prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "de": "Abstürze verhindern (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "ru": "предотвратить сбои (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "pt": "evitar falhas (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "nl": "crashes voorkomen (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "fr": "prévenir les accidents (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "it": "prevenire gli arresti anomali (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "es": "evitar accidentes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "pl": "zapobiegać awariom (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+                "zh-cn": "防止崩溃（哨兵IOBROKER-HISTORY-K，IOBROKER-HISTORY-J，IOBROKER-HISTORY-C，IOBROKER-HISTORY-G）"
+            },
             "1.9.8": {
                 "en": "added command to read supported features",
                 "de": "Befehl zum Lesen der unterstützten Funktionen hinzugefügt",
@@ -226,21 +238,6 @@
                 "en": "add \"save last value\" option",
                 "de": "Die Option um vorheriges Wert zu speichern ist hinzugefügt",
                 "ru": "Возможность сохранять предыдущее значение при сохранении только изменений"
-            },
-            "1.6.3": {
-                "en": "fix behaviour of log interval to always log the current value",
-                "de": "Verhalten vom Logging in bestimmten Zeitabständen geändert, sodass immer der aktuellste Wert geloggt wird",
-                "ru": "fix behaviour of log interval to always log the current value"
-            },
-            "1.6.2": {
-                "en": "fix in datatype conversions",
-                "de": "Fehlerbehebung in Datentypkonvertierungen",
-                "ru": "fix in datatype conversions"
-            },
-            "1.6.1": {
-                "en": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames",
-                "de": "Debounce-Feature geändert, sodass der letzte Wert der in der angegeben Zeit stabil geblieben ist geloggt wird!! Ersetzung einiger Zeichen in Dateinamen",
-                "ru": "Changed Debounce-Feature to log the last stable value that did not changed for given time!! Replace some characters in history filenames"
             }
         },
         "mode": "daemon",

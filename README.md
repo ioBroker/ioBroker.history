@@ -19,7 +19,7 @@ This adapter saves state history in a two-staged process.
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 1.9.9 (2020-06-29)
 * (Apollon77) prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)
 
 ### 1.9.8 (2020-05-14)
