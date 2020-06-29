@@ -73,7 +73,7 @@ function startAdapter(options) {
             const formerAliasId = aliasMap[id] ? aliasMap[id] : id;
 
             if (obj && obj.common &&
-                (obj.common.custom  && obj.common.custom[adapter.namespace]  && obj.common.custom[adapter.namespace].enabled
+                (obj.common.custom  && obj.common.custom[adapter.namespace] && typeof obj.common.custom[adapter.namespace] === 'object' && obj.common.custom[adapter.namespace].enabled
                 )
             ) {
                 const realId = id;
@@ -439,7 +439,7 @@ function main() { //start
                                 continue;
                             }
                         }
-                        if (!history[id][adapter.namespace] || history[id][adapter.namespace].enabled === false) {
+                        if (!history[id][adapter.namespace] || typeof history[id][adapter.namespace] !== 'object' || history[id][adapter.namespace].enabled === false) {
                             delete history[id];
                         } else {
                             count++;
@@ -619,7 +619,7 @@ function reLogHelper(_id) {
             else if (!state) {
                 adapter.log.info('init timed Relog: disable relog because state not set so far ' + _id + ': ' + JSON.stringify(state));
             }
-            else {
+            else if (history[_id]) {
                 adapter.log.debug('init timed Relog: getState ' + _id + ':  Value=' + state.val + ', ack=' + state.ack + ', ts=' + state.ts  + ', lc=' + state.lc);
                 history[_id].state = state;
                 pushHistory(_id, history[_id].state, true);
@@ -880,6 +880,13 @@ function sortByTs(a, b) {
 
 function getHistory(msg) {
     const startTime = new Date().getTime();
+
+    if (!msg.message || !msg.message.options) {
+        return adapter.sendTo(msg.from, msg.command, {
+            error:  "Invalid call. No options for getHistory provided"
+        }, msg.callback);
+    }
+
     const options = {
         id:         msg.message.id ? msg.message.id : null,
         path:       adapter.config.storeDir,

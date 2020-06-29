@@ -18,6 +18,10 @@ This adapter saves state history in a two-staged process.
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)
+
 ### 1.9.8 (2020-05-14)
 * (bluefox) added command to read supported features
 

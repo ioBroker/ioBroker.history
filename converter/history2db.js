@@ -240,7 +240,7 @@ function processFile() {
 
         //console.log('    File ' + j +': ' + id + ' --> ' + fileData.length);
 
-        if (fileData[fileData.length-1].ts >= earliestDBValue[id]) {
+        if (fileData && fileData[fileData.length - 1].ts >= earliestDBValue[id]) {
             var k;
             for (k = 0; k < fileData.length; k++) {
                 if (fileData[k].ts >= earliestDBValue[id]) break;
@@ -250,7 +250,7 @@ function processFile() {
         }
         var lastValue = null;
         var lastTime = null;
-        if (fileData.length > 0) {
+        if (fileData && fileData.length > 0) {
             var sendData = {};
             sendData.id = id;
             sendData.state = [];
