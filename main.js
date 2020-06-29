@@ -1035,7 +1035,7 @@ function getDirectories(path) {
         return fs.readdirSync(path).filter(file => {
             try {
                 return fs.statSync(path + '/' + file).isDirectory()
-            } catch {
+            } catch(e) {
                 //ignore entry
                 return false;
             }
