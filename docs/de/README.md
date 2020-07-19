@@ -39,11 +39,17 @@ Nach der Erstellung der Instanz öffnet sich das Konfigurationsfenster.
 ![](media/KonfigStorage.PNG)
 
 **Speicherverzeichnis**
-Hier den Pfad zu dem Verzeichnis eingeben, in dem die Dateien gespeichert werden
-sollen. Standardeinstellung ist das /iobroker-data Verzeichnis. Absolute
-Verzeichnisse wie z.B.: /mnt/history (Linux) oder D:/history (Windows) können
-ebenso eingegeben werden. In diesem Verzeichnis wird jeden Tag ein neuer Ordner
-erstellt in dem die geloggten Daten gespeichert werden.
+Hier den Ordnernamen eingeben, in dem die Dateien gespeichert werden sollen.  
+Der Ordner wird im Standardverzeichnis ```/opt/iobroker/iobroker-data``` angelegt.  
+In diesem Ordner wird jeden Tag ein neuer Unterordner erstellt in dem die geloggten 
+Daten gespeichert werden.
+
+> Ohne Angabe eines Speicherverzeichnisses wird der Ordner 
+> ```/opt/iobroker/iobroker-data/history``` automatisch angelegt  
+
+
+> Absolute Verzeichnisse wie z.B.: /mnt/history (Linux) oder D:/history (Windows) können
+ebenso eingegeben werden. 
 
 **Speichere Quelle vom Ereignis mit**
 Legt fest ob die Quelle der Datenänderung (der auslösende Adapter) mit gespeichert
