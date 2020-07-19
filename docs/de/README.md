@@ -39,8 +39,8 @@ Nach der Erstellung der Instanz öffnet sich das Konfigurationsfenster.
 ![](media/KonfigStorage.PNG)
 
 **Speicherverzeichnis**
-Hier den Ordnernamen eingeben, in dem die Dateien gespeichert werden
-sollen. Der Ordner wird im Standardverzeichnis ```/opt/iobroker/iobroker-data``` angelegt. 
+Hier den Ordnernamen eingeben, in dem die Dateien gespeichert werden sollen.  
+Der Ordner wird im Standardverzeichnis ```/opt/iobroker/iobroker-data``` angelegt.  
 In diesem Ordner wird jeden Tag ein neuer Unterordner erstellt in dem die geloggten 
 Daten gespeichert werden.
 
