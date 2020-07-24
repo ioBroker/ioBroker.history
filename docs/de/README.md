@@ -208,7 +208,7 @@ Mögliche Einstellungen:
  Schritte in ms Intervall
 - **count** - Anzahl der Werte, wenn das Aggregat 'onchange' ist, oder wenn eine
  andere Aggregatmethode verwendet wird Anzahl der Intervalle. Count wird ignoriert,
- wenn **step** gesetzt ist.
+ wenn **step** gesetzt ist, sonst ist der Default-Wert 500 wenn count nicht angegeben.
 - **from** - wenn *from* Feld in Antwort enthalten sein soll
 - **ack** - wenn *ack* Feld in Antwort enthalten sein soll
 - **q** - wenn *q* Feld in Antwort enthalten sein soll

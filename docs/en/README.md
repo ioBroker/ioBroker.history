@@ -57,7 +57,7 @@ Possible options:
 - **start** - (optional) time in ms - *new Date().getTime()*'
 - **end** - (optional) time in ms - *new Date().getTime()*', by default is (now + 5000 seconds)
 - **step** - (optional) used in aggregate (m4, max, min, average, total) step in ms of intervals
-- **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set.
+- **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set, else default is 500 if not set
 - **from** - if *from* field should be included in answer
 - **ack** - if *ack* field should be included in answer
 - **q** - if *q* field should be included in answer
