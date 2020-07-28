@@ -18,7 +18,7 @@ This adapter saves state history in a two-staged process.
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
-### __WORK IN PROGRESS__
+### 1.9.10 (2020-07-28)
 * (bluefox) Code formatting done
 * (bluefox) Filtered out the acknowledgment and the quality from the getHistory call if not requested 
 

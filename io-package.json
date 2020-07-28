@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.9",
+        "version": "1.9.10",
         "news": {
+            "1.9.10": {
+                "en": "Code formatting done\nFiltered out the acknowledgment and the quality from the getHistory call if not requested",
+                "de": "Code-Formatierung abgeschlossen\nFilterte die Bestätigung und die Qualität aus dem getHistory-Aufruf heraus, wenn dies nicht angefordert wurde",
+                "ru": "Форматирование кода сделано\nОтфильтровывается подтверждение и качество из вызова getHistory, если не запрашивается",
+                "pt": "Formatação de código concluída\nFiltrou o reconhecimento e a qualidade da chamada getHistory, se não solicitado",
+                "nl": "Code-opmaak voltooid\nDe bevestiging en de kwaliteit uit de aanroep van getHistory gefilterd, indien niet gevraagd",
+                "fr": "Formatage du code terminé\nFiltré l'accusé de réception et la qualité de l'appel getHistory s'il n'est pas demandé",
+                "it": "Formattazione del codice eseguita\nFiltrato il riconoscimento e la qualità dalla chiamata getHistory se non richiesto",
+                "es": "Formateo de código hecho\nFiltrado el reconocimiento y la calidad de la llamada getHistory si no se solicita",
+                "pl": "Formatowanie kodu zakończone\nOdfiltrowano potwierdzenie i jakość z wywołania getHistory, jeśli nie zostało to wymagane",
+                "zh-cn": "代码格式化完成\n如果没有要求，则从getHistory调用中过滤出确认和质量"
+            },
             "1.9.9": {
                 "en": "prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
                 "de": "Abstürze verhindern (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
@@ -233,11 +245,6 @@
                 "en": "fix relog value feature",
                 "de": "Erneutes Logging korrigiert",
                 "ru": "fix relog value feature"
-            },
-            "1.6.4": {
-                "en": "add \"save last value\" option",
-                "de": "Die Option um vorheriges Wert zu speichern ist hinzugefügt",
-                "ru": "Возможность сохранять предыдущее значение при сохранении только изменений"
             }
         },
         "mode": "daemon",
