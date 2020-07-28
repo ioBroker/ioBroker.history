@@ -171,7 +171,7 @@ zugegriffen werden. Beispiele:
 sendTo('history.0', 'getHistory', {
     id: '*',
     options: {
-        end:       new Date().getTime(),
+        end:       Date.now(),
         count:     50,
         aggregate: 'onchange'
     }
@@ -185,7 +185,7 @@ sendTo('history.0', 'getHistory', {
 - Abrufen der in der letzten Stunde gespeicherten Werte für Datenpunkt
 "system.adapter.admin.0.memRss"
 ```
-var end = new Date().getTime();
+var end = Date.now();
 sendTo('history.0', 'getHistory', {
     id: 'system.adapter.admin.0.memRss',
     options: {
@@ -201,8 +201,8 @@ sendTo('history.0', 'getHistory', {
 ```
 
 Mögliche Einstellungen:
-- **start** - (Optional) Zeit in ms - *new Date().getTime()*'
-- **end** - (Optional) Zeit in ms - *new Date().getTime()*', Standarwert
+- **start** - (Optional) Zeit in ms - *Date.now()*'
+- **end** - (Optional) Zeit in ms - *Date.now()*', Standarwert
  (jetzt + 5.000 s)
 - **step** - (Optional) Nutzung bei Aggregation (m4, max, min, average, total)
  Schritte in ms Intervall

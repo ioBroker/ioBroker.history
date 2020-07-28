@@ -25,7 +25,7 @@ The sorted values can be accessed from Javascript adapter.
 sendTo('history.0', 'getHistory', {
     id: '*',
     options: {
-        end:       new Date().getTime(),
+        end:       Date.now(),
         count:     50,
         aggregate: 'onchange'
     }
@@ -38,7 +38,7 @@ sendTo('history.0', 'getHistory', {
 
 * Get stored values for "system.adapter.admin.0.memRss" in last hour
 ```
-var end = new Date().getTime();
+var end = Date.now();
 sendTo('history.0', 'getHistory', {
     id: 'system.adapter.admin.0.memRss',
     options: {
@@ -54,8 +54,8 @@ sendTo('history.0', 'getHistory', {
 ```
 
 Possible options:
-- **start** - (optional) time in ms - *new Date().getTime()*'
-- **end** - (optional) time in ms - *new Date().getTime()*', by default is (now + 5000 seconds)
+- **start** - (optional) time in ms - *Date.now()*'
+- **end** - (optional) time in ms - *Date.now()*', by default is (now + 5000 seconds)
 - **step** - (optional) used in aggregate (m4, max, min, average, total) step in ms of intervals
 - **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set, else default is 500 if not set
 - **from** - if *from* field should be included in answer

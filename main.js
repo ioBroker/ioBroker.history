@@ -204,7 +204,7 @@ process.on('SIGTERM', () =>
     adapter && adapter.setState && finish());
 
 function storeCached(isFinishing, onlyId) {
-    const now = new Date().getTime();
+    const now = Date.now();
 
     for (const id in history) {
         if (!history.hasOwnProperty(id) || (onlyId !== undefined && onlyId !== id)) continue;
@@ -316,7 +316,7 @@ function processStartValues() {
         const task = tasksStart.shift();
         if (history[task.id][adapter.namespace].changesOnly) {
             adapter.getForeignState(history[task.id].realId, (err, state) => {
-                const now = task.now || new Date().getTime();
+                const now = task.now || Date.now();
                 pushHistory(task.id, {
                     val:  null,
                     ts:   now,
@@ -334,7 +334,7 @@ function processStartValues() {
         } else {
             pushHistory(task.id, {
                 val:  null,
-                ts:   task.now || new Date().getTime(),
+                ts:   task.now || Date.now(),
                 ack:  true,
                 q:    0x40,
                 from: 'system.adapter.' + adapter.namespace});
@@ -345,14 +345,14 @@ function processStartValues() {
 
 function writeNulls(id, now) {
     if (!id) {
-        now = new Date().getTime();
+        now = Date.now();
         for (const _id in history) {
             if (history.hasOwnProperty(_id)) {
                 writeNulls(_id, now);
             }
         }
     } else {
-        now = now || new Date().getTime();
+        now = now || Date.now();
         tasksStart.push({id: id, now: now});
         if (tasksStart.length === 1) {
             processStartValues();
@@ -570,7 +570,7 @@ function pushHistory(id, state, timerRelog) {
 
         let ignoreDebonce = false;
         if (timerRelog) {
-            state.ts = new Date().getTime();
+            state.ts = Date.now();
             state.from = 'system.adapter.' + adapter.namespace;
             adapter.log.debug('timed-relog ' + id + ', value=' + state.val + ', lastLogTime=' + history[id].lastLogTime + ', ts=' + state.ts);
             ignoreDebonce = true;
@@ -646,13 +646,17 @@ function pushHelper(_id) {
                 history[_id].state.val = false;
             }
         }
-        if (history[_id].state.lc !== undefined) delete history[_id].state.lc;
+        if (history[_id].state.lc !== undefined) {
+            delete history[_id].state.lc;
+        }
         if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
             delete history[_id].state.ack;
         } else {
             history[_id].state.ack = history[_id].state.ack ? 1 : 0;
         }
-        if (!adapter.config.storeFrom && history[_id].state.from !== undefined) delete history[_id].state.from;
+        if (!adapter.config.storeFrom && history[_id].state.from !== undefined) {
+            delete history[_id].state.from;
+        }
 
         history[_id].list.push(history[_id].state);
 
@@ -760,8 +764,12 @@ function getOneCachedData(id, options, cache, addId) {
                     continue;
                 }
                 if (options.start && res[i].ts < options.start) {
-                    if (options.ack) res[i].ack = !!res[i].ack;
-                    if (addId) res[i].id = id;
+                    if (options.ack) {
+                        res[i].ack = !!res[i].ack;
+                    }
+                    if (addId) {
+                        res[i].id = id;
+                    }
                     // add one before start
                     cache.unshift(res[i]);
                     break;
@@ -770,21 +778,32 @@ function getOneCachedData(id, options, cache, addId) {
                     vLast = res[i];
                     continue;
                 }
-                if (options.ack) res[i].ack = !!res[i].ack;
+                if (options.ack) {
+                    res[i].ack = !!res[i].ack;
+                }
 
                 if (vLast) {
-                    if (options.ack) vLast.ack = !!vLast.ack;
-                    if (addId) res[i].id = id;
+                    if (options.ack) {
+                        vLast.ack = !!vLast.ack;
+                    }
+                    if (addId) {
+                        res[i].id = id;
+                    }
                     cache.unshift(vLast);
                     vLast = null;
                 }
 
-                if (addId) res[i].id = id;
+                if (addId) {
+                    res[i].id = id;
+                }
                 cache.unshift(res[i]);
 
-                if (!options.start && cache.length >= options.count) break;
+                if (!options.start && cache.length >= options.count) {
+                    break;
+                }
             }
-            if (iProblemCount) adapter.log.warn('got null states ' + iProblemCount + ' times for ' + options.id);
+
+            iProblemCount && adapter.log.warn('got null states ' + iProblemCount + ' times for ' + options.id);
 
             adapter.log.debug('got ' + res.length + ' datapoints for ' + options.id);
         } else {
@@ -837,17 +856,27 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].id = id;
                         }
                         data.push(_data[ii]);
-                        if (!options.start && data.length >= options.count) break;
-                        if (last) break;
-                        if (options.start && _data[ii].ts < options.start) last = true;
+                        if (!options.start && data.length >= options.count) {
+                            break;
+                        }
+                        if (last) {
+                            break;
+                        }
+                        if (options.start && _data[ii].ts < options.start) {
+                            last = true;
+                        }
                     }
                 } catch (e) {
                     console.log('Cannot parse file ' + file + ': ' + e.message);
                 }
             }
         }
-        if (!options.start && data.length >= options.count) break;
-        if (day > dayEnd) break;
+        if (!options.start && data.length >= options.count) {
+            break;
+        }
+        if (day > dayEnd) {
+            break;
+        }
     }
 }
 
@@ -878,8 +907,45 @@ function sortByTs(a, b) {
     return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
 }
 
+function applyOptions(data, options, shouldCopy) {
+    if (shouldCopy) {
+        const _data = [];
+        data.forEach(item => {
+            const _item = {
+                ts: item.ts,
+                val: item.val,
+            };
+            if (options.ack) {
+                _item.ack = item.ack;
+            }
+            if (options.from) {
+                _item.from = item.from;
+            }
+            if (options.q) {
+                _item.q = item.q;
+            }
+            _data.push(_item);
+        });
+        return _data;
+    } else {
+        data.forEach(item => {
+            if (!options.ack && item.ack !== undefined) {
+                delete item.ack;
+            }
+            if (!options.from && item.from !== undefined) {
+                delete item.from;
+            }
+            if (!options.q && item.q !== undefined) {
+                delete item.q;
+            }
+        });
+
+        return data;
+    }
+}
+
 function getHistory(msg) {
-    const startTime = new Date().getTime();
+    const startTime = Date.now();
 
     if (!msg.message || !msg.message.options) {
         return adapter.sendTo(msg.from, msg.command, {
@@ -924,6 +990,9 @@ function getHistory(msg) {
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
             adapter.log.debug('after getCachedData: length = ' + cacheData.length + ', isFull=' + isFull);
+
+            cacheData = applyOptions(cacheData, options, true);
+
             // if all data read
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
@@ -931,7 +1000,8 @@ function getHistory(msg) {
                     cacheData = cacheData.slice(0, options.count);
                     adapter.log.debug('cut cacheData to ' + options.count + ' values');
                 }
-                adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
+                adapter.log.debug('Send: ' + cacheData.length + ' values in: ' + (Date.now() - startTime) + 'ms');
+
                 adapter.sendTo(msg.from, msg.command, {
                     result: cacheData,
                     step:   null,
@@ -941,6 +1011,7 @@ function getHistory(msg) {
                 const origCount = options.count;
                 options.count -= cacheData.length;
                 getFileData(options, fileData => {
+                    fileData = applyOptions(fileData, options, false);
                     adapter.log.debug('after getFileData: cacheData.length = ' + cacheData.length + ', fileData.length = ' + fileData.length);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
@@ -948,7 +1019,8 @@ function getHistory(msg) {
                     options.count = origCount;
                     Aggregate.beautify(options);
 
-                    adapter.log.debug('Send: ' + options.result.length + ' values in: ' + (new Date().getTime() - startTime) + 'ms');
+                    adapter.log.debug('Send: ' + options.result.length + ' values in: ' + (Date.now() - startTime) + 'ms');
+
                     adapter.sendTo(msg.from, msg.command, {
                         result: options.result,
                         step:   null,
@@ -982,11 +1054,11 @@ function getHistory(msg) {
                     clearTimeout(ghTimeout);
                     ghTimeout = null;
 
-                    const result          = data[1];
+                    const result          = applyOptions(data[1], options, true);
                     const overallLength   = data[2];
                     const step            = data[3];
                     if (result) {
-                        adapter.log.debug('Send: ' + result.length + ' of: ' + overallLength + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                        adapter.log.debug('Send: ' + result.length + ' of: ' + overallLength + ' in: ' + (Date.now() - startTime) + 'ms');
                         adapter.sendTo(msg.from, msg.command, {
                             result:     result,
                             step:       step,
@@ -1011,9 +1083,10 @@ function getHistory(msg) {
 
                 if (data[0] === 'response') {
                     if (data[1]) {
-                        adapter.log.debug('Send: ' + data[1].length + ' of: ' + data[2] + ' in: ' + (new Date().getTime() - startTime) + 'ms');
+                        adapter.log.debug(`Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
+                        const timeSeries = applyOptions(data[1], options, true);
                         adapter.sendTo(msg.from, msg.command, {
-                            result: data[1],
+                            result: timeSeries,
                             step:   data[3],
                             error:  null
                         }, msg.callback);

@@ -173,7 +173,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     });
     it('Test ' + adapterShortName + ': Write values into DB', function (done) {
         this.timeout(25000);
-        now = new Date().getTime();
+        now = Date.now();
 
         states.setState('history.0.testValue', {val: 1, ts: now + 1000}, function (err) {
             if (err) {

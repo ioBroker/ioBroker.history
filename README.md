@@ -18,6 +18,9 @@ This adapter saves state history in a two-staged process.
 * [deutsche Beschreibung](docs/de/README.md)
 
 ## Changelog
+### __WORK IN PROGRESS__
+* (bluefox) Code formatting done
+* (bluefox) Filtered out the acknowledgment and the quality from the getHistory call if not requested 
 
 ### 1.9.9 (2020-06-29)
 * (Apollon77) prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)

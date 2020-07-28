@@ -119,7 +119,7 @@ function main() {
             console.log('EarliesDBValues initialized from cache ' + Object.keys(earliestDBValue).length);
             earliesValCachefileExists = true;
             if (ignoreEarliesDBValues) {
-                var dateNow = new Date().getTime();
+                var dateNow = Date.now();
                 for (var id in earliestDBValue) {
                     if (!earliestDBValue.hasOwnProperty(id)) continue;
                     earliestDBValue[id] = dateNow;
@@ -207,7 +207,7 @@ function processFile() {
             }
         }
         if (!earliesValCachefileExists || processAllDPs) {
-            if (!earliestDBValue[id]) earliestDBValue[id] = new Date().getTime();
+            if (!earliestDBValue[id]) earliestDBValue[id] = Date.now();
         }
         if (processNonExistingValues) {
             console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
