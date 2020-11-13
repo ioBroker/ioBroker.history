@@ -195,7 +195,7 @@ sendTo('history.0', 'getHistory', {
     }
 }, function (result) {
     for (var i = 0; i < result.result.length; i++) {
-        console.log(result.result[i].id + ' ' + new Date(result.result[i].ts).toISOString());
+        console.log(result.result[i].val + ' ' + new Date(result.result[i].ts).toISOString());
     }
 });
 ```
