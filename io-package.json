@@ -22,8 +22,20 @@
             "fr": "Consignation de l'historique des états dans les fichiers",
             "it": "Registrazione della cronologia di stato nei file"
         },
-        "version": "1.9.11",
+        "version": "1.9.12",
         "news": {
+            "1.9.12": {
+                "en": "Optimize stop handling",
+                "de": "Optimieren Sie das Stop-Handling",
+                "ru": "Оптимизировать обработку остановок",
+                "pt": "Otimize o manuseio de parada",
+                "nl": "Optimaliseer het afhandelen van stops",
+                "fr": "Optimiser la gestion des arrêts",
+                "it": "Ottimizza la gestione delle fermate",
+                "es": "Optimizar el manejo de paradas",
+                "pl": "Zoptymalizuj obsługę zatrzymania",
+                "zh-cn": "优化停止处理"
+            },
             "1.9.10": {
                 "en": "Code formatting done\nFiltered out the acknowledgment and the quality from the getHistory call if not requested",
                 "de": "Code-Formatierung abgeschlossen\nFilterte die Bestätigung und die Qualität aus dem getHistory-Aufruf heraus, wenn dies nicht angefordert wurde",

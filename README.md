@@ -19,7 +19,7 @@ This adapter saves state history in a two-staged process.
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 1.9.12 (2021-01-17)
 * (Apollon77) Optimize stop handling
 
 ### 1.9.10 (2020-07-28)
