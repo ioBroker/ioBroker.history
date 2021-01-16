@@ -238,7 +238,16 @@ function storeCached(isFinishing, onlyId) {
 }
 
 function finish(callback) {
-    adapter.unsubscribeForeignStates('*');
+    if (!subscribeAll) {
+        for (const _id in history) {
+            if (history.hasOwnProperty(_id)) {
+                adapter.unsubscribeForeignStates(history[_id].realId);
+            }
+        }
+    } else {
+        adapter.unsubscribeForeignStates('*');
+        subscribeAll = false;
+    }
     if (bufferChecker) {
         clearInterval(bufferChecker);
         bufferChecker = null;

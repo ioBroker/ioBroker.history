@@ -288,7 +288,7 @@
                 "admin": ">=1.6.10"
             }
         ],
-        "supportStopInstance": 2000,
+        "supportStopInstance": 10000,
         "stopTimeout": 10000,
         "docs": {
             "en": [
