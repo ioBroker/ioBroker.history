@@ -421,7 +421,7 @@ Das Konverter Skript selbst sollte mit allen Verlaufs-Adaptern funktionieren, di
 nodejs history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]
 
 **Beispiel**:
-nodejs history2influx.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly
+nodejs history2db.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly
 
 Mögliche Optionen und Parameter:
 
@@ -454,3 +454,11 @@ Wenn gesetzt, muss dies der vierte Parameter nach dem Skriptnamen sein.
  den History-Dateien in die DB übertragen werden, auch wenn diese in der DB noch nicht vorhanden sind.
 - **--simulate**: Aktiviert den Simulationsmodus, d.h. es findet kein richtiges Schreiben statt und auch die
  Analysedatendateien werden beim Beenden nicht aktualisiert.
+
+### Empfohlene Vorgehensweise bei der Migration
+Zur Migration wird folgender Ablauf empfohlen:
+
+* Zuerst die neue Logging Methode aktivieren und alle States richtig konfigurieren. Prüfen das alle Werte ankommen wie geplant. Logging erfolgt "deoppelt" (also in History und im neuen)
+* Dann Analyse-Skripte laufen lassen um den exakten Beriech zu ermittlen der Migriert werden soll.
+* Dann History Adapter stoppen un die Migration ausführen. Dies kann etwas dauern. Die alten Werte werden hinzugefügt.
+* Dan wenn alles passt und die Logfiles ausgewertet sind History Daten löschen und Adapter deaktivieren.

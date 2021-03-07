@@ -160,7 +160,7 @@ With this change the quesion comes up how to convert the collected data from the
 For this some converter scripts have been prepared that can help and do the job. These scripts are called from the command line.
 
 ### Prepare and analyze existing data in transfer target
-When converting data only those data should be transferred that are not already there. Therefor the first set of scripts exists called **analyze<db>.js**. This script should be called once at the beginning to collect some data for existing data and store them in local .json files to be used by the real converter script.
+When converting data only those data should be transferred that are not already there. Therefor the first set of scripts exists called **analyze<db>.js**. This script should be executed once at the beginning to collect some data for existing data and store them in local .json files to be used by the real converter script.
 Two kind of data are collected:
 - **earliest value for datapoint ID**: The timestamp of the very first entry for each existing datapoint is stored and is used by imported to ignore all newer values by default. The assumption is that the data are filled completely beginning with this first entry and all earlier values would else be duplicated. This assumption can be overwritten on import by parameters.
 - **existing values per day per datapoint ID**: The existing data are analyzed on a per day basis and each day is stored where data exist already. This can be used as alternative to the first data to be able to also fill "holes" in the data.
@@ -213,8 +213,8 @@ The converter script itself should work with all History adapters that support "
 
 Note: Migrating many data will produce a certain load on the system, especially when converter and target database instance are running on the same machine. Monitor your systems load and performance during the action and maybe use the "delayMultiplicator" parameter to increase delays in the converter.
 
-**Usage:** nodejs history2influx.js DB-Instance [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs]  [--simulate]
-**Example**: nodejs history2influx.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly
+**Usage:** nodejs history2db.js DB-Instance [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs]  [--simulate]
+**Example**: nodejs history2db.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly
 
 Possible options and Parameter:
 - **DB-Instance**: DB-Instance to send the data to.Required parameter. Needs to be first parameter after scriptname.
@@ -227,3 +227,10 @@ Possible options and Parameter:
 - **--processNonExistingValuesOnly**: With this parameter the "existing datapoints by day" file from the analyze script is used and checked for each day and datapoint. In this mode the existing-DB-Values are always ignored, and also not updated, so please do another analyze run after using that mode!!!
 - **--processAllDPs**: With this parameter you make sure that all existing datapoints from the history files is transferred into the DB, also if these are not existing in that DB so far.
 - **--simulate**: With this parameter you enable the simulation mode, means that no real write happends and also the analyze-datafiles will not be updated on exit.
+
+### Best practice when executing the conversion
+If you move from one history method to another I propose the following process:
+* activate the new history method (sql/influxdb) for the relevant states and start logging and check that this works as expected. This means you log "twice".
+* Then run the analyze scripts to get the "cut off" points where the duplicate logging started.
+* Then stop the history adapter and execute the migration (this can take some time). So the older values will be added to the new ones.
+* Then when you are sure you did anything and also checked the error files and such delete the history json files to get some space back.
