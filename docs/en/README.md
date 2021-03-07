@@ -234,3 +234,10 @@ If you move from one history method to another I propose the following process:
 * Then run the analyze scripts to get the "cut off" points where the duplicate logging started.
 * Then stop the history adapter and execute the migration (this can take some time). So the older values will be added to the new ones.
 * Then when you are sure you did anything and also checked the error files and such delete the history json files to get some space back.
+
+### Best practice when executing the conversion
+If you move from one history method to another I propose the following process:
+* activate the new history method (sql/influxdb) for the relevant states and start logging and check that this works as expected. This means you log "twice".
+* Then run the analyze scripts to get the "cut off" points where the duplicate logging started.
+* Then stop the history adapter and execute the migration (this can take some time). So the older values will be added to the new ones.
+* Then when you are sure you did anything and also checked the error files and such delete the history json files to get some space back.

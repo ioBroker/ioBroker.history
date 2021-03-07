@@ -462,3 +462,11 @@ Zur Migration wird folgender Ablauf empfohlen:
 * Dann Analyse-Skripte laufen lassen um den exakten Beriech zu ermittlen der Migriert werden soll.
 * Dann History Adapter stoppen un die Migration ausführen. Dies kann etwas dauern. Die alten Werte werden hinzugefügt.
 * Dan wenn alles passt und die Logfiles ausgewertet sind History Daten löschen und Adapter deaktivieren.
+
+### Empfohlene Vorgehensweise bei der Migration
+Zur Migration wird folgender Ablauf empfohlen:
+
+* Zuerst die neue Logging Methode aktivieren und alle States richtig konfigurieren. Prüfen das alle Werte ankommen wie geplant. Logging erfolgt "deoppelt" (also in History und im neuen)
+* Dann Analyse-Skripte laufen lassen um den exakten Beriech zu ermittlen der Migriert werden soll.
+* Dann History Adapter stoppen un die Migration ausführen. Dies kann etwas dauern. Die alten Werte werden hinzugefügt.
+* Dan wenn alles passt und die Logfiles ausgewertet sind History Daten löschen und Adapter deaktivieren.
