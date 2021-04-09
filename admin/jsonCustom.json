@@ -1,5 +1,4 @@
 {
-  "type": "panel",
   "i18n": {
     "1 day": {
       "en": "1 day",
@@ -112,17 +111,29 @@
       "pl": "6 miesięcy"
     },
     "De-bounce interval(ms)": {
-      "en": "Ignore changes till value stays unchanged for X Milliseconds<br>(Debounce Time)",
-      "de": "Änderungen ignorieren, bis der Wert für X Millisekunden unverändert bleibt <br> (Entprellzeit)",
-      "ru": "Игнорировать изменения до тех пор, пока значение не останется неизменным в течение X миллисекунд <br> (время отладки)",
-      "pt": "Ignorar alterações até que o valor permaneça inalterado por X Milissegundos <br> (Tempo de Depuração)",
-      "nl": "Wijzigingen negeren totdat waarde ongewijzigd blijft voor X Milliseconds <br> (Debounce Time)",
-      "fr": "Ignorer les modifications jusqu'à ce que la valeur reste inchangée pour X millisecondes <br> (Debounce Time)",
-      "it": "Ignora le modifiche fino a quando il valore rimane invariato per X Milliseconds <br> (Debounce Time)",
-      "es": "Ignorar cambios hasta que el valor permanezca sin cambios durante X milisegundos <br> (Tiempo de rebote)",
-      "pl": "Zignoruj ​​zmiany, aż wartość pozostanie niezmieniona przez X Milliseconds <br> (Czas odbicia)",
+      "en": "Ignore changes till value stays unchanged for X ms",
+      "de": "Änderungen ignorieren, bis der Wert für X ms unverändert bleibt",
+      "ru": "Игнорировать изменения до тех пор, пока значение не останется неизменным в течение X мс",
+      "pt": "Ignorar alterações até que o valor permaneça inalterado por X ms",
+      "nl": "Wijzigingen negeren totdat waarde ongewijzigd blijft voor X ms",
+      "fr": "Ignorer les modifications jusqu'à ce que la valeur reste inchangée pour X ms",
+      "it": "Ignora le modifiche fino a quando il valore rimane invariato per X ms",
+      "es": "Ignorar cambios hasta que el valor permanezca sin cambios durante X ms",
+      "pl": "Zignoruj ​​zmiany, aż wartość pozostanie niezmieniona przez X ms",
       "zh-cn": "忽略更改，直到值保持不变为X毫秒<br>（去抖时间）"
     },
+	"De-bounce time": {
+      "en": "Debounce Time",
+      "de": "Entprellzeit",
+      "ru": "Дребезг",
+      "pt": "Tempo de Depuração",
+      "nl": "Debounce Time",
+      "fr": "Debounce Time",
+      "it": "Debounce Time",
+      "es": "Tiempo de rebote",
+      "pl": "Czas odbicia",
+      "zh-cn": "去抖时间"
+	},
     "Storage retention": {
       "en": "Storage retention",
       "de": "Storage Vorhaltezeit",
@@ -156,29 +167,53 @@
       "es": "mantener para siempre",
       "pl": "zachowaj na zawsze"
     },
-    "log changes interval(s) (0 = disable)": {
-      "en": "still record the same values (seconds)<br>(0 = disable)",
-      "de": "trotzdem gleiche Werte aufzeichnen (Sekunden) <br> (0 = deaktivieren)",
-      "ru": "по-прежнему записывать те же значения (в секундах) <br> (0 = отключить)",
-      "pt": "ainda gravar os mesmos valores (segundos) <br> (0 = desabilitar)",
-      "nl": "nog steeds dezelfde waarden (seconden) <br> (0 = uitschakelen)",
-      "fr": "toujours enregistrer les mêmes valeurs (secondes) <br> (0 = désactiver)",
-      "it": "registra ancora gli stessi valori (secondi) <br> (0 = disabilita)",
-      "es": "sigue registrando los mismos valores (segundos) <br> (0 = deshabilitar)",
-      "pl": "nadal nagrywaj te same wartości (sekundy) <br> (0 = wyłącz)",
+    "log changes interval(s)": {
+      "en": "still record the same values (seconds)",
+      "de": "trotzdem gleiche Werte aufzeichnen (Sekunden)",
+      "ru": "по-прежнему записывать те же значения (в секундах)",
+      "pt": "ainda gravar os mesmos valores (segundos)",
+      "nl": "nog steeds dezelfde waarden (seconden)",
+      "fr": "toujours enregistrer les mêmes valeurs (secondes)",
+      "it": "registra ancora gli stessi valori (secondi)",
+      "es": "sigue registrando los mismos valores (segundos)",
+      "pl": "nadal nagrywaj te same wartości (sekundy)",
       "zh-cn": "仍记录相同的值（秒）<br>（0 =禁用）"
     },
-    "log changes minimal delta (0 = disable delta check)": {
-      "en": "Minimum difference from last value<br>(0 = disable delta check)",
-      "de": "Minimale Differenz zum letzten Wert <br> (0 = Deltaprüfung deaktivieren)",
-      "ru": "Минимальное отличие от последнего значения <br> (0 = отключить дельта-проверку)",
-      "pt": "Diferença mínima do último valor <br> (0 = desabilitar verificação delta)",
-      "nl": "Minimaal verschil met laatste waarde <br> (0 = deltablokkering uitschakelen)",
-      "fr": "Différence minimale par rapport à la dernière valeur <br> (0 = désactiver la vérification delta)",
-      "it": "Differenza minima dall'ultimo valore <br> (0 = disabilita il controllo delta)",
-      "es": "Diferencia mínima desde el último valor <br> (0 = deshabilitar la comprobación delta)",
-      "pl": "Minimalna różnica od ostatniej wartości <br> (0 = wyłącz kontrolę delta)",
-      "zh-cn": "与上一个值的最小差异<br>（0 =禁用增量检查）"
+	"0 = disabled": {
+      "en": "0 = disabled",
+      "de": "0 = deaktiviert",
+      "ru": "0 = отключить",
+      "pt": "0 = desabilitar",
+      "nl": "0 = uitschakelen",
+      "fr": "0 = désactiver",
+      "it": "0 = disabilita",
+      "es": "0 = deshabilitar",
+      "pl": "0 = wyłącz",
+      "zh-cn": "0 =禁用"
+    },
+    "log changes minimal delta": {
+      "en": "Minimum difference from last value",
+      "de": "Minimale Differenz zum letzten Wert",
+      "ru": "Минимальное отличие от последнего значения",
+      "pt": "Diferença mínima do último valor",
+      "nl": "Minimaal verschil met laatste waarde",
+      "fr": "Différence minimale par rapport à la dernière valeur",
+      "it": "Differenza minima dall'ultimo valore",
+      "es": "Diferencia mínima desde el último valor",
+      "pl": "Minimalna różnica od ostatniej wartości",
+      "zh-cn": "与上一个值的最小差异"
+    },
+	"0 = disable delta check": {
+      "en": "0 = disable delta check",
+      "de": "0 = Deltaprüfung deaktivieren",
+      "ru": "0 = отключить дельта-проверку",
+      "pt": "0 = desabilitar verificação delta",
+      "nl": "0 = deltablokkering uitschakelen",
+      "fr": "0 = désactiver la vérification delta",
+      "it": "0 = disabilita il controllo delta",
+      "es": "0 = deshabilitar la comprobación delta",
+      "pl": "0 = wyłącz kontrolę delta",
+      "zh-cn": "0 =禁用增量检查"
     },
     "log changes only": {
       "en": "Record changes only",
@@ -230,15 +265,16 @@
     "changesOnly": {
       "type": "checkbox",
       "label": "log changes only",
-      "default": true,
+      "defaultFunc": "customObj && customObj.common && customObj.common.type === 'number'",
       "sm": 6
     },
     "debounce": {
       "type": "number",
-      "label": "log changes only",
+	  "label": "De-bounce time",
+      "help": "De-bounce interval(ms)",
       "min": 500,
       "max": 86400000,
-      "default": 10000,
+      "defaultFunc": "customObj && customObj.common && customObj.common.type === 'number' ? instanceObj.native.debounce : 0",
       "sm": 6
     },
     "changesRelogInterval": {
@@ -247,18 +283,18 @@
       "label": "log changes interval(s)",
       "min": 0,
       "max": 86400000,
-      "default": 0,
-      "sm": 6,
-      "helpText": "(0 = disable)"
+	  "help": "0 = disabled",
+      "defaultFunc": "instanceObj.native.changesRelogInterval",
+      "sm": 6
     },
     "changesMinDelta": {
       "type": "number",
       "label": "log changes minimal delta",
       "min": 0,
-      "max": 86400000,
+      "defaultFunc": "customObj && customObj.common && customObj.common.type === 'number' ? instanceObj.native.changesMinDelta : 0",
       "default": 0,
       "sm": 6,
-      "helpText": "(0 = disable delta check)"
+      "help": "0 = disable delta check"
     },
     "maxLength": {
       "newLine": true,
@@ -266,7 +302,7 @@
       "label": "maximum datapoint count in RAM",
       "min": 100,
       "max": 5000,
-      "default": 960,
+      "defaultFunc": "customObj && customObj.common && customObj.common.type === 'number' ? instanceObj.native.maxLength : 10",
       "sm": 6
     },
     "retention": {
@@ -318,7 +354,7 @@
           "label": "1 day"
         }
       ],
-      "default": 31536000,
+      "defaultFunc": "instanceObj.native.retention",
       "sm": 6
     },
     "aliasId": {
@@ -328,7 +364,7 @@
       "max": 255,
       "default": "",
       "sm": 12,
-      "helpText": "Alias Info"
+      "help": "Alias Info"
     }
   }
 }

@@ -268,7 +268,6 @@
             "data",
             "archive"
         ],
-        "main": "main.js",
         "enabled": true,
         "compact": true,
         "preserveSettings": "custom",
