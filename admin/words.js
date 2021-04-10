@@ -401,5 +401,45 @@ systemDictionary = {
         "it": "Scrivi valori NULL sui limiti di avvio / arresto:",
         "es": "Escribe valores NULL en los límites de inicio / finalización:",
         "pl": "Napisz wartości NULL na granicach start / stop:"
-    }
+    },
+    "De-bounce interval(ms)": {                      "en": "De-bounce interval(ms)",                          "de": "Entprellzeit(ms)",                                "ru": "Минимальный интервал(ms)",                        "pt": "Intervalo de desvio (ms)",                        "nl": "De-bounce interval (ms)",                         "fr": "Intervalle de rebond (ms)",                       "it": "Intervallo di rimbalzo (ms)",                     "es": "Intervalo de rebote (ms)",                        "pl": "Interwał odbicia (ms)"},
+    "Storage retention": {                           "en": "Storage retention",                               "de": "Storage Vorhaltezeit",                            "ru": "Сохранять в файле",                               "pt": "Retenção de armazenamento",                       "nl": "Opslag retentie",                                 "fr": "Conservation du stockage",                        "it": "Conservazione di memoria",                        "es": "Retención de almacenamiento",                     "pl": "Przechowywanie danych"},
+    "enabled": {                                     "en": "enabled",                                         "de": "Aktiviert",                                       "ru": "активно",                                         "pt": "ativado",                                         "nl": "ingeschakeld",                                    "fr": "activée",                                         "it": "abilitato",                                       "es": "habilitado",                                      "pl": "włączony"},
+    "log changes interval(s) (0 = disable)": {
+        "en": "still record the same values (seconds)<br>(0 = disable)",
+        "de": "trotzdem gleiche Werte aufzeichnen (Sekunden) <br> (0 = deaktivieren)",
+        "ru": "по-прежнему записывать те же значения (в секундах) <br> (0 = отключить)",
+        "pt": "ainda gravar os mesmos valores (segundos) <br> (0 = desabilitar)",
+        "nl": "nog steeds dezelfde waarden (seconden) <br> (0 = uitschakelen)",
+        "fr": "toujours enregistrer les mêmes valeurs (secondes) <br> (0 = désactiver)",
+        "it": "registra ancora gli stessi valori (secondi) <br> (0 = disabilita)",
+        "es": "sigue registrando los mismos valores (segundos) <br> (0 = deshabilitar)",
+        "pl": "nadal nagrywaj te same wartości (sekundy) <br> (0 = wyłącz)",
+        "zh-cn": "仍记录相同的值（秒）<br>（0 =禁用）"
+    },
+    "log changes minimal delta (0 = disable delta check)": {
+        "en": "Minimum difference from last value<br>(0 = disable delta check)",
+        "de": "Minimale Differenz zum letzten Wert <br> (0 = Deltaprüfung deaktivieren)",
+        "ru": "Минимальное отличие от последнего значения <br> (0 = отключить дельта-проверку)",
+        "pt": "Diferença mínima do último valor <br> (0 = desabilitar verificação delta)",
+        "nl": "Minimaal verschil met laatste waarde <br> (0 = deltablokkering uitschakelen)",
+        "fr": "Différence minimale par rapport à la dernière valeur <br> (0 = désactiver la vérification delta)",
+        "it": "Differenza minima dall'ultimo valore <br> (0 = disabilita il controllo delta)",
+        "es": "Diferencia mínima desde el último valor <br> (0 = deshabilitar la comprobación delta)",
+        "pl": "Minimalna różnica od ostatniej wartości <br> (0 = wyłącz kontrolę delta)",
+        "zh-cn": "与上一个值的最小差异<br>（0 =禁用增量检查）"
+    },
+    "log changes only": {
+        "en": "Record changes only",
+        "de": "Nur Änderungen aufzeichnen",
+        "ru": "Запись только изменений",
+        "pt": "Registrar apenas alterações",
+        "nl": "Wijzigingen alleen registreren",
+        "fr": "Enregistrer les modifications uniquement",
+        "it": "Registra solo le modifiche",
+        "es": "Registrar solo cambios",
+        "pl": "Zapisz tylko zmiany",
+        "zh-cn": "仅记录更改"
+    },
+    "maximum datapoint count in RAM": {              "en": "maximum datapoint count in RAM",                  "de": "maximale Anzahl Datenpunkte in RAM",              "ru": "макс. кол-во значений в RAM памяти",              "pt": "contagem máxima do datapoint na RAM",             "nl": "maximum aantal datapunten in RAM",                "fr": "nombre de points de données maximum en RAM",      "it": "massimo conteggio dei punti di accesso nella RAM", "es": "recuento máximo de datos en RAM",                 "pl": "maksymalna liczba punktów w pamięci RAM"}
 };
