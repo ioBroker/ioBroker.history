@@ -11,7 +11,8 @@
             "fr": "History",
             "it": "History",
             "es": "History",
-            "pl": "History"
+            "pl": "History",
+            "zh-cn": "历史"
         },
         "desc": {
             "en": "Logging of the state history in files",
@@ -20,7 +21,10 @@
             "pt": "Registro do histórico de estado em arquivos",
             "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
             "fr": "Consignation de l'historique des états dans les fichiers",
-            "it": "Registrazione della cronologia di stato nei file"
+            "it": "Registrazione della cronologia di stato nei file",
+            "es": "Registro del historial del estado en archivos",
+            "pl": "Rejestrowanie historii stanu w plikach",
+            "zh-cn": "在文件中记录状态历史记录"
         },
         "version": "1.9.12",
         "news": {
