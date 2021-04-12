@@ -6,8 +6,7 @@
 [![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 [![Tests](http://img.shields.io/travis/ioBroker/ioBroker.history/master.svg)](https://travis-ci.org/ioBroker/ioBroker.history)
 
-[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/) 
-[![Greenkeeper badge](https://badges.greenkeeper.io/ioBroker/ioBroker.history.svg)](https://greenkeeper.io/)
+[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/)
 
 This adapter saves state history in a two-staged process.
 
