@@ -26,8 +26,20 @@
             "pl": "Rejestrowanie historii stanu w plikach",
             "zh-cn": "在文件中记录状态历史记录"
         },
-        "version": "1.9.12",
+        "version": "1.9.13",
         "news": {
+            "1.9.13": {
+                "en": "Added the support of Admin5",
+                "de": "Unterstützung von Admin5 hinzugefügt",
+                "ru": "Добавлена поддержка Admin5",
+                "pt": "Adicionado o suporte de Admin5",
+                "nl": "Ondersteuning toegevoegd van Admin5",
+                "fr": "Ajout du support d'Admin5",
+                "it": "Aggiunto il supporto di Admin5",
+                "es": "Se agregó el soporte de Admin5.",
+                "pl": "Dodano obsługę Admin5",
+                "zh-cn": "添加了对Admin5的支持"
+            },
             "1.9.12": {
                 "en": "Optimize stop handling",
                 "de": "Optimieren Sie das Stop-Handling",
@@ -247,15 +259,6 @@
                 "it": "Pronto per Admin3",
                 "es": "Listo para Admin3",
                 "pl": "Gotowy na Admin3"
-            },
-            "1.6.6": {
-                "en": "Translations",
-                "de": "Übersetzungen",
-                "ru": "Переводы",
-                "pt": "Traduções",
-                "nl": "vertaalwerk",
-                "fr": "Traductions",
-                "it": "Traduzioni"
             }
         },
         "mode": "daemon",

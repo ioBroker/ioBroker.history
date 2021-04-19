@@ -22,7 +22,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### __WORK IN PROGRESS__
+### 1.9.13 (2021-04-19)
 * (bluefox) Added the support of Admin5
 
 ### 1.9.12 (2021-01-17)
