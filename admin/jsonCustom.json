@@ -300,8 +300,8 @@
       "newLine": true,
       "type": "number",
       "label": "maximum datapoint count in RAM",
-      "min": 100,
-      "max": 5000,
+      "min": 0,
+      "max": 100000,
       "defaultFunc": "customObj && customObj.common && customObj.common.type === 'number' ? instanceObj.native.maxLength : 10",
       "sm": 6
     },

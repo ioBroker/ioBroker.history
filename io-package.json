@@ -313,7 +313,8 @@
                 "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
             }
         },
-        "jsonCustom": true
+        "jsonCustom": true,
+        "jsonConfig": true
     },
     "native": {
         "maxLength": 960,

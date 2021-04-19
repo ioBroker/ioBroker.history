@@ -1,0 +1,133 @@
+{
+  "type": "tabs",
+  "i18n": true,
+  "items": {
+    "dbTab": {
+      "type": "panel",
+      "label": "DB settings",
+      "items": {
+        "_note": {
+          "type": "staticText",
+          "text": "note",
+          "sm": 12
+        },
+
+        "storeDir": {
+          "newLine": true,
+          "type": "text",
+          "label": "storeDir",
+          "sm": 12,
+          "md": 4
+        },
+        "storeFrom": {
+          "newLine": true,
+          "type": "checkbox",
+          "label": "storeFrom",
+          "sm": 12,
+          "md": 4
+        },
+        "storeAck": {
+          "type": "checkbox",
+          "label": "storeAck",
+          "sm": 12,
+          "md": 4
+        }
+      }
+    },
+    "defaultTab": {
+      "type": "panel",
+      "label": "Default settings",
+      "items": {
+        "maxLength": {
+          "type": "number",
+          "label": "maximum datapoint count in RAM",
+          "min": 0,
+          "max": 100000,
+          "sm": 12,
+          "md": 4
+        },
+        "debounce": {
+          "type": "number",
+          "sm": 12,
+          "md": 4,
+          "min": 0,
+          "label": "De-bounce time",
+          "help": "debounce"
+        },
+        "changesRelogInterval": {
+          "type": "number",
+          "label": "log changes interval(s)",
+          "help": "0 = disable",
+          "sm": 12,
+          "md": 4
+        },
+        "changesMinDelta": {
+          "newLine": true,
+          "type": "number",
+          "label": "log changes minimal delta",
+          "help": "0 = disable delta check",
+          "sm": 12,
+          "md": 4
+        },
+        "retention": {
+          "type": "select",
+          "label": "retention",
+          "options": [
+            {
+              "value": 0,
+              "label": "keep forever"
+            },
+            {
+              "value": 63072000,
+              "label": "2 years"
+            },
+            {
+              "value": 31536000,
+              "label": "1 year"
+            },
+            {
+              "value": 15811200,
+              "label": "6 months"
+            },
+            {
+              "value": 7948800,
+              "label": "3 months"
+            },
+            {
+              "value": 2678400,
+              "label": "1 months"
+            },
+            {
+              "value": 1209600,
+              "label": "2 weeks"
+            },
+            {
+              "value": 604800,
+              "label": "1 week"
+            },
+            {
+              "value": 432000,
+              "label": "5 days"
+            },
+            {
+              "value": 259200,
+              "label": "3 days"
+            },
+            {
+              "value": 86400,
+              "label": "1 day"
+            }
+          ],
+          "sm": 12,
+          "md": 4
+        },
+        "writeNulls": {
+          "label": "Write NULL values on start/stop boundaries",
+          "type": "checkbox",
+          "sm": 12,
+          "md": 4
+        }
+      }
+    }
+  }
+}

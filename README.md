@@ -16,7 +16,14 @@ This adapter saves state history in a two-staged process.
 * [English description](docs/en/README.md)
 * [deutsche Beschreibung](docs/de/README.md)
 
+<!--
+	Placeholder for the next version (at the beginning of the line):
+	### __WORK IN PROGRESS__
+-->
+
 ## Changelog
+### __WORK IN PROGRESS__
+* (bluefox) Added the support of Admin5
 
 ### 1.9.12 (2021-01-17)
 * (Apollon77) Optimize stop handling
@@ -199,7 +206,7 @@ This adapter saves state history in a two-staged process.
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2020 Bluefox <dogafox@gmail.com>, Apollon77
+Copyright (c) 2014-2021 Bluefox <dogafox@gmail.com>, Apollon77
 
 Copyright (c) 2016 Smiling_Jack
 
