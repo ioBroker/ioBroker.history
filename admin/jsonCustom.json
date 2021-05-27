@@ -261,6 +261,7 @@
       "pl": "jeśli ustawiony jest Alias-ID, dane będą rejestrowane jako te ID w plikach danych"
     }
   },
+  "type": "panel",
   "items": {
     "changesOnly": {
       "type": "checkbox",
