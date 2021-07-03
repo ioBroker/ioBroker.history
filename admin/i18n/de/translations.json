@@ -27,7 +27,7 @@
     "Storage retention": "Aufbewahrungsdauer",
     "Storage settings": "Speicher Einstellungen",
     "debounce": "Änderungen ignorieren, bis der Wert für X Millisekunden unverändert bleibt",
-    "enabled": "Aktiviert",
+    "enabled": "aktiviert",
     "keep forever": "keine automatische Löschung",
     "log changes interval(s)": "trotzdem gleiche Werte aufzeichnen (Sekunden)",
     "log changes interval(s) (0 = disable)": "trotzdem gleiche Werte aufzeichnen (Sekunden) <br> (0 = deaktivieren)",
