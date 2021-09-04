@@ -22,6 +22,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Prevent crash case in converter script (Sentry IOBROKER-HISTORY-22)
+
 ### 1.9.13 (2021-04-19)
 * (bluefox) Added the support of Admin5
 

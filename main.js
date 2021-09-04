@@ -1042,47 +1042,55 @@ function getHistory(msg) {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
             adapter.log.debug('use parallel requests');
-            const gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
+            try {
+                const gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
-            let ghTimeout = setTimeout(() => {
-                try {
-                    gh.kill('SIGINT');
-                }
-                catch (err) {
-                    adapter.log.error(err);
-                }
-            }, 120000);
-
-            gh.on('message', data => {
-                const cmd = data[0];
-                if (cmd === 'getCache') {
-                    const settings = data[1];
-                    getCachedData(settings, cacheData =>
-                        gh.send(['cacheData', cacheData]));
-                } else if (cmd === 'response') {
-                    clearTimeout(ghTimeout);
-                    ghTimeout = null;
-
-                    const result          = applyOptions(data[1], options, true);
-                    const overallLength   = data[2];
-                    const step            = data[3];
-                    if (result) {
-                        adapter.log.debug('Send: ' + result.length + ' of: ' + overallLength + ' in: ' + (Date.now() - startTime) + 'ms');
-                        adapter.sendTo(msg.from, msg.command, {
-                            result:     result,
-                            step:       step,
-                            error:      null
-                        }, msg.callback);
-                    } else {
-                        adapter.log.info('No Data');
-                        adapter.sendTo(msg.from, msg.command, {
-                            result:     [],
-                            step:       null,
-                            error:      null
-                        }, msg.callback);
+                let ghTimeout = setTimeout(() => {
+                    try {
+                        gh.kill('SIGINT');
+                    } catch (err) {
+                        adapter.log.error(err);
                     }
-                }
-            });
+                }, 120000);
+
+                gh.on('message', data => {
+                    const cmd = data[0];
+                    if (cmd === 'getCache') {
+                        const settings = data[1];
+                        getCachedData(settings, cacheData => {
+                            try {
+                                gh.send(['cacheData', cacheData]);
+                            } catch (err) {
+                                adapter.log.info('Can not send data to forked process: ' + err.message);
+                            }
+                        });
+                    } else if (cmd === 'response') {
+                        clearTimeout(ghTimeout);
+                        ghTimeout = null;
+
+                        const result = applyOptions(data[1], options, true);
+                        const overallLength = data[2];
+                        const step = data[3];
+                        if (result) {
+                            adapter.log.debug('Send: ' + result.length + ' of: ' + overallLength + ' in: ' + (Date.now() - startTime) + 'ms');
+                            adapter.sendTo(msg.from, msg.command, {
+                                result: result,
+                                step: step,
+                                error: null
+                            }, msg.callback);
+                        } else {
+                            adapter.log.info('No Data');
+                            adapter.sendTo(msg.from, msg.command, {
+                                result: [],
+                                step: null,
+                                error: null
+                            }, msg.callback);
+                        }
+                    }
+                });
+            } catch (err) {
+                adapter.log.info('Can not use parallel requests: ' + err.message);
+            }
         } else {
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);

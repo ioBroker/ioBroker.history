@@ -210,7 +210,7 @@ function processFile() {
             if (!earliestDBValue[id]) earliestDBValue[id] = Date.now();
         }
         if (processNonExistingValues) {
-            console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
+            existingDBValues[id] && console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
             if ((existingDBValues[id]) && (existingDBValues[id].indexOf(day) !== -1)) {
                 console.log('    Ignore existing ID ' + file +': ' + id);
                 setTimeout(processFile,10);
