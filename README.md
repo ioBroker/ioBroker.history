@@ -1,12 +1,13 @@
 ![Logo](admin/history.png)
 # ioBroker.history
 
-![Number of Installations](http://iobroker.live/badges/history-installed.svg) ![Number of Installations](http://iobroker.live/badges/history-stable.svg) 
+![Number of Installations](http://iobroker.live/badges/history-installed.svg)
+![Number of Installations](http://iobroker.live/badges/history-stable.svg)
 [![NPM version](http://img.shields.io/npm/v/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
-[![Tests](http://img.shields.io/travis/ioBroker/ioBroker.history/master.svg)](https://travis-ci.org/ioBroker/ioBroker.history)
 
-[![NPM](https://nodei.co/npm/iobroker.history.png?downloads=true)](https://nodei.co/npm/iobroker.history/)
+![Test and Release](https://github.com/ioBroker/iobroker.history/workflows/Test%20and%20Release/badge.svg)
+[![Translation status](https://weblate.iobroker.net/widgets/adapters/-/history/svg-badge.svg)](https://weblate.iobroker.net/engage/adapters/?utm_source=widget)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.history.svg)](https://www.npmjs.com/package/iobroker.history)
 
 This adapter saves state history in a two-staged process.
 
@@ -24,7 +25,7 @@ This adapter saves state history in a two-staged process.
 ## Changelog
 
 ### __WORK IN PROGRESS__
-* (Apollon77) Prevent crash case in converter script (Sentry IOBROKER-HISTORY-22)
+* (Apollon77) Prevent crash cases reported by Sentry
 
 ### 1.9.13 (2021-04-19)
 * (bluefox) Added the support of Admin5

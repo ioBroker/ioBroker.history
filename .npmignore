@@ -6,6 +6,5 @@ node_modules
 test
 .travis.yml
 appveyor.yml
-admin/i18n
 package-lock.json
 iob_npm.done

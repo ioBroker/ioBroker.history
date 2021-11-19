@@ -700,7 +700,12 @@ function checkRetention(id) {
                         } catch (ex) {
                             adapter.log.error('Cannot delete file "' + file + '": ' + ex);
                         }
-                        const files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
+                        let files;
+                        try {
+                            files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
+                        } catch (err) {
+                            files = [];
+                        }
                         if (!files.length) {
                             adapter.log.info('Delete old history dir "' + adapter.config.storeDir + dayList[i] + '"');
                             try {
