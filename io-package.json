@@ -1,350 +1,202 @@
 {
-    "common": {
-        "name": "history",
-        "title": "History",
-        "titleLang": {
-            "en": "History",
-            "de": "History",
-            "ru": "History",
-            "pt": "History",
-            "nl": "History",
-            "fr": "History",
-            "it": "History",
-            "es": "History",
-            "pl": "History",
-            "zh-cn": "历史"
-        },
-        "desc": {
-            "en": "Logging of the state history in files",
-            "de": "Protokollierung der Zustandsgeschichte in Dateien",
-            "ru": "Ведение истории событий в файлах",
-            "pt": "Registro do histórico de estado em arquivos",
-            "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
-            "fr": "Consignation de l'historique des états dans les fichiers",
-            "it": "Registrazione della cronologia di stato nei file",
-            "es": "Registro del historial del estado en archivos",
-            "pl": "Rejestrowanie historii stanu w plikach",
-            "zh-cn": "在文件中记录状态历史记录"
-        },
-        "version": "1.9.13",
-        "news": {
-            "1.9.13": {
-                "en": "Added the support of Admin5",
-                "de": "Unterstützung von Admin5 hinzugefügt",
-                "ru": "Добавлена поддержка Admin5",
-                "pt": "Adicionado o suporte de Admin5",
-                "nl": "Ondersteuning toegevoegd van Admin5",
-                "fr": "Ajout du support d'Admin5",
-                "it": "Aggiunto il supporto di Admin5",
-                "es": "Se agregó el soporte de Admin5.",
-                "pl": "Dodano obsługę Admin5",
-                "zh-cn": "添加了对Admin5的支持"
-            },
-            "1.9.12": {
-                "en": "Optimize stop handling",
-                "de": "Optimieren Sie das Stop-Handling",
-                "ru": "Оптимизировать обработку остановок",
-                "pt": "Otimize o manuseio de parada",
-                "nl": "Optimaliseer het afhandelen van stops",
-                "fr": "Optimiser la gestion des arrêts",
-                "it": "Ottimizza la gestione delle fermate",
-                "es": "Optimizar el manejo de paradas",
-                "pl": "Zoptymalizuj obsługę zatrzymania",
-                "zh-cn": "优化停止处理"
-            },
-            "1.9.10": {
-                "en": "Code formatting done\nFiltered out the acknowledgment and the quality from the getHistory call if not requested",
-                "de": "Code-Formatierung abgeschlossen\nFilterte die Bestätigung und die Qualität aus dem getHistory-Aufruf heraus, wenn dies nicht angefordert wurde",
-                "ru": "Форматирование кода сделано\nОтфильтровывается подтверждение и качество из вызова getHistory, если не запрашивается",
-                "pt": "Formatação de código concluída\nFiltrou o reconhecimento e a qualidade da chamada getHistory, se não solicitado",
-                "nl": "Code-opmaak voltooid\nDe bevestiging en de kwaliteit uit de aanroep van getHistory gefilterd, indien niet gevraagd",
-                "fr": "Formatage du code terminé\nFiltré l'accusé de réception et la qualité de l'appel getHistory s'il n'est pas demandé",
-                "it": "Formattazione del codice eseguita\nFiltrato il riconoscimento e la qualità dalla chiamata getHistory se non richiesto",
-                "es": "Formateo de código hecho\nFiltrado el reconocimiento y la calidad de la llamada getHistory si no se solicita",
-                "pl": "Formatowanie kodu zakończone\nOdfiltrowano potwierdzenie i jakość z wywołania getHistory, jeśli nie zostało to wymagane",
-                "zh-cn": "代码格式化完成\n如果没有要求，则从getHistory调用中过滤出确认和质量"
-            },
-            "1.9.9": {
-                "en": "prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "de": "Abstürze verhindern (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "ru": "предотвратить сбои (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "pt": "evitar falhas (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "nl": "crashes voorkomen (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "fr": "prévenir les accidents (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "it": "prevenire gli arresti anomali (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "es": "evitar accidentes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "pl": "zapobiegać awariom (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
-                "zh-cn": "防止崩溃（哨兵IOBROKER-HISTORY-K，IOBROKER-HISTORY-J，IOBROKER-HISTORY-C，IOBROKER-HISTORY-G）"
-            },
-            "1.9.8": {
-                "en": "added command to read supported features",
-                "de": "Befehl zum Lesen der unterstützten Funktionen hinzugefügt",
-                "ru": "добавлена команда для чтения поддерживаемых функций",
-                "pt": "comando adicionado para ler os recursos suportados",
-                "nl": "opdracht toegevoegd om ondersteunde functies te lezen",
-                "fr": "commande ajoutée pour lire les fonctionnalités prises en charge",
-                "it": "aggiunto comando per leggere le funzionalità supportate",
-                "es": "comando agregado para leer las funciones compatibles",
-                "pl": "dodano polecenie odczytu obsługiwanych funkcji",
-                "zh-cn": "添加了命令以读取支持的功能"
-            },
-            "1.9.7": {
-                "en": "set default history if not yet set",
-                "de": "Standardverlauf festlegen, falls noch nicht festgelegt",
-                "ru": "установить историю по умолчанию, если еще не установлено",
-                "pt": "definir histórico padrão se ainda não estiver definido",
-                "nl": "stel de standaardgeschiedenis in als deze nog niet is ingesteld",
-                "fr": "définir l'historique par défaut s'il n'est pas encore défini",
-                "it": "imposta la cronologia predefinita se non ancora impostata",
-                "es": "establecer el historial predeterminado si aún no está configurado",
-                "pl": "ustaw domyślną historię, jeśli jeszcze nie została ustawiona",
-                "zh-cn": "设置默认历史记录（如果尚未设置）"
-            },
-            "1.9.6": {
-                "en": "optimize retention directory logic again (Sentry IOBROKER-HISTORY-A)",
-                "de": "Optimieren Sie die Aufbewahrungsverzeichnislogik erneut (Sentry IOBROKER-HISTORY-A).",
-                "ru": "снова оптимизировать логику каталога хранения (Sentry IOBROKER-HISTORY-A)",
-                "pt": "otimizar a lógica do diretório de retenção novamente (Sentry IOBROKER-HISTORY-A)",
-                "nl": "de logica van de retentiemap opnieuw optimaliseren (Sentry IOBROKER-HISTORY-A)",
-                "fr": "optimiser à nouveau la logique du répertoire de rétention (Sentry IOBROKER-HISTORY-A)",
-                "it": "ottimizzare nuovamente la logica della directory di conservazione (Sentry IOBROKER-HISTORY-A)",
-                "es": "optimizar nuevamente la lógica del directorio de retención (Sentry IOBROKER-HISTORY-A)",
-                "pl": "ponownie zoptymalizuj logikę katalogu przechowywania (Sentry IOBROKER-HISTORY-A)",
-                "zh-cn": "再次优化保留目录逻辑（Sentry IOBROKER-HISTORY-A）"
-            },
-            "1.9.5": {
-                "en": "potential crash case fixed",
-                "de": "Möglicher Crash-Fall behoben",
-                "ru": "случай возможного сбоя исправлен",
-                "pt": "possível caso de falha corrigido",
-                "nl": "mogelijke crash case opgelost",
-                "fr": "cas de crash potentiel corrigé",
-                "it": "potenziale caso di crash risolto",
-                "es": "caso de bloqueo potencial solucionado",
-                "pl": "naprawiono potencjalną awarię",
-                "zh-cn": "修复潜在的崩溃案例"
-            },
-            "1.9.4": {
-                "en": "potential crash case fixed",
-                "de": "Möglicher Crash-Fall behoben",
-                "ru": "случай возможного сбоя исправлен",
-                "pt": "possível caso de falha corrigido",
-                "nl": "mogelijke crash case opgelost",
-                "fr": "cas de crash potentiel corrigé",
-                "it": "potenziale caso di crash risolto",
-                "es": "caso de bloqueo potencial solucionado",
-                "pl": "naprawiono potencjalną awarię",
-                "zh-cn": "修复潜在的崩溃案例"
-            },
-            "1.9.3": {
-                "en": "REQUIRES at least js-controller 2.0, fixes and optimizations, ready for js-controller 3.0, Sentry added for Error reporting",
-                "de": "ERFORDERT mindestens js-controller 2.0, Korrekturen und Optimierungen, bereit für js-controller 3.0, Sentry für Fehlerberichterstattung hinzugefügt",
-                "ru": "ТРЕБУЕТ как минимум js-controller 2.0, исправления и оптимизации, готов для js-controller 3.0, добавлен Sentry для отчетов об ошибках",
-                "pt": "EXIGE pelo menos o js-controller 2.0, correções e otimizações, pronto para o controller 3.0, acrescentou o Sentry para o relatório de erros",
-                "nl": "VEREIST minimaal js-controller 2.0, fixes en optimalisaties, klaar voor js-controller 3.0, Sentry toegevoegd voor foutrapportage",
-                "fr": "NÉCESSITE au moins js-controller 2.0, des corrections et des optimisations, prêt pour js-controller 3.0, Sentry ajouté pour le rapport d'erreurs",
-                "it": "RICHIEDE almeno js-controller 2.0, correzioni e ottimizzazioni, pronto per js-controller 3.0, aggiunta Sentry per la segnalazione degli errori",
-                "es": "REQUIERE al menos js-controller 2.0, correcciones y optimizaciones, listo para js-controller 3.0, Sentry agregado para informes de errores",
-                "pl": "WYMAGA co najmniej js-kontrolera 2.0, poprawek i optymalizacji, gotowy do js-kontrolera 3.0, dodano Sentry do raportowania błędów",
-                "zh-cn": "至少需要js-controller 2.0，修复和优化，为js-controller 3.0做好准备，并添加了Sentry以进行错误报告"
-            },
-            "1.8.7": {
-                "en": "old files should be deleted automatically",
-                "de": "alte Dateien sollten automatisch gelöscht werden",
-                "ru": "старые файлы должны быть удалены автоматически",
-                "pt": "arquivos antigos devem ser excluídos automaticamente",
-                "nl": "oude bestanden moeten automatisch worden verwijderd",
-                "fr": "les anciens fichiers doivent être supprimés automatiquement",
-                "it": "i vecchi file dovrebbero essere eliminati automaticamente",
-                "es": "los archivos antiguos deben eliminarse automáticamente",
-                "pl": "stare pliki powinny być automatycznie usuwane",
-                "zh-cn": "旧文件应自动删除"
-            },
-            "1.8.6": {
-                "en": "Fix several smaller issues and optimized some texts ",
-                "de": "Behebt einige kleinere Probleme und optimiert einige Texte",
-                "ru": "Исправлено несколько мелких проблем и оптимизированы некоторые тексты.",
-                "pt": "Corrigir vários problemas menores e otimizou alguns textos",
-                "nl": "Los enkele kleinere problemen op en optimaliseerde sommige teksten",
-                "fr": "Correction de plusieurs petits problèmes et optimisation de certains textes",
-                "it": "Risolve diversi problemi minori e ottimizzava alcuni testi",
-                "es": "Soluciona varios problemas menores y optimiza algunos textos.",
-                "pl": "Napraw kilka mniejszych problemów i zoptymalizuj niektóre teksty",
-                "zh-cn": "修复几个较小的问题并优化一些文本"
-            },
-            "1.8.5": {
-                "en": "error fixed in storeState",
-                "de": "Fehler in storeState behoben",
-                "ru": "исправлена ​​ошибка в storeState",
-                "pt": "erro corrigido no storeState",
-                "nl": "fout opgelost in storeState",
-                "fr": "erreur corrigée dans storeState",
-                "it": "errore riparato in storeState",
-                "es": "error corregido en storeState",
-                "pl": "błąd został naprawiony w storeState"
-            },
-            "1.8.4": {
-                "en": "error fixed for allow to disable writing of start and end values",
-                "de": "Fehler behoben für das Schreiben von Start- und Endwerten zu deaktivieren",
-                "ru": "исправлена ​​ошибка, позволяющая отключить запись начальных и конечных значений",
-                "pt": "erro corrigido para permitir desativar a escrita dos valores inicial e final",
-                "nl": "error fixed for allow om schrijven van begin- en eindwaarden uit te schakelen",
-                "fr": "erreur corrigée pour permettre de désactiver l'écriture des valeurs de début et de fin",
-                "it": "errore risolto per consentire di disabilitare la scrittura dei valori iniziali e finali",
-                "es": "error corregido para permitir deshabilitar la escritura de los valores de inicio y fin",
-                "pl": "błąd został usunięty, aby umożliwić wyłączenie zapisywania wartości początkowej i końcowej"
-            },
-            "1.8.3": {
-                "en": "Add option to write data to a different ID to make device changes easier. Retrieving data works for both IDs, also allow to disable writing of start and end values",
-                "de": "Option zum Schreiben von Daten in eine andere ID hinzufügen, um Geräteänderungen zu vereinfachen. Das Abrufen von Daten funktioniert für beide IDs und ermöglicht auch das Schreiben von Start- und Endwerten zu deaktivieren",
-                "ru": "Добавьте параметр для записи данных на другой идентификатор, чтобы упростить внесение изменений. Получение данных для обоих идентификаторов также позволяет отключить запись начальных и конечных значений",
-                "pt": "Adicione a opção de gravar dados em um ID diferente para facilitar as alterações no dispositivo. Recuperar dados funciona para ambos os IDs, também permite desativar a gravação de valores iniciais e finais",
-                "nl": "Optie toevoegen om gegevens naar een andere ID te schrijven om apparaatwijzigingen gemakkelijker te maken. Het ophalen van gegevens werkt voor beide ID's en staat ook toe om het schrijven van begin- en eindwaarden uit te schakelen",
-                "fr": "Ajoutez une option pour écrire des données sur un ID différent afin de faciliter les changements de périphérique. La récupération des données pour les deux ID permet également de désactiver l'écriture des valeurs de début et de fin",
-                "it": "Aggiungi l'opzione per scrivere i dati su un ID diverso per facilitare le modifiche ai dispositivi. Il recupero dei dati funziona per entrambi gli ID, inoltre consente di disabilitare la scrittura dei valori iniziali e finali",
-                "es": "Agregue la opción para escribir datos en una ID diferente para facilitar los cambios en el dispositivo. La recuperación de datos funciona para ambos ID, también permite deshabilitar la escritura de los valores de inicio y fin",
-                "pl": "Dodaj opcję zapisywania danych do innego identyfikatora, aby ułatwić zmianę urządzenia. Pobieranie danych działa dla obu identyfikatorów, pozwala również wyłączyć zapisywanie wartości początkowej i końcowej"
-            },
-            "1.7.4": {
-                "en": "Fix filename handling for states with special characters",
-                "de": "Behebt die Behandlung von Dateinamen für Zustände mit Sonderzeichen",
-                "ru": "Исправить обработку имен файлов для состояний со специальными символами",
-                "pt": "Corrigir manipulação de nome de arquivo para estados com caracteres especiais",
-                "nl": "Bestandsnaamafhandeling voor staten met speciale tekens oplossen",
-                "fr": "Correction de la gestion des noms de fichiers pour les états avec des caractères spéciaux",
-                "it": "Correggere la gestione dei nomi dei file per gli stati con caratteri speciali",
-                "es": "Corregir el manejo del nombre de archivo para estados con caracteres especiales",
-                "pl": "Popraw obsługę plików dla stanów ze znakami specjalnymi"
-            },
-            "1.7.3": {
-                "en": "Respect 'keep forever' setting for retention from datapoint configuration",
-                "de": "Beachten der 'Keep forever' Einstellung für die Aufbewahrung von Datenpunktkonfiguration",
-                "ru": "Упорядочить «сохранить навсегда» для сохранения из конфигурации данных",
-                "pt": "Respeito 'manter sempre' configurado para retenção da configuração do ponto de dados",
-                "nl": "Respecteer 'blijf voor altijd' instelling voor retentie van datapuntconfiguratie",
-                "fr": "Respectez le paramètre 'keep forever' pour la rétention à partir de la configuration du point de données",
-                "it": "Rispettare l'impostazione 'keep forever' per la conservazione dalla configurazione del datapoint",
-                "es": "Respetar la configuración 'mantener para siempre' para la retención desde la configuración del punto de datos",
-                "pl": "Szanuj ustawienie \"zachowaj na zawsze\", aby zachować dane z konfiguracji punktu danych"
-            },
-            "1.7.2": {
-                "en": "Admin3 Fixes",
-                "de": "Admin3-Korrekturen",
-                "ru": "Исправления Admin3",
-                "pt": "Admin3 Fixes",
-                "nl": "Admin3 Fixes",
-                "fr": "Corrections Admin3",
-                "it": "Correzioni di Admin3",
-                "es": "Correcciones de Admin3",
-                "pl": "Poprawki Admin3"
-            },
-            "1.7.1": {
-                "en": "Admin3 Fixes",
-                "de": "Admin3-Korrekturen",
-                "ru": "Исправления Admin3",
-                "pt": "Admin3 Fixes",
-                "nl": "Admin3 Fixes",
-                "fr": "Corrections Admin3",
-                "it": "Correzioni di Admin3",
-                "es": "Correcciones de Admin3",
-                "pl": "Poprawki Admin3"
-            },
-            "1.7.0": {
-                "en": "Ready for Admin3",
-                "de": "Bereit für Admin3",
-                "ru": "Готово для Admin3",
-                "pt": "Pronto para Admin3",
-                "nl": "Klaar voor Admin3",
-                "fr": "Prêt pour Admin3",
-                "it": "Pronto per Admin3",
-                "es": "Listo para Admin3",
-                "pl": "Gotowy na Admin3"
-            }
-        },
-        "mode": "daemon",
-        "platform": "Javascript/Node.js",
-        "loglevel": "info",
-        "messagebox": true,
-        "subscribe": "messagebox",
-        "keywords": [
-            "charts",
-            "history",
-            "logging",
-            "graphs",
-            "Graphen",
-            "data",
-            "archive"
-        ],
-        "enabled": true,
-        "compact": true,
-        "preserveSettings": "custom",
-        "authors": [
-            "bluefox <dogafox@gmail.com>",
-            "hobbyquaker <hq@ccu.io>",
-            "Apollon77 <ingo@fischer-ka.de>"
-        ],
-        "license": "MIT",
-        "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
-        "icon": "history.png",
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
-        "type": "storage",
-        "supportCustoms": true,
-        "materialize": true,
-        "getHistory": true,
-        "dependencies": [
-            {
-                "js-controller": ">=2.0.0"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=1.6.10"
-            }
-        ],
-        "supportStopInstance": 10000,
-        "stopTimeout": 10000,
-        "docs": {
-            "en": [
-                "docs/en/readme.md"
-            ],
-            "de": [
-                "docs/de/readme.md"
-            ]
-        },
-        "plugins": {
-            "sentry": {
-                "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
-            }
-        },
-        "adminUI": {
-            "config": "json",
-            "custom": "json"
-        },
-        "connectionType": "none",
-        "dataSource": "push",
-        "tier": 1
+  "common": {
+    "name": "history",
+    "title": "History",
+    "titleLang": {
+      "en": "History",
+      "de": "History",
+      "ru": "History",
+      "pt": "History",
+      "nl": "History",
+      "fr": "History",
+      "it": "History",
+      "es": "History",
+      "pl": "History",
+      "zh-cn": "历史"
     },
-    "native": {
-        "maxLength": 960,
-        "limit": 2000,
-        "storeDir": "",
-        "debounce": 1000,
-        "retention": 31536000,
-        "storeFrom": false,
-        "storeAck": true,
-        "changesRelogInterval": 0,
-        "changesMinDelta": 0,
-        "writeNulls": true
+    "desc": {
+      "en": "Logging of the state history in files",
+      "de": "Protokollierung der Zustandsgeschichte in Dateien",
+      "ru": "Ведение истории событий в файлах",
+      "pt": "Registro do histórico de estado em arquivos",
+      "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
+      "fr": "Consignation de l'historique des états dans les fichiers",
+      "it": "Registrazione della cronologia di stato nei file",
+      "es": "Registro del historial del estado en archivos",
+      "pl": "Rejestrowanie historii stanu w plikach",
+      "zh-cn": "在文件中记录状态历史记录"
     },
-    "objects": [
-        {
-            "_id": "_design/custom",
-            "language": "javascript",
-            "views": {
-                "state": {
-                    "map": "function(doc) { doc.type === 'state' && doc.common && doc.common.custom && emit(doc._id, doc.common.custom) }"
-                }
-            }
+    "version": "1.9.14",
+    "news": {
+      "1.9.14": {
+        "en": "Prevent crash cases reported by Sentry",
+        "de": "Von Sentry gemeldete Absturzfälle verhindern",
+        "ru": "Предотвращение аварийных ситуаций, о которых сообщает Sentry",
+        "pt": "Impedir casos de falha relatados pelo Sentry",
+        "nl": "Voorkom crashgevallen gemeld door Sentry",
+        "fr": "Empêcher les cas de crash signalés par Sentry",
+        "it": "Previeni i casi di crash segnalati da Sentry",
+        "es": "Prevenir casos de accidentes informados por Sentry",
+        "pl": "Zapobiegaj awariom zgłaszanym przez Sentry",
+        "zh-cn": "防止 Sentry 报告的崩溃案例"
+      },
+      "1.9.13": {
+        "en": "Added the support of Admin5",
+        "de": "Unterstützung von Admin5 hinzugefügt",
+        "ru": "Добавлена поддержка Admin5",
+        "pt": "Adicionado o suporte de Admin5",
+        "nl": "Ondersteuning toegevoegd van Admin5",
+        "fr": "Ajout du support d'Admin5",
+        "it": "Aggiunto il supporto di Admin5",
+        "es": "Se agregó el soporte de Admin5.",
+        "pl": "Dodano obsługę Admin5",
+        "zh-cn": "添加了对Admin5的支持"
+      },
+      "1.9.12": {
+        "en": "Optimize stop handling",
+        "de": "Optimieren Sie das Stop-Handling",
+        "ru": "Оптимизировать обработку остановок",
+        "pt": "Otimize o manuseio de parada",
+        "nl": "Optimaliseer het afhandelen van stops",
+        "fr": "Optimiser la gestion des arrêts",
+        "it": "Ottimizza la gestione delle fermate",
+        "es": "Optimizar el manejo de paradas",
+        "pl": "Zoptymalizuj obsługę zatrzymania",
+        "zh-cn": "优化停止处理"
+      },
+      "1.9.10": {
+        "en": "Code formatting done\nFiltered out the acknowledgment and the quality from the getHistory call if not requested",
+        "de": "Code-Formatierung abgeschlossen\nFilterte die Bestätigung und die Qualität aus dem getHistory-Aufruf heraus, wenn dies nicht angefordert wurde",
+        "ru": "Форматирование кода сделано\nОтфильтровывается подтверждение и качество из вызова getHistory, если не запрашивается",
+        "pt": "Formatação de código concluída\nFiltrou o reconhecimento e a qualidade da chamada getHistory, se não solicitado",
+        "nl": "Code-opmaak voltooid\nDe bevestiging en de kwaliteit uit de aanroep van getHistory gefilterd, indien niet gevraagd",
+        "fr": "Formatage du code terminé\nFiltré l'accusé de réception et la qualité de l'appel getHistory s'il n'est pas demandé",
+        "it": "Formattazione del codice eseguita\nFiltrato il riconoscimento e la qualità dalla chiamata getHistory se non richiesto",
+        "es": "Formateo de código hecho\nFiltrado el reconocimiento y la calidad de la llamada getHistory si no se solicita",
+        "pl": "Formatowanie kodu zakończone\nOdfiltrowano potwierdzenie i jakość z wywołania getHistory, jeśli nie zostało to wymagane",
+        "zh-cn": "代码格式化完成\n如果没有要求，则从getHistory调用中过滤出确认和质量"
+      },
+      "1.9.9": {
+        "en": "prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "de": "Abstürze verhindern (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "ru": "предотвратить сбои (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "pt": "evitar falhas (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "nl": "crashes voorkomen (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "fr": "prévenir les accidents (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "it": "prevenire gli arresti anomali (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "es": "evitar accidentes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "pl": "zapobiegać awariom (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)",
+        "zh-cn": "防止崩溃（哨兵IOBROKER-HISTORY-K，IOBROKER-HISTORY-J，IOBROKER-HISTORY-C，IOBROKER-HISTORY-G）"
+      },
+      "1.9.8": {
+        "en": "added command to read supported features",
+        "de": "Befehl zum Lesen der unterstützten Funktionen hinzugefügt",
+        "ru": "добавлена команда для чтения поддерживаемых функций",
+        "pt": "comando adicionado para ler os recursos suportados",
+        "nl": "opdracht toegevoegd om ondersteunde functies te lezen",
+        "fr": "commande ajoutée pour lire les fonctionnalités prises en charge",
+        "it": "aggiunto comando per leggere le funzionalità supportate",
+        "es": "comando agregado para leer las funciones compatibles",
+        "pl": "dodano polecenie odczytu obsługiwanych funkcji",
+        "zh-cn": "添加了命令以读取支持的功能"
+      },
+      "1.9.7": {
+        "en": "set default history if not yet set",
+        "de": "Standardverlauf festlegen, falls noch nicht festgelegt",
+        "ru": "установить историю по умолчанию, если еще не установлено",
+        "pt": "definir histórico padrão se ainda não estiver definido",
+        "nl": "stel de standaardgeschiedenis in als deze nog niet is ingesteld",
+        "fr": "définir l'historique par défaut s'il n'est pas encore défini",
+        "it": "imposta la cronologia predefinita se non ancora impostata",
+        "es": "establecer el historial predeterminado si aún no está configurado",
+        "pl": "ustaw domyślną historię, jeśli jeszcze nie została ustawiona",
+        "zh-cn": "设置默认历史记录（如果尚未设置）"
+      }
+    },
+    "mode": "daemon",
+    "platform": "Javascript/Node.js",
+    "loglevel": "info",
+    "messagebox": true,
+    "subscribe": "messagebox",
+    "keywords": [
+      "charts",
+      "history",
+      "logging",
+      "graphs",
+      "Graphen",
+      "data",
+      "archive"
+    ],
+    "enabled": true,
+    "compact": true,
+    "preserveSettings": "custom",
+    "authors": [
+      "bluefox <dogafox@gmail.com>",
+      "hobbyquaker <hq@ccu.io>",
+      "Apollon77 <ingo@fischer-ka.de>"
+    ],
+    "license": "MIT",
+    "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
+    "icon": "history.png",
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
+    "type": "storage",
+    "supportCustoms": true,
+    "materialize": true,
+    "getHistory": true,
+    "dependencies": [
+      {
+        "js-controller": ">=2.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=1.6.10"
+      }
+    ],
+    "supportStopInstance": 10000,
+    "stopTimeout": 10000,
+    "docs": {
+      "en": [
+        "docs/en/readme.md"
+      ],
+      "de": [
+        "docs/de/readme.md"
+      ]
+    },
+    "plugins": {
+      "sentry": {
+        "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
+      }
+    },
+    "adminUI": {
+      "config": "json",
+      "custom": "json"
+    },
+    "connectionType": "none",
+    "dataSource": "push",
+    "tier": 1
+  },
+  "native": {
+    "maxLength": 960,
+    "limit": 2000,
+    "storeDir": "",
+    "debounce": 1000,
+    "retention": 31536000,
+    "storeFrom": false,
+    "storeAck": true,
+    "changesRelogInterval": 0,
+    "changesMinDelta": 0,
+    "writeNulls": true
+  },
+  "objects": [
+    {
+      "_id": "_design/custom",
+      "language": "javascript",
+      "views": {
+        "state": {
+          "map": "function(doc) { doc.type === 'state' && doc.common && doc.common.custom && emit(doc._id, doc.common.custom) }"
         }
-    ]
+      }
+    }
+  ]
 }

@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 1.9.14 (2021-11-19)
 * (Apollon77) Prevent crash cases reported by Sentry
 
 ### 1.9.13 (2021-04-19)
@@ -35,7 +34,7 @@ This adapter saves state history in a two-staged process.
 
 ### 1.9.10 (2020-07-28)
 * (bluefox) Code formatting done
-* (bluefox) Filtered out the acknowledgment and the quality from the getHistory call if not requested 
+* (bluefox) Filtered out the acknowledgment and the quality from the getHistory call if not requested
 
 ### 1.9.9 (2020-06-29)
 * (Apollon77) prevent crashes (Sentry IOBROKER-HISTORY-K, IOBROKER-HISTORY-J, IOBROKER-HISTORY-C, IOBROKER-HISTORY-G)
