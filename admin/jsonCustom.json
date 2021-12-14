@@ -395,7 +395,6 @@
       "newLine": true,
       "type": "checkbox",
       "label": "ignore zero or null values",
-      "hidden": "instanceObj && instanceObj.native && instanceObj.native.writeNulls",
       "sm": 6
     },
     "ignoreBelowZero": {
