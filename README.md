@@ -23,9 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### 1.10.1 (2021-12-14)
+### __WORK IN PROGRESS__
 * (bluefox) Support only `js.controller` >= 3.3.x
 * (bluefox) Used system/custom view for collecting the objects
+* (bluefox) Implemented option to ignore zero- or/and below zero- values
 
 ### 1.9.14 (2021-11-19)
 * (Apollon77) Prevent crash cases reported by Sentry

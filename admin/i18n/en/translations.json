@@ -42,5 +42,7 @@
   "storeDir": "Storage directory",
   "storeFrom": "Store origin of value",
   "De-bounce time": "De-bounce time",
-  "Write NULL values on start/stop boundaries": "Write NULL values on start/stop boundaries"
+  "Write NULL values on start/stop boundaries": "Write NULL values on start/stop boundaries",
+  "ignore zero or null values": "ignore zero or null values",
+  "ignore values below zero": "ignore values below zero"
 }

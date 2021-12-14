@@ -222,7 +222,6 @@ async function translateNotExisting(obj, baseText, yandex) {
 }
 
 //TASKS
-
 gulp.task('adminWords2languages', function (done) {
     words2languages('./admin/');
     done();
