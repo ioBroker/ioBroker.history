@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "1.9.14",
+    "version": "1.10.0",
     "news": {
+      "1.10.0": {
+        "en": "Support only `js.controller` >= 3.3.x\nUsed system/custom view for collecting the objects",
+        "de": "Unterstützt nur `js.controller` >= 3.3.x\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte",
+        "ru": "Поддерживает только `js.controller`> = 3.3.x\nИспользуемый системный / пользовательский вид для сбора объектов",
+        "pt": "Suporte apenas `js.controller`> = 3.3.x\nSistema usado / visão personalizada para coletar os objetos",
+        "nl": "Ondersteuning alleen `js.controller` >= 3.3.x\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten",
+        "fr": "Supporte uniquement `js.controller` >= 3.3.x\nSystème utilisé/vue personnalisée pour la collecte des objets",
+        "it": "Supporta solo `js.controller` >= 3.3.x\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti",
+        "es": "Admite solo `js.controller`> = 3.3.x\nSistema usado / vista personalizada para recolectar los objetos.",
+        "pl": "Obsługuje tylko `js.controller` >= 3.3.x\nWykorzystany widok systemowy/niestandardowy do zbierania obiektów",
+        "zh-cn": "仅支持 `js.controller` >= 3.3.x\n用于收集对象的系统/自定义视图"
+      },
       "1.9.14": {
         "en": "Prevent crash cases reported by Sentry",
         "de": "Von Sentry gemeldete Absturzfälle verhindern",
@@ -99,18 +111,6 @@
         "es": "comando agregado para leer las funciones compatibles",
         "pl": "dodano polecenie odczytu obsługiwanych funkcji",
         "zh-cn": "添加了命令以读取支持的功能"
-      },
-      "1.9.7": {
-        "en": "set default history if not yet set",
-        "de": "Standardverlauf festlegen, falls noch nicht festgelegt",
-        "ru": "установить историю по умолчанию, если еще не установлено",
-        "pt": "definir histórico padrão se ainda não estiver definido",
-        "nl": "stel de standaardgeschiedenis in als deze nog niet is ingesteld",
-        "fr": "définir l'historique par défaut s'il n'est pas encore défini",
-        "it": "imposta la cronologia predefinita se non ancora impostata",
-        "es": "establecer el historial predeterminado si aún no está configurado",
-        "pl": "ustaw domyślną historię, jeśli jeszcze nie została ustawiona",
-        "zh-cn": "设置默认历史记录（如果尚未设置）"
       }
     },
     "mode": "daemon",
