@@ -508,7 +508,7 @@ function pushHistory(id, state, timerRelog) {
             return adapter.log.warn(`state value undefined received for ${id} which is not allowed. Ignoring.`);
         }
 
-        if (!history[id][adapter.namespace].ignoreZero && (state.val === null || state.val === 0)) {
+        if (history[id][adapter.namespace].ignoreZero && (state.val === null || state.val === 0)) {
             return adapter.log.debug(`value ${id} ignored as not desired`);
         }
 
@@ -528,7 +528,7 @@ function pushHistory(id, state, timerRelog) {
             }
         }
 
-        if (!history[id][adapter.namespace].ignoreBelowZero && (typeof state.val === 'number' && state.val < 0)) {
+        if (history[id][adapter.namespace].ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
             return adapter.log.debug(`value ${id} ignored as below zero`);
         }
 
