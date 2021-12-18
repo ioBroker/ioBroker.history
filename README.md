@@ -23,6 +23,11 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Excodibur) Hide settings not relevant when "log changes only" is not used
+* (Apollon77) Allow all number values for debounce again
+
 ### 1.10.4 (2021-12-14)
 * (bluefox) Support only `js.controller` >= 3.3.x
 * (bluefox) Used system/custom view for collecting the objects
