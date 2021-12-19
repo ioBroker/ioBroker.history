@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "1.10.4",
+    "version": "1.10.5",
     "news": {
+      "1.10.5": {
+        "en": "Hide settings not relevant when \"log changes only\" is not used\nAllow all number values for debounce again",
+        "de": "Nicht relevante Einstellungen ausblenden, wenn \"Nur Änderungen protokollieren\" nicht verwendet wird\nAlle Zahlenwerte wieder für die Entprellung zulassen",
+        "ru": "Скрыть настройки, не актуальные, если не используется \"только изменения журнала\"\nРазрешить все числовые значения для устранения дребезга снова",
+        "pt": "Ocultar configurações irrelevantes quando \"apenas registro de alterações\" não é usado\nPermitir todos os valores numéricos para debounce novamente",
+        "nl": "Instellingen verbergen die niet relevant zijn wanneer \"alleen logboekwijzigingen\" niet wordt gebruikt\nSta alle getalwaarden opnieuw toe voor debounce",
+        "fr": "Masquer les paramètres non pertinents lorsque \"log changes only\" n'est pas utilisé\nAutoriser à nouveau toutes les valeurs numériques pour l'anti-rebond",
+        "it": "Nascondi le impostazioni non rilevanti quando non viene utilizzato \"solo modifiche al registro\"\nConsenti di nuovo l'antirimbalzo di tutti i valori numerici",
+        "es": "Ocultar la configuración que no es relevante cuando no se utiliza \"solo cambios de registro\"\nPermitir todos los valores numéricos para antirrebote nuevamente",
+        "pl": "Ukryj ustawienia nieistotne, gdy nie używasz opcji „tylko rejestruj zmiany”\nZezwól ponownie na odrzucenie wszystkich wartości liczbowych",
+        "zh-cn": "不使用“仅记录更改”时隐藏不相关的设置\n再次允许所有数值去抖动"
+      },
       "1.10.4": {
         "en": "Support only `js.controller` >= 3.3.x\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
         "de": "Unterstützt nur `js.controller` >= 3.3.x\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
@@ -99,18 +111,6 @@
         "es": "Prevenir casos de accidentes informados por Sentry",
         "pl": "Zapobiegaj awariom zgłaszanym przez Sentry",
         "zh-cn": "防止 Sentry 报告的崩溃案例"
-      },
-      "1.9.13": {
-        "en": "Added the support of Admin5",
-        "de": "Unterstützung von Admin5 hinzugefügt",
-        "ru": "Добавлена поддержка Admin5",
-        "pt": "Adicionado o suporte de Admin5",
-        "nl": "Ondersteuning toegevoegd van Admin5",
-        "fr": "Ajout du support d'Admin5",
-        "it": "Aggiunto il supporto di Admin5",
-        "es": "Se agregó el soporte de Admin5.",
-        "pl": "Dodano obsługę Admin5",
-        "zh-cn": "添加了对Admin5的支持"
       }
     },
     "mode": "daemon",

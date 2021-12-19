@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 1.10.5 (2021-12-19)
 * (Excodibur) Hide settings not relevant when "log changes only" is not used
 * (Apollon77) Allow all number values for debounce again
 
