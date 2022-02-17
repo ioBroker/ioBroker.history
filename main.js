@@ -508,10 +508,6 @@ function pushHistory(id, state, timerRelog) {
             return adapter.log.warn(`state value undefined received for ${id} which is not allowed. Ignoring.`);
         }
 
-        if (history[id][adapter.namespace].ignoreZero && (state.val === null || state.val === 0)) {
-            return adapter.log.debug(`value ${id} ignored as not desired`);
-        }
-
         // convert from seconds to milliseconds
         if (state.ts < 946681200000) {
             state.ts *= 1000;
@@ -526,10 +522,6 @@ function pushHistory(id, state, timerRelog) {
             if (f == state.val) {
                 state.val = f;
             }
-        }
-
-        if (history[id][adapter.namespace].ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
-            return adapter.log.debug(`value ${id} ignored as below zero`);
         }
 
         if (history[id].state && settings.changesOnly && !timerRelog) {
@@ -632,40 +624,48 @@ function reLogHelper(_id) {
 
 function pushHelper(_id) {
     if (!history[_id] || !history[_id].state) return;
-    const _settings = history[_id][adapter.namespace];
+
+    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!state || state.val === undefined || state.val === null || state.val === 0)) {
+        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value zero or null`);
+        return;
+    } else
+    if (state && history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
+        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value is below 0`);
+        return;
+    }
+
     // if it was not deleted in this time
-    if (_settings) {
-        history[_id].timeout = null;
-        history[_id].list = history[_id].list || [];
+    history[_id].timeout = null;
+    history[_id].list = history[_id].list || [];
 
-        if (typeof history[_id].state.val === 'string') {
-            const f = parseFloat(history[_id].state.val);
-            if (f == history[_id].state.val) {
-                history[_id].state.val = f;
-            } else if (history[_id].state.val === 'true') {
-                history[_id].state.val = true;
-            } else if (history[_id].state.val === 'false') {
-                history[_id].state.val = false;
-            }
+    if (typeof history[_id].state.val === 'string') {
+        const f = parseFloat(history[_id].state.val);
+        if (f == history[_id].state.val) {
+            history[_id].state.val = f;
+        } else if (history[_id].state.val === 'true') {
+            history[_id].state.val = true;
+        } else if (history[_id].state.val === 'false') {
+            history[_id].state.val = false;
         }
-        if (history[_id].state.lc !== undefined) {
-            delete history[_id].state.lc;
-        }
-        if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
-            delete history[_id].state.ack;
-        } else {
-            history[_id].state.ack = history[_id].state.ack ? 1 : 0;
-        }
-        if (!adapter.config.storeFrom && history[_id].state.from !== undefined) {
-            delete history[_id].state.from;
-        }
+    }
+    if (history[_id].state.lc !== undefined) {
+        delete history[_id].state.lc;
+    }
+    if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
+        delete history[_id].state.ack;
+    } else {
+        history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+    }
+    if (!adapter.config.storeFrom && history[_id].state.from !== undefined) {
+        delete history[_id].state.from;
+    }
 
-        history[_id].list.push(history[_id].state);
+    history[_id].list.push(history[_id].state);
 
-        if (history[_id].list.length > _settings.maxLength) {
-            adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
-            appendFile(_id, history[_id].list);
-        }
+    const _settings = history[_id][adapter.namespace];
+    if (_settings && history[_id].list.length > _settings.maxLength) {
+        adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
+        appendFile(_id, history[_id].list);
     }
 }
 
@@ -1045,9 +1045,18 @@ function getHistory(msg) {
                     try {
                         gh.kill('SIGINT');
                     } catch (err) {
-                        adapter.log.error(err);
+                        adapter.log.error(err.message);
                     }
                 }, 120000);
+
+                gh.on('error', err => {
+                    adapter.log.info('Error communicating to forked process: ' + err.message);
+                    adapter.sendTo(msg.from, msg.command, {
+                        result: [],
+                        step: null,
+                        error: null
+                    }, msg.callback);
+                });
 
                 gh.on('message', data => {
                     const cmd = data[0];
