@@ -625,12 +625,12 @@ function reLogHelper(_id) {
 function pushHelper(_id) {
     if (!history[_id] || !history[_id].state) return;
 
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!state || state.val === undefined || state.val === null || state.val === 0)) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value zero or null`);
+    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!history[_id].state || history[_id].state.val === undefined || history[_id].state.val === null || history[_id].state.val === 0)) {
+        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(history[_id].state)} and it was ignored because the value zero or null`);
         return;
     } else
-    if (state && history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value is below 0`);
+    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof history[_id].state.val === 'number' && history[_id].state.val < 0) {
+        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(history[_id].state)} and it was ignored because the value is below 0`);
         return;
     }
 
