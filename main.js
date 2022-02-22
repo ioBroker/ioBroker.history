@@ -281,9 +281,16 @@ function finish(callback) {
 
 function processMessage(msg) {
     if (msg.command === 'features') {
-        adapter.sendTo(msg.from, msg.command, {supportedFeatures: []}, msg.callback);
-    } else
-    if (msg.command === 'getHistory') {
+        adapter.sendTo(msg.from, msg.command, {supportedFeatures: ['update', 'delete', 'deleteRange', 'deleteAll', 'storeState']}, msg.callback);
+    } else if (msg.command === 'update') {
+        updateState(msg);
+    } else if (msg.command === 'delete') {
+        deleteState(msg);
+    } else if (msg.command === 'deleteAll') {
+        deleteStateAll(msg);
+    } else if (msg.command === 'deleteRange') {
+        deleteState(msg);
+    } else if (msg.command === 'getHistory') {
         getHistory(msg);
     } else if (msg.command === 'storeState') {
         storeState(msg);
@@ -664,7 +671,7 @@ function pushHelper(_id) {
 
     const _settings = history[_id][adapter.namespace];
     if (_settings && history[_id].list.length > _settings.maxLength) {
-        adapter.log.debug('moving ' + history[_id].list.length + ' entries from '+ _id +' to file');
+        adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
         appendFile(_id, history[_id].list);
     }
 }
@@ -680,7 +687,9 @@ function checkRetention(id) {
             const dayList = getDirectories(adapter.config.storeDir).sort((a, b) => a - b);
             // calculate date
             d.setSeconds(-(history[id][adapter.namespace].retention));
+
             const day = GetHistory.ts2day(d.getTime());
+
             for (let i = 0; i < dayList.length; i++) {
                 if (dayList[i] < day) {
                     const file = GetHistory.getFilenameForID(adapter.config.storeDir, dayList[i], id);
@@ -722,11 +731,14 @@ function appendFile(id, states) {
 
     let i;
     for (i = states.length - 1; i >= 0; i--) {
-        if (!states[i]) continue;
+        if (!states[i]) {
+            continue;
+        }
         if (GetHistory.ts2day(states[i].ts) !== day) {
             break;
         }
     }
+
     data = states.splice(i - states.length + 1);
 
     if (fs.existsSync(file)) {
@@ -829,6 +841,7 @@ function getCachedData(options, callback) {
             }
         }
     }
+
     options.length = cache.length;
     callback(cache, !options.start && cache.length >= options.count);
 }
@@ -853,7 +866,9 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                     let last = false;
 
                     for (const ii in _data) {
-                        if (!_data.hasOwnProperty(ii)) continue;
+                        if (!_data.hasOwnProperty(ii)) {
+                            continue;
+                        }
                         if (options.ack) {
                             _data[ii].ack = !!_data[ii].ack;
                         }
@@ -909,7 +924,7 @@ function getFileData(options, callback) {
 function sortByTs(a, b) {
     const aTs = a.ts;
     const bTs = b.ts;
-    return ((aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0));
+    return aTs < bTs ? -1 : (aTs > bTs ? 1 : 0);
 }
 
 function applyOptions(data, options, shouldCopy) {
@@ -974,9 +989,11 @@ function getHistory(msg) {
         addId:      msg.message.options.addId || false,
         sessionId:  msg.message.options.sessionId
     };
+
     if (options.id && aliasMap[options.id]) {
         options.id = aliasMap[options.id];
     }
+
     if (options.start > options.end) {
         const _end      = options.end;
         options.end   = options.start;
@@ -986,11 +1003,15 @@ function getHistory(msg) {
     // if less 2000.01.01 00:00:00
     if (options.start < 946681200000) {
         options.start *= 1000;
-        if (options.step !== null && options.step !== undefined) options.step *= 1000;
+        if (options.step !== null && options.step !== undefined) {
+            options.step *= 1000;
+        }
     }
 
     // if less 2000.01.01 00:00:00
-    if (options.end < 946681200000) options.end *= 1000;
+    if (options.end < 946681200000) {
+        options.end *= 1000;
+    }
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
@@ -1137,8 +1158,8 @@ function getDirectories(path) {
         return fs.readdirSync(path).filter(file => {
             try {
                 return fs.statSync(path + '/' + file).isDirectory()
-            } catch(e) {
-                //ignore entry
+            } catch (e) {
+                // ignore entry
                 return false;
             }
         });
@@ -1149,16 +1170,364 @@ function getDirectories(path) {
     }
 }
 
+function update(id, state) {
+    // first try to find the value in not yet saved data
+    let found = false;
+    if (history[id]) {
+        const res = history[id].list;
+        if (res) {
+            for (let i = res.length - 1; i >= 0; i--) {
+                if (res[i].ts === state.ts) {
+                    if (state.val !== undefined) {
+                        res[i].val = state.val;
+                    }
+                    if (state.q !== undefined && res[i].q !== undefined) {
+                        res[i].q = state.q;
+                    }
+                    if (state.from !== undefined && res[i].from !== undefined) {
+                        res[i].from = state.from;
+                    }
+                    if (state.ack !== undefined) {
+                        res[i].ack = state.ack;
+                    }
+                    found = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        const day = GetHistory.ts2day(state.ts);
+        if (!isNaN(day) && day > 20100101) {
+            const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
+
+            if (fs.existsSync(file)) {
+                try {
+                    const res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].ts === state.ts) {
+                            if (state.val !== undefined) {
+                                res[i].val = state.val;
+                            }
+                            if (state.q !== undefined && res[i].q !== undefined) {
+                                res[i].q = state.q;
+                            }
+                            if (state.from !== undefined && res[i].from !== undefined) {
+                                res[i].from = state.from;
+                            }
+                            if (state.ack !== undefined) {
+                                res[i].ack = state.ack;
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        // save file
+                        fs.writeFileSync(file, JSON.stringify(res, null, 2));
+                    }
+                } catch (error) {
+                    adapter.log.error(`Cannot process file "${file}": ${error}`);
+                }
+            }
+        }
+    }
+
+    return found;
+}
+
+function _delete(id, state) {
+    // first try to find the value in not yet saved data
+    let found = false;
+    if (history[id]) {
+        const res = history[id].list;
+        if (res) {
+            if (!state.ts && !state.start && !state.end) {
+                history[id].list = [];
+            } else {
+                for (let i = res.length - 1; i >= 0; i--) {
+                    if (state.start && state.end) {
+                        if (res[i].ts >= state.start && res[i].ts <= state.end) {
+                            res.splice(i, 1);
+                        }
+                    } else if (state.start) {
+                        if (res[i].ts >= state.start) {
+                            res.splice(i, 1);
+                        }
+                    } else if (state.end) {
+                        if (res[i].ts <= state.end) {
+                            res.splice(i, 1);
+                        }
+                    } else
+                    if (res[i].ts === state.ts) {
+                        res.splice(i, 1);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        const files = [];
+        if (state.ts) {
+            const day = GetHistory.ts2day(state.ts);
+            if (!isNaN(day) && day > 20100101) {
+                const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
+
+                if (fs.existsSync(file)) {
+                    files.push(file);
+                }
+            }
+        } else {
+            let dayStart;
+            let dayEnd;
+            if (state.start && state.end) {
+                dayStart = parseInt(GetHistory.ts2day(state.start), 10);
+                dayEnd = parseInt(GetHistory.ts2day(state.end), 10);
+            } else if (state.start) {
+                dayStart = parseInt(GetHistory.ts2day(state.start), 10);
+                dayEnd   = parseInt(GetHistory.ts2day(Date.now()), 10);
+            } else if (state.end) {
+                dayStart = 0;
+                dayEnd   = parseInt(GetHistory.ts2day(state.end), 10);
+            } else {
+                dayStart = 0;
+                dayEnd   = parseInt(GetHistory.ts2day(Date.now()), 10);
+            }
+
+            const dayList = getDirectories(adapter.config.storeDir).sort((a, b) => b - a);
+
+            for (let i = 0; i < dayList.length; i++) {
+                const day = parseInt(dayList[i], 10);
+
+                if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
+                    const file = GetHistory.getFilenameForID(adapter.config.storeDir, dayList[i], id);
+                    if (fs.existsSync(file)) {
+                        files.push(file);
+                    }
+                }
+            }
+        }
+
+        files.forEach(file => {
+            try {
+                let res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+
+                if (!state.ts && !state.start && !state.end) {
+                    res = [];
+                    found = true;
+                } else {
+                    for (let i = res.length - 1; i => 0; i--) {
+                        if (state.start && state.end) {
+                            if (res[i].ts >= state.start && res[i].ts <= state.end) {
+                                res.splice(i, 1);
+                                found = true;
+                            }
+                        } else if (state.start) {
+                            if (res[i].ts >= state.start) {
+                                res.splice(i, 1);
+                                found = true;
+                            }
+                        } else if (state.end) {
+                            if (res[i].ts <= state.end) {
+                                res.splice(i, 1);
+                                found = true;
+                            }
+                        } else if (res[i].ts === state.ts) {
+                            res.splice(i, 1);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (found) {
+                    // save file
+                    if (res.length) {
+                        fs.writeFileSync(file, JSON.stringify(res, null, 2));
+                    } else {
+                        // delete file if no data
+                        fs.unlinkSync(file);
+                    }
+                }
+            } catch (error) {
+                adapter.log.error(`Cannot process file "${file}": ${error}`);
+            }
+        });
+    }
+
+    return found;
+}
+
+function updateState(msg) {
+    if (!msg.message) {
+        adapter.log.error('updateState called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {error: `Invalid call: ${JSON.stringify(msg)}`}, msg.callback);
+    }
+
+    let id;
+    let success = true;
+    if (Array.isArray(msg.message)) {
+        adapter.log.debug(`updateState ${msg.message.length} items`);
+        for (let i = 0; i < msg.message.length; i++) {
+            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+
+            if (msg.message[i].state && typeof msg.message[i].state === 'object') {
+                update(id, msg.message[i].state);
+            } else {
+                adapter.log.warn(`Invalid state for ${JSON.stringify(msg.message[i])}`);
+            }
+        }
+    } else if (msg.message.state && Array.isArray(msg.message.state)) {
+        adapter.log.debug(`updateState ${msg.message.state.length} items`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        for (let j = 0; j < msg.message.state.length; j++) {
+            if (msg.message.state[j] && typeof msg.message.state[j] === 'object') {
+                update(id, msg.message.state[j]);
+            } else {
+                adapter.log.warn(`Invalid state for ${JSON.stringify(msg.message.state[j])}`);
+            }
+        }
+    } else if (msg.message.id && msg.message.state && typeof msg.message.state === 'object') {
+        adapter.log.debug('updateState 1 item');
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        success = update(id, msg.message.state);
+    } else {
+        adapter.log.error('updateState called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {error: `Invalid call: ${JSON.stringify(msg)}`}, msg.callback);
+    }
+
+    adapter.sendTo(msg.from, msg.command, {success}, msg.callback);
+}
+
+function deleteState(msg) {
+    if (!msg.message) {
+        adapter.log.error('deleteState called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {error: `Invalid call: ${JSON.stringify(msg)}`}, msg.callback);
+    }
+
+    let id;
+    let success = true;
+    if (Array.isArray(msg.message)) {
+        adapter.log.debug(`deleteState ${msg.message.length} items`);
+        for (let i = 0; i < msg.message.length; i++) {
+            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+
+            // {id: 'blabla', ts: 892}
+            if (msg.message[i].ts) {
+                _delete(id, {ts: msg.message[i].ts});
+            } else
+            if (msg.message[i].start) {
+                if (typeof msg.message[i].start === 'string') {
+                    msg.message[i].start = new Date(msg.message[i].start).getTime();
+                }
+                if (typeof msg.message[i].end === 'string') {
+                    msg.message[i].end = new Date(msg.message[i].end).getTime();
+                }
+                _delete(id, {start: msg.message[i].start, end: msg.message[i].end || Date.now()});
+            } else
+            if (typeof msg.message[i].state === 'object' && msg.message[i].state && msg.message[i].state.ts) {
+                _delete(id, {ts: msg.message[i].state.ts});
+            } else
+            if (typeof msg.message[i].state === 'object' && msg.message[i].state && msg.message[i].state.start) {
+                if (typeof msg.message[i].state.start === 'string') {
+                    msg.message[i].state.start = new Date(msg.message[i].state.start).getTime();
+                }
+                if (typeof msg.message[i].state.end === 'string') {
+                    msg.message[i].state.end = new Date(msg.message[i].state.end).getTime();
+                }
+                _delete(id, {start: msg.message[i].state.start, end: msg.message[i].state.end || Date.now()});
+            } else {
+                adapter.log.warn(`Invalid state for ${JSON.stringify(msg.message[i])}`);
+            }
+        }
+    } else if (msg.message.state && Array.isArray(msg.message.state)) {
+        adapter.log.debug(`deleteState ${msg.message.state.length} items`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+
+        for (let j = 0; j < msg.message.state.length; j++) {
+            if (msg.message.state[j] && typeof msg.message.state[j] === 'object') {
+                if (msg.message.state[j].ts) {
+                    _delete(id, {ts: msg.message.state[j].ts});
+                } else if (msg.message.state[j].start) {
+                    if (typeof msg.message.state[j].start === 'string') {
+                        msg.message.state[j].start = new Date(msg.message.state[j].start).getTime();
+                    }
+                    if (typeof msg.message.state[j].end === 'string') {
+                        msg.message.state[j].end = new Date(msg.message.state[j].end).getTime();
+                    }
+                    _delete(id, {start: msg.message.state[j].start, end: msg.message.state[j].end || Date.now()});
+                }
+            } else if (msg.message.state[j] && typeof msg.message.state[j] === 'number') {
+                _delete(id, {ts: msg.message.state[j]});
+            } else {
+                adapter.log.warn(`Invalid state for ${JSON.stringify(msg.message.state[j])}`);
+            }
+        }
+    } else if (msg.message.ts && Array.isArray(msg.message.ts)) {
+        adapter.log.debug(`deleteState ${msg.message.ts.length} items`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        for (let j = 0; j < msg.message.ts.length; j++) {
+            if (msg.message.ts[j] && typeof msg.message.ts[j] === 'number') {
+                _delete(id, {ts: msg.message.ts[j]});
+            } else {
+                adapter.log.warn(`Invalid state for ${JSON.stringify(msg.message.ts[j])}`);
+            }
+        }
+    } else if (msg.message.id && msg.message.state && typeof msg.message.state === 'object') {
+        adapter.log.debug('deleteState 1 item');
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        success = _delete(id, {ts: msg.message.state.ts});
+    } else if (msg.message.id && msg.message.ts && typeof msg.message.ts === 'number') {
+        adapter.log.debug('deleteState 1 item');
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        success = _delete(id, {ts: msg.message.ts});
+    } else {
+        adapter.log.error('deleteState called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {error: `Invalid call: ${JSON.stringify(msg)}`}, msg.callback);
+    }
+
+    adapter.sendTo(msg.from, msg.command, {success}, msg.callback);
+}
+
+function deleteStateAll(msg) {
+    if (!msg.message) {
+        adapter.log.error('deleteState called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {error: `Invalid call: ${JSON.stringify(msg)}`}, msg.callback);
+    }
+
+    let id;
+    if (Array.isArray(msg.message)) {
+        adapter.log.debug(`deleteStateAll ${msg.message.length} items`);
+        for (let i = 0; i < msg.message.length; i++) {
+            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+            _delete(id, {});
+        }
+    } else if (msg.message.id) {
+        adapter.log.debug('deleteStateAll 1 item');
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        _delete(id, {});
+    } else {
+        adapter.log.error('deleteStateAll called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {error: `Invalid call: ${JSON.stringify(msg)}`}, msg.callback);
+    }
+
+    adapter.sendTo(msg.from, msg.command, {success: true}, msg.callback);
+}
+
 function storeState(msg) {
     if (msg.message && (msg.message.success || msg.message.error)) { // Seems we got a callback from running converter
         return;
     }
     if (!msg.message || !msg.message.id || !msg.message.state) {
         adapter.log.error('storeState called with invalid data');
-        adapter.sendTo(msg.from, msg.command, {
+        return adapter.sendTo(msg.from, msg.command, {
             error:  'Invalid call'
         }, msg.callback);
-        return;
     }
     let id;
     if (Array.isArray(msg.message)) {
@@ -1168,8 +1537,7 @@ function storeState(msg) {
             if (history[id]) {
                 history[id].state = msg.message[i].state;
                 pushHelper(id);
-            }
-            else {
+            } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message[i].id}. Ignoring`);
             }
         }
@@ -1180,8 +1548,7 @@ function storeState(msg) {
             if (history[id]) {
                 history[id].state = msg.message.state[j];
                 pushHelper(id);
-            }
-            else {
+            } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
             }
         }
@@ -1191,15 +1558,12 @@ function storeState(msg) {
         if (history[id]) {
             history[id].state = msg.message.state;
             pushHelper(id);
-        }
-        else {
+        } else {
             adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
         }
     }
 
-    adapter.sendTo(msg.from, msg.command, {
-        success: true
-    }, msg.callback);
+    adapter.sendTo(msg.from, msg.command, {success: true}, msg.callback);
 }
 
 function enableHistory(msg) {

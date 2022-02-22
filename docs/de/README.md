@@ -248,6 +248,50 @@ Die Nachricht kann eines der folgenden drei Formate haben:
 - eine ID und ein Array von Objektstatus
 - Array von mehreren IDs mit Objektstatus
 
+## delete state
+Wenn Sie einen Eintrag aus der Datenbank löschen möchten, können Sie die eingebaute Systemfunktion **löschen** verwenden.:
+
+```
+sendTo('sql.0', 'delete', [
+    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352}, 
+    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353}
+], result => console.log('deleted'));
+```
+
+Um ALLE Verlaufsdaten für einen Datenpunkt zu löschen, führen Sie aus:
+
+```
+sendTo('sql.0', 'deleteAll', [
+    {id: 'mbus.0.counter.xxx'} 
+    {id: 'mbus.0.counter.yyy'}
+], result => console.log('deleted'));
+``` 
+
+Um Verlaufsdaten für einen Datenpunkt und einen Bereich zu löschen, führen Sie Folgendes aus:
+
+```
+sendTo('sql.0', 'deleteRange', [
+    {id: 'mbus.0.counter.xxx', start: '2019-01-01T00:00:00.000Z', end: '2019-12-31T23:59:59.999'}, 
+    {id: 'mbus.0.counter.yyy', start: 1589458809352, end: 1589458809353}
+], result => console.log('deleted'));
+``` 
+
+Die Zeit könnte ms seit Epoche oder eine Zeichenfolge sein, die durch das Javascript-Datumsobjekt konvertiert werden könnte.
+
+Werte werden inklusive definierter Grenzen gelöscht. `ts >= start AND ts <= end`
+
+## change state
+Wenn Sie den Wert, die Qualität oder das Acknowledge-Flag in der Datenbank ändern möchten, können Sie die eingebaute Systemfunktion **update** verwenden:
+
+```
+sendTo('sql.0', 'update', [
+    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352, val: 15, ack: true, q: 0}, 
+    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353, val: 16, ack: true, q: 0}
+], result => console.log('deleted'));
+```
+
+`ts` ist obligatorisch. Mindestens ein weiteres Flag muss im Zustandsobjekt enthalten sein.
+
 ## Verlaufsprotokollierung über JavaScript
 Der Adapter unterstützt das Aktivieren/Deaktivieren der Verlaufsprotokollierung
 über JavaScript sowie das Abrufen der Liste der aktivierten Datenpunkte mit
