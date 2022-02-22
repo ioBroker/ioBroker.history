@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### __WORK IN PROGRESS__
+### 1.11.0 (2022-02-22)
 * (bluefox) Added support deletion and changing of stored values.
 
 ### 1.10.6 (2022-02-19)
