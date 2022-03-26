@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "1.11.0",
+    "version": "1.11.1",
     "news": {
+      "1.11.1": {
+        "en": "Fix the js-controller and admin minimum version",
+        "de": "Korrigieren Sie die js-controller- und admin-Mindestversion",
+        "ru": "Исправить минимальную версию js-controller и admin",
+        "pt": "Corrija a versão mínima do controlador js e do administrador",
+        "nl": "Fix de js-controller en admin minimumversie",
+        "fr": "Correction de la version minimale de js-controller et admin",
+        "it": "Correggi la versione minima del controller js e dell'amministratore",
+        "es": "Arreglar la versión mínima de js-controller y admin",
+        "pl": "Napraw minimalną wersję kontrolera js i administratora",
+        "zh-cn": "修复 js-controller 和 admin 最低版本"
+      },
       "1.11.0": {
         "en": "Added support deletion and changing of stored values.",
         "de": "Unterstützung für das Löschen und Ändern gespeicherter Werte hinzugefügt.",
@@ -99,18 +111,6 @@
         "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
         "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
         "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零值或/和低于零值的选项"
-      },
-      "1.10.1": {
-        "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects",
-        "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte",
-        "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов",
-        "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos",
-        "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten",
-        "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets",
-        "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti",
-        "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.",
-        "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów",
-        "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图"
       }
     },
     "mode": "daemon",
