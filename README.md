@@ -23,6 +23,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (Apollon77) Fix the js-controller and admin minimum version
+
 ### 1.11.0 (2022-02-22)
 * (bluefox) Added support deletion and changing of stored values.
 

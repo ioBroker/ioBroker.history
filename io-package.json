@@ -145,12 +145,12 @@
     "getHistory": true,
     "dependencies": [
       {
-        "js-controller": ">=2.0.0"
+        "js-controller": ">=3.3.0"
       }
     ],
     "globalDependencies": [
       {
-        "admin": ">=1.6.10"
+        "admin": ">=3.0.0"
       }
     ],
     "supportStopInstance": 10000,
