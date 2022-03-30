@@ -924,7 +924,7 @@ function getFileData(options, callback) {
 function sortByTs(a, b) {
     const aTs = a.ts;
     const bTs = b.ts;
-    return aTs < bTs ? -1 : (aTs > bTs ? 1 : 0);
+    return (aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0);
 }
 
 function applyOptions(data, options, shouldCopy) {
@@ -1023,7 +1023,7 @@ function getHistory(msg) {
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
                 if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
-                    cacheData = cacheData.slice(0, options.count);
+                    cacheData = cacheData.slice(-options.count);
                     adapter.log.debug(`cut cacheData to ${options.count} values`);
                 }
                 adapter.log.debug(`Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
@@ -1041,8 +1041,12 @@ function getHistory(msg) {
                     adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
-                    options.result = cacheData;
                     options.count = origCount;
+                    if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
+                        cacheData = cacheData.slice(-options.count);
+                        adapter.log.debug(`cut cacheData to ${options.count} values`);
+                    }
+                    options.result = cacheData;
                     Aggregate.beautify(options);
 
                     adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
