@@ -25,7 +25,7 @@ This adapter saves state history in a two-staged process.
 ## Changelog
 
 ### __WORK IN PROGRESS__
-* (Apollon77) Fix GetHistory because of wrong sorting when aggregate=none is used (e.g. by Admin)
+* (Apollon77) Fix GetHistory logic to always return the "count" newest entries if more than "count" are available
 
 ### 1.11.1 (2022-03-26)
 * (Apollon77) Fix the js-controller and admin minimum version

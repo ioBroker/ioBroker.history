@@ -27,7 +27,8 @@ sendTo('history.0', 'getHistory', {
     options: {
         end:       Date.now(),
         count:     50,
-        aggregate: 'onchange'
+        aggregate: 'onchange',
+        addId: true
     }
 }, function (result) {
     for (var i = 0; i < result.result.length; i++) {
@@ -44,7 +45,8 @@ sendTo('history.0', 'getHistory', {
     options: {
         start:      end - 3600000,
         end:        end,
-        aggregate: 'onchange'
+        aggregate: 'onchange',
+        addId: true
     }
 }, function (result) {
     for (var i = 0; i < result.result.length; i++) {
