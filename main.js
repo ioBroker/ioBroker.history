@@ -1050,18 +1050,24 @@ function getHistory(msg) {
                     cacheData = cacheData.sort(sortByTs);
                     options.count = origCount;
                     options.result = cacheData;
+                    if (options.count && options.result.length > options.count && options.aggregate === 'none' && !options.returnNewestEntries) {
+                        if (options.start) {
+                            for (let i = 0; i < options.result.length; i++) {
+                                if (options.result[i].ts < options.start) {
+                                    options.result.splice(i, 1);
+                                    i--;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        options.result = options.result.slice(0, options.count);
+                        adapter.log.debug(`pre-cut data to ${options.count} oldest values`);
+                    }
                     Aggregate.beautify(options);
 
                     adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
 
-                    if ((options.count) && (options.result.length > options.count) && (options.aggregate === 'none')) {
-                        if (options.returnNewestEntries) {
-                            options.result = options.result.slice(-options.count);
-                        } else {
-                            options.result = options.result.slice(0, options.count);
-                        }
-                        adapter.log.debug(`cut data to ${options.count} values`);
-                    }
 
                     adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
 
