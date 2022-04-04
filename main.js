@@ -843,7 +843,7 @@ function getCachedData(options, callback) {
     }
 
     options.length = cache.length;
-    callback(cache, (!options.start || options.returnNewestEntries) && options.count && cache.length >= options.count);
+    callback(cache, !options.start && options.count && cache.length >= options.count);
 }
 
 function tsSort(a, b) {
