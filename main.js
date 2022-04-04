@@ -1049,16 +1049,19 @@ function getHistory(msg) {
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     options.count = origCount;
-                    if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
-                        if (options.returnNewestEntries) {
-                            cacheData = cacheData.slice(-options.count);
-                        } else {
-                            cacheData = cacheData.slice(0, options.count);
-                        }
-                        adapter.log.debug(`cut cacheData to ${options.count} values`);
-                    }
                     options.result = cacheData;
                     Aggregate.beautify(options);
+
+                    adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
+
+                    if ((options.count) && (options.result.length > options.count) && (options.aggregate === 'none')) {
+                        if (options.returnNewestEntries) {
+                            options.result = options.result.slice(-options.count);
+                        } else {
+                            options.result = options.result.slice(0, options.count);
+                        }
+                        adapter.log.debug(`cut data to ${options.count} values`);
+                    }
 
                     adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
 
