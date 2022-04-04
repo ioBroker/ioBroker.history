@@ -274,7 +274,29 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     if (result.result[i].val >= 2.5 && result.result[i].val <= 3) found ++;
                 }
                 expect(found).to.be.equal(2);
-                done();
+
+                const latestTs = result.result[result.result.length - 1].ts;
+
+                sendTo('history.0', 'getHistory', {
+                    id: 'history.0.testValue',
+                    options: {
+                        start:     now + 15000,
+                        end:       now + 30000,
+                        count:     2,
+                        aggregate: 'none',
+                        returnNewestEntries: true
+                    }
+                }, function (result) {
+                    console.log(JSON.stringify(result.result, null, 2));
+                    expect(result.result.length).to.be.equal(2);
+                    var found = 0;
+                    for (var i = 0; i < result.result.length; i++) {
+                        if (result.result[i].val >= 2.5 && result.result[i].val <= 3) found ++;
+                    }
+                    expect(found).to.be.equal(2);
+                    expect(result.result[0].ts > latestTs).to.be.true;
+                    done();
+                });
             });
         });
     });

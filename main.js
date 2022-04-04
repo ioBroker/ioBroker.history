@@ -843,7 +843,7 @@ function getCachedData(options, callback) {
     }
 
     options.length = cache.length;
-    callback(cache, !options.start && cache.length >= options.count);
+    callback(cache, (!options.start || options.returnNewestEntries) && options.count && cache.length >= options.count);
 }
 
 function tsSort(a, b) {
@@ -985,10 +985,17 @@ function getHistory(msg) {
         q:          msg.message.options.q    || false,
         ignoreNull: msg.message.options.ignoreNull,
         aggregate:  msg.message.options.aggregate || 'average', // One of: max, min, average, total
-        limit:      parseInt(msg.message.options.limit || adapter.config.limit || 2000, 10),
+        limit:      parseInt(msg.message.options.limit, 10) || parseInt(msg.message.options.count, 10) || adapter.config.limit || 2000,
         addId:      msg.message.options.addId || false,
-        sessionId:  msg.message.options.sessionId
+        sessionId:  msg.message.options.sessionId,
+        returnNewestEntries: msg.message.options.returnNewestEntries || false
     };
+
+    if (!options.start && options.count) {
+        options.returnNewestEntries = true;
+    }
+
+    adapter.log.debug(`getHistory call: ${JSON.stringify(options)}`);
 
     if (options.id && aliasMap[options.id]) {
         options.id = aliasMap[options.id];
@@ -1022,7 +1029,7 @@ function getHistory(msg) {
             // if all data read
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
-                if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
+                if (options.count && cacheData.length > options.count && options.aggregate === 'none') {
                     cacheData = cacheData.slice(-options.count);
                     adapter.log.debug(`cut cacheData to ${options.count} values`);
                 }
@@ -1043,7 +1050,11 @@ function getHistory(msg) {
                     cacheData = cacheData.sort(sortByTs);
                     options.count = origCount;
                     if ((options.count) && (cacheData.length > options.count) && (options.aggregate === 'none')) {
-                        cacheData = cacheData.slice(-options.count);
+                        if (options.returnNewestEntries) {
+                            cacheData = cacheData.slice(-options.count);
+                        } else {
+                            cacheData = cacheData.slice(0, options.count);
+                        }
                         adapter.log.debug(`cut cacheData to ${options.count} values`);
                     }
                     options.result = cacheData;
