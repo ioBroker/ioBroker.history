@@ -294,7 +294,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         if (result.result[i].val >= 2.5 && result.result[i].val <= 3) found ++;
                     }
                     expect(found).to.be.equal(2);
-                    expect(result.result[0].ts > latestTs).to.be.true;
+                    expect(result.result[0].ts >= latestTs).to.be.true;
                     done();
                 });
             });
