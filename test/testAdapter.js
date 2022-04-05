@@ -312,14 +312,14 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             options: {
                 start:     now + 100,
                 end:       now + 30001,
-                count:     1,
+                count:     2,
                 aggregate: 'average',
                 ignoreNull: true,
                 addId: true
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(3);
+            expect(result.result.length).to.be.equal(4);
             expect(result.result[1].val).to.be.equal(2.14);
             expect(result.result[2].val).to.be.equal(2.14);
             expect(result.result[0].id).to.be.equal('history.0.testValue');
