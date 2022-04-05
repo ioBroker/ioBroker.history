@@ -320,8 +320,9 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(4);
-            expect(result.result[1].val).to.be.equal(2.14);
-            expect(result.result[2].val).to.be.equal(2.14);
+            expect(result.result[1].val).to.be.equal(1.5);
+            expect(result.result[2].val).to.be.equal(2.57);
+            expect(result.result[3].val).to.be.equal(2.57);
             expect(result.result[0].id).to.be.equal('history.0.testValue');
             done();
         });
