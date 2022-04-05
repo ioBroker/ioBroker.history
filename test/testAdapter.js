@@ -342,7 +342,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(6);
+            expect(result.result.length).to.be.at.least(4);
             expect(result.result[0].id).to.be.equal('history.0.testValue');
             done();
         });
