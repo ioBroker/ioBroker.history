@@ -1068,7 +1068,6 @@ function getHistory(msg) {
 
                     adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
 
-
                     adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
 
                     adapter.sendTo(msg.from, msg.command, {
@@ -1118,13 +1117,14 @@ function getHistory(msg) {
                         clearTimeout(ghTimeout);
                         ghTimeout = null;
 
-                        const result = applyOptions(data[1], options, true);
+                        options.result = applyOptions(data[1], options, true);
                         const overallLength = data[2];
                         const step = data[3];
-                        if (result) {
-                            adapter.log.debug(`Send: ${result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
+                        if (options.result) {
+                            Aggregate.beautify(options);
+                            adapter.log.debug(`Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
                             adapter.sendTo(msg.from, msg.command, {
-                                result: result,
+                                result: options.result,
                                 step: step,
                                 error: null
                             }, msg.callback);
@@ -1151,9 +1151,10 @@ function getHistory(msg) {
                 if (data[0] === 'response') {
                     if (data[1]) {
                         adapter.log.debug(`Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
-                        const timeSeries = applyOptions(data[1], options, true);
+                        options.result = applyOptions(data[1], options, true);
+                        Aggregate.beautify(options);
                         adapter.sendTo(msg.from, msg.command, {
-                            result: timeSeries,
+                            result: options.result,
                             step:   data[3],
                             error:  null
                         }, msg.callback);
