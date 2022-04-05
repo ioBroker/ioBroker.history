@@ -26,6 +26,7 @@ This adapter saves state history in a two-staged process.
 
 ### __WORK IN PROGRESS__
 * (Apollon77) Add flag returnNewestEntries for GetHistory to determine which records to return when more entries as "count" are existing for aggregate "none"
+* (Apollon77) make sure id is always returned on GetHistory when addId is set
 
 ### 1.11.1 (2022-03-26)
 * (Apollon77) Fix the js-controller and admin minimum version

@@ -274,6 +274,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     if (result.result[i].val >= 1 && result.result[i].val <= 3) found ++;
                 }
                 expect(found).to.be.equal(2);
+                expect(result.result[0].id).to.be.undefined;
 
                 const latestTs = result.result[result.result.length - 1].ts;
 
@@ -284,6 +285,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         end:       now + 30000,
                         count:     2,
                         aggregate: 'none',
+                        addId: true,
                         returnNewestEntries: true
                     }
                 }, function (result) {
@@ -295,6 +297,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     }
                     expect(found).to.be.equal(2);
                     expect(result.result[0].ts >= latestTs).to.be.true;
+                    expect(result.result[0].id).to.be.equal('history.0.testValue');
                     done();
                 });
             });
@@ -311,13 +314,15 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 end:       now + 30001,
                 count:     1,
                 aggregate: 'average',
-                ignoreNull: true
+                ignoreNull: true,
+                addId: true
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(3);
             expect(result.result[1].val).to.be.equal(2.14);
             expect(result.result[2].val).to.be.equal(2.14);
+            expect(result.result[0].id).to.be.equal('history.0.testValue');
             done();
         });
     });
