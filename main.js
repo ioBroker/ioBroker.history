@@ -599,28 +599,29 @@ function pushHistory(id, state, timerRelog) {
             ignoreDebonce = true;
         } else {
             if (settings.changesOnly && history[id].skipped) {
-                history[id].state = history[id].skipped;
-                pushHelper(id);
+                pushHelper(id, history[id].skipped);
             }
             if (history[id].state && ((history[id].state.val === null && state.val !== null) || (history[id].state.val !== null && state.val === null))) {
                 ignoreDebonce = true;
             } else if (!history[id].state && state.val === null) {
                 ignoreDebonce = true;
             }
-            // only store state if really changed
-            history[id].state = state;
         }
         history[id].lastLogTime = state.ts;
         history[id].skipped = null;
         if (settings.debounce && !ignoreDebonce) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
-            history[id].timeout = setTimeout(id => {
+            history[id].timeout = setTimeout((id, state) => {
                 history[id].timeout = null;
+                history[id].state = state;
                 pushHelper(id);
-            }, settings.debounce, id);
+            }, settings.debounce, id, state);
         } else {
-            pushHelper(id);
+            if (!timerRelog) {
+                history[id].state = state;
+            }
+            pushHelper(id, state);
         }
     }
 }
@@ -656,45 +657,47 @@ function reLogHelper(_id) {
     }
 }
 
-function pushHelper(_id) {
-    if (!history[_id] || !history[_id].state) return;
+function pushHelper(_id, state) {
+    if (!history[_id] || (!history[_id].state && state)) return;
+    if (!state) {
+        state = history[_id].state;
+    }
 
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!history[_id].state || history[_id].state.val === undefined || history[_id].state.val === null || history[_id].state.val === 0)) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(history[_id].state)} and it was ignored because the value zero or null`);
+    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!state || state.val === undefined || state.val === null || state.val === 0)) {
+        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value zero or null`);
         return;
     } else
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof history[_id].state.val === 'number' && history[_id].state.val < 0) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(history[_id].state)} and it was ignored because the value is below 0`);
+    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
+        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value is below 0`);
         return;
     }
 
     // if it was not deleted in this time
-    history[_id].timeout = null;
     history[_id].list = history[_id].list || [];
 
-    if (typeof history[_id].state.val === 'string') {
-        const f = parseFloat(history[_id].state.val);
-        if (f == history[_id].state.val) {
-            history[_id].state.val = f;
-        } else if (history[_id].state.val === 'true') {
-            history[_id].state.val = true;
-        } else if (history[_id].state.val === 'false') {
-            history[_id].state.val = false;
+    if (typeof state.val === 'string') {
+        const f = parseFloat(state.val);
+        if (f == state.val) {
+            state.val = f;
+        } else if (state.val === 'true') {
+            state.val = true;
+        } else if (state.val === 'false') {
+            state.val = false;
         }
     }
-    if (history[_id].state.lc !== undefined) {
-        delete history[_id].state.lc;
+    if (state.lc !== undefined) {
+        delete state.lc;
     }
-    if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
-        delete history[_id].state.ack;
+    if (!adapter.config.storeAck && state.ack !== undefined) {
+        delete state.ack;
     } else {
-        history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+        state.ack = state.ack ? 1 : 0;
     }
-    if (!adapter.config.storeFrom && history[_id].state.from !== undefined) {
-        delete history[_id].state.from;
+    if (!adapter.config.storeFrom && state.from !== undefined) {
+        delete state.from;
     }
 
-    history[_id].list.push(history[_id].state);
+    history[_id].list.push(state);
 
     const _settings = history[_id][adapter.namespace];
     if (_settings && history[_id].list.length > _settings.maxLength) {
@@ -1587,8 +1590,7 @@ function storeState(msg) {
         for (let i = 0; i < msg.message.length; i++) {
             id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
             if (history[id]) {
-                history[id].state = msg.message[i].state;
-                pushHelper(id);
+                pushHelper(msg.message[i].state);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message[i].id}. Ignoring`);
             }
@@ -1598,8 +1600,7 @@ function storeState(msg) {
         for (let j = 0; j < msg.message.state.length; j++) {
             id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
             if (history[id]) {
-                history[id].state = msg.message.state[j];
-                pushHelper(id);
+                pushHelper(id, msg.message.state[j]);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
             }
@@ -1608,8 +1609,7 @@ function storeState(msg) {
         adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
         id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         if (history[id]) {
-            history[id].state = msg.message.state;
-            pushHelper(id);
+            pushHelper(id, msg.message.state);
         } else {
             adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
         }
