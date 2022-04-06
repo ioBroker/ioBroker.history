@@ -531,28 +531,46 @@ function pushHistory(id, state, timerRelog) {
             }
         }
 
+        // When a debounce timer runs and the value is the same as the last one, ignore it
+        if (history[id].timeout && state.ts !== state.lc) {
+            return adapter.log.debug(`value not changed debounce ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
+        } else if (history[id].timeout) { // if value changed, clear timer
+            clearTimeout(history[id].timeout);
+            history[id].timeout = null;
+        }
+
+        let ignoreDebonce = false;
+
         if (history[id].state && settings.changesOnly && !timerRelog) {
             if (settings.changesRelogInterval === 0) {
                 if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
-                    history[id].skipped = state; // remember new timestamp
+                    // remember new timestamp
+                    history[id].skipped = state;
                     return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
                 }
             } else if (history[id].lastLogTime) {
                 if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    history[id].skipped = state; // remember new timestamp
+                    // remember new timestamp
+                    history[id].skipped = state;
                     return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
                 }
                 if (state.ts !== state.lc) {
-                    adapter.log.debug(`value-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+                    adapter.log.debug(`value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+                    ignoreDebonce = true;
                 }
             }
-            if (history[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
-                history[id].skipped = state; // remember new timestamp
-                adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
-                return;
-            }
-            else if (typeof state.val === 'number') {
-                adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+            if (typeof state.val === 'number') {
+                if (
+                    history[id].state.val !== null &&
+                    settings.changesMinDelta !== 0 &&
+                    Math.abs(history[id].state.val - state.val) < settings.changesMinDelta
+                ) {
+                    history[id].skipped = state; // remember new timestamp
+                    adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                    return;
+                } else if (settings.changesMinDelta !== 0){
+                    adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                }
             }
             else {
                 adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
@@ -567,7 +585,6 @@ function pushHistory(id, state, timerRelog) {
             history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
         }
 
-        let ignoreDebonce = false;
         if (timerRelog) {
             state.ts = Date.now();
             state.from = 'system.adapter.' + adapter.namespace;
@@ -591,7 +608,10 @@ function pushHistory(id, state, timerRelog) {
         if (settings.debounce && !ignoreDebonce) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
-            history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
+            history[id].timeout = setTimeout(id => {
+                history[id].timeout = null;
+                pushHelper(id);
+            }, settings.debounce, id);
         } else {
             pushHelper(id);
         }
