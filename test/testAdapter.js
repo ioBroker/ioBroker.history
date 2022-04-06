@@ -184,7 +184,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(2);
+            expect(Object.keys(result).length).to.be.equal(3);
             expect(result['history.0.testValue'].enabled).to.be.true;
             done();
         });
@@ -402,72 +402,42 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it('Test ' + adapterShortName + ': Write debounced values into DB', function (done) {
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    it('Test ' + adapterShortName + ': Write debounced values into DB', async function (done) {
         this.timeout(25000);
         now = Date.now();
 
-        states.setState('history.0.testValueDebounce', {val: 1}, function (err) { // expect logged
-            if (err) {
-                console.log(err);
-            }
-            setTimeout(function () {
-                states.setState('history.0.testValueDebounce', {val: 2}, function (err) { // Expect not logged debounce
-                    if (err) {
-                        console.log(err);
-                    }
-                    setTimeout(function () {
-                        states.setState('history.0.testValueDebounce', {val: 2.1}, function (err) { // Expect not logged min
-                            if (err) {
-                                console.log(err);
-                            }
-                            setTimeout(function () {
-                                states.setState('history.0.testValueDebounce', {val: 2.5}, function (err) { // Expect logged skipped
-                                    if (err) {
-                                        console.log(err);
-                                    }
-                                    setTimeout(function () {
-                                        states.setState('history.0.testValueDebounce', {val: 2.6}, function (err) { // Expect logged
-                                            if (err) {
-                                                console.log(err);
-                                            }
-                                            setTimeout(function () {
-                                                states.setState('history.0.testValueDebounce', {val: 4}, function (err) { // Expect logged
-                                                    if (err) {
-                                                        console.log(err);
-                                                    }
-                                                    setTimeout(function () {
-                                                        states.setState('history.0.testValueDebounce', {val: 4.4}, function (err)  { // expect logged skipped
-                                                            if (err) {
-                                                                console.log(err);
-                                                            }
-                                                            setTimeout(function () {
-                                                                states.setState('history.0.testValueDebounce', {val: 5}, function (err) {  // expect logged
-                                                                    if (err) {
-                                                                        console.log(err);
-                                                                    }
-                                                                    setTimeout(function () {
-                                                                        states.setState('history.0.testValueDebounce', {val: 5}, function (err) {  // expect not logged because same value
-                                                                            if (err) {
-                                                                                console.log(err);
-                                                                            }
-                                                                            setTimeout(done, 1000);
-                                                                        });
-                                                                    }, 20);
-                                                                });
-                                                            }, 200);
-                                                        });
-                                                    }, 200);
-                                                });
-                                            }, 200);
-                                        });
-                                    }, 200);
-                                });
-                            }, 200);
-                        });
-                    }, 20);
-                });
-            }, 200);
-        });
+        try {
+            await states.setStateAsync('history.0.testValueDebounce', {val: 1}); // expect logged
+            await delay(200);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2}); // Expect not logged debounce
+            await delay(20);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2.1}); // Expect not logged debounce
+            await delay(20);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2.2}); // Expect not logged debounce
+            await delay(20);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2.3}); // Expect not logged debounce
+            await delay(20);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2.4}); // Expect not logged debounce
+            await delay(200);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2.9}); // Expect logged skipped
+            await delay(200);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 3.0}); // Expect logged
+            await delay(200);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 4}); // Expect logged
+            await delay(200);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 4.4}); // expect logged skipped
+            await delay(200);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 5});  // expect logged
+            await delay(20);
+            await states.setStateAsync('history.0.testValueDebounce', {val: 5});  // expect not logged because same value
+            await delay(1000);
+        } catch (err) {
+            console.log(err);
+        }
     });
 
     it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
@@ -559,7 +529,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(1);
+            expect(Object.keys(result).length).to.be.equal(2);
             done();
         });
     });
