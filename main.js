@@ -534,7 +534,7 @@ function pushHistory(id, state, timerRelog) {
         const valueUnstable = !!history[id].timeout;
         // When a debounce timer runs and the value is the same as the last one, ignore it
         if (history[id].timeout && state.ts !== state.lc) {
-            return adapter.log.debug(`value not changed debounce ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
+            return adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
         } else if (history[id].timeout) { // if value changed, clear timer
             clearTimeout(history[id].timeout);
             history[id].timeout = null;
@@ -599,7 +599,9 @@ function pushHistory(id, state, timerRelog) {
             ignoreDebonce = true;
         } else {
             if (settings.changesOnly && history[id].skipped) {
+                adapter.log.debug(`Skipped value logged ${id}, value=${history[id].skipped.val}, ts=${history[id].skipped.ts}`);
                 pushHelper(id, history[id].skipped);
+                history[id].skipped = null;
             }
             if (history[id].state && ((history[id].state.val === null && state.val !== null) || (history[id].state.val !== null && state.val === null))) {
                 ignoreDebonce = true;
@@ -607,8 +609,8 @@ function pushHistory(id, state, timerRelog) {
                 ignoreDebonce = true;
             }
         }
+        // Remember last logged timestamp, to check when to do a relog even if same value
         history[id].lastLogTime = state.ts;
-        history[id].skipped = null;
         if (settings.debounce && !ignoreDebonce) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
