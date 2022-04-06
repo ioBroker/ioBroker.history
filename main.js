@@ -546,7 +546,7 @@ function pushHistory(id, state, timerRelog) {
             if (settings.changesRelogInterval === 0) {
                 if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
                     // remember new timestamp
-                    if (valueUnstable) {
+                    if (!valueUnstable) {
                         history[id].skipped = state;
                     }
                     return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
@@ -554,7 +554,7 @@ function pushHistory(id, state, timerRelog) {
             } else if (history[id].lastLogTime) {
                 if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
                     // remember new timestamp
-                    if (valueUnstable) {
+                    if (!valueUnstable) {
                         history[id].skipped = state;
                     }
                     return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
@@ -570,7 +570,7 @@ function pushHistory(id, state, timerRelog) {
                     settings.changesMinDelta !== 0 &&
                     Math.abs(history[id].state.val - state.val) < settings.changesMinDelta
                 ) {
-                    if (valueUnstable) {
+                    if (!valueUnstable) {
                         history[id].skipped = state;
                     }
                     adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
