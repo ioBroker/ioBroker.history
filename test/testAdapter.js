@@ -113,7 +113,25 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             }
                         },
                         type: 'state'
-                    }, _done);
+                    }, () => {
+                        objects.setObject('history.0.testValueDebounce', {
+                            common: {
+                                type: 'number',
+                                role: 'state',
+                                custom: {
+                                    "history.0": {
+                                        enabled: true,
+                                        changesOnly:  true,
+                                        debounce:     100,
+                                        retention:    31536000,
+                                        maxLength:    3,
+                                        changesMinDelta: 0.5
+                                    }
+                                }
+                            },
+                            type: 'state'
+                        }, _done);
+                    });
                 });
         });
     });
@@ -238,6 +256,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }, 100);
         });
     });
+
     it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
         this.timeout(25000);
 
@@ -380,6 +399,95 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
                 done();
             });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Write debounced values into DB', function (done) {
+        this.timeout(25000);
+        now = Date.now();
+
+        states.setState('history.0.testValueDebounce', {val: 1}, function (err) { // expect logged
+            if (err) {
+                console.log(err);
+            }
+            setTimeout(function () {
+                states.setState('history.0.testValueDebounce', {val: 2}, function (err) { // Expect not logged debounce
+                    if (err) {
+                        console.log(err);
+                    }
+                    setTimeout(function () {
+                        states.setState('history.0.testValueDebounce', {val: 2.1}, function (err) { // Expect not logged min
+                            if (err) {
+                                console.log(err);
+                            }
+                            setTimeout(function () {
+                                states.setState('history.0.testValueDebounce', {val: 2.5}, function (err) { // Expect logged skipped
+                                    if (err) {
+                                        console.log(err);
+                                    }
+                                    setTimeout(function () {
+                                        states.setState('history.0.testValueDebounce', {val: 2.6}, function (err) { // Expect logged
+                                            if (err) {
+                                                console.log(err);
+                                            }
+                                            setTimeout(function () {
+                                                states.setState('history.0.testValueDebounce', {val: 4}, function (err) { // Expect logged
+                                                    if (err) {
+                                                        console.log(err);
+                                                    }
+                                                    setTimeout(function () {
+                                                        states.setState('history.0.testValueDebounce', {val: 4.4}, function (err)  { // expect logged skipped
+                                                            if (err) {
+                                                                console.log(err);
+                                                            }
+                                                            setTimeout(function () {
+                                                                states.setState('history.0.testValueDebounce', {val: 5}, function (err) {  // expect logged
+                                                                    if (err) {
+                                                                        console.log(err);
+                                                                    }
+                                                                    setTimeout(function () {
+                                                                        states.setState('history.0.testValueDebounce', {val: 5}, function (err) {  // expect not logged because same value
+                                                                            if (err) {
+                                                                                console.log(err);
+                                                                            }
+                                                                            setTimeout(done, 1000);
+                                                                        });
+                                                                    }, 20);
+                                                                });
+                                                            }, 200);
+                                                        });
+                                                    }, 200);
+                                                });
+                                            }, 200);
+                                        });
+                                    }, 200);
+                                });
+                            }, 200);
+                        });
+                    }, 20);
+                });
+            }, 200);
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     50,
+                aggregate: 'none'
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(4);
+
+            //expect(found).to.be.equal(5); // additionally null value by start of adapter.
+
+            done();
         });
     });
 
