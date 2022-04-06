@@ -417,11 +417,11 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             await delay(20);
             await states.setStateAsync('history.0.testValueDebounce', {val: 2.1}); // Expect not logged debounce
             await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2.2}); // Expect not logged debounce
+            await states.setStateAsync('history.0.testValueDebounce', {val: 1.5}); // Expect not logged debounce
             await delay(20);
             await states.setStateAsync('history.0.testValueDebounce', {val: 2.3}); // Expect not logged debounce
             await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2.4}); // Expect not logged debounce
+            await states.setStateAsync('history.0.testValueDebounce', {val: 2.5}); // Expect not logged debounce
             await delay(200);
             await states.setStateAsync('history.0.testValueDebounce', {val: 2.9}); // Expect logged skipped
             await delay(200);
