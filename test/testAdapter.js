@@ -448,7 +448,9 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             await delay(11000);
         } catch (err) {
             console.log(err);
+            expect(err).to.be.not.ok;
         }
+        done();
     });
 
     it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
