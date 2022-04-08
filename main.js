@@ -542,7 +542,7 @@ function pushHistory(id, state, timerRelog) {
 
         let ignoreDebonce = false;
 
-        if (timerRelog) {
+        if (!timerRelog) {
             const valueUnstable = !!history[id].timeout;
             // When a debounce timer runs and the value is the same as the last one, ignore it
             if (history[id].timeout && state.ts !== state.lc) {
