@@ -442,7 +442,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             await delay(9500);
             for (let i = 1; i < 10; i++) {
                 await states.setStateAsync('history.0.testValueDebounce', {val: 6 + i * 0.05});  // expect logged skipped
-                await delay(150);
+                await delay(70);
             }
             await states.setStateAsync('history.0.testValueDebounce', {val: 6.5});  // expect logged
             await delay(1000);
