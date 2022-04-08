@@ -600,6 +600,7 @@ function pushHistory(id, state, timerRelog) {
         }
 
         if (timerRelog) {
+            state = Object.assign({}, state);
             state.ts = Date.now();
             state.from = 'system.adapter.' + adapter.namespace;
             adapter.log.debug(`timed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
