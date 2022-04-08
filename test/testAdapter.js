@@ -122,7 +122,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     "history.0": {
                                         enabled: true,
                                         changesOnly:  true,
-                                        changesRelogInterval: 10000,
+                                        changesRelogInterval: 10,
                                         debounce:     100,
                                         retention:    31536000,
                                         maxLength:    3,
