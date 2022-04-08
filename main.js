@@ -540,56 +540,57 @@ function pushHistory(id, state, timerRelog) {
             }
         }
 
-        const valueUnstable = !!history[id].timeout;
-        // When a debounce timer runs and the value is the same as the last one, ignore it
-        if (history[id].timeout && state.ts !== state.lc) {
-            return adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
-        } else if (history[id].timeout) { // if value changed, clear timer
-            clearTimeout(history[id].timeout);
-            history[id].timeout = null;
-        }
-
         let ignoreDebonce = false;
 
-        if (history[id].state && settings.changesOnly && !timerRelog) {
-            if (settings.changesRelogInterval === 0) {
-                if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
-                    // remember new timestamp
-                    if (!valueUnstable) {
-                        history[id].skipped = state;
-                    }
-                    return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
-                }
-            } else if (history[id].lastLogTime) {
-                if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    // remember new timestamp
-                    if (!valueUnstable) {
-                        history[id].skipped = state;
-                    }
-                    return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
-                }
-                if (state.ts !== state.lc) {
-                    adapter.log.debug(`value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
-                    ignoreDebonce = true;
-                }
+        if (timerRelog) {
+            const valueUnstable = !!history[id].timeout;
+            // When a debounce timer runs and the value is the same as the last one, ignore it
+            if (history[id].timeout && state.ts !== state.lc) {
+                return adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
+            } else if (history[id].timeout) { // if value changed, clear timer
+                clearTimeout(history[id].timeout);
+                history[id].timeout = null;
             }
-            if (typeof state.val === 'number') {
-                if (
-                    history[id].state.val !== null &&
-                    settings.changesMinDelta !== 0 &&
-                    Math.abs(history[id].state.val - state.val) < settings.changesMinDelta
-                ) {
-                    if (!valueUnstable) {
-                        history[id].skipped = state;
+
+            if (history[id].state && settings.changesOnly && !timerRelog) {
+                if (settings.changesRelogInterval === 0) {
+                    if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
+                        // remember new timestamp
+                        if (!valueUnstable) {
+                            history[id].skipped = state;
+                        }
+                        return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
                     }
-                    adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
-                    return;
-                } else if (settings.changesMinDelta !== 0){
-                    adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                } else if (history[id].lastLogTime) {
+                    if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                        // remember new timestamp
+                        if (!valueUnstable) {
+                            history[id].skipped = state;
+                        }
+                        return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                    }
+                    if (state.ts !== state.lc) {
+                        adapter.log.debug(`value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+                        ignoreDebonce = true;
+                    }
                 }
-            }
-            else {
-                adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                if (typeof state.val === 'number') {
+                    if (
+                        history[id].state.val !== null &&
+                        settings.changesMinDelta !== 0 &&
+                        Math.abs(history[id].state.val - state.val) < settings.changesMinDelta
+                    ) {
+                        if (!valueUnstable) {
+                            history[id].skipped = state;
+                        }
+                        adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        return;
+                    } else if (settings.changesMinDelta !== 0) {
+                        adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                    }
+                } else {
+                    adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                }
             }
         }
 
@@ -652,6 +653,9 @@ function reLogHelper(_id) {
         history[_id].state = history[_id].skipped;
         history[_id].state.from = 'system.adapter.' + adapter.namespace;
         history[_id].skipped = null;
+        pushHistory(_id, history[_id].state, true);
+    } else if (history[_id].state) {
+        history[_id].state.from = 'system.adapter.' + adapter.namespace;
         pushHistory(_id, history[_id].state, true);
     }
     else {
