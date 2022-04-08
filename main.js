@@ -156,7 +156,10 @@ function startAdapter(options) {
                 history[id].timeout = timeout;
                 history[id].realId  = realId;
 
-                history[formerAliasId] && history[formerAliasId].relogTimeout && clearTimeout(history[formerAliasId].relogTimeout);
+                if (history[formerAliasId] && history[formerAliasId].relogTimeout) {
+                    clearTimeout(history[formerAliasId].relogTimeout);
+                    history[formerAliasId].relogTimeout = null;
+                }
 
                 if (history[id][adapter.namespace].changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
@@ -175,8 +178,14 @@ function startAdapter(options) {
                 id = formerAliasId;
                 if (history[id]) {
                     adapter.log.info('disabled logging of ' + id);
-                    history[id].relogTimeout && clearTimeout(history[id].relogTimeout);
-                    history[id].timeout && clearTimeout(history[id].timeout);
+                    if (history[id].relogTimeout) {
+                        clearTimeout(history[id].relogTimeout);
+                        history[id].relogTimeout = null;
+                    }
+                    if (history[id].timeout) {
+                        clearTimeout(history[id].timeout);
+                        history[id].timeout = null;
+                    }
                     storeCached(true, id);
                     delete history[id];
                 }
@@ -588,9 +597,6 @@ function pushHistory(id, state, timerRelog) {
             clearTimeout(history[id].relogTimeout);
             history[id].relogTimeout = null;
         }
-        if (settings.changesRelogInterval > 0) {
-            history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
-        }
 
         if (timerRelog) {
             state.ts = Date.now();
@@ -618,12 +624,18 @@ function pushHistory(id, state, timerRelog) {
                 history[id].timeout = null;
                 history[id].state = state;
                 pushHelper(id);
+                if (settings.changesRelogInterval > 0) {
+                    history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+                }
             }, settings.debounce, id, state);
         } else {
             if (!timerRelog) {
                 history[id].state = state;
             }
             pushHelper(id, state);
+            if (settings.changesRelogInterval > 0) {
+                history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+            }
         }
     }
 }

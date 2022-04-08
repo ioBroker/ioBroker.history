@@ -122,6 +122,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     "history.0": {
                                         enabled: true,
                                         changesOnly:  true,
+                                        changesRelogInterval: 10000,
                                         debounce:     100,
                                         retention:    31536000,
                                         maxLength:    3,
@@ -438,6 +439,12 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             await states.setStateAsync('history.0.testValueDebounce', {val: 5});  // expect logged skipped
             await delay(200);
             await states.setStateAsync('history.0.testValueDebounce', {val: 6});  // expect logged
+            await delay(9500);
+            for (let i = 1; i < 10; i++) {
+                await states.setStateAsync('history.0.testValueDebounce', {val: 6 + i * 0.05});  // expect logged skipped
+                await delay(150);
+            }
+            await states.setStateAsync('history.0.testValueDebounce', {val: 6.5});  // expect logged
             await delay(1000);
         } catch (err) {
             console.log(err);
