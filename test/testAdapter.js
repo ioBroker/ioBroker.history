@@ -408,7 +408,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     }
 
     it('Test ' + adapterShortName + ': Write debounced values into DB', async function (done) {
-        this.timeout(25000);
+        this.timeout(35000);
         now = Date.now();
 
         try {
@@ -445,7 +445,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 await delay(70);
             }
             await states.setStateAsync('history.0.testValueDebounce', {val: 7});  // expect logged
-            await delay(1000);
+            await delay(11000);
         } catch (err) {
             console.log(err);
         }
