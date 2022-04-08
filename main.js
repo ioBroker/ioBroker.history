@@ -618,7 +618,7 @@ function pushHistory(id, state, timerRelog) {
         }
         // Remember last logged timestamp, to check when to do a relog even if same value
         history[id].lastLogTime = state.ts;
-        if (settings.debounce && !ignoreDebonce) {
+        if (settings.debounce && !ignoreDebonce && !timerRelog) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
             history[id].timeout = setTimeout((id, state) => {
