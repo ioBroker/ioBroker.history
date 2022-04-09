@@ -464,7 +464,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     }
 
     it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function () {
-        this.timeout(35000);
+        this.timeout(45000);
         now = Date.now();
 
         try {
@@ -502,7 +502,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     });
 
     it('Test ' + adapterShortName + ': Write debounced values into DB', async function () {
-        this.timeout(35000);
+        this.timeout(45000);
         now = Date.now();
 
         try {
