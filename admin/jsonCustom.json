@@ -404,6 +404,13 @@
       "label": "ignore values below zero",
       "hidden": "!customObj || !customObj.common || customObj.common.type !== 'number'",
       "sm": 6
+    },
+    "disableSkippedValueLogging": {
+      "newLine": true,
+      "label": "Disable charting optimized logging of skipped values",
+      "type": "checkbox",
+      "sm": 12,
+      "md": 4
     }
   }
 }

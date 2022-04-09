@@ -94,10 +94,10 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             setup.startController(true, function(id, obj) {}, function (id, state) {
                     if (onStateChanged) onStateChanged(id, state);
                 },
-                function (_objects, _states) {
+                async (_objects, _states) => {
                     objects = _objects;
                     states  = _states;
-                    objects.setObject('history.0.testValue', {
+                    await objects.setObjectAsync('history.0.testValue', {
                         common: {
                             type: 'number',
                             role: 'state',
@@ -113,26 +113,45 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             }
                         },
                         type: 'state'
-                    }, () => {
-                        objects.setObject('history.0.testValueDebounce', {
-                            common: {
-                                type: 'number',
-                                role: 'state',
-                                custom: {
-                                    "history.0": {
-                                        enabled: true,
-                                        changesOnly:  true,
-                                        changesRelogInterval: 10,
-                                        debounce:     100,
-                                        retention:    31536000,
-                                        maxLength:    3,
-                                        changesMinDelta: 0.5
-                                    }
-                                }
-                            },
-                            type: 'state'
-                        }, _done);
                     });
+                    await objects.setObjectAsync('history.0.testValueDebounce', {
+                        common: {
+                            type: 'number',
+                            role: 'state',
+                            custom: {
+                                "history.0": {
+                                    enabled: true,
+                                    changesOnly:  true,
+                                    changesRelogInterval: 10,
+                                    debounce:     100,
+                                    retention:    31536000,
+                                    maxLength:    3,
+                                    changesMinDelta: 0.5
+                                }
+                            }
+                        },
+                        type: 'state'
+                    });
+                    await objects.setObjectAsync('history.0.testValueDebounceRaw', {
+                        common: {
+                            type: 'number',
+                            role: 'state',
+                            custom: {
+                                "history.0": {
+                                    enabled: true,
+                                    changesOnly:  true,
+                                    changesRelogInterval: 10,
+                                    debounce:     100,
+                                    retention:    31536000,
+                                    maxLength:    3,
+                                    changesMinDelta: 0.5,
+                                    disableSkippedValueLogging: true
+                                }
+                            }
+                        },
+                        type: 'state'
+                    });
+                    _done();
                 });
         });
     });
@@ -185,7 +204,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(3);
+            expect(Object.keys(result).length).to.be.equal(4);
             expect(result['history.0.testValue'].enabled).to.be.true;
             done();
         });
@@ -407,54 +426,90 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    async function logSampleData(stateId) {
+        await states.setStateAsync(stateId, {val: 1}); // expect logged
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 2}); // Expect not logged debounce
+        await delay(20);
+        await states.setStateAsync(stateId, {val: 2.1}); // Expect not logged debounce
+        await delay(20);
+        await states.setStateAsync(stateId, {val: 1.5}); // Expect not logged debounce
+        await delay(20);
+        await states.setStateAsync(stateId, {val: 2.3}); // Expect not logged debounce
+        await delay(20);
+        await states.setStateAsync(stateId, {val: 2.5}); // Expect not logged debounce
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 2.9}); // Expect logged skipped
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 3.0}); // Expect logged
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 4}); // Expect logged
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 4.4}); // expect logged skipped
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 5});  // expect logged
+        await delay(20);
+        await states.setStateAsync(stateId, {val: 5});  // expect not logged debounce
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 5});  // expect logged skipped
+        await delay(200);
+        await states.setStateAsync(stateId, {val: 6});  // expect logged
+        await delay(9700);
+        for (let i = 1; i < 10; i++) {
+            await states.setStateAsync(stateId, {val: 6 + i * 0.05});  // expect logged skipped
+            await delay(70);
+        }
+        await states.setStateAsync(stateId, {val: 7});  // expect logged
+        await delay(11000);
+    }
+
+    it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function (done) {
+        this.timeout(35000);
+        now = Date.now();
+
+        try {
+            await logSampleData('history.0.testValueDebounceRaw');
+        } catch (err) {
+            console.log(err);
+            expect(err).to.be.not.ok;
+        }
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounceRaw',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     50,
+                aggregate: 'none'
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(10);
+            expect(result.result[0].val).to.be.equal(1);
+            expect(result.result[1].val).to.be.equal(2.5);
+            expect(result.result[2].val).to.be.equal(2.9);
+            expect(result.result[3].val).to.be.equal(3.0);
+            expect(result.result[4].val).to.be.equal(4);
+            expect(result.result[5].val).to.be.equal(5);
+            expect(result.result[6].val).to.be.equal(6);
+            expect(result.result[7].val).to.be.equal(6);
+            expect(result.result[8].val).to.be.equal(7);
+            expect(result.result[9].val).to.be.equal(7);
+
+            setTimeout(done, 2000);
+        });
+    });
+
     it('Test ' + adapterShortName + ': Write debounced values into DB', async function (done) {
         this.timeout(35000);
         now = Date.now();
 
         try {
-            await states.setStateAsync('history.0.testValueDebounce', {val: 1}); // expect logged
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2}); // Expect not logged debounce
-            await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2.1}); // Expect not logged debounce
-            await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 1.5}); // Expect not logged debounce
-            await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2.3}); // Expect not logged debounce
-            await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2.5}); // Expect not logged debounce
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 2.9}); // Expect logged skipped
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 3.0}); // Expect logged
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 4}); // Expect logged
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 4.4}); // expect logged skipped
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 5});  // expect logged
-            await delay(20);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 5});  // expect not logged debounce
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 5});  // expect logged skipped
-            await delay(200);
-            await states.setStateAsync('history.0.testValueDebounce', {val: 6});  // expect logged
-            await delay(9700);
-            for (let i = 1; i < 10; i++) {
-                await states.setStateAsync('history.0.testValueDebounce', {val: 6 + i * 0.05});  // expect logged skipped
-                await delay(70);
-            }
-            await states.setStateAsync('history.0.testValueDebounce', {val: 7});  // expect logged
-            await delay(11000);
+            await logSampleData('history.0.testValueDebounce');
         } catch (err) {
             console.log(err);
             expect(err).to.be.not.ok;
         }
-        done();
-    });
-
-    it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
-        this.timeout(25000);
 
         sendTo('history.0', 'getHistory', {
             id: 'history.0.testValueDebounce',
@@ -466,9 +521,20 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(4);
-
-            //expect(found).to.be.equal(5); // additionally null value by start of adapter.
+            expect(result.result.length).to.be.at.least(13);
+            expect(result.result[0].val).to.be.equal(1);
+            expect(result.result[1].val).to.be.equal(2.5);
+            expect(result.result[2].val).to.be.equal(2.9);
+            expect(result.result[3].val).to.be.equal(3.0);
+            expect(result.result[4].val).to.be.equal(4);
+            expect(result.result[5].val).to.be.equal(4.4);
+            expect(result.result[6].val).to.be.equal(5);
+            expect(result.result[7].val).to.be.equal(5);
+            expect(result.result[8].val).to.be.equal(6);
+            expect(result.result[9].val).to.be.equal(6.3);
+            expect(result.result[10].val).to.be.equal(6.45);
+            expect(result.result[11].val).to.be.equal(7);
+            expect(result.result[12].val).to.be.equal(7);
 
             done();
         });
@@ -542,7 +608,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(2);
+            expect(Object.keys(result).length).to.be.equal(3);
             done();
         });
     });

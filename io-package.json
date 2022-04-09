@@ -1,192 +1,193 @@
 {
-  "common": {
-    "name": "history",
-    "title": "History",
-    "titleLang": {
-      "en": "History",
-      "de": "History",
-      "ru": "History",
-      "pt": "History",
-      "nl": "History",
-      "fr": "History",
-      "it": "History",
-      "es": "History",
-      "pl": "History",
-      "zh-cn": "历史"
+    "common": {
+        "name": "history",
+        "title": "History",
+        "titleLang": {
+            "en": "History",
+            "de": "History",
+            "ru": "History",
+            "pt": "History",
+            "nl": "History",
+            "fr": "History",
+            "it": "History",
+            "es": "History",
+            "pl": "History",
+            "zh-cn": "历史"
+        },
+        "desc": {
+            "en": "Logging of the state history in files",
+            "de": "Protokollierung der Zustandsgeschichte in Dateien",
+            "ru": "Ведение истории событий в файлах",
+            "pt": "Registro do histórico de estado em arquivos",
+            "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
+            "fr": "Consignation de l'historique des états dans les fichiers",
+            "it": "Registrazione della cronologia di stato nei file",
+            "es": "Registro del historial del estado en archivos",
+            "pl": "Rejestrowanie historii stanu w plikach",
+            "zh-cn": "在文件中记录状态历史记录"
+        },
+        "version": "1.11.1",
+        "news": {
+            "1.11.1": {
+                "en": "Fix the js-controller and admin minimum version",
+                "de": "Korrigieren Sie die js-controller- und admin-Mindestversion",
+                "ru": "Исправить минимальную версию js-controller и admin",
+                "pt": "Corrija a versão mínima do controlador js e do administrador",
+                "nl": "Fix de js-controller en admin minimumversie",
+                "fr": "Correction de la version minimale de js-controller et admin",
+                "it": "Correggi la versione minima del controller js e dell'amministratore",
+                "es": "Arreglar la versión mínima de js-controller y admin",
+                "pl": "Napraw minimalną wersję kontrolera js i administratora",
+                "zh-cn": "修复 js-controller 和 admin 最低版本"
+            },
+            "1.11.0": {
+                "en": "Added support deletion and changing of stored values.",
+                "de": "Unterstützung für das Löschen und Ändern gespeicherter Werte hinzugefügt.",
+                "ru": "Добавлена поддержка удаления и изменения сохраненных значений.",
+                "pt": "Adicionado suporte para exclusão e alteração de valores armazenados.",
+                "nl": "Ondersteuning toegevoegd voor het verwijderen en wijzigen van opgeslagen waarden.",
+                "fr": "Ajout de la suppression du support et de la modification des valeurs stockées.",
+                "it": "Aggiunto supporto per l'eliminazione e la modifica dei valori memorizzati.",
+                "es": "Se agregó la eliminación de soporte y el cambio de valores almacenados.",
+                "pl": "Dodano obsługę usuwania i zmiany zapisanych wartości.",
+                "zh-cn": "添加了对存储值的删除和更改的支持。"
+            },
+            "1.10.6": {
+                "en": "Prevent some crash cases reported by Sentry",
+                "de": "Verhindern Sie einige von Sentry gemeldete Absturzfälle",
+                "ru": "Предотвращение некоторых случаев сбоев, о которых сообщает Sentry.",
+                "pt": "Prevenir alguns casos de travamento relatados pelo Sentinela",
+                "nl": "Voorkom enkele door Sentry gemelde crashgevallen",
+                "fr": "Empêcher certains cas de plantage signalés par Sentry",
+                "it": "Prevenire alcuni casi di crash segnalati da Sentry",
+                "es": "Evitar algunos casos de bloqueo informados por Sentry",
+                "pl": "Zapobiegaj niektórym przypadkom awarii zgłaszanych przez Sentry",
+                "zh-cn": "防止 Sentry 报告的一些崩溃案例"
+            },
+            "1.10.5": {
+                "en": "Hide settings not relevant when \"log changes only\" is not used\nAllow all number values for debounce again",
+                "de": "Nicht relevante Einstellungen ausblenden, wenn \"Nur Änderungen protokollieren\" nicht verwendet wird\nAlle Zahlenwerte wieder für die Entprellung zulassen",
+                "ru": "Скрыть настройки, не актуальные, если не используется \"только изменения журнала\"\nРазрешить все числовые значения для устранения дребезга снова",
+                "pt": "Ocultar configurações irrelevantes quando \"apenas registro de alterações\" não é usado\nPermitir todos os valores numéricos para debounce novamente",
+                "nl": "Instellingen verbergen die niet relevant zijn wanneer \"alleen logboekwijzigingen\" niet wordt gebruikt\nSta alle getalwaarden opnieuw toe voor debounce",
+                "fr": "Masquer les paramètres non pertinents lorsque \"log changes only\" n'est pas utilisé\nAutoriser à nouveau toutes les valeurs numériques pour l'anti-rebond",
+                "it": "Nascondi le impostazioni non rilevanti quando non viene utilizzato \"solo modifiche al registro\"\nConsenti di nuovo l'antirimbalzo di tutti i valori numerici",
+                "es": "Ocultar la configuración que no es relevante cuando no se utiliza \"solo cambios de registro\"\nPermitir todos los valores numéricos para antirrebote nuevamente",
+                "pl": "Ukryj ustawienia nieistotne, gdy nie używasz opcji „tylko rejestruj zmiany”\nZezwól ponownie na odrzucenie wszystkich wartości liczbowych",
+                "zh-cn": "不使用“仅记录更改”时隐藏不相关的设置\n再次允许所有数值去抖动"
+            },
+            "1.10.4": {
+                "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
+                "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
+                "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
+                "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
+                "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
+                "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
+                "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
+                "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
+                "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
+                "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零值或/和低于零值的选项"
+            },
+            "1.10.3": {
+                "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
+                "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
+                "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
+                "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
+                "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
+                "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
+                "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
+                "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
+                "pl": "Obsługuje tylko `js.controller` 3.3.x+\nWykorzystany widok systemowy/niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
+                "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零或/和低于零值的选项"
+            },
+            "1.10.2": {
+                "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
+                "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
+                "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
+                "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
+                "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
+                "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
+                "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
+                "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
+                "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
+                "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零值或/和低于零值的选项"
+            }
+        },
+        "mode": "daemon",
+        "platform": "Javascript/Node.js",
+        "loglevel": "info",
+        "messagebox": true,
+        "subscribe": "messagebox",
+        "keywords": [
+            "charts",
+            "history",
+            "logging",
+            "graphs",
+            "Graphen",
+            "data",
+            "archive"
+        ],
+        "enabled": true,
+        "compact": true,
+        "preserveSettings": "custom",
+        "authors": [
+            "bluefox <dogafox@gmail.com>",
+            "hobbyquaker <hq@ccu.io>",
+            "Apollon77 <ingo@fischer-ka.de>"
+        ],
+        "license": "MIT",
+        "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
+        "icon": "history.png",
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
+        "type": "storage",
+        "supportCustoms": true,
+        "materialize": true,
+        "getHistory": true,
+        "dependencies": [
+            {
+                "js-controller": ">=3.3.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=3.0.0"
+            }
+        ],
+        "supportStopInstance": 10000,
+        "stopTimeout": 10000,
+        "docs": {
+            "en": [
+                "docs/en/readme.md"
+            ],
+            "de": [
+                "docs/de/readme.md"
+            ]
+        },
+        "plugins": {
+            "sentry": {
+                "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
+            }
+        },
+        "adminUI": {
+            "config": "json",
+            "custom": "json"
+        },
+        "connectionType": "none",
+        "dataSource": "push",
+        "tier": 1
     },
-    "desc": {
-      "en": "Logging of the state history in files",
-      "de": "Protokollierung der Zustandsgeschichte in Dateien",
-      "ru": "Ведение истории событий в файлах",
-      "pt": "Registro do histórico de estado em arquivos",
-      "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
-      "fr": "Consignation de l'historique des états dans les fichiers",
-      "it": "Registrazione della cronologia di stato nei file",
-      "es": "Registro del historial del estado en archivos",
-      "pl": "Rejestrowanie historii stanu w plikach",
-      "zh-cn": "在文件中记录状态历史记录"
+    "native": {
+        "maxLength": 960,
+        "limit": 2000,
+        "storeDir": "",
+        "debounce": 1000,
+        "retention": 31536000,
+        "storeFrom": false,
+        "storeAck": true,
+        "changesRelogInterval": 0,
+        "changesMinDelta": 0,
+        "writeNulls": true,
+        "disableSkippedValueLogging": false
     },
-    "version": "1.11.1",
-    "news": {
-      "1.11.1": {
-        "en": "Fix the js-controller and admin minimum version",
-        "de": "Korrigieren Sie die js-controller- und admin-Mindestversion",
-        "ru": "Исправить минимальную версию js-controller и admin",
-        "pt": "Corrija a versão mínima do controlador js e do administrador",
-        "nl": "Fix de js-controller en admin minimumversie",
-        "fr": "Correction de la version minimale de js-controller et admin",
-        "it": "Correggi la versione minima del controller js e dell'amministratore",
-        "es": "Arreglar la versión mínima de js-controller y admin",
-        "pl": "Napraw minimalną wersję kontrolera js i administratora",
-        "zh-cn": "修复 js-controller 和 admin 最低版本"
-      },
-      "1.11.0": {
-        "en": "Added support deletion and changing of stored values.",
-        "de": "Unterstützung für das Löschen und Ändern gespeicherter Werte hinzugefügt.",
-        "ru": "Добавлена поддержка удаления и изменения сохраненных значений.",
-        "pt": "Adicionado suporte para exclusão e alteração de valores armazenados.",
-        "nl": "Ondersteuning toegevoegd voor het verwijderen en wijzigen van opgeslagen waarden.",
-        "fr": "Ajout de la suppression du support et de la modification des valeurs stockées.",
-        "it": "Aggiunto supporto per l'eliminazione e la modifica dei valori memorizzati.",
-        "es": "Se agregó la eliminación de soporte y el cambio de valores almacenados.",
-        "pl": "Dodano obsługę usuwania i zmiany zapisanych wartości.",
-        "zh-cn": "添加了对存储值的删除和更改的支持。"
-      },
-      "1.10.6": {
-        "en": "Prevent some crash cases reported by Sentry",
-        "de": "Verhindern Sie einige von Sentry gemeldete Absturzfälle",
-        "ru": "Предотвращение некоторых случаев сбоев, о которых сообщает Sentry.",
-        "pt": "Prevenir alguns casos de travamento relatados pelo Sentinela",
-        "nl": "Voorkom enkele door Sentry gemelde crashgevallen",
-        "fr": "Empêcher certains cas de plantage signalés par Sentry",
-        "it": "Prevenire alcuni casi di crash segnalati da Sentry",
-        "es": "Evitar algunos casos de bloqueo informados por Sentry",
-        "pl": "Zapobiegaj niektórym przypadkom awarii zgłaszanych przez Sentry",
-        "zh-cn": "防止 Sentry 报告的一些崩溃案例"
-      },
-      "1.10.5": {
-        "en": "Hide settings not relevant when \"log changes only\" is not used\nAllow all number values for debounce again",
-        "de": "Nicht relevante Einstellungen ausblenden, wenn \"Nur Änderungen protokollieren\" nicht verwendet wird\nAlle Zahlenwerte wieder für die Entprellung zulassen",
-        "ru": "Скрыть настройки, не актуальные, если не используется \"только изменения журнала\"\nРазрешить все числовые значения для устранения дребезга снова",
-        "pt": "Ocultar configurações irrelevantes quando \"apenas registro de alterações\" não é usado\nPermitir todos os valores numéricos para debounce novamente",
-        "nl": "Instellingen verbergen die niet relevant zijn wanneer \"alleen logboekwijzigingen\" niet wordt gebruikt\nSta alle getalwaarden opnieuw toe voor debounce",
-        "fr": "Masquer les paramètres non pertinents lorsque \"log changes only\" n'est pas utilisé\nAutoriser à nouveau toutes les valeurs numériques pour l'anti-rebond",
-        "it": "Nascondi le impostazioni non rilevanti quando non viene utilizzato \"solo modifiche al registro\"\nConsenti di nuovo l'antirimbalzo di tutti i valori numerici",
-        "es": "Ocultar la configuración que no es relevante cuando no se utiliza \"solo cambios de registro\"\nPermitir todos los valores numéricos para antirrebote nuevamente",
-        "pl": "Ukryj ustawienia nieistotne, gdy nie używasz opcji „tylko rejestruj zmiany”\nZezwól ponownie na odrzucenie wszystkich wartości liczbowych",
-        "zh-cn": "不使用“仅记录更改”时隐藏不相关的设置\n再次允许所有数值去抖动"
-      },
-      "1.10.4": {
-        "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
-        "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
-        "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
-        "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
-        "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
-        "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
-        "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
-        "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
-        "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
-        "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零值或/和低于零值的选项"
-      },
-      "1.10.3": {
-        "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
-        "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
-        "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
-        "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
-        "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
-        "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
-        "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
-        "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
-        "pl": "Obsługuje tylko `js.controller` 3.3.x+\nWykorzystany widok systemowy/niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
-        "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零或/和低于零值的选项"
-      },
-      "1.10.2": {
-        "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
-        "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
-        "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
-        "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
-        "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
-        "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
-        "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
-        "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
-        "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
-        "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零值或/和低于零值的选项"
-      }
-    },
-    "mode": "daemon",
-    "platform": "Javascript/Node.js",
-    "loglevel": "info",
-    "messagebox": true,
-    "subscribe": "messagebox",
-    "keywords": [
-      "charts",
-      "history",
-      "logging",
-      "graphs",
-      "Graphen",
-      "data",
-      "archive"
-    ],
-    "enabled": true,
-    "compact": true,
-    "preserveSettings": "custom",
-    "authors": [
-      "bluefox <dogafox@gmail.com>",
-      "hobbyquaker <hq@ccu.io>",
-      "Apollon77 <ingo@fischer-ka.de>"
-    ],
-    "license": "MIT",
-    "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
-    "icon": "history.png",
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
-    "type": "storage",
-    "supportCustoms": true,
-    "materialize": true,
-    "getHistory": true,
-    "dependencies": [
-      {
-        "js-controller": ">=3.3.0"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=3.0.0"
-      }
-    ],
-    "supportStopInstance": 10000,
-    "stopTimeout": 10000,
-    "docs": {
-      "en": [
-        "docs/en/readme.md"
-      ],
-      "de": [
-        "docs/de/readme.md"
-      ]
-    },
-    "plugins": {
-      "sentry": {
-        "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
-      }
-    },
-    "adminUI": {
-      "config": "json",
-      "custom": "json"
-    },
-    "connectionType": "none",
-    "dataSource": "push",
-    "tier": 1
-  },
-  "native": {
-    "maxLength": 960,
-    "limit": 2000,
-    "storeDir": "",
-    "debounce": 1000,
-    "retention": 31536000,
-    "storeFrom": false,
-    "storeAck": true,
-    "changesRelogInterval": 0,
-    "changesMinDelta": 0,
-    "writeNulls": true
-  },
-  "objects": []
+    "objects": []
 }

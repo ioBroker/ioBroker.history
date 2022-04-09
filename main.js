@@ -141,6 +141,14 @@ function startAdapter(options) {
                 obj.common.custom[adapter.namespace].ignoreZero = obj.common.custom[adapter.namespace].ignoreZero === 'true' || obj.common.custom[adapter.namespace].ignoreZero === true;
                 obj.common.custom[adapter.namespace].ignoreBelowZero = obj.common.custom[adapter.namespace].ignoreBelowZero === 'true' || obj.common.custom[adapter.namespace].ignoreBelowZero === true;
 
+                if (obj.common.custom[adapter.namespace].disableSkippedValueLogging !== undefined && obj.common.custom[adapter.namespace].disableSkippedValueLogging !== null && obj.common.custom[adapter.namespace].disableSkippedValueLogging !== '') {
+                    obj.common.custom[adapter.namespace].disableSkippedValueLogging = obj.common.custom[adapter.namespace].disableSkippedValueLogging === 'true' || obj.common.custom[adapter.namespace].disableSkippedValueLogging === true;
+                } else {
+                    obj.common.custom[adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
+                }
+
+
+
                 // add one day if retention is too small
                 if (obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention <= 604800) {
                     obj.common.custom[adapter.namespace].retention += 86400;
@@ -484,6 +492,13 @@ function main() { //start
                         history[id][adapter.namespace].ignoreZero = history[id][adapter.namespace].ignoreZero === 'true' || history[id][adapter.namespace].ignoreZero === true;
                         history[id][adapter.namespace].ignoreBelowZero = history[id][adapter.namespace].ignoreBelowZero === 'true' || history[id][adapter.namespace].ignoreBelowZero === true;
 
+                        if (history[id][adapter.namespace].disableSkippedValueLogging !== undefined && history[id][adapter.namespace].disableSkippedValueLogging !== null && history[id][adapter.namespace].disableSkippedValueLogging !== '') {
+                            history[id][adapter.namespace].disableSkippedValueLogging = history[id][adapter.namespace].disableSkippedValueLogging === 'true' || history[id][adapter.namespace].disableSkippedValueLogging === true;
+                        } else {
+                            history[id][adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
+                        }
+
+
                         history[id].realId = realId;
                         history[id].list = history[id].list || [];
                     }
@@ -552,11 +567,19 @@ function pushHistory(id, state, timerRelog) {
                 history[id].timeout = null;
             }
 
+            if (settings.ignoreZero && (state.val === undefined || state.val === null || state.val === 0)) {
+                return adapter.log.debug(`value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`);
+            } else
+            if (settings.ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
+                adapter.log.debug(`value ignored because below 0 ${id}, new-value=${state.val}, ts=${state.ts}`);
+                return;
+            }
+
             if (history[id].state && settings.changesOnly && !timerRelog) {
                 if (settings.changesRelogInterval === 0) {
                     if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
                         // remember new timestamp
-                        if (!valueUnstable) {
+                        if (!valueUnstable && !settings.disableSkippedValueLogging) {
                             history[id].skipped = state;
                         }
                         return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
@@ -564,7 +587,7 @@ function pushHistory(id, state, timerRelog) {
                 } else if (history[id].lastLogTime) {
                     if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
                         // remember new timestamp
-                        if (!valueUnstable) {
+                        if (!valueUnstable && !settings.disableSkippedValueLogging) {
                             history[id].skipped = state;
                         }
                         return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
@@ -580,7 +603,7 @@ function pushHistory(id, state, timerRelog) {
                         settings.changesMinDelta !== 0 &&
                         Math.abs(history[id].state.val - state.val) < settings.changesMinDelta
                     ) {
-                        if (!valueUnstable) {
+                        if (!valueUnstable && !settings.disableSkippedValueLogging) {
                             history[id].skipped = state;
                         }
                         adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
@@ -678,15 +701,6 @@ function pushHelper(_id, state) {
     if (!history[_id] || (!history[_id].state && state)) return;
     if (!state) {
         state = history[_id].state;
-    }
-
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!state || state.val === undefined || state.val === null || state.val === 0)) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value zero or null`);
-        return;
-    } else
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(state)} and it was ignored because the value is below 0`);
-        return;
     }
 
     // if it was not deleted in this time

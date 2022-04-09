@@ -15,7 +15,9 @@
     "DEC": "DEC",
     "DEC/INC": "DEC / INC",
     "De-bounce interval(ms)": "Intervalo de desvio (ms)",
+    "De-bounce time": "Tempo de recuperação",
     "Default settings": "Configurações padrão",
+    "Disable charting optimized logging of skipped values": "Desativar o registro otimizado de gráficos de valores ignorados",
     "End": "Fim",
     "Generate": "Gerar",
     "History adapter settings": "Configurações do adaptador de histórico",
@@ -26,8 +28,11 @@
     "Steps": "Passos",
     "Storage retention": "Retenção de armazenamento",
     "Storage settings": "Configurações de armazenamento",
+    "Write NULL values on start/stop boundaries": "Escreva valores NULL nos limites de início/parada",
     "debounce": "Ignorar alterações até que o valor permaneça inalterado por X Milissegundos",
     "enabled": "ativado",
+    "ignore values below zero": "ignorar valores abaixo de zero",
+    "ignore zero or null values": "ignorar valores zero ou nulos",
     "keep forever": "mantenha para sempre",
     "log changes interval(s)": "ainda gravar os mesmos valores (segundos)",
     "log changes interval(s) (0 = disable)": "ainda gravar os mesmos valores (segundos) <br> (0 = desabilitar)",
@@ -40,9 +45,5 @@
     "retention": "Retenção de armazenamento",
     "storeAck": "Recorde de valor",
     "storeDir": "Diretório de armazenamento",
-    "storeFrom": "Armazenar origem do valor",
-    "De-bounce time": "Tempo de recuperação",
-    "Write NULL values on start/stop boundaries": "Escreva valores NULL nos limites de início/parada",
-    "ignore zero or null values": "ignorar valores zero ou nulos",
-    "ignore values below zero": "ignorar valores abaixo de zero"
+    "storeFrom": "Armazenar origem do valor"
 }
