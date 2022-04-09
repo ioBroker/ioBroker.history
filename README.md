@@ -25,6 +25,8 @@ This adapter saves state history in a two-staged process.
 ## Changelog
 
 ### __WORK IN PROGRESS__
+* (Apollon77) Do bigger adjustments to the logging logic to make sure Debounce is working properly
+* (Apollon77) New setting added to disable the "logging of additional values for charting optimization" - then only the expected data are logged
 * (Apollon77) Add flag returnNewestEntries for GetHistory to determine which records to return when more entries as "count" are existing for aggregate "none"
 * (Apollon77) make sure id is always returned on GetHistory when addId is set
 

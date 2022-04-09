@@ -141,7 +141,6 @@
         "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
         "type": "storage",
         "supportCustoms": true,
-        "materialize": true,
         "getHistory": true,
         "dependencies": [
             {
