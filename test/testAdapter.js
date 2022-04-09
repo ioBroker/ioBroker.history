@@ -527,15 +527,15 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 expect(result.result.length).to.be.at.least(13);
                 expect(result.result[0].val).to.be.equal(1);
                 expect(result.result[1].val).to.be.equal(2.5);
-                expect(result.result[2].val).to.be.equal(2.9);
-                expect(result.result[3].val).to.be.equal(3.0);
+                expect(result.result[2].val).to.be.below(3);
+                expect(result.result[3].val).to.be.equal(3);
                 expect(result.result[4].val).to.be.equal(4);
-                expect(result.result[5].val).to.be.equal(4.4);
+                expect(result.result[5].val).to.be.below(5);
                 expect(result.result[6].val).to.be.equal(5);
                 expect(result.result[7].val).to.be.equal(5);
                 expect(result.result[8].val).to.be.equal(6);
-                expect(result.result[9].val).to.be.equal(6.3);
-                expect(result.result[10].val).to.be.equal(6.45);
+                expect(result.result[9].val).to.be.below(7);
+                expect(result.result[10].val).to.be.below(7);
                 expect(result.result[11].val).to.be.equal(7);
                 expect(result.result[12].val).to.be.equal(7);
 
