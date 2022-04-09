@@ -123,7 +123,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     enabled: true,
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
-                                    debounce:     100,
+                                    debounce:     150,
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5
@@ -141,7 +141,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     enabled: true,
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
-                                    debounce:     100,
+                                    debounce:     150,
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5,
