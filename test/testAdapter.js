@@ -463,7 +463,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         await delay(11000);
     }
 
-    it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function (done) {
+    it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function () {
         this.timeout(35000);
         now = Date.now();
 
@@ -474,33 +474,34 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             expect(err).to.be.not.ok;
         }
 
-        sendTo('history.0', 'getHistory', {
-            id: 'history.0.testValueDebounceRaw',
-            options: {
-                start:     now,
-                end:       Date.now(),
-                count:     50,
-                aggregate: 'none'
-            }
-        }, function (result) {
-            console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(10);
-            expect(result.result[0].val).to.be.equal(1);
-            expect(result.result[1].val).to.be.equal(2.5);
-            expect(result.result[2].val).to.be.equal(2.9);
-            expect(result.result[3].val).to.be.equal(3.0);
-            expect(result.result[4].val).to.be.equal(4);
-            expect(result.result[5].val).to.be.equal(5);
-            expect(result.result[6].val).to.be.equal(6);
-            expect(result.result[7].val).to.be.equal(6);
-            expect(result.result[8].val).to.be.equal(7);
-            expect(result.result[9].val).to.be.equal(7);
+        return new Promise(resolve => {
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueDebounceRaw',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(9);
+                expect(result.result[0].val).to.be.equal(1);
+                expect(result.result[1].val).to.be.equal(2.5);
+                expect(result.result[2].val).to.be.equal(3.0);
+                expect(result.result[3].val).to.be.equal(4);
+                expect(result.result[4].val).to.be.equal(5);
+                expect(result.result[5].val).to.be.equal(6);
+                expect(result.result[6].val).to.be.equal(6);
+                expect(result.result[7].val).to.be.equal(7);
+                expect(result.result[8].val).to.be.equal(7);
 
-            setTimeout(done, 2000);
+                setTimeout(resolve, 2000);
+            });
         });
     });
 
-    it('Test ' + adapterShortName + ': Write debounced values into DB', async function (done) {
+    it('Test ' + adapterShortName + ': Write debounced values into DB', async function () {
         this.timeout(35000);
         now = Date.now();
 
@@ -511,32 +512,35 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             expect(err).to.be.not.ok;
         }
 
-        sendTo('history.0', 'getHistory', {
-            id: 'history.0.testValueDebounce',
-            options: {
-                start:     now,
-                end:       Date.now(),
-                count:     50,
-                aggregate: 'none'
-            }
-        }, function (result) {
-            console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(13);
-            expect(result.result[0].val).to.be.equal(1);
-            expect(result.result[1].val).to.be.equal(2.5);
-            expect(result.result[2].val).to.be.equal(2.9);
-            expect(result.result[3].val).to.be.equal(3.0);
-            expect(result.result[4].val).to.be.equal(4);
-            expect(result.result[5].val).to.be.equal(4.4);
-            expect(result.result[6].val).to.be.equal(5);
-            expect(result.result[7].val).to.be.equal(5);
-            expect(result.result[8].val).to.be.equal(6);
-            expect(result.result[9].val).to.be.equal(6.3);
-            expect(result.result[10].val).to.be.equal(6.45);
-            expect(result.result[11].val).to.be.equal(7);
-            expect(result.result[12].val).to.be.equal(7);
+        return new Promise(resolve => {
 
-            done();
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueDebounce',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(13);
+                expect(result.result[0].val).to.be.equal(1);
+                expect(result.result[1].val).to.be.equal(2.5);
+                expect(result.result[2].val).to.be.equal(2.9);
+                expect(result.result[3].val).to.be.equal(3.0);
+                expect(result.result[4].val).to.be.equal(4);
+                expect(result.result[5].val).to.be.equal(4.4);
+                expect(result.result[6].val).to.be.equal(5);
+                expect(result.result[7].val).to.be.equal(5);
+                expect(result.result[8].val).to.be.equal(6);
+                expect(result.result[9].val).to.be.equal(6.3);
+                expect(result.result[10].val).to.be.equal(6.45);
+                expect(result.result[11].val).to.be.equal(7);
+                expect(result.result[12].val).to.be.equal(7);
+
+                resolve();
+            });
         });
     });
 
