@@ -745,7 +745,7 @@ function pushHelper(_id, state) {
 
     const _settings = history[_id][adapter.namespace];
     if (_settings && history[_id].list.length > _settings.maxLength) {
-        adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
+        _settings.enableDebugLogs && adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
         appendFile(_id, history[_id].list);
     }
 }
