@@ -123,12 +123,12 @@ function startAdapter(options) {
                 }
                 if (!obj.common.custom[adapter.namespace].blockTime && obj.common.custom[adapter.namespace].blockTime !== '0' && obj.common.custom[adapter.namespace].blockTime !== 0) {
                     if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
-                        obj.common.custom[adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 1000;
+                        obj.common.custom[adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 0;
                     } else {
-                        obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].debounce, 10) || 1000;
+                        obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].debounce, 10) || 0;
                     }
                 } else {
-                    obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].blockTime, 10) || 1000;
+                    obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].blockTime, 10) || 0;
                 }
                 if (!obj.common.custom[adapter.namespace].debounceTime && obj.common.custom[adapter.namespace].debounceTime !== '0' && obj.common.custom[adapter.namespace].debounceTime !== 0) {
                     obj.common.custom[adapter.namespace].debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
@@ -443,7 +443,7 @@ function main() { //start
         adapter.config.blockTime = parseInt(adapter.config.blockTime, 10) || 0;
     } else {
         if (adapter.config.debounce !== null && adapter.config.debounce !== undefined) {
-            adapter.config.debounce = parseInt(adapter.config.debounce, 10) || 1000;
+            adapter.config.debounce = parseInt(adapter.config.debounce, 10) || 0;
         } else {
             adapter.config.blockTime = 0;
         }
@@ -497,12 +497,12 @@ function main() { //start
                         }
                         if (!history[id][adapter.namespace].blockTime && history[id][adapter.namespace].blockTime !== '0' && history[id][adapter.namespace].blockTime !== 0) {
                             if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                                history[id][adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 1000;
+                                history[id][adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 0;
                             } else {
-                                history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].debounce, 10) || 1000;
+                                history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].debounce, 10) || 0;
                             }
                         } else {
-                            history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].blockTime, 10) || 1000;
+                            history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].blockTime, 10) || 0;
                         }
                         if (!history[id][adapter.namespace].debounceTime && history[id][adapter.namespace].debounceTime !== '0' && history[id][adapter.namespace].debounceTime !== 0) {
                             history[id][adapter.namespace].debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
