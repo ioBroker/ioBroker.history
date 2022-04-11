@@ -121,10 +121,19 @@ function startAdapter(options) {
                 } else {
                     obj.common.custom[adapter.namespace].retention = parseInt(obj.common.custom[adapter.namespace].retention, 10) || 0;
                 }
-                if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
-                    obj.common.custom[adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                if (!obj.common.custom[adapter.namespace].blockTime && obj.common.custom[adapter.namespace].blockTime !== '0' && obj.common.custom[adapter.namespace].blockTime !== 0) {
+                    if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
+                        obj.common.custom[adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 1000;
+                    } else {
+                        obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].debounce, 10) || 1000;
+                    }
                 } else {
-                    obj.common.custom[adapter.namespace].debounce = parseInt(obj.common.custom[adapter.namespace].debounce, 10);
+                    obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].blockTime, 10) || 1000;
+                }
+                if (!obj.common.custom[adapter.namespace].debounceTime && obj.common.custom[adapter.namespace].debounceTime !== '0' && obj.common.custom[adapter.namespace].debounceTime !== 0) {
+                    obj.common.custom[adapter.namespace].debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].debounceTime = parseInt(obj.common.custom[adapter.namespace].debounceTime, 10) || 0;
                 }
                 obj.common.custom[adapter.namespace].changesOnly = obj.common.custom[adapter.namespace].changesOnly === 'true' || obj.common.custom[adapter.namespace].changesOnly === true;
                 if (obj.common.custom[adapter.namespace].changesRelogInterval !== undefined && obj.common.custom[adapter.namespace].changesRelogInterval !== null && obj.common.custom[adapter.namespace].changesRelogInterval !== '') {
@@ -430,6 +439,24 @@ function main() { //start
         adapter.config.changesMinDelta = 0;
     }
 
+    if (adapter.config.blockTime !== null && adapter.config.blockTime !== undefined) {
+        adapter.config.blockTime = parseInt(adapter.config.blockTime, 10) || 0;
+    } else {
+        if (adapter.config.debounce !== null && adapter.config.debounce !== undefined) {
+            adapter.config.debounce = parseInt(adapter.config.debounce, 10) || 1000;
+        } else {
+            adapter.config.blockTime = 0;
+        }
+    }
+
+    if (adapter.config.debounceTime !== null && adapter.config.debounceTime !== undefined) {
+        adapter.config.debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
+    } else {
+        adapter.config.debounceTime = 0;
+    }
+
+
+
     try {
         // create directory
         if (!fs.existsSync(adapter.config.storeDir)) {
@@ -468,10 +495,19 @@ function main() { //start
                         } else {
                             history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
                         }
-                        if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                            history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                        if (!history[id][adapter.namespace].blockTime && history[id][adapter.namespace].blockTime !== '0' && history[id][adapter.namespace].blockTime !== 0) {
+                            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                                history[id][adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 1000;
+                            } else {
+                                history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].debounce, 10) || 1000;
+                            }
                         } else {
-                            history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
+                            history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].blockTime, 10) || 1000;
+                        }
+                        if (!history[id][adapter.namespace].debounceTime && history[id][adapter.namespace].debounceTime !== '0' && history[id][adapter.namespace].debounceTime !== 0) {
+                            history[id][adapter.namespace].debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
+                        } else {
+                            history[id][adapter.namespace].debounceTime = parseInt(history[id][adapter.namespace].debounceTime, 10) || 0;
                         }
                         history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
                         if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
@@ -570,9 +606,10 @@ function pushHistory(id, state, timerRelog) {
             const valueUnstable = !!history[id].timeout;
             // When a debounce timer runs and the value is the same as the last one, ignore it
             if (history[id].timeout && state.ts !== state.lc) {
-                settings.enableDebugLogs && adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
+                settings.enableDebugLogs && adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce timer keeps running`);
                 return;
             } else if (history[id].timeout) { // if value changed, clear timer
+                settings.enableDebugLogs && adapter.log.debug(`value changed during debounce time ${id}, value=${state.val}, ts=${state.ts}, debounce timer restarted`);
                 clearTimeout(history[id].timeout);
                 history[id].timeout = null;
             }
@@ -655,7 +692,7 @@ function pushHistory(id, state, timerRelog) {
         }
         // Remember last logged timestamp, to check when to do a relog even if same value
         history[id].lastLogTime = state.ts;
-        if (settings.debounce && !ignoreDebonce && !timerRelog) {
+        if (settings.debounceTime && !ignoreDebonce && !timerRelog) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
             history[id].timeout = setTimeout((id, state) => {
@@ -666,7 +703,7 @@ function pushHistory(id, state, timerRelog) {
                 if (settings.changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
                 }
-            }, settings.debounce, id, state);
+            }, settings.debounceTime, id, state);
         } else {
             if (!timerRelog) {
                 history[id].state = state;
@@ -711,7 +748,7 @@ function reLogHelper(_id) {
 }
 
 function pushHelper(_id, state) {
-    if (!history[_id] || (!history[_id].state && state)) return;
+    if (!history[_id] || (!history[_id].state && !state)) return;
     if (!state) {
         state = history[_id].state;
     }
@@ -1634,7 +1671,7 @@ function storeState(msg) {
         for (let i = 0; i < msg.message.length; i++) {
             id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
             if (history[id]) {
-                pushHelper(msg.message[i].state);
+                pushHelper(id, msg.message[i].state);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message[i].id}. Ignoring`);
             }

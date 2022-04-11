@@ -26,7 +26,7 @@
             "pl": "Rejestrowanie historii stanu w plikach",
             "zh-cn": "在文件中记录状态历史记录"
         },
-        "version": "1.11.1",
+        "version": "2.0.0",
         "news": {
             "1.11.1": {
                 "en": "Fix the js-controller and admin minimum version",
@@ -149,7 +149,7 @@
         ],
         "globalDependencies": [
             {
-                "admin": ">=3.0.0"
+                "admin": ">=5.1.28"
             }
         ],
         "supportStopInstance": 10000,
@@ -173,13 +173,67 @@
         },
         "connectionType": "none",
         "dataSource": "push",
-        "tier": 1
+        "tier": 1,
+        "messages": [
+            {
+                "condition": {
+                    "operand": "and",
+                    "rules": [
+                        "oldVersion<2.0.0",
+                        "newVersion>=2.0.0"
+                    ]
+                },
+                "title": {
+                    "en": "Important notice!",
+                    "de": "Wichtiger Hinweis!",
+                    "ru": "Важное замечание!",
+                    "pt": "Notícia importante!",
+                    "nl": "Belangrijke mededeling!",
+                    "fr": "Avis important!",
+                    "it": "Avviso IMPORTANTE!",
+                    "es": "Noticia importante!",
+                    "pl": "Ważna uwaga!",
+                    "zh-cn": "重要通知!"
+                },
+                "text": {
+                    "en": "This new version introduces several changes how values are logged because we fixed several issues and added new features. Please especially check the defined \"debounce\" and \"block time\" settings in your datapoints if values are not logged as expected and make sure the settings make sense. For more details please refer to the changelog and Readme.",
+                    "de": "Diese neue Version führt mehrere Änderungen ein, wie Werte protokolliert werden, da wir mehrere Probleme behoben und neue Funktionen hinzugefügt haben. Bitte überprüfen Sie insbesondere die definierten „Entprellen“- und „Sperrzeit“-Einstellungen in Ihren Datenpunkten, wenn Werte nicht wie erwartet protokolliert werden, und stellen Sie sicher, dass die Einstellungen sinnvoll sind. Weitere Details finden Sie im Changelog und in der Readme.",
+                    "ru": "В этой новой версии внесено несколько изменений в регистрацию значений, поскольку мы исправили несколько проблем и добавили новые функции. Пожалуйста, особенно проверьте определенные настройки «debounce» и «block time» в ваших точках данных, если значения не регистрируются должным образом, и убедитесь, что настройки имеют смысл. Для получения более подробной информации, пожалуйста, обратитесь к журналу изменений и Readme.",
+                    "pt": "Esta nova versão apresenta várias alterações na forma como os valores são registrados, pois corrigimos vários problemas e adicionamos novos recursos. Verifique especialmente as configurações definidas de \"debounce\" e \"block time\" em seus pontos de dados se os valores não forem registrados conforme o esperado e verifique se as configurações fazem sentido. Para obter mais detalhes, consulte o log de alterações e o Leiame.",
+                    "nl": "Deze nieuwe versie introduceert verschillende wijzigingen in de manier waarop waarden worden geregistreerd, omdat we verschillende problemen hebben opgelost en nieuwe functies hebben toegevoegd. Controleer vooral de gedefinieerde \"debounce\" en \"block time\" instellingen in uw datapunten als de waarden niet zijn vastgelegd zoals verwacht en zorg ervoor dat de instellingen kloppen. Raadpleeg de changelog en Readme voor meer informatie.",
+                    "fr": "Cette nouvelle version introduit plusieurs changements dans la journalisation des valeurs car nous avons corrigé plusieurs problèmes et ajouté de nouvelles fonctionnalités. Veuillez vérifier en particulier les paramètres \"anti-rebond\" et \"temps de blocage\" définis dans vos points de données si les valeurs ne sont pas enregistrées comme prévu et assurez-vous que les paramètres ont un sens. Pour plus de détails, veuillez consulter le journal des modifications et le fichier Lisez-moi.",
+                    "it": "Questa nuova versione introduce diverse modifiche al modo in cui i valori vengono registrati perché abbiamo risolto diversi problemi e aggiunto nuove funzionalità. Controllare in particolare le impostazioni definite \"debounce\" e \"block time\" nei propri datapoint se i valori non sono registrati come previsto e assicurarsi che le impostazioni abbiano un senso. Per maggiori dettagli, fare riferimento al log delle modifiche e al Leggimi.",
+                    "es": "Esta nueva versión introduce varios cambios en la forma en que se registran los valores porque solucionamos varios problemas y agregamos nuevas funciones. Verifique especialmente la configuración definida de \"antirrebote\" y \"tiempo de bloqueo\" en sus puntos de datos si los valores no se registran como se esperaba y asegúrese de que la configuración tenga sentido. Para obtener más detalles, consulte el registro de cambios y el archivo Léame.",
+                    "pl": "Ta nowa wersja wprowadza kilka zmian w sposobie rejestrowania wartości, ponieważ naprawiliśmy kilka problemów i dodaliśmy nowe funkcje. W szczególności sprawdź zdefiniowane ustawienia „odbicia” i „czasu blokowania” w punktach danych, jeśli wartości nie są rejestrowane zgodnie z oczekiwaniami i upewnij się, że ustawienia mają sens. Aby uzyskać więcej informacji, zapoznaj się z dziennikiem zmian i Readme.",
+                    "zh-cn": "这个新版本引入了一些更改值的记录方式，因为我们修复了几个问题并添加了新功能。如果未按预期记录值，请特别检查数据点中定义的“去抖动”和“阻塞时间”设置，并确保设置有意义。有关更多详细信息，请参阅更改日志和自述文件。"
+                },
+                "link": "https://github.com/ioBroker/ioBroker.history/blob/master/docs/en/README.md#settings",
+                "level": "warn",
+                "linkText": {
+                    "en": "Readme",
+                    "de": "Liesmich",
+                    "ru": "Прочти меня",
+                    "pt": "Leia-me",
+                    "nl": "Leesmij",
+                    "fr": "Lisez-moi",
+                    "it": "Leggimi",
+                    "es": "Léame",
+                    "pl": "Readme",
+                    "zh-cn": "自述文件"
+                },
+                "buttons": [
+                    "agree",
+                    "cancel"
+                ]
+            }
+        ]
     },
     "native": {
         "maxLength": 960,
         "limit": 2000,
         "storeDir": "",
-        "debounce": 1000,
+        "blockTime": 0,
+        "debounceTime": 0,
         "retention": 31536000,
         "storeFrom": false,
         "storeAck": true,

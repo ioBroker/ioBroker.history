@@ -7,14 +7,22 @@ To enable charts you have to install **flot** adapter.
 
 ## Settings
 
-- **Storage directory** - Path to the directory, where the files will be stored. It can be done relative to `iobroker-data` or absolute, like `/mnt/history` or `D:/History`
-- **Maximal number of stored in RAM values** - After this number of values reached in RAM they will be saved on disk.
-- **Store origin of value** - If "from" field will be stored too. Can save place on disk.
-- **De-bounce interval** - Protection against too often changes of some value and defined tha time in ms in which after one value change other changes are not logged
-- **Storage retention** - How many values in the past will be stored on disk.
-- **Log unchanged values any(s)** - When using "log changes only" you can set a time interval in seconds here after which also unchanged values will be re-logged into the DB
+- **Storage directory** (instance) - Path to the directory, where the files will be stored. It can be done relative to `iobroker-data` or absolute, like `/mnt/history` or `D:/History`. Please DO NOT store the data in nany node_modules directory!
+- **Store origin of value** - Defines, ff "from" field will be stored too. Can save space on disk.
+- **Debounce Time** - Protection against unstable values to make sure that only stable values are logged when the value did not change in the defined amount of Milliseconds. ATTENTION: If values change more often then this setting effectively no value will be logged (because any value is unstable)
+- **Blocktime** - Defines for how long after storing the last value no further value is stored. When the given time in Milliseconds is over then the next value that fulfills all other checks is logged.
+- **Record changes only** - This function make sure that only changed values are logged if they fulfill other checks (see below). Same values will not be logged.
+- **still record the same values (seconds)** - When using "Record changes only" you can set a time interval in seconds here after which also unchanged values will be re-logged into the DB. You can detect the values re-logged by the adapter with the "from" field.
+- **Minimum difference from last value** - When using "Record changes only" you can define the required minimum difference between the new value and the last value. If this is not reached the value is not recorded.
+- **ignore 0 or null values (==0)** - You can define if 0 or null values should be ignored.
+- **ignore values below zero (<0)** - You can define if values below zero should be ignored.
+- **Disable charting optimized logging of skipped values** - By default the adapter tries to record the values for optimized charting. This can mean that additional values (that e.g. not fulfilled all checks above) are logged automatically. If this is not wanted, you can disable this feature.
+- **Alias-ID** - You can define an alias for the ID. This is useful if you have changed a device and want to have continuous data logging. Please consider switching to real alias States in teh future!
+- **Storage retention** - How many values in the past will be stored on disk. Data are deleted when the time is reached as soon as new data should be stored for a datapoint.
+- **Maximal number of stored in RAM values** - Define how many number of values will be hold in RAM before persisting them on disk. You can control how much I/O is done.
+- **Enable enhanced debug logs for the datapoint** - If you want to see more detailed logs for this datapoint, you can enable this option. You still need to enable "debug" loglevel for these additional values to be visible! This helps in debugging issues or understanding why the adapter is logging a value (or not). 
 
-Most of these values will be pre-filled on the detail settings for the datapoint and can be changed there. Additionally, you can an "alias ID" on the datapoint page. With this you can, e.g. after switching a device and datapoint names changed, still log the data to the former ID by just entering this ID there and all data will be logged as this one.
+Most of these values can be pre-defined in the instance settings and are then pre-filled or used for the datapoint.
 
 
 ## Access values from Javascript adapter

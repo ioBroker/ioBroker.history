@@ -124,7 +124,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     enabled: true,
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
-                                    debounce:     500,
+                                    debounceTime:     500,
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5
@@ -142,11 +142,30 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     enabled: true,
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
-                                    debounce:     500,
+                                    debounceTime:     500,
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5,
                                     disableSkippedValueLogging: true
+                                }
+                            }
+                        },
+                        type: 'state'
+                    });
+                    await objects.setObjectAsync('history.0.testValueBlocked', {
+                        common: {
+                            type: 'number',
+                            role: 'state',
+                            custom: {
+                                "history.0": {
+                                    enabled: true,
+                                    changesOnly:  true,
+                                    changesRelogInterval: 10,
+                                    debounceTime:     0,
+                                    blockTime:        1000,
+                                    retention:        31536000,
+                                    maxLength:        3,
+                                    changesMinDelta:  0.5
                                 }
                             }
                         },
@@ -205,7 +224,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(4);
+            expect(Object.keys(result).length).to.be.equal(5);
             expect(result['history.0.testValue'].enabled).to.be.true;
             done();
         });
@@ -545,6 +564,43 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
+    it('Test ' + adapterShortName + ': Write with 1s block values into DB', async function () {
+        this.timeout(45000);
+        now = Date.now();
+
+        try {
+            await logSampleData('history.0.testValueBlocked');
+        } catch (err) {
+            console.log(err);
+            expect(err).to.be.not.ok;
+        }
+
+        return new Promise(resolve => {
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueBlocked',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(7);
+                expect(result.result[0].val).to.be.equal(1);
+                expect(result.result[1].val).to.be.equal(2.9);
+                expect(result.result[2].val).to.be.equal(4);
+                expect(result.result[3].val).to.be.below(5);
+                expect(result.result[4].val).to.be.equal(6);
+                expect(result.result[5].val).to.be.below(6.05);
+                expect(result.result[6].val).to.be.below(7);
+
+                resolve();
+            });
+        });
+    });
+
     it('Test ' + adapterShortName + ': Remove Alias-ID', function (done) {
         this.timeout(5000);
 
@@ -613,7 +669,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(3);
+            expect(Object.keys(result).length).to.be.equal(4);
             done();
         });
     });
