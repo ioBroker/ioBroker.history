@@ -395,7 +395,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             options: {
                 start:     now + 100,
                 end:       now + 30001,
-                count:     4,
+                count:     2,
                 aggregate: 'percentile',
                 percentile: 50,
                 addId: true
@@ -416,7 +416,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             options: {
                 start:     now + 100,
                 end:       now + 30001,
-                count:     4,
+                count:     2,
                 aggregate: 'percentile',
                 percentile: 95,
                 addId: true

@@ -1105,7 +1105,8 @@ function getHistory(msg) {
         limit:      parseInt(msg.message.options.limit, 10) || parseInt(msg.message.options.count, 10) || adapter.config.limit || 2000,
         addId:      msg.message.options.addId || false,
         sessionId:  msg.message.options.sessionId,
-        returnNewestEntries: msg.message.options.returnNewestEntries || false
+        returnNewestEntries: msg.message.options.returnNewestEntries || false,
+        percentile: msg.message.options.aggregate === 'percentile' ? parseInt(msg.message.options.percentile, 10) || 50 : null
     };
 
     if (!options.start && options.count) {
