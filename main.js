@@ -614,6 +614,11 @@ function pushHistory(id, state, timerRelog) {
                 history[id].timeout = null;
             }
 
+            if (!valueUnstable && settings.blockTime && (history[id].lastLogTime + settings.blockTime) < state.ts) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignored blockTime ${id}, value=${state.val}, ts=${state.ts}, lastLoggedTs=${history[id].lastLogTime}, blockTime=${settings.blockTime}`);
+                return;
+            }
+
             if (settings.ignoreZero && (state.val === undefined || state.val === null || state.val === 0)) {
                 settings.enableDebugLogs && adapter.log.debug(`value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`);
                 return;
@@ -690,14 +695,13 @@ function pushHistory(id, state, timerRelog) {
                 ignoreDebonce = true;
             }
         }
-        // Remember last logged timestamp, to check when to do a relog even if same value
-        history[id].lastLogTime = state.ts;
         if (settings.debounceTime && !ignoreDebonce && !timerRelog) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
             history[id].timeout = setTimeout((id, state) => {
                 history[id].timeout = null;
                 history[id].state = state;
+                history[id].lastLogTime = state.ts;
                 settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
                 pushHelper(id);
                 if (settings.changesRelogInterval > 0) {
@@ -708,6 +712,8 @@ function pushHistory(id, state, timerRelog) {
             if (!timerRelog) {
                 history[id].state = state;
             }
+            history[id].lastLogTime = state.ts;
+
             settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
             pushHelper(id, state);
             if (settings.changesRelogInterval > 0) {
