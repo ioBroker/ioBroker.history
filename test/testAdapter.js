@@ -460,7 +460,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             await delay(70);
         }
         await states.setStateAsync(stateId, {val: 7});  // expect logged
-        await delay(11000);
+        await delay(13000);
     }
 
     it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function () {
