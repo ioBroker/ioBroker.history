@@ -591,10 +591,10 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 expect(result.result[0].val).to.be.equal(1);
                 expect(result.result[1].val).to.be.equal(2.9);
                 expect(result.result[2].val).to.be.equal(4);
-                expect(result.result[3].val).to.be.below(5);
+                expect(result.result[3].val).to.be.equal(5);
                 expect(result.result[4].val).to.be.equal(6);
-                expect(result.result[5].val).to.be.below(6.05);
-                expect(result.result[6].val).to.be.below(7);
+                expect(result.result[5].val).to.be.equal(6.05);
+                expect(result.result[6].val).to.be.equal(7);
 
                 resolve();
             });
