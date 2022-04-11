@@ -18,6 +18,7 @@
     "De-bounce time": "Czas odbicia",
     "Default settings": "Ustawienia domyślne",
     "Disable charting optimized logging of skipped values": "Wyłącz zoptymalizowane rejestrowanie pominiętych wartości na wykresach",
+    "Enable enhanced debug logs for the datapoint": "Włącz rozszerzone dzienniki debugowania dla punktu danych",
     "End": "Koniec",
     "Generate": "Generować",
     "History adapter settings": "Ustawienia adaptera historii",

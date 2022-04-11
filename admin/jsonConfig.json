@@ -133,6 +133,13 @@
           "type": "checkbox",
           "sm": 12,
           "md": 4
+        },
+        "enableDebugLogs": {
+          "newLine": true,
+          "label": "Enable enhanced debug logs for the datapoint",
+          "type": "checkbox",
+          "sm": 12,
+          "md": 4
         }
       }
     }

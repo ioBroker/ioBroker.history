@@ -147,7 +147,11 @@ function startAdapter(options) {
                     obj.common.custom[adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
                 }
 
-
+                if (obj.common.custom[adapter.namespace].enableDebugLogs !== undefined && obj.common.custom[adapter.namespace].enableDebugLogs !== null && obj.common.custom[adapter.namespace].enableDebugLogs !== '') {
+                    obj.common.custom[adapter.namespace].enableDebugLogs = obj.common.custom[adapter.namespace].enableDebugLogs === 'true' || obj.common.custom[adapter.namespace].enableDebugLogs === true;
+                } else {
+                    obj.common.custom[adapter.namespace].enableDebugLogs = adapter.config.enableDebugLogs;
+                }
 
                 // add one day if retention is too small
                 if (obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention <= 604800) {
@@ -498,6 +502,11 @@ function main() { //start
                             history[id][adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
                         }
 
+                        if (history[id][adapter.namespace].enableDebugLogs !== undefined && history[id][adapter.namespace].enableDebugLogs !== null && history[id][adapter.namespace].enableDebugLogs !== '') {
+                            history[id][adapter.namespace].enableDebugLogs = history[id][adapter.namespace].enableDebugLogs === 'true' || history[id][adapter.namespace].enableDebugLogs === true;
+                        } else {
+                            history[id][adapter.namespace].enableDebugLogs = adapter.config.enableDebugLogs;
+                        }
 
                         history[id].realId = realId;
                         history[id].list = history[id].list || [];
@@ -561,17 +570,19 @@ function pushHistory(id, state, timerRelog) {
             const valueUnstable = !!history[id].timeout;
             // When a debounce timer runs and the value is the same as the last one, ignore it
             if (history[id].timeout && state.ts !== state.lc) {
-                return adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
+                settings.enableDebugLogs && adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce-timeout=${!!history[id].timeout}`);
+                return;
             } else if (history[id].timeout) { // if value changed, clear timer
                 clearTimeout(history[id].timeout);
                 history[id].timeout = null;
             }
 
             if (settings.ignoreZero && (state.val === undefined || state.val === null || state.val === 0)) {
-                return adapter.log.debug(`value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`);
+                settings.enableDebugLogs && adapter.log.debug(`value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`);
+                return;
             } else
             if (settings.ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
-                adapter.log.debug(`value ignored because below 0 ${id}, new-value=${state.val}, ts=${state.ts}`);
+                settings.enableDebugLogs && adapter.log.debug(`value ignored because below 0 ${id}, new-value=${state.val}, ts=${state.ts}`);
                 return;
             }
 
@@ -582,7 +593,8 @@ function pushHistory(id, state, timerRelog) {
                         if (!valueUnstable && !settings.disableSkippedValueLogging) {
                             history[id].skipped = state;
                         }
-                        return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        settings.enableDebugLogs && adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        return;
                     }
                 } else if (history[id].lastLogTime) {
                     if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
@@ -590,10 +602,11 @@ function pushHistory(id, state, timerRelog) {
                         if (!valueUnstable && !settings.disableSkippedValueLogging) {
                             history[id].skipped = state;
                         }
-                        return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        settings.enableDebugLogs && adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        return;
                     }
                     if (state.ts !== state.lc) {
-                        adapter.log.debug(`value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+                        settings.enableDebugLogs && adapter.log.debug(`value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
                         ignoreDebonce = true;
                     }
                 }
@@ -606,13 +619,13 @@ function pushHistory(id, state, timerRelog) {
                         if (!valueUnstable && !settings.disableSkippedValueLogging) {
                             history[id].skipped = state;
                         }
-                        adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        settings.enableDebugLogs && adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
                         return;
                     } else if (settings.changesMinDelta !== 0) {
-                        adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        settings.enableDebugLogs && adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
                     }
                 } else {
-                    adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                    settings.enableDebugLogs && adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
                 }
             }
         }
@@ -626,11 +639,11 @@ function pushHistory(id, state, timerRelog) {
             state = Object.assign({}, state);
             state.ts = Date.now();
             state.from = 'system.adapter.' + adapter.namespace;
-            adapter.log.debug(`timed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+            settings.enableDebugLogs && adapter.log.debug(`timed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
             ignoreDebonce = true;
         } else {
             if (settings.changesOnly && history[id].skipped) {
-                adapter.log.debug(`Skipped value logged ${id}, value=${history[id].skipped.val}, ts=${history[id].skipped.ts}`);
+                settings.enableDebugLogs && adapter.log.debug(`Skipped value logged ${id}, value=${history[id].skipped.val}, ts=${history[id].skipped.ts}`);
                 pushHelper(id, history[id].skipped);
                 history[id].skipped = null;
             }
@@ -648,6 +661,7 @@ function pushHistory(id, state, timerRelog) {
             history[id].timeout = setTimeout((id, state) => {
                 history[id].timeout = null;
                 history[id].state = state;
+                settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
                 pushHelper(id);
                 if (settings.changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
@@ -657,6 +671,7 @@ function pushHistory(id, state, timerRelog) {
             if (!timerRelog) {
                 history[id].state = state;
             }
+            settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
             pushHelper(id, state);
             if (settings.changesRelogInterval > 0) {
                 history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
@@ -674,10 +689,8 @@ function reLogHelper(_id) {
     history[_id].relogTimeout = null;
 
     if (history[_id].skipped) {
-        history[_id].skipped.from = 'system.adapter.' + adapter.namespace;
         pushHistory(_id, history[_id].skipped, true);
     } else if (history[_id].state) {
-        history[_id].state.from = 'system.adapter.' + adapter.namespace;
         pushHistory(_id, history[_id].state, true);
     }
     else {
@@ -1142,7 +1155,7 @@ function getHistory(msg) {
     } else {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
-            adapter.log.debug('use parallel requests');
+            adapter.log.debug('use parallel requests for getHistory');
             try {
                 const gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 

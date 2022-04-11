@@ -186,7 +186,8 @@
         "changesRelogInterval": 0,
         "changesMinDelta": 0,
         "writeNulls": true,
-        "disableSkippedValueLogging": false
+        "disableSkippedValueLogging": false,
+        "enableLogging": false
     },
     "objects": []
 }

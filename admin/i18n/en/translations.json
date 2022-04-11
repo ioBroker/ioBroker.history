@@ -18,6 +18,7 @@
     "De-bounce time": "De-bounce time",
     "Default settings": "Default settings",
     "Disable charting optimized logging of skipped values": "Disable charting optimized logging of skipped values",
+    "Enable enhanced debug logs for the datapoint": "Enable enhanced debug logs for the datapoint",
     "End": "End",
     "Generate": "Generate",
     "History adapter settings": "History adapter settings",

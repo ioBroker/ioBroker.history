@@ -18,6 +18,7 @@
     "De-bounce time": "Интервал игнорирования дребезга",
     "Default settings": "Настройки по умолчанию для состояний",
     "Disable charting optimized logging of skipped values": "Отключить оптимизированную регистрацию пропущенных значений для построения диаграмм",
+    "Enable enhanced debug logs for the datapoint": "Включить расширенные журналы отладки для точки данных",
     "End": "Конец",
     "Generate": "Генерировать",
     "History adapter settings": "Настройки драйвера history",
