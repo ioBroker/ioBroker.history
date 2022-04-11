@@ -30,7 +30,8 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) Add flag returnNewestEntries for GetHistory to determine which records to return when more entries as "count" are existing for aggregate "none"
 * (Apollon77) Make sure id is always returned on GetHistory when addId is set
 * (Apollon77) Add new Debug flag to enable/disable debug logging on datapoint level (default is false) to optimize performance
-* (Apollon77) Add aggregate method "percentile" to calculate the percentile of the values (requires options.percentile with the percentile level)
+* (Apollon77) Add aggregate method "percentile" to calculate the percentile of the values (requires options.percentile with the percentile level, defaults to 50 if not provided)
+* (Apollon77) Add (experimental) method "integral" to calculate the integral of the values (requires options.integralUnit with the time duration of the integral in seconds, defaults to 60s if not provided)
 
 ### 1.11.1 (2022-03-26)
 * (Apollon77) Fix the js-controller and admin minimum version

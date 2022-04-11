@@ -1106,7 +1106,8 @@ function getHistory(msg) {
         addId:      msg.message.options.addId || false,
         sessionId:  msg.message.options.sessionId,
         returnNewestEntries: msg.message.options.returnNewestEntries || false,
-        percentile: msg.message.options.aggregate === 'percentile' ? parseInt(msg.message.options.percentile, 10) || 50 : null
+        percentile: msg.message.options.aggregate === 'percentile' ? parseInt(msg.message.options.percentile, 10) || 50 : null,
+        integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null
     };
 
     if (!options.start && options.count) {
@@ -1139,8 +1140,13 @@ function getHistory(msg) {
     }
 
     if (options.aggregate === 'percentile' && options.percentile <= 0 || options.percentile > 100) {
-        adapter.log.error(`Invalid or missing percentile value: ${options.percentile}, use 50 as default`);
+        adapter.log.error(`Invalid percentile value: ${options.percentile}, use 50 as default`);
         options.percentile = 50;
+    }
+
+    if (options.aggregate === 'integral' && (typeof options.integralUnit !== 'number' || options.integralUnit <= 0)) {
+        adapter.log.error(`Invalid integralUnit value: ${options.integralUnit}, use 60s as default`);
+        options.integralUnit = 60;
     }
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {

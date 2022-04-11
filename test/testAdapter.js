@@ -387,7 +387,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it(`Test ${adapterShortName}: Read percentile 50 values from DB using GetHistory`, function (done) {
+    it(`Test ${adapterShortName}: Read percentile 50+95 values from DB using GetHistory`, function (done) {
         this.timeout(10000);
 
         sendTo('history.0', 'getHistory', {
@@ -402,30 +402,27 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(4);
+            expect(result.result.length).to.be.at.least(3);
             expect(result.result[0].id).to.be.equal('history.0.testValue');
-            done();
-        });
-    });
+            const percentile50 = result.result[1].val;
 
-    it(`Test ${adapterShortName}: Read percentile 95 values from DB using GetHistory`, function (done) {
-        this.timeout(10000);
-
-        sendTo('history.0', 'getHistory', {
-            id: 'history.0.testValue',
-            options: {
-                start:     now + 100,
-                end:       now + 30001,
-                count:     2,
-                aggregate: 'percentile',
-                percentile: 95,
-                addId: true
-            }
-        }, result => {
-            console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(4);
-            expect(result.result[0].id).to.be.equal('history.0.testValue');
-            done();
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValue',
+                options: {
+                    start:     now + 100,
+                    end:       now + 30001,
+                    count:     2,
+                    aggregate: 'percentile',
+                    percentile: 95,
+                    addId: true
+                }
+            }, result => {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(3);
+                expect(result.result[0].id).to.be.equal('history.0.testValue');
+                expect(result.result[1].val).to.be.greaterThan(percentile50);
+                done();
+            });
         });
     });
 
@@ -603,6 +600,27 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
                 resolve();
             });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Read integral from DB using GetHistory', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     5,
+                aggregate: 'integral',
+                integralUnit: 5,
+                addId: true
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(4);
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            done();
         });
     });
 
