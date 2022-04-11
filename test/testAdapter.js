@@ -387,6 +387,48 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
+    it(`Test ${adapterShortName}: Read percentile 50 values from DB using GetHistory`, function (done) {
+        this.timeout(10000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValue',
+            options: {
+                start:     now + 100,
+                end:       now + 30001,
+                count:     4,
+                aggregate: 'percentile',
+                percentile: 50,
+                addId: true
+            }
+        }, result => {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(4);
+            expect(result.result[0].id).to.be.equal('history.0.testValue');
+            done();
+        });
+    });
+
+    it(`Test ${adapterShortName}: Read percentile 95 values from DB using GetHistory`, function (done) {
+        this.timeout(10000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValue',
+            options: {
+                start:     now + 100,
+                end:       now + 30001,
+                count:     4,
+                aggregate: 'percentile',
+                percentile: 95,
+                addId: true
+            }
+        }, result => {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(4);
+            expect(result.result[0].id).to.be.equal('history.0.testValue');
+            done();
+        });
+    });
+
     it(`Test ${adapterShortName}: Read minmax values from DB using GetHistory`, function (done) {
         this.timeout(10000);
 

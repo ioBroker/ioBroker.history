@@ -1137,6 +1137,11 @@ function getHistory(msg) {
         options.end *= 1000;
     }
 
+    if (options.aggregate === 'percentile' && options.percentile <= 0 || options.percentile > 100) {
+        adapter.log.error(`Invalid or missing percentile value: ${options.percentile}, use 50 as default`);
+        options.percentile = 50;
+    }
+
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
             adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
