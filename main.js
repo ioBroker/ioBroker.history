@@ -614,7 +614,7 @@ function pushHistory(id, state, timerRelog) {
                 history[id].timeout = null;
             }
 
-            if (!valueUnstable && settings.blockTime && history[id].state.ts && (history[id].state.ts + settings.blockTime) > state.ts) {
+            if (!valueUnstable && settings.blockTime && history[id].state && (history[id].state.ts + settings.blockTime) > state.ts) {
                 settings.enableDebugLogs && adapter.log.debug(`value ignored blockTime ${id}, value=${state.val}, ts=${state.ts}, lastState.ts=${history[id].state.ts}, blockTime=${settings.blockTime}`);
                 return;
             }
