@@ -123,7 +123,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     enabled: true,
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
-                                    debounce:     150,
+                                    debounce:     500,
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5
@@ -141,7 +141,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     enabled: true,
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
-                                    debounce:     150,
+                                    debounce:     500,
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5,
@@ -428,7 +428,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
     async function logSampleData(stateId) {
         await states.setStateAsync(stateId, {val: 1}); // expect logged
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 2}); // Expect not logged debounce
         await delay(20);
         await states.setStateAsync(stateId, {val: 2.1}); // Expect not logged debounce
@@ -438,21 +438,21 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         await states.setStateAsync(stateId, {val: 2.3}); // Expect not logged debounce
         await delay(20);
         await states.setStateAsync(stateId, {val: 2.5}); // Expect not logged debounce
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 2.9}); // Expect logged skipped
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 3.0}); // Expect logged
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 4}); // Expect logged
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 4.4}); // expect logged skipped
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 5});  // expect logged
         await delay(20);
         await states.setStateAsync(stateId, {val: 5});  // expect not logged debounce
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 5});  // expect logged skipped
-        await delay(200);
+        await delay(600);
         await states.setStateAsync(stateId, {val: 6});  // expect logged
         await delay(9700);
         for (let i = 1; i < 10; i++) {
