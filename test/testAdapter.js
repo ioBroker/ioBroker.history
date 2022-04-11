@@ -454,7 +454,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         await states.setStateAsync(stateId, {val: 5});  // expect logged skipped
         await delay(600);
         await states.setStateAsync(stateId, {val: 6});  // expect logged
-        await delay(9700);
+        await delay(10100);
         for (let i = 1; i < 10; i++) {
             await states.setStateAsync(stateId, {val: 6 + i * 0.05});  // expect logged skipped
             await delay(70);
