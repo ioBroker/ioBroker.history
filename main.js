@@ -1697,8 +1697,8 @@ function storeState(msg) {
         }
     } else if (msg.message.state && Array.isArray(msg.message.state)) {
         adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         for (let j = 0; j < msg.message.state.length; j++) {
-            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
             if (history[id]) {
                 pushHelper(id, msg.message.state[j]);
             } else {

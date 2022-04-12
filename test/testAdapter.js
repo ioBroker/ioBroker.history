@@ -689,33 +689,20 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         this.timeout(45000);
         now = Date.now()-24*60*60*1000;
 
-        try {
-            await states.setStateAsync('history.0.testValue', {val: 2.064, ack: true, ts: now});
-            await states.setStateAsync('history.0.testValue', {val: 2.116, ack: true, ts: now + 6 * 60 * 1000});
-            await states.setStateAsync('history.0.testValue', {val: 2.028, ack: true, ts: now + 12 * 60 * 1000});
-            await states.setStateAsync('history.0.testValue', {val: 2.126, ack: true, ts: now + 18 * 60 * 1000});
-            await states.setStateAsync('history.0.testValue', {val: 2.041, ack: true, ts: now + 24 * 60 * 1000});
-            await states.setStateAsync('history.0.testValue', {val: 2.051, ack: true, ts: now + 30 * 60 * 1000});
-        } catch (err) {
-            console.log(err);
-            expect(err).to.be.not.ok;
-        }
-
         return new Promise(resolve => {
 
-            sendTo('history.0', 'getHistory', {
+            sendTo('history.0', 'storeState', {
                 id: 'history.0.testValue',
-                options: {
-                    start:     now,
-                    end:       now + 30 * 60 * 1000,
-                    count:     1,
-                    aggregate: 'integral',
-                    integralUnit: 1,
-                    integralInterpolation: 'none'
-                }
+                state: [
+                    {val: 2.064, ack: true, ts: now},
+                    {val: 2.116, ack: true, ts: now + 6 * 60 * 1000},
+                    {val: 2.028, ack: true, ts: now + 12 * 60 * 1000},
+                    {val: 2.126, ack: true, ts: now + 18 * 60 * 1000},
+                    {val: 2.041, ack: true, ts: now + 24 * 60 * 1000},
+                    {val: 2.051, ack: true, ts: now + 30 * 60 * 1000}
+                ]
             }, function (result) {
-                console.log(JSON.stringify(result.result, null, 2));
-                expect(result.result.length).to.be.at.least(13);
+                expect(result.success).to.be.true;
 
                 sendTo('history.0', 'getHistory', {
                     id: 'history.0.testValue',
@@ -724,14 +711,29 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         end:       now + 30 * 60 * 1000,
                         count:     1,
                         aggregate: 'integral',
-                        integralUnit: 60,
+                        integralUnit: 1,
                         integralInterpolation: 'none'
                     }
                 }, function (result) {
                     console.log(JSON.stringify(result.result, null, 2));
                     expect(result.result.length).to.be.at.least(13);
 
-                    resolve();
+                    sendTo('history.0', 'getHistory', {
+                        id: 'history.0.testValue',
+                        options: {
+                            start:     now,
+                            end:       now + 30 * 60 * 1000,
+                            count:     1,
+                            aggregate: 'integral',
+                            integralUnit: 60,
+                            integralInterpolation: 'none'
+                        }
+                    }, function (result) {
+                        console.log(JSON.stringify(result.result, null, 2));
+                        expect(result.result.length).to.be.at.least(13);
+
+                        resolve();
+                    });
                 });
             });
         });
