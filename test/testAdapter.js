@@ -387,45 +387,6 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it(`Test ${adapterShortName}: Read percentile 50+95 values from DB using GetHistory`, function (done) {
-        this.timeout(10000);
-
-        sendTo('history.0', 'getHistory', {
-            id: 'history.0.testValue',
-            options: {
-                start:     now + 100,
-                end:       now + 30001,
-                count:     2,
-                aggregate: 'percentile',
-                percentile: 50,
-                addId: true
-            }
-        }, result => {
-            console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(3);
-            expect(result.result[0].id).to.be.equal('history.0.testValue');
-            const percentile50 = result.result[1].val;
-
-            sendTo('history.0', 'getHistory', {
-                id: 'history.0.testValue',
-                options: {
-                    start:     now + 100,
-                    end:       now + 30001,
-                    count:     2,
-                    aggregate: 'percentile',
-                    percentile: 95,
-                    addId: true
-                }
-            }, result => {
-                console.log(JSON.stringify(result.result, null, 2));
-                expect(result.result.length).to.be.at.least(3);
-                expect(result.result[0].id).to.be.equal('history.0.testValue');
-                expect(result.result[1].val).to.be.greaterThan(percentile50);
-                done();
-            });
-        });
-    });
-
     it(`Test ${adapterShortName}: Read minmax values from DB using GetHistory`, function (done) {
         this.timeout(10000);
 
@@ -599,6 +560,45 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 expect(result.result[12].val).to.be.equal(7);
 
                 resolve();
+            });
+        });
+    });
+
+    it(`Test ${adapterShortName}: Read percentile 50+95 values from DB using GetHistory`, function (done) {
+        this.timeout(10000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     2,
+                aggregate: 'percentile',
+                percentile: 50,
+                addId: true
+            }
+        }, result => {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(3);
+            expect(result.result[0].id).to.be.equal('history.0.testValue');
+            const percentile50 = result.result[1].val;
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueDebounce',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     2,
+                    aggregate: 'percentile',
+                    percentile: 95,
+                    addId: true
+                }
+            }, result => {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(3);
+                expect(result.result[0].id).to.be.equal('history.0.testValue');
+                expect(result.result[1].val).to.be.greaterThan(percentile50);
+                done();
             });
         });
     });
