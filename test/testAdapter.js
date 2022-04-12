@@ -671,7 +671,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 console.log(JSON.stringify(result.result, null, 2));
                 expect(result.result.length).to.be.at.least(9);
                 expect(result.result[0].val).to.be.equal(1);
-                expect(result.result[1].val).to.be.equal(2.9);
+                expect(result.result[1].val).to.be.at.least(2.9);
                 expect(result.result[2].val).to.be.equal(4);
                 expect(result.result[3].val).to.be.equal(5);
                 expect(result.result[4].val).to.be.equal(6);
