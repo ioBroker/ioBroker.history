@@ -687,19 +687,46 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
     it('Test ' + adapterShortName + ': Write example-integral values into DB', async function () {
         this.timeout(45000);
-        now = Date.now()-24*60*60*1000;
+        const nowSampleI1 = Date.now() - 24 * 60 * 60 * 1000;
+        const nowSampleI21 = Date.now() - 23 * 60 * 60 * 1000;
+        const nowSampleI22 = Date.now() - 22 * 60 * 60 * 1000;
+        const nowSampleI23 = Date.now() - 21 * 60 * 60 * 1000;
+        const nowSampleI24 = Date.now() - 20 * 60 * 60 * 1000;
 
         return new Promise(resolve => {
 
             sendTo('history.0', 'storeState', {
                 id: 'history.0.testValue',
                 state: [
-                    {val: 2.064, ack: true, ts: now},
-                    {val: 2.116, ack: true, ts: now + 6 * 60 * 1000},
-                    {val: 2.028, ack: true, ts: now + 12 * 60 * 1000},
-                    {val: 2.126, ack: true, ts: now + 18 * 60 * 1000},
-                    {val: 2.041, ack: true, ts: now + 24 * 60 * 1000},
-                    {val: 2.051, ack: true, ts: now + 30 * 60 * 1000}
+                    {val: 2.064, ack: true, ts: nowSampleI1}, //
+                    {val: 2.116, ack: true, ts: nowSampleI1 + 6 * 60 * 1000},
+                    {val: 2.028, ack: true, ts: nowSampleI1 + 12 * 60 * 1000},
+                    {val: 2.126, ack: true, ts: nowSampleI1 + 18 * 60 * 1000},
+                    {val: 2.041, ack: true, ts: nowSampleI1 + 24 * 60 * 1000},
+                    {val: 2.051, ack: true, ts: nowSampleI1 + 30 * 60 * 1000},
+
+                    {val: -2, ack: true, ts: nowSampleI21}, // 10s none = 50.0
+                    {val: 10, ack: true, ts: nowSampleI21 + 10 * 1000},
+                    {val: 7, ack: true, ts: nowSampleI21 + 20 * 1000},
+                    {val: 17, ack: true, ts: nowSampleI21 + 30 * 1000},
+                    {val: 15, ack: true, ts: nowSampleI21 + 40 * 1000},
+                    {val: 4, ack: true, ts: nowSampleI21 + 50 * 1000},
+
+                    {val: 19, ack: true, ts: nowSampleI22}, // 10s none = 43
+                    {val: 4, ack: true, ts: nowSampleI22 + 10 * 1000},
+                    {val: -3, ack: true, ts: nowSampleI22 + 20 * 1000},
+                    {val: 19, ack: true, ts: nowSampleI22 + 30 * 1000},
+                    {val: 13, ack: true, ts: nowSampleI22 + 40 * 1000},
+                    {val: 1, ack: true, ts: nowSampleI22 + 50 * 1000},
+
+                    {val: -2, ack: true, ts: nowSampleI23}, // 10s linear = 25
+                    {val: 7, ack: true, ts: nowSampleI23 + 20 * 1000},
+                    {val: 4, ack: true, ts: nowSampleI23 + 50 * 1000},
+
+                    {val: 4, ack: true, ts: nowSampleI24 + 10 * 1000}, // 10s linear = 32.5
+                    {val: -3, ack: true, ts: nowSampleI24 + 20 * 1000},
+                    {val: 19, ack: true, ts: nowSampleI24 + 30 * 1000},
+                    {val: 1, ack: true, ts: nowSampleI24 + 50 * 1000},
                 ]
             }, function (result) {
                 expect(result.success).to.be.true;
@@ -707,32 +734,98 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 sendTo('history.0', 'getHistory', {
                     id: 'history.0.testValue',
                     options: {
-                        start:     now,
-                        end:       now + 30 * 60 * 1000 + 1,
+                        start:     nowSampleI1,
+                        end:       nowSampleI1 + 31 * 60 * 1000,
                         count:     1,
                         aggregate: 'integral',
                         integralUnit: 1,
                         integralInterpolation: 'none'
                     }
                 }, function (result) {
-                    console.log(JSON.stringify(result.result, null, 2));
+                    console.log('Sample I1-1: ' + JSON.stringify(result.result, null, 2));
                     expect(result.result.length).to.be.at.least(3);
+                    // Result Influxdb1 Doku = 3732.66
 
                     sendTo('history.0', 'getHistory', {
                         id: 'history.0.testValue',
                         options: {
-                            start:     now,
-                            end:       now + 30 * 60 * 1000,
+                            start:     nowSampleI1,
+                            end:       nowSampleI1 + 31 * 60 * 1000,
                             count:     1,
                             aggregate: 'integral',
                             integralUnit: 60,
                             integralInterpolation: 'none'
                         }
                     }, function (result) {
-                        console.log(JSON.stringify(result.result, null, 2));
+                        console.log('Sample I1-60: ' + JSON.stringify(result.result, null, 2));
                         expect(result.result.length).to.be.at.least(3);
+                        // Result Influxdb1 Doku = 62.211
 
-                        resolve();
+                        sendTo('history.0', 'getHistory', {
+                            id: 'history.0.testValue',
+                            options: {
+                                start:     nowSampleI21,
+                                end:       nowSampleI21 + 60 * 1000,
+                                count:     1,
+                                aggregate: 'integral',
+                                integralUnit: 10,
+                                integralInterpolation: 'none'
+                            }
+                        }, function (result) {
+                            console.log('Sample I21: ' + JSON.stringify(result.result, null, 2));
+                            expect(result.result.length).to.be.at.least(3);
+                            // Result Influxdb21 Doku = 50.0
+
+                            sendTo('history.0', 'getHistory', {
+                                id: 'history.0.testValue',
+                                options: {
+                                    start:     nowSampleI22,
+                                    end:       nowSampleI22 + 60 * 1000,
+                                    count:     1,
+                                    aggregate: 'integral',
+                                    integralUnit: 10,
+                                    integralInterpolation: 'none'
+                                }
+                            }, function (result) {
+                                console.log('Sample I22: ' + JSON.stringify(result.result, null, 2));
+                                expect(result.result.length).to.be.at.least(3);
+                                // Result Influxdb22 Doku = 43
+
+                                sendTo('history.0', 'getHistory', {
+                                    id: 'history.0.testValue',
+                                    options: {
+                                        start:     nowSampleI23,
+                                        end:       nowSampleI23 + 60 * 1000,
+                                        count:     1,
+                                        aggregate: 'integral',
+                                        integralUnit: 10,
+                                        integralInterpolation: 'linear'
+                                    }
+                                }, function (result) {
+                                    console.log('Sample I23: ' + JSON.stringify(result.result, null, 2));
+                                    expect(result.result.length).to.be.at.least(3);
+                                    // Result Influxdb23 Doku = 25.0
+
+                                    sendTo('history.0', 'getHistory', {
+                                        id: 'history.0.testValue',
+                                        options: {
+                                            start:     nowSampleI24,
+                                            end:       nowSampleI24 + 60 * 1000,
+                                            count:     1,
+                                            aggregate: 'integral',
+                                            integralUnit: 10,
+                                            integralInterpolation: 'linear'
+                                        }
+                                    }, function (result) {
+                                        console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
+                                        expect(result.result.length).to.be.at.least(3);
+                                        // Result Influxdb24 Doku = 32.5
+
+                                        resolve();
+                                    });
+                                });
+                            });
+                        });
                     });
                 });
             });
