@@ -628,7 +628,7 @@ function pushHistory(id, state, timerRelog) {
                 return;
             }
 
-            if (history[id].state && settings.changesOnly && !timerRelog) {
+            if (history[id].state && settings.changesOnly) {
                 if (settings.changesRelogInterval === 0) {
                     if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
                         // remember new timestamp

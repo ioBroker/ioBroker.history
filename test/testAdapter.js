@@ -708,7 +708,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     id: 'history.0.testValue',
                     options: {
                         start:     now,
-                        end:       now + 30 * 60 * 1000,
+                        end:       now + 30 * 60 * 1000 + 1,
                         count:     1,
                         aggregate: 'integral',
                         integralUnit: 1,
@@ -716,7 +716,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     }
                 }, function (result) {
                     console.log(JSON.stringify(result.result, null, 2));
-                    expect(result.result.length).to.be.at.least(13);
+                    expect(result.result.length).to.be.at.least(3);
 
                     sendTo('history.0', 'getHistory', {
                         id: 'history.0.testValue',
@@ -730,7 +730,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         }
                     }, function (result) {
                         console.log(JSON.stringify(result.result, null, 2));
-                        expect(result.result.length).to.be.at.least(13);
+                        expect(result.result.length).to.be.at.least(3);
 
                         resolve();
                     });
