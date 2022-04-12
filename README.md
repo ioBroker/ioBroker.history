@@ -32,7 +32,7 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) Add new Debug flag to enable/disable debug logging on datapoint level (default is false) to optimize performance
 * (Apollon77) Add aggregate method "percentile" to calculate the percentile of the values (requires options.percentile with the percentile level, defaults to 50 if not provided)
 * (Apollon77) Add (experimental) method "integral" to calculate the integral of the values. Requires options.integralUnit with the time duration of the integral in seconds, defaults to 60s if not provided. Optionally a linear interpolation can be done by setting options.integralInterpolation to "linear"
-* (Apollon77) When request should return exactly 1 result then cut the additional pre and post intervals out of the results and really return one result if there is any value in the result
+* (Apollon77) When request contains flag removeBorderValues: true, the result then cut the additional pre and post border values out of the results
 
 ### 1.11.1 (2022-03-26)
 * (Apollon77) Fix the js-controller and admin minimum version

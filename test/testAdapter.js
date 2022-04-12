@@ -575,6 +575,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 count:     1,
                 aggregate: 'percentile',
                 percentile: 50,
+                removeBorderValues: true,
                 addId: true
             }
         }, result => {
@@ -591,6 +592,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     count:     1,
                     aggregate: 'percentile',
                     percentile: 95,
+                    removeBorderValues: true,
                     addId: true
                 }
             }, result => {
@@ -614,11 +616,12 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 count:     5,
                 aggregate: 'integral',
                 integralUnit: 5,
+                removeBorderValues: true,
                 addId: true
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(7);
+            expect(result.result.length).to.be.equal(5);
             expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
             done();
         });
@@ -636,11 +639,12 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 aggregate: 'integral',
                 integralUnit: 5,
                 integralInterpolation: 'linear',
+                removeBorderValues: true,
                 addId: true
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(7);
+            expect(result.result.length).to.be.equal(5);
             expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
             done();
         });
@@ -738,6 +742,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         end:       nowSampleI1 + 30 * 60 * 1000,
                         count:     1,
                         aggregate: 'integral',
+                        removeBorderValues: true,
                         integralUnit: 1,
                         integralInterpolation: 'none'
                     }
@@ -753,6 +758,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             end:       nowSampleI1 + 30 * 60 * 1000,
                             count:     1,
                             aggregate: 'integral',
+                            removeBorderValues: true,
                             integralUnit: 60,
                             integralInterpolation: 'none'
                         }
@@ -768,6 +774,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                 end:       nowSampleI21 + 60 * 1000,
                                 count:     1,
                                 aggregate: 'integral',
+                                removeBorderValues: true,
                                 integralUnit: 10,
                                 integralInterpolation: 'none'
                             }
@@ -783,6 +790,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     end:       nowSampleI22 + 60 * 1000,
                                     count:     1,
                                     aggregate: 'integral',
+                                    removeBorderValues: true,
                                     integralUnit: 10,
                                     integralInterpolation: 'none'
                                 }
@@ -798,6 +806,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                         end:       nowSampleI23 + 60 * 1000,
                                         count:     1,
                                         aggregate: 'integral',
+                                        removeBorderValues: true,
                                         integralUnit: 10,
                                         integralInterpolation: 'linear'
                                     }
@@ -813,6 +822,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                             end:       nowSampleI24 + 60 * 1000,
                                             count:     1,
                                             aggregate: 'integral',
+                                            removeBorderValues: true,
                                             integralUnit: 10,
                                             integralInterpolation: 'linear'
                                         }
