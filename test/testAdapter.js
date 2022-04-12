@@ -624,6 +624,28 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
+    it('Test ' + adapterShortName + ': Read linar integral from DB using GetHistory', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     5,
+                aggregate: 'integral',
+                integralUnit: 5,
+                integralInterpolation: 'linear',
+                addId: true
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(4);
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            done();
+        });
+    });
+
     it('Test ' + adapterShortName + ': Write with 1s block values into DB', async function () {
         this.timeout(45000);
         now = Date.now();

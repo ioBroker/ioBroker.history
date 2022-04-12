@@ -1107,7 +1107,8 @@ function getHistory(msg) {
         sessionId:  msg.message.options.sessionId,
         returnNewestEntries: msg.message.options.returnNewestEntries || false,
         percentile: msg.message.options.aggregate === 'percentile' ? parseInt(msg.message.options.percentile, 10) || 50 : null,
-        integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null
+        integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null,
+        integralInterpolation: msg.message.options.aggregate === 'integral' ? msg.message.options.integralInterpolation || 'none' : null
     };
 
     if (!options.start && options.count) {
