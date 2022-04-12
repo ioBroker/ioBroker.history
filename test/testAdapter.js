@@ -735,7 +735,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     id: 'history.0.testValue',
                     options: {
                         start:     nowSampleI1,
-                        end:       nowSampleI1 + 31 * 60 * 1000,
+                        end:       nowSampleI1 + 30 * 60 * 1000,
                         count:     1,
                         aggregate: 'integral',
                         integralUnit: 1,
@@ -750,7 +750,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         id: 'history.0.testValue',
                         options: {
                             start:     nowSampleI1,
-                            end:       nowSampleI1 + 31 * 60 * 1000,
+                            end:       nowSampleI1 + 30 * 60 * 1000,
                             count:     1,
                             aggregate: 'integral',
                             integralUnit: 60,
