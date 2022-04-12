@@ -690,12 +690,12 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         now = Date.now()-24*60*60*1000;
 
         try {
-            await setStateAsync('history.0.testValue', {val: 2.064, ack: true, ts: now});
-            await setStateAsync('history.0.testValue', {val: 2.116, ack: true, ts: now + 6 * 60 * 1000});
-            await setStateAsync('history.0.testValue', {val: 2.028, ack: true, ts: now + 12 * 60 * 1000});
-            await setStateAsync('history.0.testValue', {val: 2.126, ack: true, ts: now + 18 * 60 * 1000});
-            await setStateAsync('history.0.testValue', {val: 2.041, ack: true, ts: now + 24 * 60 * 1000});
-            await setStateAsync('history.0.testValue', {val: 2.051, ack: true, ts: now + 30 * 60 * 1000});
+            await states.setStateAsync('history.0.testValue', {val: 2.064, ack: true, ts: now});
+            await states.setStateAsync('history.0.testValue', {val: 2.116, ack: true, ts: now + 6 * 60 * 1000});
+            await states.setStateAsync('history.0.testValue', {val: 2.028, ack: true, ts: now + 12 * 60 * 1000});
+            await states.setStateAsync('history.0.testValue', {val: 2.126, ack: true, ts: now + 18 * 60 * 1000});
+            await states.setStateAsync('history.0.testValue', {val: 2.041, ack: true, ts: now + 24 * 60 * 1000});
+            await states.setStateAsync('history.0.testValue', {val: 2.051, ack: true, ts: now + 30 * 60 * 1000});
         } catch (err) {
             console.log(err);
             expect(err).to.be.not.ok;
