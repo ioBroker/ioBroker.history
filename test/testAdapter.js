@@ -572,32 +572,32 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             options: {
                 start:     now,
                 end:       Date.now(),
-                count:     2,
+                count:     1,
                 aggregate: 'percentile',
                 percentile: 50,
                 addId: true
             }
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(3);
+            expect(result.result.length).to.be.equal(1);
             expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
-            const percentile50 = result.result[1].val;
+            const percentile50 = result.result[0].val;
 
             sendTo('history.0', 'getHistory', {
                 id: 'history.0.testValueDebounce',
                 options: {
                     start:     now,
                     end:       Date.now(),
-                    count:     2,
+                    count:     1,
                     aggregate: 'percentile',
                     percentile: 95,
                     addId: true
                 }
             }, result => {
                 console.log(JSON.stringify(result.result, null, 2));
-                expect(result.result.length).to.be.at.least(3);
+                expect(result.result.length).to.be.equal(1);
                 expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
-                expect(result.result[1].val).to.be.greaterThan(percentile50);
+                expect(result.result[0].val).to.be.greaterThan(percentile50);
                 done();
             });
         });
@@ -743,7 +743,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     }
                 }, function (result) {
                     console.log('Sample I1-1: ' + JSON.stringify(result.result, null, 2));
-                    expect(result.result.length).to.be.at.least(3);
+                    expect(result.result.length).to.be.equal(1);
                     // Result Influxdb1 Doku = 3732.66
 
                     sendTo('history.0', 'getHistory', {
@@ -758,7 +758,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         }
                     }, function (result) {
                         console.log('Sample I1-60: ' + JSON.stringify(result.result, null, 2));
-                        expect(result.result.length).to.be.at.least(3);
+                        expect(result.result.length).to.be.equal(1);
                         // Result Influxdb1 Doku = 62.211
 
                         sendTo('history.0', 'getHistory', {
@@ -773,7 +773,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             }
                         }, function (result) {
                             console.log('Sample I21: ' + JSON.stringify(result.result, null, 2));
-                            expect(result.result.length).to.be.at.least(3);
+                            expect(result.result.length).to.be.equal(1);
                             // Result Influxdb21 Doku = 50.0
 
                             sendTo('history.0', 'getHistory', {
@@ -788,7 +788,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                 }
                             }, function (result) {
                                 console.log('Sample I22: ' + JSON.stringify(result.result, null, 2));
-                                expect(result.result.length).to.be.at.least(3);
+                                expect(result.result.length).to.be.equal(1);
                                 // Result Influxdb22 Doku = 43
 
                                 sendTo('history.0', 'getHistory', {
@@ -803,7 +803,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     }
                                 }, function (result) {
                                     console.log('Sample I23: ' + JSON.stringify(result.result, null, 2));
-                                    expect(result.result.length).to.be.at.least(3);
+                                    expect(result.result.length).to.be.equal(1);
                                     // Result Influxdb23 Doku = 25.0
 
                                     sendTo('history.0', 'getHistory', {
@@ -818,7 +818,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                         }
                                     }, function (result) {
                                         console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
-                                        expect(result.result.length).to.be.at.least(3);
+                                        expect(result.result.length).to.be.equal(1);
                                         // Result Influxdb24 Doku = 32.5
 
                                         resolve();
