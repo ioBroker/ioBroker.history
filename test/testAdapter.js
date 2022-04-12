@@ -624,7 +624,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it('Test ' + adapterShortName + ': Read linar integral from DB using GetHistory', function (done) {
+    it('Test ' + adapterShortName + ': Read linear integral from DB using GetHistory', function (done) {
         this.timeout(25000);
 
         sendTo('history.0', 'getHistory', {
@@ -681,6 +681,58 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 expect(result.result[8].val).to.be.equal(7);
 
                 resolve();
+            });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Write example-integral values into DB', async function () {
+        this.timeout(45000);
+        now = Date.now()-24*60*60*1000;
+
+        try {
+            await setStateAsync('history.0.testValue', {val: 2.064, ack: true, ts: now});
+            await setStateAsync('history.0.testValue', {val: 2.116, ack: true, ts: now + 6 * 60 * 1000});
+            await setStateAsync('history.0.testValue', {val: 2.028, ack: true, ts: now + 12 * 60 * 1000});
+            await setStateAsync('history.0.testValue', {val: 2.126, ack: true, ts: now + 18 * 60 * 1000});
+            await setStateAsync('history.0.testValue', {val: 2.041, ack: true, ts: now + 24 * 60 * 1000});
+            await setStateAsync('history.0.testValue', {val: 2.051, ack: true, ts: now + 30 * 60 * 1000});
+        } catch (err) {
+            console.log(err);
+            expect(err).to.be.not.ok;
+        }
+
+        return new Promise(resolve => {
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValue',
+                options: {
+                    start:     now,
+                    end:       now + 30 * 60 * 1000,
+                    count:     1,
+                    aggregate: 'integral',
+                    integralUnit: 1,
+                    integralInterpolation: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(13);
+
+                sendTo('history.0', 'getHistory', {
+                    id: 'history.0.testValue',
+                    options: {
+                        start:     now,
+                        end:       now + 30 * 60 * 1000,
+                        count:     1,
+                        aggregate: 'integral',
+                        integralUnit: 60,
+                        integralInterpolation: 'none'
+                    }
+                }, function (result) {
+                    console.log(JSON.stringify(result.result, null, 2));
+                    expect(result.result.length).to.be.at.least(13);
+
+                    resolve();
+                });
             });
         });
     });
