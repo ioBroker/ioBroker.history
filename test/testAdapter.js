@@ -580,7 +580,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.at.least(3);
-            expect(result.result[0].id).to.be.equal('history.0.testValue');
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
             const percentile50 = result.result[1].val;
 
             sendTo('history.0', 'getHistory', {
@@ -596,7 +596,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }, result => {
                 console.log(JSON.stringify(result.result, null, 2));
                 expect(result.result.length).to.be.at.least(3);
-                expect(result.result[0].id).to.be.equal('history.0.testValue');
+                expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
                 expect(result.result[1].val).to.be.greaterThan(percentile50);
                 done();
             });
