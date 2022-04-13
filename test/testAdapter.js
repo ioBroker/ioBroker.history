@@ -689,7 +689,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it('Test ' + adapterShortName + ': Write example-integral values into DB', async function () {
+    it('Test ' + adapterShortName + ': Tests with more sample data', async function () {
         this.timeout(45000);
         const nowSampleI1 = Date.now() - 24 * 60 * 60 * 1000;
         const nowSampleI21 = Date.now() - 22 * 60 * 60 * 1000;
@@ -834,7 +834,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     }, function (result) {
                                         console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
                                         expect(result.result.length).to.be.equal(1);
-                                        expect(result.result[0].val).to.be.equal(34.5);
+                                        expect(result.result[0].val).to.be.equal(33.5);
                                         // Result Influxdb24 Doku = 32.5
 
                                         sendTo('history.0', 'getHistory', {
