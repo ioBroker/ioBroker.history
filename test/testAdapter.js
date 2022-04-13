@@ -575,14 +575,13 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 count:     1,
                 aggregate: 'percentile',
                 percentile: 50,
-                removeBorderValues: true,
                 addId: true
             }
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(1);
-            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
-            expect(result.result[0].val).to.be.equal(5);
+            expect(result.result.length).to.be.equal(3);
+            expect(result.result[1].id).to.be.equal('history.0.testValueDebounce');
+            expect(result.result[1].val).to.be.equal(5);
 
             sendTo('history.0', 'getHistory', {
                 id: 'history.0.testValueDebounce',
@@ -817,7 +816,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                 }, function (result) {
                                     console.log('Sample I23: ' + JSON.stringify(result.result, null, 2));
                                     expect(result.result.length).to.be.equal(1);
-                                    expect(result.result[0].val).to.be.equal(25);
+                                    expect(result.result[0].val).to.be.equal(25.5);
                                     // Result Influxdb23 Doku = 25.0
 
                                     sendTo('history.0', 'getHistory', {
