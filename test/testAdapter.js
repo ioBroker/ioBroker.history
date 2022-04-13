@@ -169,7 +169,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     blockTime:        1000,
                                     retention:        31536000,
                                     maxLength:        3,
-                                    changesMinDelta:  0.5
+                                    changesMinDelta:  0.5,
                                     ignoreBelowNumber: -1,
                                     ignoreAboveNumber: 100
                                 }
