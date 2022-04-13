@@ -843,11 +843,11 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                                 start:     nowSampleI22,
                                                 end:       nowSampleI22 + 60 * 1000,
                                                 count:     1,
-                                                aggregate: 'percentile',
-                                                percentile: 80
+                                                aggregate: 'quantile',
+                                                quantile: 0.8
                                             }
                                         }, function (result) {
-                                            console.log('Sample I22-Percentile: ' + JSON.stringify(result.result, null, 2));
+                                            console.log('Sample I22-Quantile: ' + JSON.stringify(result.result, null, 2));
                                             expect(result.result.length).to.be.equal(3);
 
                                             resolve();

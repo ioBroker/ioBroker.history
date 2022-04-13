@@ -1107,6 +1107,7 @@ function getHistory(msg) {
         sessionId:  msg.message.options.sessionId,
         returnNewestEntries: msg.message.options.returnNewestEntries || false,
         percentile: msg.message.options.aggregate === 'percentile' ? parseInt(msg.message.options.percentile, 10) || 50 : null,
+        quantile: msg.message.options.aggregate === 'quantile' ? parseFloat(msg.message.options.quantile) || 0.5 : null,
         integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null,
         integralInterpolation: msg.message.options.aggregate === 'integral' ? msg.message.options.integralInterpolation || 'none' : null,
         removeBorderValues: msg.message.options.removeBorderValues || false
@@ -1141,9 +1142,14 @@ function getHistory(msg) {
         options.end *= 1000;
     }
 
-    if (options.aggregate === 'percentile' && options.percentile <= 0 || options.percentile > 100) {
+    if (options.aggregate === 'percentile' && options.percentile < 0 || options.percentile > 100) {
         adapter.log.error(`Invalid percentile value: ${options.percentile}, use 50 as default`);
         options.percentile = 50;
+    }
+
+    if (options.aggregate === 'quantile' && options.quantile < 0 || options.quantile > 1) {
+        adapter.log.error(`Invalid quantile value: ${options.quantile}, use 0.5 as default`);
+        options.quantile = 0.5;
     }
 
     if (options.aggregate === 'integral' && (typeof options.integralUnit !== 'number' || options.integralUnit <= 0)) {
