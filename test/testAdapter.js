@@ -843,7 +843,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     }, function (result) {
                                         console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
                                         expect(result.result.length).to.be.equal(1);
-                                        expect(result.result[0].val).to.be.equal(33.5);
+                                        expect(result.result[0].val).to.be.equal(33);
                                         // Result Influxdb24 Doku = 32.5
 
                                         sendTo('history.0', 'getHistory', {
