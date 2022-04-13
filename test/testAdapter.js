@@ -575,13 +575,14 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 count:     1,
                 aggregate: 'percentile',
                 percentile: 50,
+                removeBorderValues: true,
                 addId: true
             }
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(3);
-            expect(result.result[1].id).to.be.equal('history.0.testValueDebounce');
-            expect(result.result[1].val).to.be.equal(5);
+            expect(result.result.length).to.be.equal(1);
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            expect(result.result[0].val).to.be.equal(5);
 
             sendTo('history.0', 'getHistory', {
                 id: 'history.0.testValueDebounce',
@@ -836,7 +837,21 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                         expect(result.result[0].val).to.be.equal(34.5);
                                         // Result Influxdb24 Doku = 32.5
 
-                                        resolve();
+                                        sendTo('history.0', 'getHistory', {
+                                            id: 'history.0.testValue',
+                                            options: {
+                                                start:     nowSampleI22,
+                                                end:       nowSampleI22 + 60 * 1000,
+                                                count:     1,
+                                                aggregate: 'percentile',
+                                                percentile: 80
+                                            }
+                                        }, function (result) {
+                                            console.log('Sample I22-Percentile: ' + JSON.stringify(result.result, null, 2));
+                                            expect(result.result.length).to.be.equal(3);
+
+                                            resolve();
+                                        });
                                     });
                                 });
                             });
