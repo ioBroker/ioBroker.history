@@ -582,7 +582,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(1);
             expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
-            const percentile50 = result.result[0].val;
+            expect(result.result[0].val).to.be.equal(5);
 
             sendTo('history.0', 'getHistory', {
                 id: 'history.0.testValueDebounce',
@@ -599,7 +599,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 console.log(JSON.stringify(result.result, null, 2));
                 expect(result.result.length).to.be.equal(1);
                 expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
-                expect(result.result[0].val).to.be.greaterThan(percentile50);
+                expect(result.result[0].val).to.be.equal(7);
                 done();
             });
         });
@@ -675,7 +675,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 console.log(JSON.stringify(result.result, null, 2));
                 expect(result.result.length).to.be.at.least(9);
                 expect(result.result[0].val).to.be.equal(1);
-                expect(result.result[1].val).to.be.at.least(2.9);
+                expect(result.result[1].val).to.be.at.least(2.3);
                 expect(result.result[2].val).to.be.equal(4);
                 expect(result.result[3].val).to.be.equal(5);
                 expect(result.result[4].val).to.be.equal(6);
@@ -692,10 +692,10 @@ describe('Test ' + adapterShortName + ' adapter', function() {
     it('Test ' + adapterShortName + ': Write example-integral values into DB', async function () {
         this.timeout(45000);
         const nowSampleI1 = Date.now() - 24 * 60 * 60 * 1000;
-        const nowSampleI21 = Date.now() - 23 * 60 * 60 * 1000;
-        const nowSampleI22 = Date.now() - 22 * 60 * 60 * 1000;
-        const nowSampleI23 = Date.now() - 21 * 60 * 60 * 1000;
-        const nowSampleI24 = Date.now() - 20 * 60 * 60 * 1000;
+        const nowSampleI21 = Date.now() - 22 * 60 * 60 * 1000;
+        const nowSampleI22 = Date.now() - 21 * 60 * 60 * 1000;
+        const nowSampleI23 = Date.now() - 20 * 60 * 60 * 1000;
+        const nowSampleI24 = Date.now() - 19 * 60 * 60 * 1000;
 
         return new Promise(resolve => {
 
@@ -749,6 +749,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                 }, function (result) {
                     console.log('Sample I1-1: ' + JSON.stringify(result.result, null, 2));
                     expect(result.result.length).to.be.equal(1);
+                    expect(result.result[0].val).to.be.equal(3735);
                     // Result Influxdb1 Doku = 3732.66
 
                     sendTo('history.0', 'getHistory', {
@@ -765,6 +766,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                     }, function (result) {
                         console.log('Sample I1-60: ' + JSON.stringify(result.result, null, 2));
                         expect(result.result.length).to.be.equal(1);
+                        expect(result.result[0].val).to.be.equal(62.25);
                         // Result Influxdb1 Doku = 62.211
 
                         sendTo('history.0', 'getHistory', {
@@ -781,6 +783,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                         }, function (result) {
                             console.log('Sample I21: ' + JSON.stringify(result.result, null, 2));
                             expect(result.result.length).to.be.equal(1);
+                            expect(result.result[0].val).to.be.equal(51);
                             // Result Influxdb21 Doku = 50.0
 
                             sendTo('history.0', 'getHistory', {
@@ -797,6 +800,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             }, function (result) {
                                 console.log('Sample I22: ' + JSON.stringify(result.result, null, 2));
                                 expect(result.result.length).to.be.equal(1);
+                                expect(result.result[0].val).to.be.equal(53);
                                 // Result Influxdb22 Doku = 43
 
                                 sendTo('history.0', 'getHistory', {
@@ -813,6 +817,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                 }, function (result) {
                                     console.log('Sample I23: ' + JSON.stringify(result.result, null, 2));
                                     expect(result.result.length).to.be.equal(1);
+                                    expect(result.result[0].val).to.be.equal(25);
                                     // Result Influxdb23 Doku = 25.0
 
                                     sendTo('history.0', 'getHistory', {
@@ -829,6 +834,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     }, function (result) {
                                         console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
                                         expect(result.result.length).to.be.equal(1);
+                                        expect(result.result[0].val).to.be.equal(34.5);
                                         // Result Influxdb24 Doku = 32.5
 
                                         resolve();
