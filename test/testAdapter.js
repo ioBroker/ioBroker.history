@@ -127,7 +127,9 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     debounceTime:     500,
                                     retention:    31536000,
                                     maxLength:    3,
-                                    changesMinDelta: 0.5
+                                    changesMinDelta: 0.5,
+                                    ignoreBelowNumber: -1,
+                                    ignoreAboveNumber: 100
                                 }
                             }
                         },
@@ -146,7 +148,9 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     retention:    31536000,
                                     maxLength:    3,
                                     changesMinDelta: 0.5,
-                                    disableSkippedValueLogging: true
+                                    disableSkippedValueLogging: true,
+                                    ignoreBelowZero: true,
+                                    ignoreAboveNumber: 100
                                 }
                             }
                         },
@@ -166,6 +170,8 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     retention:        31536000,
                                     maxLength:        3,
                                     changesMinDelta:  0.5
+                                    ignoreBelowNumber: -1,
+                                    ignoreAboveNumber: 100
                                 }
                             }
                         },
@@ -480,7 +486,10 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             await delay(70);
         }
         await states.setStateAsync(stateId, {val: 7});  // expect logged
-        await delay(13000);
+        await delay(5000);
+        await states.setStateAsync(stateId, {val: -5});  // expect not logged, too low
+        await states.setStateAsync(stateId, {val: 101}); // expect not logged, too high
+        await delay(7000);
     }
 
     it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function () {

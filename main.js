@@ -148,7 +148,15 @@ function startAdapter(options) {
                 }
 
                 obj.common.custom[adapter.namespace].ignoreZero = obj.common.custom[adapter.namespace].ignoreZero === 'true' || obj.common.custom[adapter.namespace].ignoreZero === true;
-                obj.common.custom[adapter.namespace].ignoreBelowZero = obj.common.custom[adapter.namespace].ignoreBelowZero === 'true' || obj.common.custom[adapter.namespace].ignoreBelowZero === true;
+
+                if (obj.common.custom[adapter.namespace].ignoreAboveNumber !== undefined && obj.common.custom[adapter.namespace].ignoreAboveNumber !== null && obj.common.custom[adapter.namespace].ignoreAboveNumber !== '') {
+                    obj.common.custom[adapter.namespace].ignoreAboveNumber = parseFloat(obj.common.custom[adapter.namespace].ignoreAboveNumber) || null;
+                }
+                if (obj.common.custom[adapter.namespace].ignoreBelowNumber !== undefined && obj.common.custom[adapter.namespace].ignoreBelowNumber !== null && obj.common.custom[adapter.namespace].ignoreBelowNumber !== '') {
+                    obj.common.custom[adapter.namespace].ignoreBelowNumber = parseFloat(obj.common.custom[adapter.namespace].ignoreBelowNumber) || null;
+                } else if (obj.common.custom[adapter.namespace].ignoreBelowZero === 'true' || obj.common.custom[adapter.namespace].ignoreBelowZero === true) {
+                    obj.common.custom[adapter.namespace].ignoreBelowNumber = 0;
+                }
 
                 if (obj.common.custom[adapter.namespace].disableSkippedValueLogging !== undefined && obj.common.custom[adapter.namespace].disableSkippedValueLogging !== null && obj.common.custom[adapter.namespace].disableSkippedValueLogging !== '') {
                     obj.common.custom[adapter.namespace].disableSkippedValueLogging = obj.common.custom[adapter.namespace].disableSkippedValueLogging === 'true' || obj.common.custom[adapter.namespace].disableSkippedValueLogging === true;
@@ -530,7 +538,15 @@ function main() { //start
                         }
 
                         history[id][adapter.namespace].ignoreZero = history[id][adapter.namespace].ignoreZero === 'true' || history[id][adapter.namespace].ignoreZero === true;
-                        history[id][adapter.namespace].ignoreBelowZero = history[id][adapter.namespace].ignoreBelowZero === 'true' || history[id][adapter.namespace].ignoreBelowZero === true;
+
+                        if (history[id][adapter.namespace].ignoreAboveNumber !== undefined && history[id][adapter.namespace].ignoreAboveNumber !== null && history[id][adapter.namespace].ignoreAboveNumber !== '') {
+                            history[id][adapter.namespace].ignoreAboveNumber = parseFloat(history[id][adapter.namespace].ignoreAboveNumber) || null;
+                        }
+                        if (history[id][adapter.namespace].ignoreBelowNumber !== undefined && history[id][adapter.namespace].ignoreBelowNumber !== null && history[id][adapter.namespace].ignoreBelowNumber !== '') {
+                            history[id][adapter.namespace].ignoreBelowNumber = parseFloat(history[id][adapter.namespace].ignoreBelowNumber) || null;
+                        } else if (history[id][adapter.namespace].ignoreBelowZero === 'true' || history[id][adapter.namespace].ignoreBelowZero === true) {
+                            history[id][adapter.namespace].ignoreBelowNumber = 0;
+                        }
 
                         if (history[id][adapter.namespace].disableSkippedValueLogging !== undefined && history[id][adapter.namespace].disableSkippedValueLogging !== null && history[id][adapter.namespace].disableSkippedValueLogging !== '') {
                             history[id][adapter.namespace].disableSkippedValueLogging = history[id][adapter.namespace].disableSkippedValueLogging === 'true' || history[id][adapter.namespace].disableSkippedValueLogging === true;
@@ -623,8 +639,12 @@ function pushHistory(id, state, timerRelog) {
                 settings.enableDebugLogs && adapter.log.debug(`value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`);
                 return;
             } else
-            if (settings.ignoreBelowZero && typeof state.val === 'number' && state.val < 0) {
-                settings.enableDebugLogs && adapter.log.debug(`value ignored because below 0 ${id}, new-value=${state.val}, ts=${state.ts}`);
+            if (typeof settings.ignoreBelowNumber === 'number' && typeof state.val === 'number' && state.val < settings.ignoreBelowNumber) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignored because below ${settings.ignoreBelowNumber} for ${id}, new-value=${state.val}, ts=${state.ts}`);
+                return;
+            }
+            if (typeof settings.ignoreAboveNumber === 'number' && typeof state.val === 'number' && state.val > settings.ignoreAboveNumber) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignored because above ${settings.ignoreAboveNumber} for ${id}, new-value=${state.val}, ts=${state.ts}`);
                 return;
             }
 

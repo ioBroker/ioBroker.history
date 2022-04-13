@@ -55,10 +55,23 @@
       "label": "ignore zero or null values",
       "sm": 6
     },
-    "ignoreBelowZero": {
-      "type": "checkbox",
-      "label": "ignore values below zero",
+    "ignoreBelowNumber": {
+      "type": "string",
+      "label": "ignore values below x",
       "hidden": "!customObj || !customObj.common || customObj.common.type !== 'number'",
+      "defaultFunc": "instanceObj.native.ignoreBelowZero ? instanceObj.native.ignoreBelowZero.toString() || ''",
+      "validator": "((data.ignoreBelowNumber || '').toString().length === 0) || !isNaN(parseFloat(data.ignoreBelowNumber))",
+      "validatorErrorText": "Enter a number or leave the field empty",
+      "validatorNoSaveOnError": true,
+      "sm": 6
+    },
+    "ignoreAboveNumber": {
+      "type": "string",
+      "label": "ignore values above x",
+      "hidden": "!customObj || !customObj.common || customObj.common.type !== 'number'",
+      "validator": "((data.ignoreAboveNumber || '').toString().length === 0) || !isNaN(parseFloat(data.ignoreAboveNumber))",
+      "validatorErrorText": "Enter a number or leave the field empty",
+      "validatorNoSaveOnError": true,
       "sm": 6
     },
     "disableSkippedValueLogging": {
