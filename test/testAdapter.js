@@ -857,8 +857,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                             }
                                         }, function (result) {
                                             console.log('Sample I22-Quantile: ' + JSON.stringify(result.result, null, 2));
-                                            expect(result.result.length).to.be.equal(2);
-                                            expect(result.result[0].val).to.be.null;
+                                            expect(result.result.length).to.be.equal(3);
                                             expect(result.result[1].val).to.be.equal(19);
 
                                             resolve();
