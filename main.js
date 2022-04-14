@@ -1169,7 +1169,7 @@ function getHistory(msg) {
         options.integralUnit = 60;
     }
 
-    const debugLog = options.debugLog = !!(history[options.id] && history[options.id].enableDebugLogs);
+    const debugLog = options.debugLog = !!(history[options.id] && history[options.id][adapter.namespace] && history[options.id][adapter.namespace].enableDebugLogs);
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
