@@ -74,6 +74,8 @@ Possible options:
 - **addId** - if *id* field should be included in answer
 - **limit** - do not return more entries than limit
 - **ignoreNull** - if null values should be included (false), replaced by last not null value (true) or replaced with 0 (0)
+- **removeBorderValues** - By default additional border values are returned to optimize charting. Set this option to true if this is not wanted (e.g. for script data processing)
+- **returnNewestEntries** - The returned data are always sorted by timestamp ascending. When using aggregate "none" and also providing "count" or "limit" this means that normally the oldest entries are returned. Set this option to true to get the newest entries instead.
 - **aggregate** - aggregate method:
     - *minmax* - used special algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
     - *max* - Splice the whole time range in small intervals and find for every interval max value and use it for this interval (nulls will be ignored).
@@ -81,7 +83,16 @@ Possible options:
     - *average* - Same as max, but take average value.
     - *total* - Same as max, but calculate total value.
     - *count* - Same as max, but calculate number of values (nulls will be calculated).
+    - *percentile* - Calculate n-th percentile (n is given in options.percentile or defaults to 50 if not provided).
+    - *quantile* - Calculate n quantile (n is given in options.quantile or defaults to 0.5 if not provided).
+    - *integral* - Calculate integral (additional parameters see below).
     - *none* - No aggregation at all. Only raw values in given period.
+- **percentile** - (optional) when using aggregate method "percentile" defines the percentile level (0..100)(defaults to 50)
+- **quantile** - (optional) when using aggregate method "quantile" defines the quantile level (0..1)(defaults to 0.5)
+- **integralUnit** - (optional) when using aggregate method "integral" defines the unit in seconds (defaults to 60s). e.g. to get integral in hours for Wh or such, set to 3600.
+- **integralInterpolation** - (optional) when using aggregate method "integral" defines the interpolation method (defaults to "none").
+    - *linear* - linear interpolation
+    - *none* - no/stepwise interpolation 
 
 The first and last points will be calculated for aggregations, except aggregation "none".
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.

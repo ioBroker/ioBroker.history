@@ -166,7 +166,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     changesOnly:  true,
                                     changesRelogInterval: 10,
                                     debounceTime:     0,
-                                    blockTime:        1000,
+                                    blockTime:        1500,
                                     retention:        31536000,
                                     maxLength:        3,
                                     changesMinDelta:  0.5,
@@ -452,38 +452,39 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function logSampleData(stateId) {
+    async function logSampleData(stateId, waitMultiplier) {
+        if (!waitMultiplier) waitMultiplier = 1;
         await states.setStateAsync(stateId, {val: 1}); // expect logged
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 2}); // Expect not logged debounce
-        await delay(20);
+        await delay(20 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 2.1}); // Expect not logged debounce
-        await delay(20);
+        await delay(20 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 1.5}); // Expect not logged debounce
-        await delay(20);
+        await delay(20 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 2.3}); // Expect not logged debounce
-        await delay(20);
+        await delay(20 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 2.5}); // Expect not logged debounce
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 2.9}); // Expect logged skipped
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 3.0}); // Expect logged
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 4}); // Expect logged
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 4.4}); // expect logged skipped
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 5});  // expect logged
-        await delay(20);
+        await delay(20 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 5});  // expect not logged debounce
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 5});  // expect logged skipped
-        await delay(600);
+        await delay(600 * waitMultiplier);
         await states.setStateAsync(stateId, {val: 6});  // expect logged
         await delay(10100);
         for (let i = 1; i < 10; i++) {
             await states.setStateAsync(stateId, {val: 6 + i * 0.05});  // expect logged skipped
-            await delay(70);
+            await delay(70 * waitMultiplier);
         }
         await states.setStateAsync(stateId, {val: 7});  // expect logged
         await delay(5000);
@@ -664,7 +665,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         now = Date.now();
 
         try {
-            await logSampleData('history.0.testValueBlocked');
+            await logSampleData('history.0.testValueBlocked', 1.5);
         } catch (err) {
             console.log(err);
             expect(err).to.be.not.ok;
