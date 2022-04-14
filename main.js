@@ -1069,6 +1069,7 @@ function applyOptions(data, options, shouldCopy) {
             const _item = {
                 ts: item.ts,
                 val: item.val,
+                i: item.i
             };
             if (options.ack) {
                 _item.ack = item.ack;
@@ -1078,6 +1079,9 @@ function applyOptions(data, options, shouldCopy) {
             }
             if (options.q) {
                 _item.q = item.q;
+            }
+            if (options.addId) {
+                _item.id = item.id;
             }
             _data.push(_item);
         });
@@ -1092,6 +1096,9 @@ function applyOptions(data, options, shouldCopy) {
             }
             if (!options.q && item.q !== undefined) {
                 delete item.q;
+            }
+            if (!options.addId && item.id !== undefined) {
+                delete item.id;
             }
         });
 
