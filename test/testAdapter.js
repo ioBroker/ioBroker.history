@@ -700,11 +700,11 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
     it('Test ' + adapterShortName + ': Tests with more sample data', async function () {
         this.timeout(45000);
-        const nowSampleI1 = Date.now() - 24 * 60 * 60 * 1000;
-        const nowSampleI21 = Date.now() - 22 * 60 * 60 * 1000;
-        const nowSampleI22 = Date.now() - 21 * 60 * 60 * 1000;
-        const nowSampleI23 = Date.now() - 20 * 60 * 60 * 1000;
-        const nowSampleI24 = Date.now() - 19 * 60 * 60 * 1000;
+        const nowSampleI1 = Date.now() - 29 * 60 * 60 * 1000;
+        const nowSampleI21 = Date.now() - 28 * 60 * 60 * 1000;
+        const nowSampleI22 = Date.now() - 27 * 60 * 60 * 1000;
+        const nowSampleI23 = Date.now() - 26 * 60 * 60 * 1000;
+        const nowSampleI24 = Date.now() - 25 * 60 * 60 * 1000;
 
         return new Promise(resolve => {
 
@@ -843,7 +843,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     }, function (result) {
                                         console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
                                         expect(result.result.length).to.be.equal(1);
-                                        expect(result.result[0].val).to.be.equal(33);
+                                        expect(result.result[0].val).to.be.equal(33.5);
                                         // Result Influxdb24 Doku = 32.5
 
                                         sendTo('history.0', 'getHistory', {
