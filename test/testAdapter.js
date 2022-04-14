@@ -873,7 +873,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it('Test ' + adapterShortName + ': Read data since 1.1.1970 GetHistory', function (done) {
+    it('Test ' + adapterShortName + ': Read data two weeks around now GetHistory', function (done) {
         this.timeout(25000);
 
         const start1week = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -890,7 +890,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.equal(3);
+            expect(result.result.length).to.be.equal(4);
             expect(result.result[0].id).to.be.equal('history.0.testValue');
             done();
         });

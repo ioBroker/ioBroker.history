@@ -75,7 +75,7 @@ Possible options:
 - **limit** - do not return more entries than limit
 - **ignoreNull** - if null values should be included (false), replaced by last not null value (true) or replaced with 0 (0)
 - **removeBorderValues** - By default additional border values are returned to optimize charting. Set this option to true if this is not wanted (e.g. for script data processing)
-- **returnNewestEntries** - The returned data are always sorted by timestamp ascending. When using aggregate "none" and also providing "count" or "limit" this means that normally the oldest entries are returned. Set this option to true to get the newest entries instead.
+- **returnNewestEntries** - The returned data are always sorted by timestamp ascending. When using aggregate "none" and also providing "count" or "limit" this means that normally the oldest entries are returned (unless no start data is provided). Set this option to true to get the newest entries instead.
 - **aggregate** - aggregate method:
     - *minmax* - used special algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
     - *max* - Splice the whole time range in small intervals and find for every interval max value and use it for this interval (nulls will be ignored).

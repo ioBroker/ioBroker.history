@@ -984,10 +984,8 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     // get all files in directory
     for (let i = 0; i < dayList.length; i++) {
         const day = parseInt(dayList[i], 10);
-        console.log(`Check day ${day}`);
 
         if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-            console.log(`Read day ${day}`);
             const file = GetHistory.getFilenameForID(options.path, dayList[i], id);
             const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
@@ -1171,9 +1169,11 @@ function getHistory(msg) {
         options.integralUnit = 60;
     }
 
+    options.debugLog = !!(history[options.id] && history[options.id].enableDebugLogs);
+
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
-            adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
+            debugLog && adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
 
             cacheData = applyOptions(cacheData, options, true);
 
@@ -1182,7 +1182,7 @@ function getHistory(msg) {
                 cacheData = cacheData.sort(sortByTs);
                 if (options.count && cacheData.length > options.count && options.aggregate === 'none') {
                     cacheData = cacheData.slice(-options.count);
-                    adapter.log.debug(`cut cacheData to ${options.count} values`);
+                    debugLog && adapter.log.debug(`cut cacheData to ${options.count} values`);
                 }
                 adapter.log.debug(`Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
 
@@ -1196,7 +1196,7 @@ function getHistory(msg) {
                 options.count -= cacheData.length;
                 getFileData(options, fileData => {
                     fileData = applyOptions(fileData, options, false);
-                    adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
+                    debugLog && adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     options.count = origCount;
@@ -1213,11 +1213,14 @@ function getHistory(msg) {
                             }
                         }
                         options.result = options.result.slice(0, options.count);
-                        adapter.log.debug(`pre-cut data to ${options.count} oldest values`);
+                        debugLog && adapter.log.debug(`pre-cut data to ${options.count} oldest values`);
+                    }
+                    if (options.debugLog) {
+                        options.log = adapter.log.debug;
                     }
                     Aggregate.beautify(options);
 
-                    adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
+                    debugLog && adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
 
                     adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
 
@@ -1252,6 +1255,12 @@ function getHistory(msg) {
                         error: null
                     }, msg.callback);
                 });
+
+                if (options.debugLog && gh.stdout) {
+                    gh.stdout.on('data', data => {
+                        adapter.log.debug(`GetHistory fork: ${data && data.toString()}`);
+                    });
+                }
 
                 gh.on('message', data => {
                     const cmd = data[0];
@@ -1292,6 +1301,9 @@ function getHistory(msg) {
                 adapter.log.info(`Can not use parallel requests: ${err.message}`);
             }
         } else {
+            if (options.debugLog) {
+                options.log = adapter.log.debug;
+            }
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);
             getCachedData(options, cachedData => {
