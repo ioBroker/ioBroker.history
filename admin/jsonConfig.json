@@ -153,6 +153,15 @@
           "type": "checkbox",
           "sm": 12,
           "md": 4
+        },
+        "debounce": {
+          "type": "number",
+          "sm": 12,
+          "md": 4,
+          "min": 0,
+          "label": "De-bounce time",
+          "help": "debounce",
+          "hidden": "true"
         }
       }
     }

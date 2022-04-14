@@ -159,6 +159,22 @@
       "sm": 12,
       "md": 4,
       "defaultFunc": "instanceObj.native.enableDebugLogs || false"
+    },
+    "debounce": {
+      "type": "number",
+      "label": "De-bounce time",
+      "help": "De-bounce interval(ms)",
+      "min": 0,
+      "max": 86400000,
+      "defaultFunc": "customObj && customObj.common && customObj.common.type === 'number' ? instanceObj.native.debounce : 0",
+      "hidden": "true",
+      "sm": 6
+    },
+    "ignoreBelowZero": {
+      "type": "checkbox",
+      "label": "ignore values below zero",
+      "hidden": "true",
+      "sm": 6
     }
   }
 }
