@@ -54,7 +54,7 @@
       "type": "text",
       "label": "ignore values below x",
       "hidden": "!customObj || !customObj.common || customObj.common.type !== 'number'",
-      "defaultFunc": "data.ignoreBelowZero ? data.ignoreBelowZero.toString() || ''",
+      "defaultFunc": "data.ignoreBelowZero ? '0' : ''",
       "validator": "((data.ignoreBelowNumber || '').toString().length === 0) || !isNaN(parseFloat(data.ignoreBelowNumber))",
       "validatorErrorText": "Enter a number or leave the field empty",
       "validatorNoSaveOnError": true,
