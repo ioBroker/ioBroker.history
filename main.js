@@ -984,8 +984,10 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     // get all files in directory
     for (let i = 0; i < dayList.length; i++) {
         const day = parseInt(dayList[i], 10);
+        console.log(`Check day ${day}`);
 
         if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
+            console.log(`Read day ${day}`);
             const file = GetHistory.getFilenameForID(options.path, dayList[i], id);
             const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
