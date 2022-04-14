@@ -49,14 +49,9 @@
       "help": "0 = disable delta check",
       "disabled": "!data.changesOnly"
     },
-    "ignoreZero": {
-      "newLine": true,
-      "type": "checkbox",
-      "label": "ignore zero or null values",
-      "sm": 6
-    },
     "ignoreBelowNumber": {
-      "type": "string",
+      "newLine": true,
+      "type": "text",
       "label": "ignore values below x",
       "hidden": "!customObj || !customObj.common || customObj.common.type !== 'number'",
       "defaultFunc": "instanceObj.native.ignoreBelowZero ? instanceObj.native.ignoreBelowZero.toString() || ''",
@@ -66,7 +61,7 @@
       "sm": 6
     },
     "ignoreAboveNumber": {
-      "type": "string",
+      "type": "text",
       "label": "ignore values above x",
       "hidden": "!customObj || !customObj.common || customObj.common.type !== 'number'",
       "validator": "((data.ignoreAboveNumber || '').toString().length === 0) || !isNaN(parseFloat(data.ignoreAboveNumber))",
@@ -74,12 +69,17 @@
       "validatorNoSaveOnError": true,
       "sm": 6
     },
+    "ignoreZero": {
+      "newLine": true,
+      "type": "checkbox",
+      "label": "ignore zero or null values",
+      "sm": 6
+    },
     "disableSkippedValueLogging": {
       "newLine": true,
       "label": "Disable charting optimized logging of skipped values",
       "type": "checkbox",
       "sm": 12,
-      "md": 4,
       "defaultFunc": "instanceObj.native.disableSkippedValueLogging || false"
     },
     "aliasId": {
@@ -157,7 +157,6 @@
       "label": "Enable enhanced debug logs for the datapoint",
       "type": "checkbox",
       "sm": 12,
-      "md": 4,
       "defaultFunc": "instanceObj.native.enableDebugLogs || false"
     },
     "debounce": {
