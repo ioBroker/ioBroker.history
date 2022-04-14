@@ -600,15 +600,6 @@ function pushHistory(id, state, timerRelog) {
             return adapter.log.warn(`state value undefined received for ${id} which is not allowed. Ignoring.`);
         }
 
-        // convert from seconds to milliseconds
-        if (state.ts < 946681200000) {
-            state.ts *= 1000;
-        }
-        // convert from seconds to milliseconds
-        if (state.lc < 946681200000) {
-            state.lc *= 1000;
-        }
-
         if (typeof state.val === 'string') {
             const f = parseFloat(state.val);
             if (f == state.val) {
@@ -994,8 +985,9 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     for (let i = 0; i < dayList.length; i++) {
         const day = parseInt(dayList[i], 10);
 
-        if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
+        if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
             const file = GetHistory.getFilenameForID(options.path, dayList[i], id);
+            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
             if (fs.existsSync(file)) {
                 try {
@@ -1006,6 +998,12 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                         if (!_data.hasOwnProperty(ii)) {
                             continue;
                         }
+
+                        // if a ts in seconds is in then convert on the fly
+                        if (_data[ii].ts && _data[ii].ts < tsCheck) {
+                            _data[ii].ts *= 1000;
+                        }
+
                         if (options.ack) {
                             _data[ii].ack = !!_data[ii].ack;
                         }
@@ -1013,7 +1011,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].id = id;
                         }
                         data.push(_data[ii]);
-                        if (!options.start && data.length >= options.count) {
+                        if (!options.start && !options.returnNewestEntries && data.length >= options.count) {
                             break;
                         }
                         if (last) {
@@ -1147,19 +1145,6 @@ function getHistory(msg) {
         const _end      = options.end;
         options.end   = options.start;
         options.start = _end;
-    }
-
-    // if less 2000.01.01 00:00:00
-    if (options.start < 946681200000) {
-        options.start *= 1000;
-        if (options.step !== null && options.step !== undefined) {
-            options.step *= 1000;
-        }
-    }
-
-    // if less 2000.01.01 00:00:00
-    if (options.end < 946681200000) {
-        options.end *= 1000;
     }
 
     if (options.aggregate === 'percentile' && options.percentile < 0 || options.percentile > 100) {
@@ -1379,14 +1364,19 @@ function update(id, state) {
 
     if (!found) {
         const day = GetHistory.ts2day(state.ts);
-        if (!isNaN(day) && day > 20100101) {
+        if (!isNaN(day)) {
             const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
+            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
             if (fs.existsSync(file)) {
                 try {
                     const res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
 
                     for (let i = 0; i < res.length; i++) {
+                        // if a ts in seconds is in then convert on the fly
+                        if (res[i].ts && res[i].ts < tsCheck) {
+                            res[i].ts *= 1000;
+                        }
                         if (res[i].ts === state.ts) {
                             if (state.val !== undefined) {
                                 res[i].val = state.val;
@@ -1455,11 +1445,11 @@ function _delete(id, state) {
         const files = [];
         if (state.ts) {
             const day = GetHistory.ts2day(state.ts);
-            if (!isNaN(day) && day > 20100101) {
+            if (!isNaN(day)) {
                 const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
 
                 if (fs.existsSync(file)) {
-                    files.push(file);
+                    files.push({file, day});
                 }
             }
         } else {
@@ -1484,24 +1474,29 @@ function _delete(id, state) {
             for (let i = 0; i < dayList.length; i++) {
                 const day = parseInt(dayList[i], 10);
 
-                if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
+                if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
                     const file = GetHistory.getFilenameForID(adapter.config.storeDir, dayList[i], id);
                     if (fs.existsSync(file)) {
-                        files.push(file);
+                        files.push({file, day});
                     }
                 }
             }
         }
 
-        files.forEach(file => {
+        files.forEach(entry => {
             try {
-                let res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+                const tsCheck = new Date(Math.floor(entry.day/10000),0, 1).getTime();
+                let res = JSON.parse(fs.readFileSync(entry.file)).sort(tsSort);
 
                 if (!state.ts && !state.start && !state.end) {
                     res = [];
                     found = true;
                 } else {
                     for (let i = res.length - 1; i => 0; i--) {
+                        // if a ts in seconds is in then convert on the fly
+                        if (res[i].ts && res[i].ts < tsCheck) {
+                            res[i].ts *= 1000;
+                        }
                         if (state.start && state.end) {
                             if (res[i].ts >= state.start && res[i].ts <= state.end) {
                                 res.splice(i, 1);

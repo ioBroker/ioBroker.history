@@ -85,7 +85,6 @@ function main() {
                             } else {
                                 if (resultDP.result[0]) {
                                     earliestDBValue[dp.name] = resultDP.result[0][0].ts;
-                                    if (earliestDBValue[dp.name] < 946681200000) earliestDBValue[dp.name] = Date.now(); // mysterious timestamp, ignore
                                     console.log('FirstVal ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + new Date(earliestDBValue[dp.name]).toString());
                                 }
                                 if ((deepAnalyze) && (resultDP.result[1])) {
@@ -124,7 +123,6 @@ function main() {
 
 
 function ts2day(ts) {
-    if (ts < 946681200000) ts *= 1000;
     var dateObj = new Date(ts);
 
     var text = dateObj.getFullYear().toString();

@@ -49,7 +49,6 @@ function main() {
             console.log(JSON.stringify(result.result));
             for (var id in result.result) {
                 earliestDBValue[id] = result.result[id].ts;
-                if (earliestDBValue[id] < 946681200000) earliestDBValue[id] = Date.now(); // mysterious timestamp, ignore
                 if (result.result[id].type !== 'undefined') existingTypes[id] = result.result[id].type;
             }
             fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes));
