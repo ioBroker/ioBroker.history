@@ -142,6 +142,7 @@
           "md": 4
         },
         "disableSkippedValueLogging": {
+          "newLine": true,
           "label": "Disable charting optimized logging of skipped values",
           "type": "checkbox",
           "sm": 12,
