@@ -191,6 +191,7 @@ function processFile() {
     if (Object.keys(allFiles).length === 0) finish(true);
 
     var day = parseInt(Object.keys(allFiles)[Object.keys(allFiles).length-1], 10);
+    var tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
     if (allFiles[day].files.length>0) {
         var dir = allFiles[day].dirname;
@@ -224,7 +225,8 @@ function processFile() {
 
             fileData = JSON.parse(fileContent, function (key, value) {
                 if (key === 'ts') {
-                    if (value < 946681200000) value *= 1000;
+                    // if the ts is smaller then the one from the 1.1. of the relevant year, it is in seconds and needs to be adjusted
+                    if (value < tsCheck) value *= 1000;
                 }
                 else if (key === 'ack') {
                     value = !!value;
@@ -406,7 +408,6 @@ function getFiles(path) {
 }
 
 function ts2day(ts) {
-    if (ts < 946681200000) ts *= 1000;
     var dateObj = new Date(ts);
 
     var text = dateObj.getFullYear().toString();

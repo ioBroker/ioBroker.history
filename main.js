@@ -121,10 +121,19 @@ function startAdapter(options) {
                 } else {
                     obj.common.custom[adapter.namespace].retention = parseInt(obj.common.custom[adapter.namespace].retention, 10) || 0;
                 }
-                if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
-                    obj.common.custom[adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                if (!obj.common.custom[adapter.namespace].blockTime && obj.common.custom[adapter.namespace].blockTime !== '0' && obj.common.custom[adapter.namespace].blockTime !== 0) {
+                    if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
+                        obj.common.custom[adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 0;
+                    } else {
+                        obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].debounce, 10) || 0;
+                    }
                 } else {
-                    obj.common.custom[adapter.namespace].debounce = parseInt(obj.common.custom[adapter.namespace].debounce, 10);
+                    obj.common.custom[adapter.namespace].blockTime = parseInt(obj.common.custom[adapter.namespace].blockTime, 10) || 0;
+                }
+                if (!obj.common.custom[adapter.namespace].debounceTime && obj.common.custom[adapter.namespace].debounceTime !== '0' && obj.common.custom[adapter.namespace].debounceTime !== 0) {
+                    obj.common.custom[adapter.namespace].debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
+                } else {
+                    obj.common.custom[adapter.namespace].debounceTime = parseInt(obj.common.custom[adapter.namespace].debounceTime, 10) || 0;
                 }
                 obj.common.custom[adapter.namespace].changesOnly = obj.common.custom[adapter.namespace].changesOnly === 'true' || obj.common.custom[adapter.namespace].changesOnly === true;
                 if (obj.common.custom[adapter.namespace].changesRelogInterval !== undefined && obj.common.custom[adapter.namespace].changesRelogInterval !== null && obj.common.custom[adapter.namespace].changesRelogInterval !== '') {
@@ -139,7 +148,27 @@ function startAdapter(options) {
                 }
 
                 obj.common.custom[adapter.namespace].ignoreZero = obj.common.custom[adapter.namespace].ignoreZero === 'true' || obj.common.custom[adapter.namespace].ignoreZero === true;
-                obj.common.custom[adapter.namespace].ignoreBelowZero = obj.common.custom[adapter.namespace].ignoreBelowZero === 'true' || obj.common.custom[adapter.namespace].ignoreBelowZero === true;
+
+                if (obj.common.custom[adapter.namespace].ignoreAboveNumber !== undefined && obj.common.custom[adapter.namespace].ignoreAboveNumber !== null && obj.common.custom[adapter.namespace].ignoreAboveNumber !== '') {
+                    obj.common.custom[adapter.namespace].ignoreAboveNumber = parseFloat(obj.common.custom[adapter.namespace].ignoreAboveNumber) || null;
+                }
+                if (obj.common.custom[adapter.namespace].ignoreBelowNumber !== undefined && obj.common.custom[adapter.namespace].ignoreBelowNumber !== null && obj.common.custom[adapter.namespace].ignoreBelowNumber !== '') {
+                    obj.common.custom[adapter.namespace].ignoreBelowNumber = parseFloat(obj.common.custom[adapter.namespace].ignoreBelowNumber) || null;
+                } else if (obj.common.custom[adapter.namespace].ignoreBelowZero === 'true' || obj.common.custom[adapter.namespace].ignoreBelowZero === true) {
+                    obj.common.custom[adapter.namespace].ignoreBelowNumber = 0;
+                }
+
+                if (obj.common.custom[adapter.namespace].disableSkippedValueLogging !== undefined && obj.common.custom[adapter.namespace].disableSkippedValueLogging !== null && obj.common.custom[adapter.namespace].disableSkippedValueLogging !== '') {
+                    obj.common.custom[adapter.namespace].disableSkippedValueLogging = obj.common.custom[adapter.namespace].disableSkippedValueLogging === 'true' || obj.common.custom[adapter.namespace].disableSkippedValueLogging === true;
+                } else {
+                    obj.common.custom[adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
+                }
+
+                if (obj.common.custom[adapter.namespace].enableDebugLogs !== undefined && obj.common.custom[adapter.namespace].enableDebugLogs !== null && obj.common.custom[adapter.namespace].enableDebugLogs !== '') {
+                    obj.common.custom[adapter.namespace].enableDebugLogs = obj.common.custom[adapter.namespace].enableDebugLogs === 'true' || obj.common.custom[adapter.namespace].enableDebugLogs === true;
+                } else {
+                    obj.common.custom[adapter.namespace].enableDebugLogs = adapter.config.enableDebugLogs;
+                }
 
                 // add one day if retention is too small
                 if (obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention <= 604800) {
@@ -156,7 +185,10 @@ function startAdapter(options) {
                 history[id].timeout = timeout;
                 history[id].realId  = realId;
 
-                history[formerAliasId] && history[formerAliasId].relogTimeout && clearTimeout(history[formerAliasId].relogTimeout);
+                if (history[formerAliasId] && history[formerAliasId].relogTimeout) {
+                    clearTimeout(history[formerAliasId].relogTimeout);
+                    history[formerAliasId].relogTimeout = null;
+                }
 
                 if (history[id][adapter.namespace].changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
@@ -175,8 +207,14 @@ function startAdapter(options) {
                 id = formerAliasId;
                 if (history[id]) {
                     adapter.log.info('disabled logging of ' + id);
-                    history[id].relogTimeout && clearTimeout(history[id].relogTimeout);
-                    history[id].timeout && clearTimeout(history[id].timeout);
+                    if (history[id].relogTimeout) {
+                        clearTimeout(history[id].relogTimeout);
+                        history[id].relogTimeout = null;
+                    }
+                    if (history[id].timeout) {
+                        clearTimeout(history[id].timeout);
+                        history[id].timeout = null;
+                    }
                     storeCached(true, id);
                     delete history[id];
                 }
@@ -409,6 +447,24 @@ function main() { //start
         adapter.config.changesMinDelta = 0;
     }
 
+    if (adapter.config.blockTime !== null && adapter.config.blockTime !== undefined) {
+        adapter.config.blockTime = parseInt(adapter.config.blockTime, 10) || 0;
+    } else {
+        if (adapter.config.debounce !== null && adapter.config.debounce !== undefined) {
+            adapter.config.debounce = parseInt(adapter.config.debounce, 10) || 0;
+        } else {
+            adapter.config.blockTime = 0;
+        }
+    }
+
+    if (adapter.config.debounceTime !== null && adapter.config.debounceTime !== undefined) {
+        adapter.config.debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
+    } else {
+        adapter.config.debounceTime = 0;
+    }
+
+
+
     try {
         // create directory
         if (!fs.existsSync(adapter.config.storeDir)) {
@@ -447,10 +503,19 @@ function main() { //start
                         } else {
                             history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
                         }
-                        if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
-                            history[id][adapter.namespace].debounce = parseInt(adapter.config.debounce, 10) || 1000;
+                        if (!history[id][adapter.namespace].blockTime && history[id][adapter.namespace].blockTime !== '0' && history[id][adapter.namespace].blockTime !== 0) {
+                            if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
+                                history[id][adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 0;
+                            } else {
+                                history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].debounce, 10) || 0;
+                            }
                         } else {
-                            history[id][adapter.namespace].debounce = parseInt(history[id][adapter.namespace].debounce, 10);
+                            history[id][adapter.namespace].blockTime = parseInt(history[id][adapter.namespace].blockTime, 10) || 0;
+                        }
+                        if (!history[id][adapter.namespace].debounceTime && history[id][adapter.namespace].debounceTime !== '0' && history[id][adapter.namespace].debounceTime !== 0) {
+                            history[id][adapter.namespace].debounceTime = parseInt(adapter.config.debounceTime, 10) || 0;
+                        } else {
+                            history[id][adapter.namespace].debounceTime = parseInt(history[id][adapter.namespace].debounceTime, 10) || 0;
                         }
                         history[id][adapter.namespace].changesOnly = history[id][adapter.namespace].changesOnly === 'true' || history[id][adapter.namespace].changesOnly === true;
                         if (history[id][adapter.namespace].changesRelogInterval !== undefined && history[id][adapter.namespace].changesRelogInterval !== null && history[id][adapter.namespace].changesRelogInterval !== '') {
@@ -473,7 +538,27 @@ function main() { //start
                         }
 
                         history[id][adapter.namespace].ignoreZero = history[id][adapter.namespace].ignoreZero === 'true' || history[id][adapter.namespace].ignoreZero === true;
-                        history[id][adapter.namespace].ignoreBelowZero = history[id][adapter.namespace].ignoreBelowZero === 'true' || history[id][adapter.namespace].ignoreBelowZero === true;
+
+                        if (history[id][adapter.namespace].ignoreAboveNumber !== undefined && history[id][adapter.namespace].ignoreAboveNumber !== null && history[id][adapter.namespace].ignoreAboveNumber !== '') {
+                            history[id][adapter.namespace].ignoreAboveNumber = parseFloat(history[id][adapter.namespace].ignoreAboveNumber) || null;
+                        }
+                        if (history[id][adapter.namespace].ignoreBelowNumber !== undefined && history[id][adapter.namespace].ignoreBelowNumber !== null && history[id][adapter.namespace].ignoreBelowNumber !== '') {
+                            history[id][adapter.namespace].ignoreBelowNumber = parseFloat(history[id][adapter.namespace].ignoreBelowNumber) || null;
+                        } else if (history[id][adapter.namespace].ignoreBelowZero === 'true' || history[id][adapter.namespace].ignoreBelowZero === true) {
+                            history[id][adapter.namespace].ignoreBelowNumber = 0;
+                        }
+
+                        if (history[id][adapter.namespace].disableSkippedValueLogging !== undefined && history[id][adapter.namespace].disableSkippedValueLogging !== null && history[id][adapter.namespace].disableSkippedValueLogging !== '') {
+                            history[id][adapter.namespace].disableSkippedValueLogging = history[id][adapter.namespace].disableSkippedValueLogging === 'true' || history[id][adapter.namespace].disableSkippedValueLogging === true;
+                        } else {
+                            history[id][adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
+                        }
+
+                        if (history[id][adapter.namespace].enableDebugLogs !== undefined && history[id][adapter.namespace].enableDebugLogs !== null && history[id][adapter.namespace].enableDebugLogs !== '') {
+                            history[id][adapter.namespace].enableDebugLogs = history[id][adapter.namespace].enableDebugLogs === 'true' || history[id][adapter.namespace].enableDebugLogs === true;
+                        } else {
+                            history[id][adapter.namespace].enableDebugLogs = adapter.config.enableDebugLogs;
+                        }
 
                         history[id].realId = realId;
                         history[id].list = history[id].list || [];
@@ -515,15 +600,6 @@ function pushHistory(id, state, timerRelog) {
             return adapter.log.warn(`state value undefined received for ${id} which is not allowed. Ignoring.`);
         }
 
-        // convert from seconds to milliseconds
-        if (state.ts < 946681200000) {
-            state.ts *= 1000;
-        }
-        // convert from seconds to milliseconds
-        if (state.lc < 946681200000) {
-            state.lc *= 1000;
-        }
-
         if (typeof state.val === 'string') {
             const f = parseFloat(state.val);
             if (f == state.val) {
@@ -531,31 +607,79 @@ function pushHistory(id, state, timerRelog) {
             }
         }
 
-        if (history[id].state && settings.changesOnly && !timerRelog) {
-            if (settings.changesRelogInterval === 0) {
-                if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
-                    history[id].skipped = state; // remember new timestamp
-                    return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
-                }
-            } else if (history[id].lastLogTime) {
-                if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
-                    history[id].skipped = state; // remember new timestamp
-                    return adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
-                }
-                if (state.ts !== state.lc) {
-                    adapter.log.debug(`value-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
-                }
+        let ignoreDebonce = false;
+
+        if (!timerRelog) {
+            const valueUnstable = !!history[id].timeout;
+            // When a debounce timer runs and the value is the same as the last one, ignore it
+            if (history[id].timeout && state.ts !== state.lc) {
+                settings.enableDebugLogs && adapter.log.debug(`value not changed debounce ${id}, value=${state.val}, ts=${state.ts}, debounce timer keeps running`);
+                return;
+            } else if (history[id].timeout) { // if value changed, clear timer
+                settings.enableDebugLogs && adapter.log.debug(`value changed during debounce time ${id}, value=${state.val}, ts=${state.ts}, debounce timer restarted`);
+                clearTimeout(history[id].timeout);
+                history[id].timeout = null;
             }
-            if (history[id].state.val !== null && (settings.changesMinDelta !== 0) && (typeof state.val === 'number') && (Math.abs(history[id].state.val - state.val) < settings.changesMinDelta)) {
-                history[id].skipped = state; // remember new timestamp
-                adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+
+            if (!valueUnstable && settings.blockTime && history[id].state && (history[id].state.ts + settings.blockTime) > state.ts) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignored blockTime ${id}, value=${state.val}, ts=${state.ts}, lastState.ts=${history[id].state.ts}, blockTime=${settings.blockTime}`);
                 return;
             }
-            else if (typeof state.val === 'number') {
-                adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+
+            if (settings.ignoreZero && (state.val === undefined || state.val === null || state.val === 0)) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`);
+                return;
+            } else
+            if (typeof settings.ignoreBelowNumber === 'number' && typeof state.val === 'number' && state.val < settings.ignoreBelowNumber) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignored because below ${settings.ignoreBelowNumber} for ${id}, new-value=${state.val}, ts=${state.ts}`);
+                return;
             }
-            else {
-                adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+            if (typeof settings.ignoreAboveNumber === 'number' && typeof state.val === 'number' && state.val > settings.ignoreAboveNumber) {
+                settings.enableDebugLogs && adapter.log.debug(`value ignored because above ${settings.ignoreAboveNumber} for ${id}, new-value=${state.val}, ts=${state.ts}`);
+                return;
+            }
+
+            if (history[id].state && settings.changesOnly) {
+                if (settings.changesRelogInterval === 0) {
+                    if ((history[id].state.val !== null || state.val === null) && state.ts !== state.lc) {
+                        // remember new timestamp
+                        if (!valueUnstable && !settings.disableSkippedValueLogging) {
+                            history[id].skipped = state;
+                        }
+                        settings.enableDebugLogs && adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        return;
+                    }
+                } else if (history[id].lastLogTime) {
+                    if ((history[id].state.val !== null || state.val === null) && (state.ts !== state.lc) && (Math.abs(history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000)) {
+                        // remember new timestamp
+                        if (!valueUnstable && !settings.disableSkippedValueLogging) {
+                            history[id].skipped = state;
+                        }
+                        settings.enableDebugLogs && adapter.log.debug(`value not changed ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        return;
+                    }
+                    if (state.ts !== state.lc) {
+                        settings.enableDebugLogs && adapter.log.debug(`value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+                        ignoreDebonce = true;
+                    }
+                }
+                if (typeof state.val === 'number') {
+                    if (
+                        history[id].state.val !== null &&
+                        settings.changesMinDelta !== 0 &&
+                        Math.abs(history[id].state.val - state.val) < settings.changesMinDelta
+                    ) {
+                        if (!valueUnstable && !settings.disableSkippedValueLogging) {
+                            history[id].skipped = state;
+                        }
+                        settings.enableDebugLogs && adapter.log.debug(`Min-Delta not reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                        return;
+                    } else if (settings.changesMinDelta !== 0) {
+                        settings.enableDebugLogs && adapter.log.debug(`Min-Delta reached ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                    }
+                } else {
+                    settings.enableDebugLogs && adapter.log.debug(`Min-Delta ignored because no number ${id}, last-value=${history[id].state.val}, new-value=${state.val}, ts=${state.ts}`);
+                }
             }
         }
 
@@ -563,37 +687,49 @@ function pushHistory(id, state, timerRelog) {
             clearTimeout(history[id].relogTimeout);
             history[id].relogTimeout = null;
         }
-        if (settings.changesRelogInterval > 0) {
-            history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
-        }
 
-        let ignoreDebonce = false;
         if (timerRelog) {
+            state = Object.assign({}, state);
             state.ts = Date.now();
             state.from = 'system.adapter.' + adapter.namespace;
-            adapter.log.debug(`timed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
+            settings.enableDebugLogs && adapter.log.debug(`timed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
             ignoreDebonce = true;
         } else {
             if (settings.changesOnly && history[id].skipped) {
-                history[id].state = history[id].skipped;
-                pushHelper(id);
+                settings.enableDebugLogs && adapter.log.debug(`Skipped value logged ${id}, value=${history[id].skipped.val}, ts=${history[id].skipped.ts}`);
+                pushHelper(id, history[id].skipped);
+                history[id].skipped = null;
             }
             if (history[id].state && ((history[id].state.val === null && state.val !== null) || (history[id].state.val !== null && state.val === null))) {
                 ignoreDebonce = true;
             } else if (!history[id].state && state.val === null) {
                 ignoreDebonce = true;
             }
-            // only store state if really changed
-            history[id].state = state;
         }
-        history[id].lastLogTime = state.ts;
-        history[id].skipped = null;
-        if (settings.debounce && !ignoreDebonce) {
+        if (settings.debounceTime && !ignoreDebonce && !timerRelog) {
             // Discard changes in de-bounce time to store last stable value
             history[id].timeout && clearTimeout(history[id].timeout);
-            history[id].timeout = setTimeout(pushHelper, settings.debounce, id);
+            history[id].timeout = setTimeout((id, state) => {
+                history[id].timeout = null;
+                history[id].state = state;
+                history[id].lastLogTime = state.ts;
+                settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
+                pushHelper(id);
+                if (settings.changesRelogInterval > 0) {
+                    history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+                }
+            }, settings.debounceTime, id, state);
         } else {
-            pushHelper(id);
+            if (!timerRelog) {
+                history[id].state = state;
+            }
+            history[id].lastLogTime = state.ts;
+
+            settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
+            pushHelper(id, state);
+            if (settings.changesRelogInterval > 0) {
+                history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
+            }
         }
     }
 }
@@ -607,9 +743,8 @@ function reLogHelper(_id) {
     history[_id].relogTimeout = null;
 
     if (history[_id].skipped) {
-        history[_id].state = history[_id].skipped;
-        history[_id].state.from = 'system.adapter.' + adapter.namespace;
-        history[_id].skipped = null;
+        pushHistory(_id, history[_id].skipped, true);
+    } else if (history[_id].state) {
         pushHistory(_id, history[_id].state, true);
     }
     else {
@@ -629,49 +764,42 @@ function reLogHelper(_id) {
     }
 }
 
-function pushHelper(_id) {
-    if (!history[_id] || !history[_id].state) return;
-
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreZero && (!history[_id].state || history[_id].state.val === undefined || history[_id].state.val === null || history[_id].state.val === 0)) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(history[_id].state)} and it was ignored because the value zero or null`);
-        return;
-    } else
-    if (history[_id] && history[_id][adapter.namespace] && history[_id][adapter.namespace].ignoreBelowZero && typeof history[_id].state.val === 'number' && history[_id].state.val < 0) {
-        adapter.log.debug(`pushHelper called for ${_id} and state: ${JSON.stringify(history[_id].state)} and it was ignored because the value is below 0`);
-        return;
+function pushHelper(_id, state) {
+    if (!history[_id] || (!history[_id].state && !state)) return;
+    if (!state) {
+        state = history[_id].state;
     }
 
     // if it was not deleted in this time
-    history[_id].timeout = null;
     history[_id].list = history[_id].list || [];
 
-    if (typeof history[_id].state.val === 'string') {
-        const f = parseFloat(history[_id].state.val);
-        if (f == history[_id].state.val) {
-            history[_id].state.val = f;
-        } else if (history[_id].state.val === 'true') {
-            history[_id].state.val = true;
-        } else if (history[_id].state.val === 'false') {
-            history[_id].state.val = false;
+    if (typeof state.val === 'string') {
+        const f = parseFloat(state.val);
+        if (f == state.val) {
+            state.val = f;
+        } else if (state.val === 'true') {
+            state.val = true;
+        } else if (state.val === 'false') {
+            state.val = false;
         }
     }
-    if (history[_id].state.lc !== undefined) {
-        delete history[_id].state.lc;
+    if (state.lc !== undefined) {
+        delete state.lc;
     }
-    if (!adapter.config.storeAck && history[_id].state.ack !== undefined) {
-        delete history[_id].state.ack;
+    if (!adapter.config.storeAck && state.ack !== undefined) {
+        delete state.ack;
     } else {
-        history[_id].state.ack = history[_id].state.ack ? 1 : 0;
+        state.ack = state.ack ? 1 : 0;
     }
-    if (!adapter.config.storeFrom && history[_id].state.from !== undefined) {
-        delete history[_id].state.from;
+    if (!adapter.config.storeFrom && state.from !== undefined) {
+        delete state.from;
     }
 
-    history[_id].list.push(history[_id].state);
+    history[_id].list.push(state);
 
     const _settings = history[_id][adapter.namespace];
     if (_settings && history[_id].list.length > _settings.maxLength) {
-        adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
+        _settings.enableDebugLogs && adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
         appendFile(_id, history[_id].list);
     }
 }
@@ -857,8 +985,9 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     for (let i = 0; i < dayList.length; i++) {
         const day = parseInt(dayList[i], 10);
 
-        if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
+        if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
             const file = GetHistory.getFilenameForID(options.path, dayList[i], id);
+            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
             if (fs.existsSync(file)) {
                 try {
@@ -869,6 +998,12 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                         if (!_data.hasOwnProperty(ii)) {
                             continue;
                         }
+
+                        // if a ts in seconds is in then convert on the fly
+                        if (_data[ii].ts && _data[ii].ts < tsCheck) {
+                            _data[ii].ts *= 1000;
+                        }
+
                         if (options.ack) {
                             _data[ii].ack = !!_data[ii].ack;
                         }
@@ -876,7 +1011,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].id = id;
                         }
                         data.push(_data[ii]);
-                        if (!options.start && data.length >= options.count) {
+                        if (!options.start && !options.returnNewestEntries && data.length >= options.count) {
                             break;
                         }
                         if (last) {
@@ -934,6 +1069,7 @@ function applyOptions(data, options, shouldCopy) {
             const _item = {
                 ts: item.ts,
                 val: item.val,
+                i: item.i
             };
             if (options.ack) {
                 _item.ack = item.ack;
@@ -943,6 +1079,9 @@ function applyOptions(data, options, shouldCopy) {
             }
             if (options.q) {
                 _item.q = item.q;
+            }
+            if (options.addId) {
+                _item.id = item.id;
             }
             _data.push(_item);
         });
@@ -957,6 +1096,9 @@ function applyOptions(data, options, shouldCopy) {
             }
             if (!options.q && item.q !== undefined) {
                 delete item.q;
+            }
+            if (!options.addId && item.id !== undefined) {
+                delete item.id;
             }
         });
 
@@ -988,7 +1130,12 @@ function getHistory(msg) {
         limit:      parseInt(msg.message.options.limit, 10) || parseInt(msg.message.options.count, 10) || adapter.config.limit || 2000,
         addId:      msg.message.options.addId || false,
         sessionId:  msg.message.options.sessionId,
-        returnNewestEntries: msg.message.options.returnNewestEntries || false
+        returnNewestEntries: msg.message.options.returnNewestEntries || false,
+        percentile: msg.message.options.aggregate === 'percentile' ? parseInt(msg.message.options.percentile, 10) || 50 : null,
+        quantile: msg.message.options.aggregate === 'quantile' ? parseFloat(msg.message.options.quantile) || 0.5 : null,
+        integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null,
+        integralInterpolation: msg.message.options.aggregate === 'integral' ? msg.message.options.integralInterpolation || 'none' : null,
+        removeBorderValues: msg.message.options.removeBorderValues || false
     };
 
     if (!options.start && options.count) {
@@ -1007,22 +1154,26 @@ function getHistory(msg) {
         options.start = _end;
     }
 
-    // if less 2000.01.01 00:00:00
-    if (options.start < 946681200000) {
-        options.start *= 1000;
-        if (options.step !== null && options.step !== undefined) {
-            options.step *= 1000;
-        }
+    if (options.aggregate === 'percentile' && options.percentile < 0 || options.percentile > 100) {
+        adapter.log.error(`Invalid percentile value: ${options.percentile}, use 50 as default`);
+        options.percentile = 50;
     }
 
-    // if less 2000.01.01 00:00:00
-    if (options.end < 946681200000) {
-        options.end *= 1000;
+    if (options.aggregate === 'quantile' && options.quantile < 0 || options.quantile > 1) {
+        adapter.log.error(`Invalid quantile value: ${options.quantile}, use 0.5 as default`);
+        options.quantile = 0.5;
     }
+
+    if (options.aggregate === 'integral' && (typeof options.integralUnit !== 'number' || options.integralUnit <= 0)) {
+        adapter.log.error(`Invalid integralUnit value: ${options.integralUnit}, use 60s as default`);
+        options.integralUnit = 60;
+    }
+
+    const debugLog = options.debugLog = !!(history[options.id] && history[options.id][adapter.namespace] && history[options.id][adapter.namespace].enableDebugLogs);
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
-            adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
+            debugLog && adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
 
             cacheData = applyOptions(cacheData, options, true);
 
@@ -1031,7 +1182,7 @@ function getHistory(msg) {
                 cacheData = cacheData.sort(sortByTs);
                 if (options.count && cacheData.length > options.count && options.aggregate === 'none') {
                     cacheData = cacheData.slice(-options.count);
-                    adapter.log.debug(`cut cacheData to ${options.count} values`);
+                    debugLog && adapter.log.debug(`cut cacheData to ${options.count} values`);
                 }
                 adapter.log.debug(`Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
 
@@ -1045,7 +1196,7 @@ function getHistory(msg) {
                 options.count -= cacheData.length;
                 getFileData(options, fileData => {
                     fileData = applyOptions(fileData, options, false);
-                    adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
+                    debugLog && adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     options.count = origCount;
@@ -1062,11 +1213,14 @@ function getHistory(msg) {
                             }
                         }
                         options.result = options.result.slice(0, options.count);
-                        adapter.log.debug(`pre-cut data to ${options.count} oldest values`);
+                        debugLog && adapter.log.debug(`pre-cut data to ${options.count} oldest values`);
+                    }
+                    if (options.debugLog) {
+                        options.log = adapter.log.debug;
                     }
                     Aggregate.beautify(options);
 
-                    adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
+                    debugLog && adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
 
                     adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
 
@@ -1081,7 +1235,7 @@ function getHistory(msg) {
     } else {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
-            adapter.log.debug('use parallel requests');
+            adapter.log.debug('use parallel requests for getHistory');
             try {
                 const gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
@@ -1102,6 +1256,12 @@ function getHistory(msg) {
                     }, msg.callback);
                 });
 
+                if (options.debugLog && gh.stdout) {
+                    gh.stdout.on('data', data => {
+                        adapter.log.debug(`GetHistory fork: ${data && data.toString()}`);
+                    });
+                }
+
                 gh.on('message', data => {
                     const cmd = data[0];
                     if (cmd === 'getCache') {
@@ -1121,7 +1281,6 @@ function getHistory(msg) {
                         const overallLength = data[2];
                         const step = data[3];
                         if (options.result) {
-                            Aggregate.beautify(options);
                             adapter.log.debug(`Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
                             adapter.sendTo(msg.from, msg.command, {
                                 result: options.result,
@@ -1142,6 +1301,9 @@ function getHistory(msg) {
                 adapter.log.info(`Can not use parallel requests: ${err.message}`);
             }
         } else {
+            if (options.debugLog) {
+                options.log = adapter.log.debug;
+            }
             GetHistory.initAggregate(options);
             GetHistory.getFileData(options);
             getCachedData(options, cachedData => {
@@ -1152,7 +1314,6 @@ function getHistory(msg) {
                     if (data[1]) {
                         adapter.log.debug(`Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
                         options.result = applyOptions(data[1], options, true);
-                        Aggregate.beautify(options);
                         adapter.sendTo(msg.from, msg.command, {
                             result: options.result,
                             step:   data[3],
@@ -1224,14 +1385,19 @@ function update(id, state) {
 
     if (!found) {
         const day = GetHistory.ts2day(state.ts);
-        if (!isNaN(day) && day > 20100101) {
+        if (!isNaN(day)) {
             const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
+            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
             if (fs.existsSync(file)) {
                 try {
                     const res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
 
                     for (let i = 0; i < res.length; i++) {
+                        // if a ts in seconds is in then convert on the fly
+                        if (res[i].ts && res[i].ts < tsCheck) {
+                            res[i].ts *= 1000;
+                        }
                         if (res[i].ts === state.ts) {
                             if (state.val !== undefined) {
                                 res[i].val = state.val;
@@ -1300,11 +1466,11 @@ function _delete(id, state) {
         const files = [];
         if (state.ts) {
             const day = GetHistory.ts2day(state.ts);
-            if (!isNaN(day) && day > 20100101) {
+            if (!isNaN(day)) {
                 const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
 
                 if (fs.existsSync(file)) {
-                    files.push(file);
+                    files.push({file, day});
                 }
             }
         } else {
@@ -1329,24 +1495,29 @@ function _delete(id, state) {
             for (let i = 0; i < dayList.length; i++) {
                 const day = parseInt(dayList[i], 10);
 
-                if (!isNaN(day) && day > 20100101 && day >= dayStart && day <= dayEnd) {
+                if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
                     const file = GetHistory.getFilenameForID(adapter.config.storeDir, dayList[i], id);
                     if (fs.existsSync(file)) {
-                        files.push(file);
+                        files.push({file, day});
                     }
                 }
             }
         }
 
-        files.forEach(file => {
+        files.forEach(entry => {
             try {
-                let res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+                const tsCheck = new Date(Math.floor(entry.day/10000),0, 1).getTime();
+                let res = JSON.parse(fs.readFileSync(entry.file)).sort(tsSort);
 
                 if (!state.ts && !state.start && !state.end) {
                     res = [];
                     found = true;
                 } else {
                     for (let i = res.length - 1; i => 0; i--) {
+                        // if a ts in seconds is in then convert on the fly
+                        if (res[i].ts && res[i].ts < tsCheck) {
+                            res[i].ts *= 1000;
+                        }
                         if (state.start && state.end) {
                             if (res[i].ts >= state.start && res[i].ts <= state.end) {
                                 res.splice(i, 1);
@@ -1560,19 +1731,17 @@ function storeState(msg) {
         for (let i = 0; i < msg.message.length; i++) {
             id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
             if (history[id]) {
-                history[id].state = msg.message[i].state;
-                pushHelper(id);
+                pushHelper(id, msg.message[i].state);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message[i].id}. Ignoring`);
             }
         }
     } else if (msg.message.state && Array.isArray(msg.message.state)) {
         adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         for (let j = 0; j < msg.message.state.length; j++) {
-            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
             if (history[id]) {
-                history[id].state = msg.message.state[j];
-                pushHelper(id);
+                pushHelper(id, msg.message.state[j]);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
             }
@@ -1581,8 +1750,7 @@ function storeState(msg) {
         adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
         id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         if (history[id]) {
-            history[id].state = msg.message.state;
-            pushHelper(id);
+            pushHelper(id, msg.message.state);
         } else {
             adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
         }

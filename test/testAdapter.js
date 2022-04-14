@@ -87,6 +87,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             config.common.enabled  = true;
             config.common.loglevel = 'debug';
 
+            config.native.enableDebugLogs = true;
             //config.native.dbtype   = 'sqlite';
 
             await setup.setAdapterConfig(config.common, config.native);
@@ -94,10 +95,10 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             setup.startController(true, function(id, obj) {}, function (id, state) {
                     if (onStateChanged) onStateChanged(id, state);
                 },
-                function (_objects, _states) {
+                async (_objects, _states) => {
                     objects = _objects;
                     states  = _states;
-                    objects.setObject('history.0.testValue', {
+                    await objects.setObjectAsync('history.0.testValue', {
                         common: {
                             type: 'number',
                             role: 'state',
@@ -113,7 +114,70 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                             }
                         },
                         type: 'state'
-                    }, _done);
+                    });
+                    await objects.setObjectAsync('history.0.testValueDebounce', {
+                        common: {
+                            type: 'number',
+                            role: 'state',
+                            custom: {
+                                "history.0": {
+                                    enabled: true,
+                                    changesOnly:  true,
+                                    changesRelogInterval: 10,
+                                    debounceTime:     500,
+                                    retention:    31536000,
+                                    maxLength:    3,
+                                    changesMinDelta: 0.5,
+                                    ignoreBelowNumber: -1,
+                                    ignoreAboveNumber: 100
+                                }
+                            }
+                        },
+                        type: 'state'
+                    });
+                    await objects.setObjectAsync('history.0.testValueDebounceRaw', {
+                        common: {
+                            type: 'number',
+                            role: 'state',
+                            custom: {
+                                "history.0": {
+                                    enabled: true,
+                                    changesOnly:  true,
+                                    changesRelogInterval: 10,
+                                    debounceTime:     500,
+                                    retention:    31536000,
+                                    maxLength:    3,
+                                    changesMinDelta: 0.5,
+                                    disableSkippedValueLogging: true,
+                                    ignoreBelowZero: true,
+                                    ignoreAboveNumber: 100
+                                }
+                            }
+                        },
+                        type: 'state'
+                    });
+                    await objects.setObjectAsync('history.0.testValueBlocked', {
+                        common: {
+                            type: 'number',
+                            role: 'state',
+                            custom: {
+                                "history.0": {
+                                    enabled: true,
+                                    changesOnly:  true,
+                                    changesRelogInterval: 10,
+                                    debounceTime:     0,
+                                    blockTime:        1500,
+                                    retention:        31536000,
+                                    maxLength:        3,
+                                    changesMinDelta:  0.5,
+                                    ignoreBelowNumber: -1,
+                                    ignoreAboveNumber: 100
+                                }
+                            }
+                        },
+                        type: 'state'
+                    });
+                    _done();
                 });
         });
     });
@@ -166,7 +230,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(2);
+            expect(Object.keys(result).length).to.be.equal(5);
             expect(result['history.0.testValue'].enabled).to.be.true;
             done();
         });
@@ -238,6 +302,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }, 100);
         });
     });
+
     it('Test ' + adapterShortName + ': Read values from DB using GetHistory', function (done) {
         this.timeout(25000);
 
@@ -383,6 +448,454 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function logSampleData(stateId, waitMultiplier) {
+        if (!waitMultiplier) waitMultiplier = 1;
+        await states.setStateAsync(stateId, {val: 1}); // expect logged
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 2}); // Expect not logged debounce
+        await delay(20 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 2.1}); // Expect not logged debounce
+        await delay(20 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 1.5}); // Expect not logged debounce
+        await delay(20 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 2.3}); // Expect not logged debounce
+        await delay(20 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 2.5}); // Expect not logged debounce
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 2.9}); // Expect logged skipped
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 3.0}); // Expect logged
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 4}); // Expect logged
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 4.4}); // expect logged skipped
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 5});  // expect logged
+        await delay(20 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 5});  // expect not logged debounce
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 5});  // expect logged skipped
+        await delay(600 * waitMultiplier);
+        await states.setStateAsync(stateId, {val: 6});  // expect logged
+        await delay(10100);
+        for (let i = 1; i < 10; i++) {
+            await states.setStateAsync(stateId, {val: 6 + i * 0.05});  // expect logged skipped
+            await delay(70 * waitMultiplier);
+        }
+        await states.setStateAsync(stateId, {val: 7});  // expect logged
+        await delay(5000);
+        await states.setStateAsync(stateId, {val: -5});  // expect not logged, too low
+        await states.setStateAsync(stateId, {val: 101}); // expect not logged, too high
+        await delay(7000);
+    }
+
+    it('Test ' + adapterShortName + ': Write debounced Raw values into DB', async function () {
+        this.timeout(45000);
+        now = Date.now();
+
+        try {
+            await logSampleData('history.0.testValueDebounceRaw');
+        } catch (err) {
+            console.log(err);
+            expect(err).to.be.not.ok;
+        }
+
+        return new Promise(resolve => {
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueDebounceRaw',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(9);
+                expect(result.result[0].val).to.be.equal(1);
+                expect(result.result[1].val).to.be.equal(2.5);
+                expect(result.result[2].val).to.be.equal(3.0);
+                expect(result.result[3].val).to.be.equal(4);
+                expect(result.result[4].val).to.be.equal(5);
+                expect(result.result[5].val).to.be.equal(6);
+                expect(result.result[6].val).to.be.equal(6);
+                expect(result.result[7].val).to.be.equal(7);
+                expect(result.result[8].val).to.be.equal(7);
+
+                setTimeout(resolve, 2000);
+            });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Write debounced values into DB', async function () {
+        this.timeout(45000);
+        now = Date.now();
+
+        try {
+            await logSampleData('history.0.testValueDebounce');
+        } catch (err) {
+            console.log(err);
+            expect(err).to.be.not.ok;
+        }
+
+        return new Promise(resolve => {
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueDebounce',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(13);
+                expect(result.result[0].val).to.be.equal(1);
+                expect(result.result[1].val).to.be.equal(2.5);
+                expect(result.result[2].val).to.be.below(3);
+                expect(result.result[3].val).to.be.equal(3);
+                expect(result.result[4].val).to.be.equal(4);
+                expect(result.result[5].val).to.be.below(5);
+                expect(result.result[6].val).to.be.equal(5);
+                expect(result.result[7].val).to.be.equal(5);
+                expect(result.result[8].val).to.be.equal(6);
+                expect(result.result[9].val).to.be.below(7);
+                expect(result.result[10].val).to.be.below(7);
+                expect(result.result[11].val).to.be.equal(7);
+                expect(result.result[12].val).to.be.equal(7);
+
+                resolve();
+            });
+        });
+    });
+
+    it(`Test ${adapterShortName}: Read percentile 50+95 values from DB using GetHistory`, function (done) {
+        this.timeout(10000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     1,
+                aggregate: 'percentile',
+                percentile: 50,
+                removeBorderValues: true,
+                addId: true
+            }
+        }, result => {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(1);
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            expect(result.result[0].val).to.be.equal(5);
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueDebounce',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     1,
+                    aggregate: 'percentile',
+                    percentile: 95,
+                    removeBorderValues: true,
+                    addId: true
+                }
+            }, result => {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.equal(1);
+                expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+                expect(result.result[0].val).to.be.equal(7);
+                done();
+            });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Read integral from DB using GetHistory', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     5,
+                aggregate: 'integral',
+                integralUnit: 5,
+                removeBorderValues: true,
+                addId: true
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(5);
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            done();
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Read linear integral from DB using GetHistory', function (done) {
+        this.timeout(25000);
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValueDebounce',
+            options: {
+                start:     now,
+                end:       Date.now(),
+                count:     5,
+                aggregate: 'integral',
+                integralUnit: 5,
+                integralInterpolation: 'linear',
+                removeBorderValues: true,
+                addId: true
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(5);
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            done();
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Write with 1s block values into DB', async function () {
+        this.timeout(45000);
+        now = Date.now();
+
+        try {
+            await logSampleData('history.0.testValueBlocked', 1.5);
+        } catch (err) {
+            console.log(err);
+            expect(err).to.be.not.ok;
+        }
+
+        return new Promise(resolve => {
+
+            sendTo('history.0', 'getHistory', {
+                id: 'history.0.testValueBlocked',
+                options: {
+                    start:     now,
+                    end:       Date.now(),
+                    count:     50,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.at.least(9);
+                expect(result.result[0].val).to.be.equal(1);
+                expect(result.result[1].val).to.be.at.least(2.3);
+                expect(result.result[2].val).to.be.equal(4);
+                expect(result.result[3].val).to.be.equal(5);
+                expect(result.result[4].val).to.be.equal(6);
+                expect(result.result[5].val).to.be.equal(6);
+                expect(result.result[6].val).to.be.equal(6.45);
+                expect(result.result[7].val).to.be.equal(7);
+                expect(result.result[8].val).to.be.equal(7);
+
+                resolve();
+            });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Tests with more sample data', async function () {
+        this.timeout(45000);
+        const nowSampleI1 = Date.now() - 29 * 60 * 60 * 1000;
+        const nowSampleI21 = Date.now() - 28 * 60 * 60 * 1000;
+        const nowSampleI22 = Date.now() - 27 * 60 * 60 * 1000;
+        const nowSampleI23 = Date.now() - 26 * 60 * 60 * 1000;
+        const nowSampleI24 = Date.now() - 25 * 60 * 60 * 1000;
+
+        return new Promise(resolve => {
+
+            sendTo('history.0', 'storeState', {
+                id: 'history.0.testValue',
+                state: [
+                    {val: 2.064, ack: true, ts: nowSampleI1}, //
+                    {val: 2.116, ack: true, ts: nowSampleI1 + 6 * 60 * 1000},
+                    {val: 2.028, ack: true, ts: nowSampleI1 + 12 * 60 * 1000},
+                    {val: 2.126, ack: true, ts: nowSampleI1 + 18 * 60 * 1000},
+                    {val: 2.041, ack: true, ts: nowSampleI1 + 24 * 60 * 1000},
+                    {val: 2.051, ack: true, ts: nowSampleI1 + 30 * 60 * 1000},
+
+                    {val: -2, ack: true, ts: nowSampleI21}, // 10s none = 50.0
+                    {val: 10, ack: true, ts: nowSampleI21 + 10 * 1000},
+                    {val: 7, ack: true, ts: nowSampleI21 + 20 * 1000},
+                    {val: 17, ack: true, ts: nowSampleI21 + 30 * 1000},
+                    {val: 15, ack: true, ts: nowSampleI21 + 40 * 1000},
+                    {val: 4, ack: true, ts: nowSampleI21 + 50 * 1000},
+
+                    {val: 19, ack: true, ts: nowSampleI22}, // 10s none = 43
+                    {val: 4, ack: true, ts: nowSampleI22 + 10 * 1000},
+                    {val: -3, ack: true, ts: nowSampleI22 + 20 * 1000},
+                    {val: 19, ack: true, ts: nowSampleI22 + 30 * 1000},
+                    {val: 13, ack: true, ts: nowSampleI22 + 40 * 1000},
+                    {val: 1, ack: true, ts: nowSampleI22 + 50 * 1000},
+
+                    {val: -2, ack: true, ts: nowSampleI23}, // 10s linear = 25
+                    {val: 7, ack: true, ts: nowSampleI23 + 20 * 1000},
+                    {val: 4, ack: true, ts: nowSampleI23 + 50 * 1000},
+
+                    {val: 4, ack: true, ts: nowSampleI24 + 10 * 1000}, // 10s linear = 32.5
+                    {val: -3, ack: true, ts: nowSampleI24 + 20 * 1000},
+                    {val: 19, ack: true, ts: nowSampleI24 + 30 * 1000},
+                    {val: 1, ack: true, ts: nowSampleI24 + 50 * 1000},
+                ]
+            }, function (result) {
+                expect(result.success).to.be.true;
+
+                sendTo('history.0', 'getHistory', {
+                    id: 'history.0.testValue',
+                    options: {
+                        start:     nowSampleI1,
+                        end:       nowSampleI1 + 30 * 60 * 1000,
+                        count:     1,
+                        aggregate: 'integral',
+                        removeBorderValues: true,
+                        integralUnit: 1,
+                        integralInterpolation: 'none'
+                    }
+                }, function (result) {
+                    console.log('Sample I1-1: ' + JSON.stringify(result.result, null, 2));
+                    expect(result.result.length).to.be.equal(1);
+                    expect(result.result[0].val).to.be.equal(3735);
+                    // Result Influxdb1 Doku = 3732.66
+
+                    sendTo('history.0', 'getHistory', {
+                        id: 'history.0.testValue',
+                        options: {
+                            start:     nowSampleI1,
+                            end:       nowSampleI1 + 30 * 60 * 1000,
+                            count:     1,
+                            aggregate: 'integral',
+                            removeBorderValues: true,
+                            integralUnit: 60,
+                            integralInterpolation: 'none'
+                        }
+                    }, function (result) {
+                        console.log('Sample I1-60: ' + JSON.stringify(result.result, null, 2));
+                        expect(result.result.length).to.be.equal(1);
+                        expect(result.result[0].val).to.be.equal(62.25);
+                        // Result Influxdb1 Doku = 62.211
+
+                        sendTo('history.0', 'getHistory', {
+                            id: 'history.0.testValue',
+                            options: {
+                                start:     nowSampleI21,
+                                end:       nowSampleI21 + 60 * 1000,
+                                count:     1,
+                                aggregate: 'integral',
+                                removeBorderValues: true,
+                                integralUnit: 10,
+                                integralInterpolation: 'none'
+                            }
+                        }, function (result) {
+                            console.log('Sample I21: ' + JSON.stringify(result.result, null, 2));
+                            expect(result.result.length).to.be.equal(1);
+                            expect(result.result[0].val).to.be.equal(51);
+                            // Result Influxdb21 Doku = 50.0
+
+                            sendTo('history.0', 'getHistory', {
+                                id: 'history.0.testValue',
+                                options: {
+                                    start:     nowSampleI22,
+                                    end:       nowSampleI22 + 60 * 1000,
+                                    count:     1,
+                                    aggregate: 'integral',
+                                    removeBorderValues: true,
+                                    integralUnit: 10,
+                                    integralInterpolation: 'none'
+                                }
+                            }, function (result) {
+                                console.log('Sample I22: ' + JSON.stringify(result.result, null, 2));
+                                expect(result.result.length).to.be.equal(1);
+                                expect(result.result[0].val).to.be.equal(53);
+                                // Result Influxdb22 Doku = 43
+
+                                sendTo('history.0', 'getHistory', {
+                                    id: 'history.0.testValue',
+                                    options: {
+                                        start:     nowSampleI23,
+                                        end:       nowSampleI23 + 60 * 1000,
+                                        count:     1,
+                                        aggregate: 'integral',
+                                        removeBorderValues: true,
+                                        integralUnit: 10,
+                                        integralInterpolation: 'linear'
+                                    }
+                                }, function (result) {
+                                    console.log('Sample I23: ' + JSON.stringify(result.result, null, 2));
+                                    expect(result.result.length).to.be.equal(1);
+                                    expect(result.result[0].val).to.be.equal(25.5);
+                                    // Result Influxdb23 Doku = 25.0
+
+                                    sendTo('history.0', 'getHistory', {
+                                        id: 'history.0.testValue',
+                                        options: {
+                                            start:     nowSampleI24,
+                                            end:       nowSampleI24 + 60 * 1000,
+                                            count:     1,
+                                            aggregate: 'integral',
+                                            removeBorderValues: true,
+                                            integralUnit: 10,
+                                            integralInterpolation: 'linear'
+                                        }
+                                    }, function (result) {
+                                        console.log('Sample I24: ' + JSON.stringify(result.result, null, 2));
+                                        expect(result.result.length).to.be.equal(1);
+                                        expect(result.result[0].val).to.be.equal(33.5);
+                                        // Result Influxdb24 Doku = 32.5
+
+                                        sendTo('history.0', 'getHistory', {
+                                            id: 'history.0.testValue',
+                                            options: {
+                                                start:     nowSampleI22,
+                                                end:       nowSampleI22 + 60 * 1000,
+                                                count:     1,
+                                                aggregate: 'quantile',
+                                                quantile: 0.8
+                                            }
+                                        }, function (result) {
+                                            console.log('Sample I22-Quantile: ' + JSON.stringify(result.result, null, 2));
+                                            expect(result.result.length).to.be.equal(3);
+                                            expect(result.result[1].val).to.be.equal(19);
+
+                                            resolve();
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    it('Test ' + adapterShortName + ': Read data two weeks around now GetHistory', function (done) {
+        this.timeout(25000);
+
+        const start1week = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+        sendTo('history.0', 'getHistory', {
+            id: 'history.0.testValue',
+            options: {
+                start:     start1week,
+                end:       start1week + 7 * 24 * 60 * 60 * 1000,
+                step:      24 * 60 * 60 * 1000,
+                aggregate: 'integral',
+                integralUnit: 3600,
+                addId: true
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.equal(4);
+            expect(result.result[0].id).to.be.equal('history.0.testValue');
+            done();
+        });
+    });
+
     it('Test ' + adapterShortName + ': Remove Alias-ID', function (done) {
         this.timeout(5000);
 
@@ -451,7 +964,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
         sendTo('history.0', 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(1);
+            expect(Object.keys(result).length).to.be.equal(4);
             done();
         });
     });
