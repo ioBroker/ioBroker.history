@@ -1278,7 +1278,6 @@ function getHistory(msg) {
                         const overallLength = data[2];
                         const step = data[3];
                         if (options.result) {
-                            Aggregate.beautify(options);
                             adapter.log.debug(`Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
                             adapter.sendTo(msg.from, msg.command, {
                                 result: options.result,
@@ -1309,7 +1308,6 @@ function getHistory(msg) {
                     if (data[1]) {
                         adapter.log.debug(`Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
                         options.result = applyOptions(data[1], options, true);
-                        Aggregate.beautify(options);
                         adapter.sendTo(msg.from, msg.command, {
                             result: options.result,
                             step:   data[3],
