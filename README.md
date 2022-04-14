@@ -19,12 +19,12 @@ This adapter saves state history in a two-staged process.
 
 <!--
 	Placeholder for the next version (at the beginning of the line):
-	### __WORK IN PROGRESS__
+	### **WORK IN PROGRESS**
 -->
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### **WORK IN PROGRESS**
 * (Apollon77) Breaking: Configuration is only working in the new Admin 5 UI!
 * (Apollon77) Breaking! Do bigger adjustments to the recording logic. Debounce is refined and blockTime is added to differentiate between the two checks
 * (Apollon77) Breaking! GetHistory requests now need to deliver the ts in milliseconds! Make sure to use up to date scripts and Charting UIs
