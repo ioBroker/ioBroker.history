@@ -31,6 +31,13 @@
           "label": "storeAck",
           "sm": 12,
           "md": 4
+        },
+        "writeNulls": {
+          "newLine": true,
+          "label": "Write NULL values on start/stop boundaries",
+          "type": "checkbox",
+          "sm": 12,
+          "md": 4
         }
       }
     },
@@ -131,13 +138,6 @@
           "label": "maximum datapoint count in RAM",
           "min": 0,
           "max": 100000,
-          "sm": 12,
-          "md": 4
-        },
-        "writeNulls": {
-          "newLine": true,
-          "label": "Write NULL values on start/stop boundaries",
-          "type": "checkbox",
           "sm": 12,
           "md": 4
         },
