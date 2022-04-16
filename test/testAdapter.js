@@ -635,7 +635,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(5);
-            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce-alias');
             done();
         });
     });
@@ -658,7 +658,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(5);
-            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce');
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce-alias');
             done();
         });
     });
