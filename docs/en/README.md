@@ -98,7 +98,7 @@ The first and last points will be calculated for aggregations, except aggregatio
 If you manually request some aggregation you should ignore first and last values, because they are calculated from values outside of period.
 
 ## storeState
-If you want to write other data into the InfluxDB you can use the build in system function `storeState`.
+If you want to write other data into the history DB you can use the build in system function `storeState`.
 This function can also be used to convert data from other History adapters like History or SQL.
 
 The given ids are not checked against the ioBroker database and do not need to be set up there, but can only be accessed directly.
