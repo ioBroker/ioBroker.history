@@ -463,8 +463,6 @@ function main() { //start
         adapter.config.debounceTime = 0;
     }
 
-
-
     try {
         // create directory
         if (!fs.existsSync(adapter.config.storeDir)) {
