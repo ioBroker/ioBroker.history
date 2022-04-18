@@ -131,7 +131,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
                                     ignoreBelowNumber: -1,
                                     ignoreAboveNumber: 100,
                                     ignoreZero:   true,
-                                    aliasId: 'history.0.testValueDebounce-alias'
+                                    aliasId: 'history.0.testValueDebounce alias'
 
                                 }
                             }
@@ -548,7 +548,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         return new Promise(resolve => {
 
             sendTo('history.0', 'getHistory', {
-                id: 'history.0.testValueDebounce-alias',
+                id: 'history.0.testValueDebounce alias',
                 options: {
                     start:     now,
                     end:       Date.now(),
@@ -581,7 +581,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         this.timeout(10000);
 
         sendTo('history.0', 'getHistory', {
-            id: 'history.0.testValueDebounce-alias',
+            id: 'history.0.testValueDebounce alias',
             options: {
                 start:     now,
                 end:       Date.now(),
@@ -594,11 +594,11 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, result => {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(1);
-            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce-alias');
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce alias');
             expect(result.result[0].val).to.be.equal(5);
 
             sendTo('history.0', 'getHistory', {
-                id: 'history.0.testValueDebounce-alias',
+                id: 'history.0.testValueDebounce alias',
                 options: {
                     start:     now,
                     end:       Date.now(),
@@ -611,7 +611,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             }, result => {
                 console.log(JSON.stringify(result.result, null, 2));
                 expect(result.result.length).to.be.equal(1);
-                expect(result.result[0].id).to.be.equal('history.0.testValueDebounce-alias');
+                expect(result.result[0].id).to.be.equal('history.0.testValueDebounce alias');
                 expect(result.result[0].val).to.be.equal(7);
                 done();
             });
@@ -635,7 +635,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(5);
-            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce-alias');
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce alias');
             done();
         });
     });
@@ -658,7 +658,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
             expect(result.result.length).to.be.equal(5);
-            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce-alias');
+            expect(result.result[0].id).to.be.equal('history.0.testValueDebounce alias');
             done();
         });
     });
