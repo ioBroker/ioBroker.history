@@ -1511,7 +1511,7 @@ function _delete(id, state) {
                     res = [];
                     found = true;
                 } else {
-                    for (let i = res.length - 1; i => 0; i--) {
+                    for (let i = res.length - 1; i >= 0; i--) {
                         // if a ts in seconds is in then convert on the fly
                         if (res[i].ts && res[i].ts < tsCheck) {
                             res[i].ts *= 1000;
