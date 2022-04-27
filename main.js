@@ -1542,14 +1542,14 @@ function _delete(id, state) {
                 if (found) {
                     // save file
                     if (res.length) {
-                        fs.writeFileSync(file, JSON.stringify(res, null, 2));
+                        fs.writeFileSync(entry.file, JSON.stringify(res, null, 2));
                     } else {
                         // delete file if no data
-                        fs.unlinkSync(file);
+                        fs.unlinkSync(entry.file);
                     }
                 }
             } catch (error) {
-                adapter.log.error(`Cannot process file "${file}": ${error}`);
+                adapter.log.error(`Cannot process file "${entry.file}": ${error}`);
             }
         });
     }
