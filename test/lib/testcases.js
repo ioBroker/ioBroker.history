@@ -679,7 +679,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                     console.log(`Sample I1-1: ${JSON.stringify(result.result, null, 2)}`);
                     expect(result.result.length).to.be.equal(1);
                     if (assumeExistingData) {
-                        expect(result.result[0].val).to.be.equal(3733.569506);
+                        expect(result.result[0].val.toFixed(2)).to.be.equal('3733.57');
                     } else {
                         expect(result.result[0].val).to.be.equal(3735);
                     }
@@ -930,7 +930,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(33 + (assumeExistingData ? 30 : 0));
+            expect(result.result.length).to.be.at.least(33 + (assumeExistingData * 30));
 
             done();
         });
