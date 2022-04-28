@@ -237,12 +237,6 @@ function startAdapter(options) {
     return adapter;
 }
 
-process.on('SIGINT', () =>
-    adapter && adapter.setState && finish());
-
-process.on('SIGTERM', () =>
-    adapter && adapter.setState && finish());
-
 function storeCached(isFinishing, onlyId) {
     const now = Date.now();
 
@@ -1169,6 +1163,13 @@ function getHistory(msg) {
 
     const debugLog = options.debugLog = !!(history[options.id] && history[options.id][adapter.namespace] && history[options.id][adapter.namespace].enableDebugLogs);
 
+    if (options.ignoreNull === 'true')  options.ignoreNull = true;  // include nulls and replace them with last value
+    if (options.ignoreNull === 'false') options.ignoreNull = false; // include nulls
+    if (options.ignoreNull === '0')     options.ignoreNull = 0;     // include nulls and replace them with 0
+    if (options.ignoreNull !== true && options.ignoreNull !== false && options.ignoreNull !== 0) {
+        options.ignoreNull = false;
+    }
+
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
             debugLog && adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
@@ -1723,13 +1724,20 @@ function storeState(msg) {
             error:  'Invalid call'
         }, msg.callback);
     }
+
+    let pushFunc = pushHelper;
+    if (msg.message.rules) {
+        pushFunc = pushHistory;
+    }
+
+
     let id;
     if (Array.isArray(msg.message)) {
         adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
         for (let i = 0; i < msg.message.length; i++) {
             id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
             if (history[id]) {
-                pushHelper(id, msg.message[i].state);
+                pushFunc(id, msg.message[i].state);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message[i].id}. Ignoring`);
             }
@@ -1739,7 +1747,7 @@ function storeState(msg) {
         id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         for (let j = 0; j < msg.message.state.length; j++) {
             if (history[id]) {
-                pushHelper(id, msg.message.state[j]);
+                pushFunc(id, msg.message.state[j]);
             } else {
                 adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
             }
@@ -1748,7 +1756,7 @@ function storeState(msg) {
         adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
         id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         if (history[id]) {
-            pushHelper(id, msg.message.state);
+            pushFunc(id, msg.message.state);
         } else {
             adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
         }
