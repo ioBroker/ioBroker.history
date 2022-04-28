@@ -77,8 +77,8 @@ function checkValueOfState(id, value, cb, counter) {
 }
 */
 
-describe('Test ' + adapterShortName + ' adapter', function() {
-    before('Test ' + adapterShortName + ' adapter: Start js-controller', function (_done) {
+describe('Test ' + adapterShortName + '-writeNulls adapter', function() {
+    before('Test ' + adapterShortName + '-writeNulls adapter: Start js-controller', function (_done) {
         this.timeout(600000); // because of first install from npm
 
         setup.setupController(async function () {
@@ -106,7 +106,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    it('Test ' + adapterShortName + ' adapter: Check if adapter started', function (done) {
+    it('Test ' + adapterShortName + '-writeNulls adapter: Check if adapter started', function (done) {
         this.timeout(60000);
         checkConnectionOfAdapter(function (res) {
             if (res) console.log(res);
@@ -117,12 +117,12 @@ describe('Test ' + adapterShortName + ' adapter', function() {
 
     tests.register(it, expect, sendTo, adapterShortName, true, false);
 
-    after('Test ' + adapterShortName + ' adapter: Stop js-controller', function (done) {
-        this.timeout(10000);
+    after('Test ' + adapterShortName + '-writeNulls adapter: Stop js-controller', function (done) {
+        this.timeout(20000);
 
         setup.stopController(function (normalTerminated) {
             console.log('Adapter normal terminated: ' + normalTerminated);
-            done();
+            setTimeout(done, 10000);
         });
     });
 });

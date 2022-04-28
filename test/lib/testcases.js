@@ -101,6 +101,8 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
 
 function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExistingData) {
     const instanceName = `${adapterShortName}.0`;
+    if (writeNulls) adapterShortName += '-writeNulls';
+    if (assumeExistingData) adapterShortName += '-existing';
 
     it(`Test ${adapterShortName}: Setup test objects after start`, function(done) {
         this.timeout(3000);
