@@ -87,6 +87,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
             config.common.enabled  = true;
             config.common.loglevel = 'debug';
 
+            config.native.writeNulls = false;
             config.native.enableDebugLogs = true;
             //config.native.dbtype   = 'sqlite';
 
@@ -115,7 +116,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    tests.register(it, expect, sendTo, adapterShortName, true, false);
+    tests.register(it, expect, sendTo, adapterShortName, false, true);
 
     after('Test ' + adapterShortName + ' adapter: Stop js-controller', function (done) {
         this.timeout(10000);

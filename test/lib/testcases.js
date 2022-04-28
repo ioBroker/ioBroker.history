@@ -5,12 +5,14 @@
 'use strict';
 
 let now;
+let preInitTime;
 let objects = null;
 let states = null;
 
 async function preInit(_objects, _states, sendTo, adapterShortName) {
     objects = _objects;
     states = _states;
+    preInitTime = Date.now();
 
     const instanceName = `${adapterShortName}.0`;
     let obj = {
@@ -97,7 +99,7 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
     await objects.setObjectAsync(`${instanceName}.testValueBlocked`, obj);
 }
 
-function register(it, expect, sendTo, adapterShortName) {
+function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExistingData) {
     const instanceName = `${adapterShortName}.0`;
 
     it(`Test ${adapterShortName}: Setup test objects after start`, function(done) {
@@ -880,6 +882,50 @@ function register(it, expect, sendTo, adapterShortName) {
         sendTo(instanceName, 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
             expect(Object.keys(result).length).to.be.equal(4);
+            done();
+        });
+    });
+
+    it(`Test ${adapterShortName}: Check for written Null values`, function (done) {
+        this.timeout(25000);
+
+        sendTo(instanceName, 'getHistory', {
+            id: `${instanceName}.testValue`,
+            options: {
+                start:     preInitTime - 5000,
+                count:     500,
+                aggregate: 'none'
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(4);
+            var found = 0;
+            for (var i = 0; i < result.result.length; i++) {
+                if (result.result[i].val === null) found++;
+            }
+            if (writeNulls) {
+                expect(found).to.be.equal(2);
+            } else {
+                expect(found).to.be.equal(0);
+            }
+
+            done();
+        });
+    });
+
+    it(`Test ${adapterShortName}: Check for written Data in general`, function (done) {
+        this.timeout(25000);
+
+        sendTo(instanceName, 'getHistory', {
+            id: `${instanceName}.testValue`,
+            options: {
+                count:     500,
+                aggregate: 'none'
+            }
+        }, function (result) {
+            console.log(JSON.stringify(result.result, null, 2));
+            expect(result.result.length).to.be.at.least(4);
+
             done();
         });
     });
