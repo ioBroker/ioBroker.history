@@ -16,7 +16,7 @@ async function preInit(objects, states, sendTo, adapterShortName) {
         },
         type: 'state'
     };
-    obj.common[instanceName] = {
+    obj.common.custom[instanceName] = {
         enabled: true,
         changesOnly:  true,
         debounce:     0,
@@ -33,7 +33,7 @@ async function preInit(objects, states, sendTo, adapterShortName) {
         },
         type: 'state'
     };
-    obj.common[instanceName] = {
+    obj.common.custom[instanceName] = {
         enabled: true,
         changesOnly:  true,
         changesRelogInterval: 10,
@@ -56,7 +56,7 @@ async function preInit(objects, states, sendTo, adapterShortName) {
         },
         type: 'state'
     };
-    obj.common[instanceName] = {
+    obj.common.custom[instanceName] = {
         enabled: true,
         changesOnly:  true,
         changesRelogInterval: 10,
@@ -77,7 +77,7 @@ async function preInit(objects, states, sendTo, adapterShortName) {
         },
         type: 'state'
     };
-    obj.common[instanceName] ={
+    obj.common.custom[instanceName] ={
         enabled: true,
         changesOnly:  true,
         changesRelogInterval: 10,
