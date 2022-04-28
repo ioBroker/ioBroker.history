@@ -771,7 +771,11 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                                     }, function (result) {
                                         console.log(`Sample I24: ${JSON.stringify(result.result, null, 2)}`);
                                         expect(result.result.length).to.be.equal(1);
-                                        expect(result.result[0].val).to.be.equal(33.5);
+                                        if (assumeExistingData) {
+                                            expect(result.result[0].val).to.be.equal(32);
+                                        } else {
+                                            expect(result.result[0].val).to.be.equal(33.5);
+                                        }
                                         // Result Influxdb24 Doku = 32.5
 
                                         sendTo(instanceName, 'getHistory', {
