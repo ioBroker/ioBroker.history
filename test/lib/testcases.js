@@ -678,7 +678,11 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                 }, function (result) {
                     console.log(`Sample I1-1: ${JSON.stringify(result.result, null, 2)}`);
                     expect(result.result.length).to.be.equal(1);
-                    expect(result.result[0].val).to.be.equal(3735);
+                    if (assumeExistingData) {
+                        expect(result.result[0].val).to.be.equal(3733.569506);
+                    } else {
+                        expect(result.result[0].val).to.be.equal(3735);
+                    }
                     // Result Influxdb1 Doku = 3732.66
 
                     sendTo(instanceName, 'getHistory', {
@@ -900,7 +904,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(4);
+            expect(result.result.length).to.be.at.least(5);
             var found = 0;
             for (var i = 0; i < result.result.length; i++) {
                 if (result.result[i].val === null) found++;
@@ -926,7 +930,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(4);
+            expect(result.result.length).to.be.at.least(33 + (assumeExistingData ? 30 : 0));
 
             done();
         });
