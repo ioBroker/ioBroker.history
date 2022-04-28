@@ -5,8 +5,13 @@
 'use strict';
 
 let now;
+let objects = null;
+let states = null;
 
-async function preInit(objects, states, sendTo, adapterShortName) {
+async function preInit(_objects, _states, sendTo, adapterShortName) {
+    objects = _objects;
+    states = _states;
+
     const instanceName = `${adapterShortName}.0`;
     let obj = {
         common: {
@@ -92,7 +97,7 @@ async function preInit(objects, states, sendTo, adapterShortName) {
     await objects.setObjectAsync(`${instanceName}.testValueBlocked`, obj);
 }
 
-function register(it, expect, objects, states, sendTo, adapterShortName) {
+function register(it, expect, sendTo, adapterShortName) {
     const instanceName = `${adapterShortName}.0`;
 
     it(`Test ${adapterShortName}: Setup test objects after start`, function(done) {

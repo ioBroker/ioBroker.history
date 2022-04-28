@@ -115,7 +115,7 @@ describe('Test ' + adapterShortName + ' adapter', function() {
         });
     });
 
-    tests.register(it, expect, objects, states, sendTo, adapterShortName);
+    tests.register(it, expect, sendTo, adapterShortName);
 
     after('Test ' + adapterShortName + ' adapter: Stop js-controller', function (done) {
         this.timeout(10000);
