@@ -679,7 +679,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                     console.log(`Sample I1-1: ${JSON.stringify(result.result, null, 2)}`);
                     expect(result.result.length).to.be.equal(1);
                     if (assumeExistingData) {
-                        expect(result.result[0].val.toFixed(2)).to.be.equal('3733.57'); // We round to 2 digits
+                        expect(result.result[0].val.toFixed(1)).to.be.equal('3733.6'); // We round to 2 digits
                     } else {
                         expect(result.result[0].val).to.be.equal(3735);
                     }
@@ -700,7 +700,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                         console.log(`Sample I1-60: ${JSON.stringify(result.result, null, 2)}`);
                         expect(result.result.length).to.be.equal(1);
                         if (assumeExistingData) {
-                            expect(result.result[0].val.toFixed(2)).to.be.equal('62.23'); // We round to 2 digits
+                            expect(result.result[0].val.toFixed(1)).to.be.equal('62.2'); // We round to 2 digits
                         } else {
                             expect(result.result[0].val).to.be.equal(62.25);
                         }
