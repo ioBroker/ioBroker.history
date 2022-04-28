@@ -101,6 +101,7 @@ function register(it, expect, sendTo, adapterShortName) {
     const instanceName = `${adapterShortName}.0`;
 
     it(`Test ${adapterShortName}: Setup test objects after start`, function(done) {
+        this.timeout(3000);
         objects.setObject('system.adapter.test.0', {
                 common: {
 
