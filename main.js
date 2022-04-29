@@ -100,7 +100,7 @@ function startAdapter(options) {
                 const list      = history[id] ? history[id].list    : null;
                 const timeout   = history[id] ? history[id].timeout : null;
 
-                if (!history[formerAliasId] && !subscribeAll) {
+                if (!(history[formerAliasId] && history[formerAliasId][adapter.namespace]) && !subscribeAll) {
                     // unsubscribe
                     for (const _id in history) {
                         if (history.hasOwnProperty(_id) && history.hasOwnProperty(history[_id].realId)) {
@@ -924,7 +924,7 @@ function getOneCachedData(id, options, cache, addId) {
                         vLast.ack = !!vLast.ack;
                     }
                     if (addId) {
-                        res[i].id = id;
+                        vLast.id = id;
                     }
                     cache.unshift(vLast);
                     vLast = null;
