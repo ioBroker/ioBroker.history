@@ -115,7 +115,7 @@ describe('Test ' + adapterShortName + '-writeNulls adapter', function() {
         });
     });
 
-    tests.register(it, expect, sendTo, adapterShortName, true, 0);
+    tests.register(it, expect, sendTo, adapterShortName, true, 0, 0);
 
     after('Test ' + adapterShortName + '-writeNulls adapter: Stop js-controller', function (done) {
         this.timeout(20000);

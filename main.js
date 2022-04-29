@@ -246,7 +246,7 @@ function storeCached(isFinishing, onlyId) {
         }
 
         if (isFinishing) {
-            if (history[id].skipped) {
+            if (history[id].skipped && !(history[id][adapter.namespace] && history[id][adapter.namespace].disableSkippedValueLogging)) {
                 history[id].list.push(history[id].skipped);
                 history[id].skipped = null;
             }
@@ -1236,7 +1236,7 @@ function getHistory(msg) {
         if (1 || typeof GetHistory === 'undefined') {
             adapter.log.debug('use parallel requests for getHistory');
             try {
-                const gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
+                let gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
                 let ghTimeout = setTimeout(() => {
                     try {
@@ -1244,9 +1244,11 @@ function getHistory(msg) {
                     } catch (err) {
                         adapter.log.error(err.message);
                     }
+                    gh = null;
                 }, 120000);
 
                 gh.on('error', err => {
+                    gh = null;
                     adapter.log.info('Error communicating to forked process: ' + err.message);
                     adapter.sendTo(msg.from, msg.command, {
                         result: [],
@@ -1276,7 +1278,14 @@ function getHistory(msg) {
                         clearTimeout(ghTimeout);
                         ghTimeout = null;
 
-                        options.result = applyOptions(data[1], options, true);
+                        try {
+                            gh.send(['exit']);
+                        } catch (err) {
+                            adapter.log.info('Can not exit forked process: ' + err.message);
+                        }
+                        gh = null;
+
+                        options.result = applyOptions(data[1], options, false);
                         const overallLength = data[2];
                         const step = data[3];
                         if (options.result) {
@@ -1286,6 +1295,7 @@ function getHistory(msg) {
                                 step: step,
                                 error: null
                             }, msg.callback);
+                            options.result = null;
                         } else {
                             adapter.log.info('No Data');
                             adapter.sendTo(msg.from, msg.command, {
@@ -1318,6 +1328,7 @@ function getHistory(msg) {
                             step:   data[3],
                             error:  null
                         }, msg.callback);
+                        options.result = null;
                     } else {
                         adapter.log.info('No Data');
                         adapter.sendTo(msg.from, msg.command, {
@@ -1829,10 +1840,9 @@ function disableHistory(msg) {
 function getEnabledDPs(msg) {
     const data = {};
     for (const id in history) {
-        if (!history.hasOwnProperty(id)) {
-            continue;
+        if (history.hasOwnProperty(id) && history[id] && history[id][adapter.namespace] && history[id][adapter.namespace].enabled) {
+            data[history[id].realId] = history[id][adapter.namespace];
         }
-        data[history[id].realId] = history[id][adapter.namespace];
     }
 
     adapter.sendTo(msg.from, msg.command, data, msg.callback);

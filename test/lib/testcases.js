@@ -52,7 +52,6 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
         ignoreAboveNumber: 100,
         ignoreZero:   true,
         aliasId: `${instanceName}.testValueDebounce alias`
-
     };
     await objects.setObjectAsync(`${instanceName}.testValueDebounce`, obj);
     obj = {
@@ -73,7 +72,8 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
         changesMinDelta: 0.5,
         disableSkippedValueLogging: true,
         ignoreBelowZero: true,
-        ignoreAboveNumber: 100
+        ignoreAboveNumber: 100,
+        storageType: 'Number'
     };
     await objects.setObjectAsync(`${instanceName}.testValueDebounceRaw`, obj);
     obj = {
@@ -84,7 +84,7 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
         },
         type: 'state'
     };
-    obj.common.custom[instanceName] ={
+    obj.common.custom[instanceName] = {
         enabled: true,
         changesOnly:  true,
         changesRelogInterval: 10,
@@ -97,50 +97,50 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
         ignoreAboveNumber: 100
     };
     await objects.setObjectAsync(`${instanceName}.testValueBlocked`, obj);
+
+    await objects.setObjectAsync('system.adapter.test.0', {
+        common: {
+
+        },
+        type: 'instance'
+    });
+    states.subscribeMessage('system.adapter.test.0');
 }
 
-function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExistingData) {
+function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExistingData, additionalActiveObjects) {
     const instanceName = `${adapterShortName}.0`;
     if (writeNulls) adapterShortName += '-writeNulls';
     if (assumeExistingData) adapterShortName += '-existing';
 
     it(`Test ${adapterShortName}: Setup test objects after start`, function(done) {
         this.timeout(3000);
-        objects.setObject('system.adapter.test.0', {
-                common: {
 
+        objects.setObject(`${instanceName}.testValue2`, {
+                common: {
+                    type: 'number',
+                    role: 'state'
                 },
-                type: 'instance'
+                type: 'state'
             },
             function () {
-                states.subscribeMessage('system.adapter.test.0');
-                objects.setObject(`${instanceName}.testValue2`, {
-                        common: {
-                            type: 'number',
-                            role: 'state'
-                        },
-                        type: 'state'
-                    },
-                    function () {
-                        sendTo(instanceName, 'enableHistory', {
-                            id: `${instanceName}.testValue2`,
-                            options: {
-                                changesOnly:  true,
-                                debounce:     0,
-                                retention:    31536000,
-                                maxLength:    0,
-                                changesMinDelta: 0.5,
-                                aliasId: `${instanceName}.testValue2-alias`
-                            }
-                        }, function (result) {
-                            expect(result.error).to.be.undefined;
-                            expect(result.success).to.be.true;
-                            // wait till adapter receives the new settings
-                            setTimeout(function () {
-                                done();
-                            }, 2000);
-                        });
-                    });
+                sendTo(instanceName, 'enableHistory', {
+                    id: `${instanceName}.testValue2`,
+                    options: {
+                        changesOnly:  true,
+                        debounce:     0,
+                        retention:    31536000,
+                        maxLength:    0,
+                        changesMinDelta: 0.5,
+                        aliasId: `${instanceName}.testValue2-alias`
+                    }
+                }, function (result) {
+                    expect(result.error).to.be.undefined;
+                    expect(result.success).to.be.true;
+                    // wait till adapter receives the new settings
+                    setTimeout(function () {
+                        done();
+                    }, 2000);
+                });
             });
     });
 
@@ -149,7 +149,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
 
         sendTo(instanceName, 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(5);
+            expect(Object.keys(result).length).to.be.equal(5 + additionalActiveObjects);
             expect(result[`${instanceName}.testValue`].enabled).to.be.true;
             done();
         });
@@ -774,7 +774,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                                         if (assumeExistingData) {
                                             expect(result.result[0].val).to.be.equal(32);
                                         } else {
-                                            expect(result.result[0].val).to.be.equal(33.5);
+                                            expect(result.result[0].val).to.be.within(33, 33.5);
                                         }
                                         // Result Influxdb24 Doku = 32.5
 
@@ -887,7 +887,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
         }, function (result) {
             expect(result.error).to.be.undefined;
             expect(result.success).to.be.true;
-            done();
+            setTimeout(done, 2000);
         });
     });
     it(`Test ${adapterShortName}: Check Enabled Points after Disable`, function (done) {
@@ -895,7 +895,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
 
         sendTo(instanceName, 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            expect(Object.keys(result).length).to.be.equal(4);
+            expect(Object.keys(result).length).to.be.equal(4 + additionalActiveObjects);
             done();
         });
     });
