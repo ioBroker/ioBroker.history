@@ -116,7 +116,7 @@ describe('Test ' + adapterShortName + '-existing adapter', function() {
         });
     });
 
-    tests.register(it, expect, sendTo, adapterShortName, false, 1);
+    tests.register(it, expect, sendTo, adapterShortName, false, 1, 0);
 
     after('Test ' + adapterShortName + '-existing adapter: Stop js-controller', function (done) {
         this.timeout(20000);
