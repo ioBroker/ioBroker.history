@@ -20,7 +20,8 @@ To enable charts you have to install **flot** adapter.
 - **Alias-ID** - You can define an alias for the ID. This is useful if you have changed a device and want to have continuous data logging. Please consider switching to real alias States in teh future!
 - **Storage retention** - How many values in the past will be stored on disk. Data are deleted when the time is reached as soon as new data should be stored for a datapoint.
 - **Maximal number of stored in RAM values** - Define how many number of values will be hold in RAM before persisting them on disk. You can control how much I/O is done.
-- **Enable enhanced debug logs for the datapoint** - If you want to see more detailed logs for this datapoint, you can enable this option. You still need to enable "debug" loglevel for these additional values to be visible! This helps in debugging issues or understanding why the adapter is logging a value (or not). 
+- **Enable enhanced debug logs for the datapoint** - If you want to see more detailed logs for this datapoint, you can enable this option. You still need to enable "debug" loglevel for these additional values to be visible! This helps in debugging issues or understanding why the adapter is logging a value (or not).
+- **On query round numbers to** - Define how many digits should be rounded to when querying the values.
 
 Most of these values can be pre-defined in the instance settings and are then pre-filled or used for the datapoint.
 

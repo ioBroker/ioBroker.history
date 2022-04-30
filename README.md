@@ -32,6 +32,7 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) Add flag returnNewestEntries for GetHistory to determine which records to return when more entries as "count" are existing for aggregate "none"
 * (Apollon77) Make sure id is always returned on GetHistory when addId is set
 * (Apollon77) Add new Debug flag to enable/disable debug logging on datapoint level (default is false) to optimize performance
+* (Apollon77) Add support to specify how to round numbers on query per datapoint
 * (Apollon77) Add aggregate method "percentile" to calculate the percentile (0..100) of the values (requires options.percentile with the percentile level, defaults to 50 if not provided). Basically same as Quantile just different levels are used
 * (Apollon77) Add aggregate method "quantile" to calculate the quantile (0..1) of the values (requires options.quantile with the quantile level, defaults to 0.5 if not provided). Basically same as Percentile just different levels are used
 * (Apollon77) Add (experimental) method "integral" to calculate the integral of the values. Requires options.integralUnit with the time duration of the integral in seconds, defaults to 60s if not provided. Optionally a linear interpolation can be done by setting options.integralInterpolation to "linear"
