@@ -26,7 +26,7 @@ This adapter saves state history in a two-staged process.
 
 ### **WORK IN PROGRESS**
 * (Apollon77) Breaking: Configuration is only working in the new Admin 5 UI!
-* (Apollon77) Breaking! Do bigger adjustments to the recording logic. Debounce is refined and blockTime is added to differentiate between the two checks
+* (Apollon77) Breaking! Did bigger adjustments to the recording logic. Debounce is refined and blockTime is added to differentiate between the two checks
 * (Apollon77) Breaking! GetHistory requests now need to deliver the ts in milliseconds! Make sure to use up to date scripts and Charting UIs
 * (Apollon77) New setting added to disable the "logging of additional values for charting optimization" - then only the expected data are logged
 * (Apollon77) Add flag returnNewestEntries for GetHistory to determine which records to return when more entries as "count" are existing for aggregate "none"
@@ -41,6 +41,8 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) Enhance the former "Ignore below 0" feature and now allow specifying to ignore below or above specified values. The old setting is converted to the new one
 * (Apollon77) Adjust handing for data files prior 1.1.2010 and automatically convert older ts formats to the new one
 * (Apollon77) Adjust handling of data prior 1.1.2000 in the importer scripts
+* (Apollon77) Make sure that min change delta allows numbers entered with comma (german notation) in all cases
+
 
 ### 1.11.1 (2022-03-26)
 * (Apollon77) Fix the js-controller and admin minimum version
