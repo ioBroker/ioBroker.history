@@ -188,7 +188,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                                                         console.log(err);
                                                     }
                                                     setTimeout(function () {
-                                                        states.setState(`${instanceName}.testValue`, {val: 3, ts: now + 19000}, function (err) {
+                                                        states.setState(`${instanceName}.testValue`, {val: '+003.00', ts: now + 19000}, function (err) {
                                                             if (err) {
                                                                 console.log(err);
                                                             }
@@ -679,7 +679,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                     console.log(`Sample I1-1: ${JSON.stringify(result.result, null, 2)}`);
                     expect(result.result.length).to.be.equal(1);
                     if (assumeExistingData) {
-                        expect(result.result[0].val).to.be.within(3700, 3735);
+                        expect(result.result[0].val).to.be.within(3700, 3755);
                     } else {
                         expect(result.result[0].val).to.be.within(3700, 3800);
                     }
@@ -938,7 +938,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             }
         }, function (result) {
             console.log(JSON.stringify(result.result, null, 2));
-            expect(result.result.length).to.be.at.least(33 + (assumeExistingData * 30));
+            expect(result.result.length).to.be.at.least((writeNulls? 3 : 0) + ((assumeExistingData + 1) * 30));
 
             done();
         });

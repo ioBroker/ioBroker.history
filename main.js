@@ -164,6 +164,18 @@ function startAdapter(options) {
                     obj.common.custom[adapter.namespace].disableSkippedValueLogging = adapter.config.disableSkippedValueLogging;
                 }
 
+                // round
+                if (obj.common.custom[adapter.namespace].round !== null && obj.common.custom[adapter.namespace].round !== undefined && obj.common.custom[adapter.namespace] !== '') {
+                    obj.common.custom[adapter.namespace].round = parseInt(obj.common.custom[adapter.namespace], 10);
+                    if (!isFinite(obj.common.custom[adapter.namespace].round) || obj.common.custom[adapter.namespace].round < 0) {
+                        obj.common.custom[adapter.namespace].round = adapter.config.round;
+                    } else {
+                        obj.common.custom[adapter.namespace].round = Math.pow(10, parseInt(obj.common.custom[adapter.namespace].round, 10));
+                    }
+                } else {
+                    obj.common.custom[adapter.namespace].round = adapter.config.round;
+                }
+
                 if (obj.common.custom[adapter.namespace].enableDebugLogs !== undefined && obj.common.custom[adapter.namespace].enableDebugLogs !== null && obj.common.custom[adapter.namespace].enableDebugLogs !== '') {
                     obj.common.custom[adapter.namespace].enableDebugLogs = obj.common.custom[adapter.namespace].enableDebugLogs === 'true' || obj.common.custom[adapter.namespace].enableDebugLogs === true;
                 } else {
@@ -457,6 +469,18 @@ function main() { //start
         adapter.config.debounceTime = 0;
     }
 
+    if (adapter.config.round !== null && adapter.config.round !== undefined && adapter.config.round !== '') {
+        adapter.config.round = parseInt(adapter.config.round, 10);
+        if (!isFinite(adapter.config.round) || adapter.config.round < 0) {
+            adapter.config.round = null;
+            adapter.log.info(`Invalid round value: ${adapter.config.round} - ignore, do not round values`);
+        } else {
+            adapter.config.round = Math.pow(10, parseInt(adapter.config.round, 10));
+        }
+    } else {
+        adapter.config.round = null;
+    }
+
     try {
         // create directory
         if (!fs.existsSync(adapter.config.storeDir)) {
@@ -519,7 +543,7 @@ function main() { //start
                             history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
                         }
                         if (history[id][adapter.namespace].changesMinDelta !== undefined && history[id][adapter.namespace].changesMinDelta !== null && history[id][adapter.namespace].changesMinDelta !== '') {
-                            history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta) || 0;
+                            history[id][adapter.namespace].changesMinDelta = parseFloat(history[id][adapter.namespace].changesMinDelta.toString().replace(/,/g, '.')) || 0;
                         } else {
                             history[id][adapter.namespace].changesMinDelta = adapter.config.changesMinDelta;
                         }
@@ -550,6 +574,18 @@ function main() { //start
                             history[id][adapter.namespace].enableDebugLogs = history[id][adapter.namespace].enableDebugLogs === 'true' || history[id][adapter.namespace].enableDebugLogs === true;
                         } else {
                             history[id][adapter.namespace].enableDebugLogs = adapter.config.enableDebugLogs;
+                        }
+
+                        // round
+                        if (history[id][adapter.namespace].round !== null && history[id][adapter.namespace].round !== undefined && history[id][adapter.namespace] !== '') {
+                            history[id][adapter.namespace].round = parseInt(history[id][adapter.namespace], 10);
+                            if (!isFinite(history[id][adapter.namespace].round) || history[id][adapter.namespace].round < 0) {
+                                history[id][adapter.namespace].round = adapter.config.round;
+                            } else {
+                                history[id][adapter.namespace].round = Math.pow(10, parseInt(history[id][adapter.namespace].round, 10));
+                            }
+                        } else {
+                            history[id][adapter.namespace].round = adapter.config.round;
                         }
 
                         history[id].realId = realId;
@@ -593,11 +629,12 @@ function pushHistory(id, state, timerRelog) {
         }
 
         if (typeof state.val === 'string') {
-            const f = parseFloat(state.val);
-            if (f == state.val) {
-                state.val = f;
+            if (isFinite(state.val)) {
+                state.val = parseFloat(state.val);
             }
         }
+
+        settings.enableDebugLogs && adapter.log.debug(`new value received for ${id}, new-value=${state.val}, ts=${state.ts}, relog=${timerRelog}`);
 
         let ignoreDebonce = false;
 
@@ -766,9 +803,8 @@ function pushHelper(_id, state) {
     history[_id].list = history[_id].list || [];
 
     if (typeof state.val === 'string') {
-        const f = parseFloat(state.val);
-        if (f == state.val) {
-            state.val = f;
+        if (isFinite(state.val)) {
+            state.val = parseFloat(state.val);
         } else if (state.val === 'true') {
             state.val = true;
         } else if (state.val === 'false') {
@@ -900,40 +936,32 @@ function getOneCachedData(id, options, cache, addId) {
                     iProblemCount++;
                     continue;
                 }
-                if (options.start && res[i].ts < options.start) {
-                    if (options.ack) {
-                        res[i].ack = !!res[i].ack;
-                    }
-                    if (addId) {
-                        res[i].id = id;
-                    }
-                    // add one before start
-                    cache.unshift(res[i]);
-                    break;
-                } else if (res[i].ts > options.end) {
-                    // add one after end
-                    vLast = res[i];
-                    continue;
+                const resEntry = Object.assign({}, res[i]);
+                if (resEntry.val !== null && isFinite(resEntry.val) && options.round) {
+                    resEntry.val = Math.round(resEntry.val * options.round) / options.round;
                 }
                 if (options.ack) {
-                    res[i].ack = !!res[i].ack;
+                    resEntry.ack = !!resEntry.ack;
+                }
+                if (addId) {
+                    resEntry.id = id;
+                }
+                if (options.start && resEntry.ts < options.start) {
+                    // add one before start
+                    cache.unshift(resEntry);
+                    break;
+                } else if (resEntry.ts > options.end) {
+                    // add one after end
+                    vLast = resEntry;
+                    continue;
                 }
 
                 if (vLast) {
-                    if (options.ack) {
-                        vLast.ack = !!vLast.ack;
-                    }
-                    if (addId) {
-                        vLast.id = id;
-                    }
                     cache.unshift(vLast);
                     vLast = null;
                 }
 
-                if (addId) {
-                    res[i].id = id;
-                }
-                cache.unshift(res[i]);
+                cache.unshift(resEntry);
 
                 if (!options.start && cache.length >= options.count) {
                     break;
@@ -996,6 +1024,9 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].ts *= 1000;
                         }
 
+                        if (_data[ii].val !== null && isFinite(_data[ii].val) && options.round) {
+                            _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                        }
                         if (options.ack) {
                             _data[ii].ack = !!_data[ii].ack;
                         }
@@ -1054,48 +1085,23 @@ function sortByTs(a, b) {
     return (aTs < bTs) ? -1 : ((aTs > bTs) ? 1 : 0);
 }
 
-function applyOptions(data, options, shouldCopy) {
-    if (shouldCopy) {
-        const _data = [];
-        data.forEach(item => {
-            const _item = {
-                ts: item.ts,
-                val: item.val,
-                i: item.i
-            };
-            if (options.ack) {
-                _item.ack = item.ack;
-            }
-            if (options.from) {
-                _item.from = item.from;
-            }
-            if (options.q) {
-                _item.q = item.q;
-            }
-            if (options.addId) {
-                _item.id = item.id;
-            }
-            _data.push(_item);
-        });
-        return _data;
-    } else {
-        data.forEach(item => {
-            if (!options.ack && item.ack !== undefined) {
-                delete item.ack;
-            }
-            if (!options.from && item.from !== undefined) {
-                delete item.from;
-            }
-            if (!options.q && item.q !== undefined) {
-                delete item.q;
-            }
-            if (!options.addId && item.id !== undefined) {
-                delete item.id;
-            }
-        });
+function applyOptions(data, options) {
+    data.forEach(item => {
+        if (!options.ack && item.ack !== undefined) {
+            delete item.ack;
+        }
+        if (!options.from && item.from !== undefined) {
+            delete item.from;
+        }
+        if (!options.q && item.q !== undefined) {
+            delete item.q;
+        }
+        if (!options.addId && item.id !== undefined) {
+            delete item.id;
+        }
+    });
 
-        return data;
-    }
+    return data;
 }
 
 function getHistory(msg) {
@@ -1129,6 +1135,17 @@ function getHistory(msg) {
         integralInterpolation: msg.message.options.aggregate === 'integral' ? msg.message.options.integralInterpolation || 'none' : null,
         removeBorderValues: msg.message.options.removeBorderValues || false
     };
+
+    if (msg.message.options.round !== null && msg.message.options.round !== undefined && msg.message.options.round !== '') {
+        msg.message.options.round = parseInt(msg.message.options.round, 10);
+        if (!isFinite(msg.message.options.round) || msg.message.options.round < 0) {
+            options.round = adapter.config.round;
+        } else {
+            options.round = Math.pow(10, parseInt(msg.message.options.round, 10));
+        }
+    } else {
+        options.round = adapter.config.round;
+    }
 
     if (!options.start && options.count) {
         options.returnNewestEntries = true;
@@ -1174,7 +1191,7 @@ function getHistory(msg) {
         getCachedData(options, (cacheData, isFull) => {
             debugLog && adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
 
-            cacheData = applyOptions(cacheData, options, true);
+            cacheData = applyOptions(cacheData, options);
 
             // if all data read
             if (isFull && cacheData.length) {
@@ -1194,7 +1211,7 @@ function getHistory(msg) {
                 const origCount = options.count;
                 options.count -= cacheData.length;
                 getFileData(options, fileData => {
-                    fileData = applyOptions(fileData, options, false);
+                    fileData = applyOptions(fileData, options);
                     debugLog && adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
@@ -1285,7 +1302,7 @@ function getHistory(msg) {
                         }
                         gh = null;
 
-                        options.result = applyOptions(data[1], options, false);
+                        options.result = applyOptions(data[1], options);
                         const overallLength = data[2];
                         const step = data[3];
                         if (options.result) {
@@ -1322,7 +1339,7 @@ function getHistory(msg) {
                 if (data[0] === 'response') {
                     if (data[1]) {
                         adapter.log.debug(`Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
-                        options.result = applyOptions(data[1], options, true);
+                        options.result = applyOptions(data[1], options);
                         adapter.sendTo(msg.from, msg.command, {
                             result: options.result,
                             step:   data[3],

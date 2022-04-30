@@ -241,7 +241,8 @@
         "changesMinDelta": 0,
         "writeNulls": true,
         "disableSkippedValueLogging": false,
-        "enableLogging": false
+        "enableLogging": false,
+        "round": ""
     },
     "objects": []
 }
