@@ -1013,10 +1013,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
             adapter.log.debug(`handleFileData: ${day} -> ${file}`);
             if (fs.existsSync(file)) {
                 try {
-                    let _data = JSON.parse(fs.readFileSync(file));
-                    if (options.returnNewestEntries) {
-                        _data = _data.sort(tsSort)
-                    }
+                    let _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
                     adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                     let last = false;
 
@@ -1040,7 +1037,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].id = id;
                         }
                         data.push(_data[ii]);
-                        if (!options.returnNewestEntries && data.length >= options.count) {
+                        if (options.returnNewestEntries && data.length >= options.count) {
                             break;
                         }
                         if (last) {
