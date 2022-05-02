@@ -998,68 +998,62 @@ function tsSort(a, b) {
     return b.ts - a.ts;
 }
 
-function handleFileData(day, id, options, data, addId) {
-    const file = GetHistory.getFilenameForID(options.path, day, id);
-    const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
-
-    adapter.log.debug(`handleFileData: ${day} -> ${file}`);
-    if (fs.existsSync(file)) {
-        try {
-            const _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
-adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
-            let last = false;
-
-            for (const ii in _data) {
-                if (!_data.hasOwnProperty(ii)) {
-                    continue;
-                }
-
-                // if a ts in seconds is in then convert on the fly
-                if (_data[ii].ts && _data[ii].ts < tsCheck) {
-                    _data[ii].ts *= 1000;
-                }
-
-                if (_data[ii].val !== null && isFinite(_data[ii].val) && options.round) {
-                    _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
-                }
-                if (options.ack) {
-                    _data[ii].ack = !!_data[ii].ack;
-                }
-                if (addId) {
-                    _data[ii].id = id;
-                }
-                data.push(_data[ii]);
-                if (!options.returnNewestEntries && data.length >= options.count) {
-                    break;
-                }
-                if (last) {
-                    break;
-                }
-                if (options.start && _data[ii].ts < options.start) {
-                    last = true;
-                }
-            }
-        } catch (e) {
-            console.log(`Cannot parse file ${file}: ${e.message}`);
-        }
-    }
-}
-
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
-    if (options.returnNewestEntries) {
-        dayList = dayList.sort((a, b) => b - a)
-    } else {
-        dayList = dayList.sort((a, b) => a - b)
-    }
     adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id} with list ${JSON.stringify(dayList)}`);
 
     // get all files in directory
     for (let i = 0; i < dayList.length; i++) {
         const day = parseInt(dayList[i], 10);
         if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-            handleFileData(day, id, options, data, addId);
+            const file = GetHistory.getFilenameForID(options.path, day, id);
+            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
+
+            adapter.log.debug(`handleFileData: ${day} -> ${file}`);
+            if (fs.existsSync(file)) {
+                try {
+                    let _data = JSON.parse(fs.readFileSync(file));
+                    if (options.returnNewestEntries) {
+                        _data = _data.sort(tsSort)
+                    }
+                    adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
+                    let last = false;
+
+                    for (const ii in _data) {
+                        if (!_data.hasOwnProperty(ii)) {
+                            continue;
+                        }
+
+                        // if a ts in seconds is in then convert on the fly
+                        if (_data[ii].ts && _data[ii].ts < tsCheck) {
+                            _data[ii].ts *= 1000;
+                        }
+
+                        if (_data[ii].val !== null && isFinite(_data[ii].val) && options.round) {
+                            _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                        }
+                        if (options.ack) {
+                            _data[ii].ack = !!_data[ii].ack;
+                        }
+                        if (addId) {
+                            _data[ii].id = id;
+                        }
+                        data.push(_data[ii]);
+                        if (!options.returnNewestEntries && data.length >= options.count) {
+                            break;
+                        }
+                        if (last) {
+                            break;
+                        }
+                        if (options.start && _data[ii].ts < options.start) {
+                            last = true;
+                        }
+                    }
+                } catch (e) {
+                    console.log(`Cannot parse file ${file}: ${e.message}`);
+                }
+            }
         }
 
         if (data.length >= options.count) {
@@ -1074,7 +1068,12 @@ function getFileData(options, callback) {
     const fileData = [];
 
     // get list of directories
-    const dayList = getDirectories(options.path).sort((a, b) => b - a);
+    let dayList = getDirectories(options.path);
+    if (options.returnNewestEntries) {
+        dayList = dayList.sort((a, b) => b - a)
+    } else {
+        dayList = dayList.sort((a, b) => a - b)
+    }
 
     if (options.id && options.id !== '*') {
         getOneFileData(dayList, dayStart, dayEnd, options.id, options, fileData);
