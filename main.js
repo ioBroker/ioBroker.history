@@ -963,16 +963,16 @@ function getOneCachedData(id, options, cache, addId) {
 
                 cache.unshift(resEntry);
 
-                if (!options.start && cache.length >= options.count) {
+                if ((options.returnNewestEntries && cache.length >= options.count) && (options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none')) {
                     break;
                 }
             }
 
-            iProblemCount && adapter.log.warn(`got null states ${iProblemCount} times for ${options.id}`);
+            iProblemCount && adapter.log.warn(`getOneCachedData: got null states ${iProblemCount} times for ${options.id}`);
 
-            adapter.log.debug(`got ${res.length} datapoints for ${options.id}`);
+            adapter.log.debug(`getOneCachedData: got ${res.length} datapoints for ${options.id}`);
         } else {
-            adapter.log.debug(`datapoints for ${options.id} do not yet exist`);
+            adapter.log.debug(`getOneCachedData: datapoints for ${options.id} do not yet exist`);
         }
     }
 }
@@ -991,69 +991,92 @@ function getCachedData(options, callback) {
     }
 
     options.length = cache.length;
-    callback(cache, !options.start && options.count && cache.length >= options.count);
+    callback(cache, options.returnNewestEntries && cache.length >= options.count);
 }
 
 function tsSort(a, b) {
     return b.ts - a.ts;
 }
 
+function handleFileData(day, id, options, data, addId) {
+    const file = GetHistory.getFilenameForID(options.path, day, id);
+    const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
+
+    if (fs.existsSync(file)) {
+        try {
+            const _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+            let last = false;
+
+            for (const ii in _data) {
+                if (!_data.hasOwnProperty(ii)) {
+                    continue;
+                }
+
+                // if a ts in seconds is in then convert on the fly
+                if (_data[ii].ts && _data[ii].ts < tsCheck) {
+                    _data[ii].ts *= 1000;
+                }
+
+                if (_data[ii].val !== null && isFinite(_data[ii].val) && options.round) {
+                    _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                }
+                if (options.ack) {
+                    _data[ii].ack = !!_data[ii].ack;
+                }
+                if (addId) {
+                    _data[ii].id = id;
+                }
+                data.push(_data[ii]);
+                if (!options.returnNewestEntries && data.length >= options.count) {
+                    break;
+                }
+                if (last) {
+                    break;
+                }
+                if (options.start && _data[ii].ts < options.start) {
+                    last = true;
+                }
+            }
+        } catch (e) {
+            console.log(`Cannot parse file ${file}: ${e.message}`);
+        }
+    }
+}
+
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
-    // get all files in directory
-    for (let i = 0; i < dayList.length; i++) {
-        const day = parseInt(dayList[i], 10);
+    if (options.returnNewestEntries) {
+        // get all files in directory
+        for (let i = dayList.length - 1; i >= 0; i--) {
+            const day = parseInt(dayList[i], 10);
+            if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
+                handleFileData(day, id, options, data, addId);
+            }
 
-        if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-            const file = GetHistory.getFilenameForID(options.path, dayList[i], id);
-            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
+            if (data.length >= options.count) {
+                break;
+            }
 
-            if (fs.existsSync(file)) {
-                try {
-                    const _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
-                    let last = false;
-
-                    for (const ii in _data) {
-                        if (!_data.hasOwnProperty(ii)) {
-                            continue;
-                        }
-
-                        // if a ts in seconds is in then convert on the fly
-                        if (_data[ii].ts && _data[ii].ts < tsCheck) {
-                            _data[ii].ts *= 1000;
-                        }
-
-                        if (_data[ii].val !== null && isFinite(_data[ii].val) && options.round) {
-                            _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
-                        }
-                        if (options.ack) {
-                            _data[ii].ack = !!_data[ii].ack;
-                        }
-                        if (addId) {
-                            _data[ii].id = id;
-                        }
-                        data.push(_data[ii]);
-                        if (!options.start && !options.returnNewestEntries && data.length >= options.count) {
-                            break;
-                        }
-                        if (last) {
-                            break;
-                        }
-                        if (options.start && _data[ii].ts < options.start) {
-                            last = true;
-                        }
-                    }
-                } catch (e) {
-                    console.log(`Cannot parse file ${file}: ${e.message}`);
-                }
+            if (day < dayStart) {
+                break;
             }
         }
-        if (!options.start && data.length >= options.count) {
-            break;
-        }
-        if (day > dayEnd) {
-            break;
+    } else {
+        // get all files in directory
+        for (let i = 0; i < dayList.length; i++) {
+            const day = parseInt(dayList[i], 10);
+            if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
+                handleFileData(day, id, options, data, addId);
+            }
+
+            if (data.length >= options.count) {
+                break;
+            }
+
+            if (day > dayEnd) {
+                break;
+            }
         }
     }
 }
@@ -1187,7 +1210,7 @@ function getHistory(msg) {
         options.ignoreNull = false;
     }
 
-    if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
+    if (options.returnNewestEntries || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
             debugLog && adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
 
