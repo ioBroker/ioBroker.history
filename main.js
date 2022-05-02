@@ -1001,7 +1001,7 @@ function tsSort(a, b) {
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
-    adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id} with list ${JSON.stringify(dayList)}`);
+    options.debugLog && adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
 
     // get all files in directory
     for (let i = 0; i < dayList.length; i++) {
@@ -1010,11 +1010,11 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
             const file = GetHistory.getFilenameForID(options.path, day, id);
             const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
-            adapter.log.debug(`handleFileData: ${day} -> ${file}`);
+            options.debugLog && adapter.log.debug(`handleFileData: ${day} -> ${file}`);
             if (fs.existsSync(file)) {
                 try {
                     let _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
-                    adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
+                    //adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                     let last = false;
 
                     for (const ii in _data) {
