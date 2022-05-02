@@ -1048,7 +1048,7 @@ adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
-    adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
+    adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id} with list ${JSON.stringify(dayList)}`);
     if (options.returnNewestEntries) {
         // get all files in directory
         for (let i = dayList.length - 1; i >= 0; i--) {
@@ -1058,10 +1058,6 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
             }
 
             if (data.length >= options.count) {
-                break;
-            }
-
-            if (!isNaN(day) && day < dayStart) {
                 break;
             }
         }
@@ -1074,10 +1070,6 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
             }
 
             if (data.length >= options.count) {
-                break;
-            }
-
-            if (day > dayEnd) {
                 break;
             }
         }
