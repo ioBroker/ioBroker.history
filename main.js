@@ -1037,7 +1037,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].id = id;
                         }
                         data.push(_data[ii]);
-                        if (options.returnNewestEntries && data.length >= options.count) {
+                        if ((options.returnNewestEntries || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') && data.length >= options.count) {
                             break;
                         }
                         if (last) {
