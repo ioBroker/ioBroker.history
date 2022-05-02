@@ -1219,13 +1219,15 @@ function getHistory(msg) {
                 }, msg.callback);
             } else {
                 const origCount = options.count;
-                options.count -= cacheData.length;
+                if (options.returnNewestEntries) {
+                    options.count -= cacheData.length;
+                }
                 getFileData(options, fileData => {
+                    options.count = origCount;
                     fileData = applyOptions(fileData, options);
                     debugLog && adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
-                    options.count = origCount;
                     options.result = cacheData;
                     if (options.count && options.result.length > options.count && options.aggregate === 'none' && !options.returnNewestEntries) {
                         if (options.start) {
