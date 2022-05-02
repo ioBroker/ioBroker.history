@@ -1061,7 +1061,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                 break;
             }
 
-            if (day < dayStart) {
+            if (!isNaN(day) && day < dayStart) {
                 break;
             }
         }
@@ -1400,7 +1400,7 @@ function getDirectories(path) {
     try {
         return fs.readdirSync(path).filter(file => {
             try {
-                return fs.statSync(path + '/' + file).isDirectory()
+                return !file.startsWith('.') && fs.statSync(path + '/' + file).isDirectory()
             } catch (e) {
                 // ignore entry
                 return false;
