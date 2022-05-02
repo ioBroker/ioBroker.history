@@ -1048,30 +1048,22 @@ adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
-    adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id} with list ${JSON.stringify(dayList)}`);
     if (options.returnNewestEntries) {
-        // get all files in directory
-        for (let i = dayList.length - 1; i >= 0; i--) {
-            const day = parseInt(dayList[i], 10);
-            if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-                handleFileData(day, id, options, data, addId);
-            }
-
-            if (data.length >= options.count) {
-                break;
-            }
-        }
+        dayList = dayList.sort((a, b) => b - a)
     } else {
-        // get all files in directory
-        for (let i = 0; i < dayList.length; i++) {
-            const day = parseInt(dayList[i], 10);
-            if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-                handleFileData(day, id, options, data, addId);
-            }
+        dayList = dayList.sort((a, b) => a - b)
+    }
+    adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id} with list ${JSON.stringify(dayList)}`);
 
-            if (data.length >= options.count) {
-                break;
-            }
+    // get all files in directory
+    for (let i = 0; i < dayList.length; i++) {
+        const day = parseInt(dayList[i], 10);
+        if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
+            handleFileData(day, id, options, data, addId);
+        }
+
+        if (data.length >= options.count) {
+            break;
         }
     }
 }
