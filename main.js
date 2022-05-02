@@ -1002,9 +1002,11 @@ function handleFileData(day, id, options, data, addId) {
     const file = GetHistory.getFilenameForID(options.path, day, id);
     const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
+    adapter.log.debug(`handleFileData: ${day} -> ${file}`);
     if (fs.existsSync(file)) {
         try {
             const _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
             let last = false;
 
             for (const ii in _data) {
@@ -1046,6 +1048,7 @@ function handleFileData(day, id, options, data, addId) {
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
     addId = addId || options.addId;
 
+    adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
     if (options.returnNewestEntries) {
         // get all files in directory
         for (let i = dayList.length - 1; i >= 0; i--) {
@@ -1184,6 +1187,10 @@ function getHistory(msg) {
         const _end      = options.end;
         options.end   = options.start;
         options.start = _end;
+    }
+
+    if (!options.start && !options.count) {
+        options.start = Date.now() - 2592000000; // - 1 month
     }
 
     if (options.aggregate === 'percentile' && options.percentile < 0 || options.percentile > 100) {
