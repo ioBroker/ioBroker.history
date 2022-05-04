@@ -95,7 +95,7 @@ function startAdapter(options) {
                     delete aliasMap[id];
                 }
 
-                const writeNull = !history[id][adapter.namespace];
+                const writeNull = !history[id] || !history[id][adapter.namespace];
                 const state     = history[id] ? history[id].state   : null;
                 const list      = history[id] ? history[id].list    : null;
                 const timeout   = history[id] ? history[id].timeout : null;
