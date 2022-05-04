@@ -1170,7 +1170,7 @@ function getHistory(msg) {
     }
 
     if (!options.start && !options.count) {
-        options.start = Date.now() - 2592000000; // - 1 month
+        options.start = Date.now() - 86400000; // - 1 day
     }
 
     if (options.aggregate === 'percentile' && options.percentile < 0 || options.percentile > 100) {
