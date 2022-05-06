@@ -116,11 +116,22 @@ function startAdapter(options) {
                 } else {
                     obj.common.custom[adapter.namespace].maxLength = parseInt(obj.common.custom[adapter.namespace].maxLength, 10);
                 }
+
                 if (!obj.common.custom[adapter.namespace].retention && obj.common.custom[adapter.namespace].retention !== '0' && obj.common.custom[adapter.namespace].retention !== 0) {
                     obj.common.custom[adapter.namespace].retention = parseInt(adapter.config.retention, 10) || 0;
                 } else {
                     obj.common.custom[adapter.namespace].retention = parseInt(obj.common.custom[adapter.namespace].retention, 10) || 0;
                 }
+                if (obj.common.custom[adapter.namespace].retention === -1) {
+                    // customRetentionDuration
+                    if (obj.common.custom[adapter.namespace].customRetentionDuration !== undefined && obj.common.custom[adapter.namespace].customRetentionDuration !== null && obj.common.custom[adapter.namespace].customRetentionDuration !== '') {
+                        obj.common.custom[adapter.namespace].customRetentionDuration = parseInt(obj.common.custom[adapter.namespace].customRetentionDuration, 10) || 0;
+                    } else {
+                        obj.common.custom[adapter.namespace].customRetentionDuration = adapter.config.customRetentionDuration;
+                    }
+                    obj.common.custom[adapter.namespace].retention = obj.common.custom[adapter.namespace].customRetentionDuration * 24 * 60 * 60
+                }
+
                 if (!obj.common.custom[adapter.namespace].blockTime && obj.common.custom[adapter.namespace].blockTime !== '0' && obj.common.custom[adapter.namespace].blockTime !== 0) {
                     if (!obj.common.custom[adapter.namespace].debounce && obj.common.custom[adapter.namespace].debounce !== '0' && obj.common.custom[adapter.namespace].debounce !== 0) {
                         obj.common.custom[adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 0;
@@ -210,7 +221,7 @@ function startAdapter(options) {
                     writeNulls(id);
                 }
 
-                adapter.log.info(`enabled logging of ${id}, Alias=${id !== realId}`);
+                adapter.log.info(`enabled logging of ${id}, Alias=${id !== realId}, WriteNulls=${writeNull}`);
             } else {
                 if (aliasMap[id]) {
                     adapter.log.debug(`Removed Alias: ${id} !-> ${aliasMap[id]}`);
@@ -441,6 +452,11 @@ function main() { //start
     }
     adapter.config.storeDir += '/';
 
+    adapter.config.retention = parseInt(adapter.config.retention, 10) || 0;
+    if (adapter.config.retention === -1 ) { // Custom timeframe
+        adapter.config.retention = (parseInt(adapter.config.customRetentionDuration, 10) || 0) * 24 * 60 * 60;
+    }
+
     if (adapter.config.changesRelogInterval !== null && adapter.config.changesRelogInterval !== undefined) {
         adapter.config.changesRelogInterval = parseInt(adapter.config.changesRelogInterval, 10);
     } else {
@@ -519,6 +535,16 @@ function main() { //start
                         } else {
                             history[id][adapter.namespace].retention = parseInt(history[id][adapter.namespace].retention, 10) || 0;
                         }
+                        if (history[id][adapter.namespace].retention === -1) {
+                            // customRetentionDuration
+                            if (history[id][adapter.namespace].customRetentionDuration !== undefined && history[id][adapter.namespace].customRetentionDuration !== null && history[id][adapter.namespace].customRetentionDuration !== '') {
+                                history[id][adapter.namespace].customRetentionDuration = parseInt(history[id][adapter.namespace].customRetentionDuration, 10) || 0;
+                            } else {
+                                history[id][adapter.namespace].customRetentionDuration = adapter.config.customRetentionDuration;
+                            }
+                            history[id][adapter.namespace].retention = history[id][adapter.namespace].customRetentionDuration * 24 * 60 * 60
+                        }
+
                         if (!history[id][adapter.namespace].blockTime && history[id][adapter.namespace].blockTime !== '0' && history[id][adapter.namespace].blockTime !== 0) {
                             if (!history[id][adapter.namespace].debounce && history[id][adapter.namespace].debounce !== '0' && history[id][adapter.namespace].debounce !== 0) {
                                 history[id][adapter.namespace].blockTime = parseInt(adapter.config.blockTime, 10) || 0;

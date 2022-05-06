@@ -39,6 +39,7 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) When request contains flag removeBorderValues: true, the result then cut the additional pre and post border values out of the results
 * (Apollon77) If storeState Message calls include a rules property then the new value is added with respecting all rules (incl. debounce, so be careful!)
 * (Apollon77) Enhance the former "Ignore below 0" feature and now allow specifying to ignore below or above specified values. The old setting is converted to the new one
+* (Apollon77) Allow to specify custom retention duration in days
 * (Apollon77) Adjust handing for data files prior 1.1.2010 and automatically convert older ts formats to the new one
 * (Apollon77) Adjust handling of data prior 1.1.2000 in the importer scripts
 * (Apollon77) Make sure that min change delta allows numbers entered with comma (german notation) in all cases

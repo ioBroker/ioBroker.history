@@ -242,7 +242,8 @@
         "writeNulls": true,
         "disableSkippedValueLogging": false,
         "enableLogging": false,
-        "round": ""
+        "round": "",
+        "customRetentionDuration": 365
     },
     "objects": []
 }
