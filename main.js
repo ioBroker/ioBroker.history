@@ -1456,7 +1456,7 @@ function update(id, state) {
 
             if (fs.existsSync(file)) {
                 try {
-                    const res = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+                    const res = JSON.parse(fs.readFileSync(file));
 
                     for (let i = 0; i < res.length; i++) {
                         // if a ts in seconds is in then convert on the fly
