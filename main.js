@@ -1165,7 +1165,8 @@ function getHistory(msg) {
         quantile: msg.message.options.aggregate === 'quantile' ? parseFloat(msg.message.options.quantile) || 0.5 : null,
         integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null,
         integralInterpolation: msg.message.options.aggregate === 'integral' ? msg.message.options.integralInterpolation || 'none' : null,
-        removeBorderValues: msg.message.options.removeBorderValues || false
+        removeBorderValues: msg.message.options.removeBorderValues || false,
+        logId:     (msg.message.id ? msg.message.id : 'all') + Date.now() + Math.random()
     };
 
     if (msg.message.options.round !== null && msg.message.options.round !== undefined && msg.message.options.round !== '') {
@@ -1183,7 +1184,7 @@ function getHistory(msg) {
         options.returnNewestEntries = true;
     }
 
-    adapter.log.debug(`getHistory call: ${JSON.stringify(options)}`);
+    adapter.log.debug(`${options.logId} getHistory call: ${JSON.stringify(options)}`);
 
     if (options.id && aliasMap[options.id]) {
         options.id = aliasMap[options.id];
@@ -1225,7 +1226,7 @@ function getHistory(msg) {
 
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
-            debugLog && adapter.log.debug(`after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
+            debugLog && adapter.log.debug(`${options.logId} after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
 
             cacheData = applyOptions(cacheData, options);
 
@@ -1234,9 +1235,9 @@ function getHistory(msg) {
                 cacheData = cacheData.sort(sortByTs);
                 if (options.count && cacheData.length > options.count && options.aggregate === 'none') {
                     cacheData = cacheData.slice(-options.count);
-                    debugLog && adapter.log.debug(`cut cacheData to ${options.count} values`);
+                    debugLog && adapter.log.debug(`${options.logId} cut cacheData to ${options.count} values`);
                 }
-                adapter.log.debug(`Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
+                adapter.log.debug(`${options.logId} Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
 
                 adapter.sendTo(msg.from, msg.command, {
                     result: cacheData,
@@ -1251,7 +1252,7 @@ function getHistory(msg) {
                 getFileData(options, fileData => {
                     options.count = origCount;
                     fileData = applyOptions(fileData, options);
-                    debugLog && adapter.log.debug(`after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
+                    debugLog && adapter.log.debug(`${options.logId} after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     options.result = cacheData;
@@ -1267,16 +1268,16 @@ function getHistory(msg) {
                             }
                         }
                         options.result = options.result.slice(0, options.count);
-                        debugLog && adapter.log.debug(`pre-cut data to ${options.count} oldest values`);
+                        debugLog && adapter.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);
                     }
                     if (options.debugLog) {
                         options.log = adapter.log.debug;
                     }
                     Aggregate.beautify(options);
 
-                    debugLog && adapter.log.debug(`after beautify: options.result.length = ${options.result.length}`);
+                    debugLog && adapter.log.debug(`${options.logId} after beautify: options.result.length = ${options.result.length}`);
 
-                    adapter.log.debug(`Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
+                    adapter.log.debug(`${options.logId} Send: ${options.result.length} values in: ${Date.now() - startTime}ms`);
 
                     adapter.sendTo(msg.from, msg.command, {
                         result: options.result,
@@ -1289,7 +1290,7 @@ function getHistory(msg) {
     } else {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
-            adapter.log.debug('use parallel requests for getHistory');
+            adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
             try {
                 let gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
 
@@ -1304,7 +1305,7 @@ function getHistory(msg) {
 
                 gh.on('error', err => {
                     gh = null;
-                    adapter.log.info('Error communicating to forked process: ' + err.message);
+                    adapter.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
                     adapter.sendTo(msg.from, msg.command, {
                         result: [],
                         step: null,
@@ -1314,7 +1315,7 @@ function getHistory(msg) {
 
                 if (options.debugLog && gh.stdout) {
                     gh.stdout.on('data', data => {
-                        adapter.log.debug(`GetHistory fork: ${data && data.toString()}`);
+                        adapter.log.debug(`${options.logId} GetHistory fork: ${data && data.toString()}`);
                     });
                 }
 
@@ -1326,7 +1327,7 @@ function getHistory(msg) {
                             try {
                                 gh.send(['cacheData', cacheData]);
                             } catch (err) {
-                                adapter.log.info('Can not send data to forked process: ' + err.message);
+                                adapter.log.info(`${options.logId} Can not send data to forked process: ${err.message}`);
                             }
                         });
                     } else if (cmd === 'response') {
@@ -1336,7 +1337,7 @@ function getHistory(msg) {
                         try {
                             gh.send(['exit']);
                         } catch (err) {
-                            adapter.log.info('Can not exit forked process: ' + err.message);
+                            adapter.log.info(`${options.logId} Can not exit forked process: ${err.message}`);
                         }
                         gh = null;
 
@@ -1344,7 +1345,7 @@ function getHistory(msg) {
                         const overallLength = data[2];
                         const step = data[3];
                         if (options.result) {
-                            adapter.log.debug(`Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
+                            adapter.log.debug(`${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
                             adapter.sendTo(msg.from, msg.command, {
                                 result: options.result,
                                 step: step,
@@ -1352,7 +1353,7 @@ function getHistory(msg) {
                             }, msg.callback);
                             options.result = null;
                         } else {
-                            adapter.log.info('No Data');
+                            adapter.log.info(`${options.logId} No Data`);
                             adapter.sendTo(msg.from, msg.command, {
                                 result: [],
                                 step: null,
@@ -1362,7 +1363,7 @@ function getHistory(msg) {
                     }
                 });
             } catch (err) {
-                adapter.log.info(`Can not use parallel requests: ${err.message}`);
+                adapter.log.info(`${options.logId} Can not use parallel requests: ${err.message}`);
             }
         } else {
             if (options.debugLog) {
@@ -1376,7 +1377,7 @@ function getHistory(msg) {
 
                 if (data[0] === 'response') {
                     if (data[1]) {
-                        adapter.log.debug(`Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
+                        adapter.log.debug(`${options.logId} Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`);
                         options.result = applyOptions(data[1], options);
                         adapter.sendTo(msg.from, msg.command, {
                             result: options.result,
@@ -1385,7 +1386,7 @@ function getHistory(msg) {
                         }, msg.callback);
                         options.result = null;
                     } else {
-                        adapter.log.info('No Data');
+                        adapter.log.info(`${options.logId} No Data`);
                         adapter.sendTo(msg.from, msg.command, {
                             result: [],
                             step:   null,
@@ -1393,7 +1394,7 @@ function getHistory(msg) {
                         }, msg.callback);
                     }
                 } else {
-                    adapter.log.error('Unknown response type: ' + data[0]);
+                    adapter.log.error(`${options.logId} Unknown response type: ${data[0]}`);
                 }
             });
         }
