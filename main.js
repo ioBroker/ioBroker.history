@@ -1797,7 +1797,6 @@ function storeState(msg) {
         pushFunc = pushHistory;
     }
 
-
     let id;
     if (Array.isArray(msg.message)) {
         adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);

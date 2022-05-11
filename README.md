@@ -24,10 +24,14 @@ This adapter saves state history in a two-staged process.
 
 ## Changelog
 
-### **WORK IN PROGRESS**
-* (Apollon77) Breaking: Configuration is only working in the new Admin 5 UI!
-* (Apollon77) Breaking! Did bigger adjustments to the recording logic. Debounce is refined and blockTime is added to differentiate between the two checks
-* (Apollon77) Breaking! GetHistory requests now need to deliver the ts in milliseconds! Make sure to use up to date scripts and Charting UIs
+### __WORK IN PROGRESS__
+* (Apollon77) BREAKING: Configuration is only working in the new Admin 5 UI!
+* (Apollon77) Did bigger adjustments to the recording logic and added a lot of new Features. Please refer to Changelog and Forum post for details.
+
+### 2.0.0 (2022-05-11)
+* (Apollon77) BREAKING: Configuration is only working in the new Admin 5 UI!
+* (Apollon77) BREAKING! Did bigger adjustments to the recording logic. Debounce is refined and blockTime is added to differentiate between the two checks
+* (Apollon77) BREAKING! GetHistory requests now need to deliver the ts in milliseconds! Make sure to use up to date scripts and Charting UIs
 * (Apollon77) New setting added to disable the "logging of additional values for charting optimization" - then only the expected data are logged
 * (Apollon77) Add flag returnNewestEntries for GetHistory to determine which records to return when more entries as "count" are existing for aggregate "none"
 * (Apollon77) Make sure id is always returned on GetHistory when addId is set
