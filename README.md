@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.0.1 (2022-05-11)
 * (Apollon77) BREAKING: Configuration is only working in the new Admin 5 UI!
 * (Apollon77) Did bigger adjustments to the recording logic and added a lot of new Features. Please refer to Changelog and Forum post for details.
 
@@ -47,7 +46,6 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) Adjust handing for data files prior 1.1.2010 and automatically convert older ts formats to the new one
 * (Apollon77) Adjust handling of data prior 1.1.2000 in the importer scripts
 * (Apollon77) Make sure that min change delta allows numbers entered with comma (german notation) in all cases
-
 
 ### 1.11.1 (2022-03-26)
 * (Apollon77) Fix the js-controller and admin minimum version
