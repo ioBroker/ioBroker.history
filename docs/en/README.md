@@ -67,7 +67,7 @@ sendTo('history.0', 'getHistory', {
 Possible options:
 - **start** - (optional) time in ms - *Date.now()*'
 - **end** - (optional) time in ms - *Date.now()*', by default is (now + 5000 seconds)
-- **step** - (optional) used in aggregate (m4, max, min, average, total) step in ms of intervals
+- **step** - (optional) used in aggregate (max, min, average, total, ...) step in ms of intervals
 - **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set, else default is 500 if not set
 - **from** - if *from* field should be included in answer
 - **ack** - if *ack* field should be included in answer
@@ -107,8 +107,36 @@ The given ids are not checked against the ioBroker database and do not need to b
 
 The Message can have one of the following three formats:
 * one ID and one state object
+
+```
+sendTo('history.0', 'storeState', [
+    id: 'mbus.0.counter.xxx',
+    state: {ts: 1589458809352, val: 123, ack: false, from: 'system.adapter.whatever.0', ...}
+], result => console.log('added'));
+```
+
 * one ID and array of state objects
-* array of multiple IDs with state objects
+
+```
+sendTo('history.0', 'storeState', {
+    id: 'mbus.0.counter.xxx',
+    state: [
+      {ts: 1589458809352, val: 123, ack: false, from: 'system.adapter.whatever.0', ...}, 
+      {ts: 1589458809353, val: 123, ack: false, from: 'system.adapter.whatever.0', ...}
+    ]
+}, result => console.log('added'));
+```
+
+* array of multiple IDs with one state object each
+
+```
+sendTo('history.0', 'storeState', [
+    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352, val: 123, ack: false, from: 'system.adapter.whatever.0', ...}}, 
+    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353, val: 123, ack: false, from: 'system.adapter.whatever.0', ...}}
+], result => console.log('added'));
+```
+
+Additionally, you can add attribute `rules: true` in message to activate all rules, like `counter`, `changesOnly`, `de-bounce` and so on.
 
 ## delete state
 If you want to delete entry from the Database you can use the build in system function **delete**:
