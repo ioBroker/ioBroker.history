@@ -963,7 +963,7 @@ function getOneCachedData(id, options, cache, addId) {
                     continue;
                 }
                 const resEntry = Object.assign({}, res[i]);
-                if (resEntry.val !== null && isFinite(resEntry.val) && options.round) {
+                if (typeof resEntry.val === 'number' && isFinite(resEntry.val) && options.round) {
                     resEntry.val = Math.round(resEntry.val * options.round) / options.round;
                 }
                 if (options.ack) {
@@ -1053,7 +1053,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                             _data[ii].ts *= 1000;
                         }
 
-                        if (_data[ii].val !== null && isFinite(_data[ii].val) && options.round) {
+                        if (typeof _data[ii].val === 'number' && isFinite(_data[ii].val) && options.round) {
                             _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
                         }
                         if (options.ack) {
@@ -1178,6 +1178,26 @@ function getHistory(msg) {
         }
     } else {
         options.round = adapter.config.round;
+    }
+
+    try {
+        if (options.start && typeof options.start !== 'number') {
+            options.start = new Date(options.start).getTime();
+        }
+    } catch (err) {
+        return adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call. Start date ' + JSON.stringify(options.start) + ' is not a valid date'
+        }, msg.callback);
+    }
+
+    try {
+        if (options.end && typeof options.end !== 'number') {
+            options.end = new Date(options.end).getTime();
+        }
+    } catch (err) {
+        return adapter.sendTo(msg.from, msg.command, {
+            error:  'Invalid call. End date ' + JSON.stringify(options.end) + ' is not a valid date'
+        }, msg.callback);
     }
 
     if (!options.start && options.count) {
