@@ -1075,6 +1075,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             sendTo(instanceName, 'getHistory', {
                 id: `my.own.unknown.value-${customNow}`,
                 options: {
+                    start:     customNow - 10000,
                     count: 500,
                     aggregate: 'none'
                 }
@@ -1087,6 +1088,25 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
         });
     });
 
+    it(`Test ${adapterShortName}: storeState error for unknown Id with rules parameter`, function (done) {
+        this.timeout(25000);
+
+        const customNow2 = Date.now();
+        sendTo(instanceName, 'storeState', {
+            id: `my.own.unknown.value-${customNow2}`,
+            rules: true,
+            state: [
+                {val: 1, ack: true, ts: customNow2 - 5000},
+                {val: 2, ack: true, ts: customNow2 - 4000},
+                {val: 3, ack: true, ts: customNow2 - 3000}
+            ]
+        }, function (result) {
+            expect(result.success).to.be.not.ok;
+            expect(result.error).to.be.equal(`history not enabled for my.own.unknown.value-${customNow2}, so can not apply the rules as requested`);
+
+            done();
+        });
+    });
 }
 
 module.exports.register = register;

@@ -852,7 +852,8 @@ function pushHelper(_id, state) {
     history[_id].list.push(state);
 
     const _settings = history[_id][adapter.namespace] || {};
-    if (_settings && history[_id].list.length > _settings.maxLength) {
+    const maxLength = _settings.maxLength !== undefined ? _settings.maxLength : parseInt(adapter.config.maxLength, 10) || 960;
+    if (_settings && history[_id].list.length > maxLength) {
         _settings.enableDebugLogs && adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
         appendFile(_id, history[_id].list);
     }
@@ -1808,7 +1809,7 @@ function storeStatePushData(id, state, applyRules) {
             adapter.log.warn(`storeState: history not enabled for ${id}, so can not apply the rules as requested`);
             throw new Error(`history not enabled for ${id}, so can not apply the rules as requested`);
         }
-        history[id] = {};
+        history[id] = history[id] || {};
     }
     pushFunc(id, state);
 }
