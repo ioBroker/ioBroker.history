@@ -1236,6 +1236,7 @@ function getHistory(msg) {
         options.integralUnit = 60;
     }
 
+    history[options.id] = history[options.id] || {};
     const debugLog = options.debugLog = !!(history[options.id] && history[options.id][adapter.namespace] && history[options.id][adapter.namespace].enableDebugLogs);
 
     if (options.ignoreNull === 'true')  options.ignoreNull = true;  // include nulls and replace them with last value
