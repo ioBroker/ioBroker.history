@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.0",
+    "version": "2.1.1",
     "news": {
+      "2.1.1": {
+        "en": "Fix crash case reported by Sentry",
+        "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
+        "ru": "Исправить случай сбоя, о котором сообщил Sentry",
+        "pt": "Corrigir caso de falha relatado pelo Sentinela",
+        "nl": "Herstel crashgeval gemeld door Sentry",
+        "fr": "Correction d'un cas de crash signalé par Sentry",
+        "it": "Risolto il caso di crash segnalato da Sentry",
+        "es": "Solucionar caso de bloqueo informado por Sentry",
+        "pl": "Napraw przypadek awarii zgłoszony przez Sentry",
+        "zh-cn": "修复 Sentry 报告的崩溃案例"
+      },
       "2.1.0": {
         "en": "Fix several crash cases reported by Sentry\nMake sure disabling \"Log changes only\" also really do not log the changes anymore\nAllow storeState and GetHistory also to be called for \"unknown ids\"",
         "de": "Mehrere von Sentry gemeldete Absturzfälle behoben\nStellen Sie sicher, dass durch Deaktivieren von \"Nur Änderungen protokollieren\" die Änderungen auch wirklich nicht mehr protokolliert werden\nAufruf von storeState und GetHistory auch für \"unbekannte IDs\" zulassen",
@@ -99,18 +111,6 @@
         "es": "Ocultar la configuración que no es relevante cuando no se utiliza \"solo cambios de registro\"\nPermitir todos los valores numéricos para antirrebote nuevamente",
         "pl": "Ukryj ustawienia nieistotne, gdy nie używasz opcji „tylko rejestruj zmiany”\nZezwól ponownie na odrzucenie wszystkich wartości liczbowych",
         "zh-cn": "不使用“仅记录更改”时隐藏不相关的设置\n再次允许所有数值去抖动"
-      },
-      "1.10.4": {
-        "en": "Support only `js.controller` 3.3.x+\nUsed system/custom view for collecting the objects\nImplemented option to ignore zero- or/and below zero- values",
-        "de": "Unterstützt nur `js.controller` 3.3.x+\nVerwendete Systemansicht/benutzerdefinierte Ansicht zum Sammeln der Objekte\nImplementierte Option zum Ignorieren von Null- oder/und Unter-Null-Werten",
-        "ru": "Поддерживает только `js.controller`3.3.x+\nИспользуемый системный / пользовательский вид для сбора объектов\nРеализована возможность игнорировать нулевые и / или отрицательные значения.",
-        "pt": "Suporte apenas `js.controller`3.3.x+\nSistema usado / visão personalizada para coletar os objetos\nOpção implementada para ignorar valores zero ou / e abaixo de zero",
-        "nl": "Ondersteuning alleen `js.controller` 3.3.x+\nGebruikt systeem/aangepaste weergave voor het verzamelen van de objecten\nGeïmplementeerde optie om nul- of/en onder nul-waarden te negeren",
-        "fr": "Supporte uniquement `js.controller` 3.3.x+\nSystème utilisé/vue personnalisée pour la collecte des objets\nOption implémentée pour ignorer les valeurs zéro ou/et inférieures à zéro",
-        "it": "Supporta solo `js.controller` 3.3.x+\nSistema utilizzato/vista personalizzata per la raccolta degli oggetti\nOpzione implementata per ignorare i valori zero o/o inferiori a zero",
-        "es": "Admite solo `js.controller`3.3.x+\nSistema usado / vista personalizada para recolectar los objetos.\nOpción implementada para ignorar valores cero o inferiores a cero",
-        "pl": "Obsługuje tylko `js.controller` 3.3.x+\nUżywany system/widok niestandardowy do zbierania obiektów\nZaimplementowana opcja ignorowania wartości zerowych lub/i poniżej zera",
-        "zh-cn": "仅支持 `js.controller` 3.3.x+\n用于收集对象的系统/自定义视图\n已实现忽略零值或/和低于零值的选项"
       }
     },
     "mode": "daemon",
