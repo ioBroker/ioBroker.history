@@ -103,7 +103,9 @@ If you manually request some aggregation you should ignore first and last values
 If you want to write other data into the history DB you can use the build in system function `storeState`.
 This function can also be used to convert data from other History adapters like History or SQL.
 
-The given ids are not checked against the ioBroker database and do not need to be set up there, but can only be accessed directly.
+A successful response do not mean that the data are really written out to the disk. It just means that they were processed.
+
+The given ids are not checked against the ioBroker database and do not need to be set up or enabled there. If own IDs are used without settings then the "rules" parameter is not supported and will result in an error. The default "Maximal number of stored in RAM values" is used for such IDs.
 
 The Message can have one of the following three formats:
 * one ID and one state object

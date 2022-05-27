@@ -1806,7 +1806,6 @@ function storeStatePushData(id, state, applyRules) {
     let pushFunc = applyRules ? pushHistory : pushHelper;
     if (!history[id] || !history[id][adapter.namespace]) {
         if (applyRules) {
-            adapter.log.warn(`storeState: history not enabled for ${id}, so can not apply the rules as requested`);
             throw new Error(`history not enabled for ${id}, so can not apply the rules as requested`);
         }
         history[id] = history[id] || {};
