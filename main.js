@@ -275,7 +275,7 @@ function storeCached(isFinishing, onlyId) {
             }
             if (adapter.config.writeNulls) {
                 const nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
-                if (history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
+                if (history[id][adapter.namespace] && history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
                     const state = Object.assign({}, history[id].state);
                     state.ts   = now;
                     state.from = 'system.adapter.' + adapter.namespace;
