@@ -43,7 +43,7 @@
     "debounce": "Änderungen ignorieren, bis der Wert für X Millisekunden unverändert bleibt",
     "enabled": "Aktiviert",
     "ignore values above x": "Ignoriere Werte größer als",
-    "ignore values below x": "IgnoriereWerte kleiner als",
+    "ignore values below x": "Ignoriere Werte kleiner als",
     "ignore values below zero": "Werte unter 0 ignorieren (<0)",
     "ignore zero or null values": "Ignoriere 0 oder Nullwerte (==0)",
     "keep forever": "keine automatische Löschung",
