@@ -1057,6 +1057,36 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             done();
         });
     });
+
+    it(`Test ${adapterShortName}: storeState and getHistory for unknown Id`, function (done) {
+        this.timeout(25000);
+
+        const customNow = Date.now();
+        sendTo(instanceName, 'storeState', {
+            id: `my.own.unknown.value-${customNow}`,
+            state: [
+                {val: 1, ack: true, ts: customNow - 5000},
+                {val: 2, ack: true, ts: customNow - 4000},
+                {val: 3, ack: true, ts: customNow - 3000}
+            ]
+        }, function (result) {
+            expect(result.success).to.be.true;
+
+            sendTo(instanceName, 'getHistory', {
+                id: `my.own.unknown.value-${customNow}`,
+                options: {
+                    count: 500,
+                    aggregate: 'none'
+                }
+            }, function (result) {
+                console.log(JSON.stringify(result.result, null, 2));
+                expect(result.result.length).to.be.equal(3);
+
+                done();
+            });
+        });
+    });
+
 }
 
 module.exports.register = register;

@@ -26,6 +26,8 @@ This adapter saves state history in a two-staged process.
 
 ### __WORK IN PROGRESS__
 * (Apollon77) Fix several crash cases reported by Sentry
+* (Apollon77) Make sure disabling "Log changes only" also really do not log the changes anymore
+* (Apollon77) Allow storeState and GetHistory also to be called for "unknown ids"
 
 ### 2.0.1 (2022-05-11)
 * (Apollon77) BREAKING: Configuration is only working in the new Admin 5 UI!

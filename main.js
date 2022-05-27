@@ -851,7 +851,7 @@ function pushHelper(_id, state) {
 
     history[_id].list.push(state);
 
-    const _settings = history[_id][adapter.namespace];
+    const _settings = history[_id][adapter.namespace] || {};
     if (_settings && history[_id].list.length > _settings.maxLength) {
         _settings.enableDebugLogs && adapter.log.debug(`moving ${history[_id].list.length} entries from ${_id} to file`);
         appendFile(_id, history[_id].list);
@@ -859,7 +859,7 @@ function pushHelper(_id, state) {
 }
 
 function checkRetention(id) {
-    if (history[id][adapter.namespace].retention) {
+    if (history[id] && history[id][adapter.namespace] && history[id][adapter.namespace].retention) {
         const d = new Date();
         const dt = d.getTime();
         // check every 6 hours
@@ -1801,7 +1801,19 @@ function deleteStateAll(msg) {
     adapter.sendTo(msg.from, msg.command, {success: true}, msg.callback);
 }
 
-function storeState(msg) {
+function storeStatePushData(id, state, applyRules) {
+    let pushFunc = applyRules ? pushHistory : pushHelper;
+    if (!history[id] || !history[id][adapter.namespace]) {
+        if (applyRules) {
+            adapter.log.warn(`storeState: history not enabled for ${id}, so can not apply the rules as requested`);
+            throw new Error(`history not enabled for ${id}, so can not apply the rules as requested`);
+        }
+        history[id] = {};
+    }
+    pushFunc(id, state);
+}
+
+async function storeState(msg) {
     if (msg.message && (msg.message.success || msg.message.error)) { // Seems we got a callback from running converter
         return;
     }
@@ -1812,40 +1824,30 @@ function storeState(msg) {
         }, msg.callback);
     }
 
-    let pushFunc = pushHelper;
-    if (msg.message.rules) {
-        pushFunc = pushHistory;
-    }
-
     let id;
-    if (Array.isArray(msg.message)) {
-        adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
-        for (let i = 0; i < msg.message.length; i++) {
-            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
-            if (history[id]) {
-                pushFunc(id, msg.message[i].state);
-            } else {
-                adapter.log.warn(`storeState: history not enabled for ${msg.message[i].id}. Ignoring`);
+    try {
+        if (Array.isArray(msg.message)) {
+            adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
+            for (let i = 0; i < msg.message.length; i++) {
+                id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+                storeStatePushData(id, msg.message[i].state, msg.message.rules);
             }
-        }
-    } else if (msg.message.state && Array.isArray(msg.message.state)) {
-        adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
-        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-        for (let j = 0; j < msg.message.state.length; j++) {
-            if (history[id]) {
-                pushFunc(id, msg.message.state[j]);
-            } else {
-                adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
+        } else if (msg.message.state && Array.isArray(msg.message.state)) {
+            adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
+            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+            for (let j = 0; j < msg.message.state.length; j++) {
+                storeStatePushData(id, msg.message.state[j], msg.message.rules);
             }
-        }
-    } else {
-        adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
-        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-        if (history[id]) {
-            pushFunc(id, msg.message.state);
         } else {
-            adapter.log.warn(`storeState: history not enabled for ${msg.message.id}. Ignoring`);
+            adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
+            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+            storeStatePushData(id, msg.message.state, msg.message.rules);
         }
+    } catch (err) {
+        adapter.log.warn(`storeState: ${err.message}`);
+        return adapter.sendTo(msg.from, msg.command, {
+            error:  err.message
+        }, msg.callback);
     }
 
     adapter.sendTo(msg.from, msg.command, {success: true}, msg.callback);
