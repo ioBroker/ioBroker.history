@@ -1841,7 +1841,7 @@ async function storeState(msg) {
                 errors.push(err.message);
             }
         }
-    } else if (msg.message.state && Array.isArray(msg.message.state)) {
+    } else if (msg.message.id && Array.isArray(msg.message.state)) {
         adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
         const id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         for (let j = 0; j < msg.message.state.length; j++) {
@@ -1852,7 +1852,7 @@ async function storeState(msg) {
                 errors.push(err.message);
             }
         }
-    } else {
+    } else if (msg.message.id && msg.message.state) {
         adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
         const id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         try {
@@ -1861,6 +1861,11 @@ async function storeState(msg) {
         } catch (err) {
             errors.push(err.message);
         }
+    } else {
+        adapter.log.error('storeState called with invalid data');
+        return adapter.sendTo(msg.from, msg.command, {
+            error: `Invalid call: ${JSON.stringify(msg)}`
+        }, msg.callback);
     }
     if (errors.length) {
         adapter.log.warn(`storeState executed with ${errors.length} errors: ${errors.join(', ')}`);
