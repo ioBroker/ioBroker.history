@@ -1803,6 +1803,10 @@ function deleteStateAll(msg) {
 }
 
 function storeStatePushData(id, state, applyRules) {
+    if (!state || typeof state !== 'object') {
+        throw new Error(`State ${JSON.stringify(state)} for ${id} is not valid`);
+    }
+
     let pushFunc = applyRules ? pushHistory : pushHelper;
     if (!history[id] || !history[id][adapter.namespace]) {
         if (applyRules) {
@@ -1825,32 +1829,50 @@ async function storeState(msg) {
     }
 
     let id;
-    try {
-        if (Array.isArray(msg.message)) {
-            adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
-            for (let i = 0; i < msg.message.length; i++) {
-                id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+    let errors = [];
+    let successCount = 0;
+    if (Array.isArray(msg.message)) {
+        adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
+        for (let i = 0; i < msg.message.length; i++) {
+            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+            try {
                 storeStatePushData(id, msg.message[i].state, msg.message.rules);
+                successCount++;
+            } catch (err) {
+                errors.push(err.message);
             }
-        } else if (msg.message.state && Array.isArray(msg.message.state)) {
-            adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
-            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-            for (let j = 0; j < msg.message.state.length; j++) {
-                storeStatePushData(id, msg.message.state[j], msg.message.rules);
-            }
-        } else {
-            adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
-            id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
-            storeStatePushData(id, msg.message.state, msg.message.rules);
         }
-    } catch (err) {
-        adapter.log.warn(`storeState: ${err.message}`);
+    } else if (msg.message.state && Array.isArray(msg.message.state)) {
+        adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        for (let j = 0; j < msg.message.state.length; j++) {
+            try {
+                storeStatePushData(id, msg.message.state[j], msg.message.rules);
+                successCount++;
+            } catch (err) {
+                errors.push(err.message);
+            }
+        }
+    } else {
+        adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
+        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        try {
+            storeStatePushData(id, msg.message.state, msg.message.rules);
+            successCount++;
+        } catch (err) {
+            errors.push(err.message);
+        }
+    }
+    if (error.length) {
+        adapter.log.warn(`storeState executed with ${errors.length} errors: ${errors.join(', ')}`);
         return adapter.sendTo(msg.from, msg.command, {
-            error:  err.message
+            error:  `${errors.length} errors happened while storing data`,
+            errors: errors,
+            successCount
         }, msg.callback);
     }
 
-    adapter.sendTo(msg.from, msg.command, {success: true}, msg.callback);
+    adapter.sendTo(msg.from, msg.command, {success: true, successCount}, msg.callback);
 }
 
 function enableHistory(msg) {

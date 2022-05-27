@@ -1071,6 +1071,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             ]
         }, function (result) {
             expect(result.success).to.be.true;
+            expect(result.successCount).to.be.equal(3);
 
             setTimeout( () =>  {
                 sendTo(instanceName, 'getHistory', {
@@ -1100,11 +1101,15 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
             state: [
                 {val: 1, ack: true, ts: customNow2 - 5000},
                 {val: 2, ack: true, ts: customNow2 - 4000},
-                {val: 3, ack: true, ts: customNow2 - 3000}
+                '37'
             ]
         }, function (result) {
             expect(result.success).to.be.not.ok;
-            expect(result.error).to.be.equal(`history not enabled for my.own.unknown.value-${customNow2}, so can not apply the rules as requested`);
+            expect(result.successCount).to.be.equal(0);
+            expect(result.error).to.be.equal('3 errors happened while storing data');
+            expect(Array.isArray(result.errors)).to.be.true;
+            expect(result.errors[0]).to.be.equal(`history not enabled for my.own.unknown.value-${customNow2}, so can not apply the rules as requested`);
+            expect(result.errors[2]).to.be.equal(`State "37" for my.own.unknown.value-${customNow2} is not valid`);
 
             done();
         });
