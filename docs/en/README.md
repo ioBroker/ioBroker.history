@@ -140,6 +140,8 @@ sendTo('history.0', 'storeState', [
 
 Additionally, you can add attribute `rules: true` in message to activate all rules, like `counter`, `changesOnly`, `de-bounce` and so on.
 
+In case of errors an array with all single error messages is returned and also a successCount to see how many entries were stored successfully.
+
 ## delete state
 If you want to delete entry from the Database you can use the build in system function **delete**:
 

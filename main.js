@@ -1828,13 +1828,12 @@ async function storeState(msg) {
         }, msg.callback);
     }
 
-    let id;
     let errors = [];
     let successCount = 0;
     if (Array.isArray(msg.message)) {
         adapter.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
         for (let i = 0; i < msg.message.length; i++) {
-            id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
+            const id = aliasMap[msg.message[i].id] ? aliasMap[msg.message[i].id] : msg.message[i].id;
             try {
                 storeStatePushData(id, msg.message[i].state, msg.message.rules);
                 successCount++;
@@ -1844,7 +1843,7 @@ async function storeState(msg) {
         }
     } else if (msg.message.state && Array.isArray(msg.message.state)) {
         adapter.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
-        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        const id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         for (let j = 0; j < msg.message.state.length; j++) {
             try {
                 storeStatePushData(id, msg.message.state[j], msg.message.rules);
@@ -1855,7 +1854,7 @@ async function storeState(msg) {
         }
     } else {
         adapter.log.debug(`storeState: store 1 state for ${msg.message.id}`);
-        id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
+        const id = aliasMap[msg.message.id] ? aliasMap[msg.message.id] : msg.message.id;
         try {
             storeStatePushData(id, msg.message.state, msg.message.rules);
             successCount++;
@@ -1863,7 +1862,7 @@ async function storeState(msg) {
             errors.push(err.message);
         }
     }
-    if (error.length) {
+    if (errors.length) {
         adapter.log.warn(`storeState executed with ${errors.length} errors: ${errors.join(', ')}`);
         return adapter.sendTo(msg.from, msg.command, {
             error:  `${errors.length} errors happened while storing data`,
@@ -1872,6 +1871,7 @@ async function storeState(msg) {
         }, msg.callback);
     }
 
+    adapter.log.debug(`storeState executed with ${successCount} states successfully`);
     adapter.sendTo(msg.from, msg.command, {success: true, successCount}, msg.callback);
 }
 
