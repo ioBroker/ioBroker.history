@@ -202,18 +202,18 @@ function startAdapter(options) {
                     return adapter.log.debug(`Object ${id} unchanged. Ignore`);
                 }
 
+                if (history[formerAliasId] && history[formerAliasId].relogTimeout) {
+                    clearTimeout(history[formerAliasId].relogTimeout);
+                    history[formerAliasId].relogTimeout = null;
+                }
+
                 history[id] = obj.common.custom;
                 history[id].state   = state;
                 history[id].list    = list || [];
                 history[id].timeout = timeout;
                 history[id].realId  = realId;
 
-                if (history[formerAliasId] && history[formerAliasId].relogTimeout) {
-                    clearTimeout(history[formerAliasId].relogTimeout);
-                    history[formerAliasId].relogTimeout = null;
-                }
-
-                if (history[id][adapter.namespace].changesRelogInterval > 0) {
+                if (history[id][adapter.namespace] && history[id][adapter.namespace].changesOnly && history[id][adapter.namespace].changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
                 }
 
@@ -415,7 +415,7 @@ function writeNulls(id, now) {
         if (tasksStart.length === 1) {
             processStartValues();
         }
-        if (history[id][adapter.namespace].changesRelogInterval > 0) {
+        if (history[id][adapter.namespace] && history[id][adapter.namespace].changesOnly && history[id][adapter.namespace].changesRelogInterval > 0) {
             history[id].relogTimeout && clearTimeout(history[id].relogTimeout);
             history[id].relogTimeout = setTimeout(reLogHelper, (history[id][adapter.namespace].changesRelogInterval * 500 * Math.random()) + history[id][adapter.namespace].changesRelogInterval * 500, id);
         }
@@ -770,7 +770,7 @@ function pushHistory(id, state, timerRelog) {
                 history[id].lastLogTime = state.ts;
                 settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
                 pushHelper(id);
-                if (settings.changesRelogInterval > 0) {
+                if (settings.changesOnly && settings.changesRelogInterval > 0) {
                     history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
                 }
             }, settings.debounceTime, id, state);
@@ -782,7 +782,7 @@ function pushHistory(id, state, timerRelog) {
 
             settings.enableDebugLogs && adapter.log.debug(`Value logged ${id}, value=${history[id].state.val}, ts=${history[id].state.ts}`);
             pushHelper(id, state);
-            if (settings.changesRelogInterval > 0) {
+            if (settings.changesOnly && settings.changesRelogInterval > 0) {
                 history[id].relogTimeout = setTimeout(reLogHelper, settings.changesRelogInterval * 1000, id);
             }
         }
