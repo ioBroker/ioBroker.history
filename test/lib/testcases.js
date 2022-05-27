@@ -1072,19 +1072,21 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
         }, function (result) {
             expect(result.success).to.be.true;
 
-            sendTo(instanceName, 'getHistory', {
-                id: `my.own.unknown.value-${customNow}`,
-                options: {
-                    start:     customNow - 10000,
-                    count: 500,
-                    aggregate: 'none'
-                }
-            }, function (result) {
-                console.log(JSON.stringify(result.result, null, 2));
-                expect(result.result.length).to.be.equal(3);
+            setTimeout( () =>  {
+                sendTo(instanceName, 'getHistory', {
+                    id: `my.own.unknown.value-${customNow}`,
+                    options: {
+                        start:     customNow - 10000,
+                        count: 500,
+                        aggregate: 'none'
+                    }
+                }, function (result) {
+                    console.log(JSON.stringify(result.result, null, 2));
+                    expect(result.result.length).to.be.equal(3);
 
-                done();
-            });
+                    done();
+                });
+            }, 1000);
         });
     });
 
