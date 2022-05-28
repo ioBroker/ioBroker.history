@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.1",
+    "version": "2.1.2",
     "news": {
+      "2.1.2": {
+        "en": "Fix crash case reported by Sentry",
+        "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
+        "ru": "Исправить случай сбоя, о котором сообщил Sentry",
+        "pt": "Corrigir caso de falha relatado pelo Sentinela",
+        "nl": "Herstel crashgeval gemeld door Sentry",
+        "fr": "Correction d'un cas de crash signalé par Sentry",
+        "it": "Risolto il caso di crash segnalato da Sentry",
+        "es": "Solucionar caso de bloqueo informado por Sentry",
+        "pl": "Napraw przypadek awarii zgłoszony przez Sentry",
+        "zh-cn": "修复 Sentry 报告的崩溃案例"
+      },
       "2.1.1": {
         "en": "Fix crash case reported by Sentry",
         "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
@@ -99,18 +111,6 @@
         "es": "Evitar algunos casos de bloqueo informados por Sentry",
         "pl": "Zapobiegaj niektórym przypadkom awarii zgłaszanych przez Sentry",
         "zh-cn": "防止 Sentry 报告的一些崩溃案例"
-      },
-      "1.10.5": {
-        "en": "Hide settings not relevant when \"log changes only\" is not used\nAllow all number values for debounce again",
-        "de": "Nicht relevante Einstellungen ausblenden, wenn \"Nur Änderungen protokollieren\" nicht verwendet wird\nAlle Zahlenwerte wieder für die Entprellung zulassen",
-        "ru": "Скрыть настройки, не актуальные, если не используется \"только изменения журнала\"\nРазрешить все числовые значения для устранения дребезга снова",
-        "pt": "Ocultar configurações irrelevantes quando \"apenas registro de alterações\" não é usado\nPermitir todos os valores numéricos para debounce novamente",
-        "nl": "Instellingen verbergen die niet relevant zijn wanneer \"alleen logboekwijzigingen\" niet wordt gebruikt\nSta alle getalwaarden opnieuw toe voor debounce",
-        "fr": "Masquer les paramètres non pertinents lorsque \"log changes only\" n'est pas utilisé\nAutoriser à nouveau toutes les valeurs numériques pour l'anti-rebond",
-        "it": "Nascondi le impostazioni non rilevanti quando non viene utilizzato \"solo modifiche al registro\"\nConsenti di nuovo l'antirimbalzo di tutti i valori numerici",
-        "es": "Ocultar la configuración que no es relevante cuando no se utiliza \"solo cambios de registro\"\nPermitir todos los valores numéricos para antirrebote nuevamente",
-        "pl": "Ukryj ustawienia nieistotne, gdy nie używasz opcji „tylko rejestruj zmiany”\nZezwól ponownie na odrzucenie wszystkich wartości liczbowych",
-        "zh-cn": "不使用“仅记录更改”时隐藏不相关的设置\n再次允许所有数值去抖动"
       }
     },
     "mode": "daemon",

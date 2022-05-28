@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### __WORK IN PROGRESS__
+### 2.1.2 (2022-05-28)
 * (Apollon77) Fix crash case reported by Sentry
 
 ### 2.1.1 (2022-05-27)
