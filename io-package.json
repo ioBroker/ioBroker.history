@@ -156,10 +156,10 @@
     "stopTimeout": 10000,
     "docs": {
       "en": [
-        "docs/en/readme.md"
+        "docs/en/README.md"
       ],
       "de": [
-        "docs/de/readme.md"
+        "docs/de/README.md"
       ]
     },
     "plugins": {
