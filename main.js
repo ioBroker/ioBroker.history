@@ -268,6 +268,7 @@ function storeCached(isFinishing, onlyId) {
             continue;
         }
 
+        history[id].list = history[id].list || [];
         if (isFinishing) {
             if (history[id].skipped && !(history[id][adapter.namespace] && history[id][adapter.namespace].disableSkippedValueLogging)) {
                 history[id].list.push(history[id].skipped);
