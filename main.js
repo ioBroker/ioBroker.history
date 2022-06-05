@@ -927,7 +927,7 @@ function appendFile(id, states) {
 
     if (fs.existsSync(file)) {
         try {
-            data = JSON.parse(fs.readFileSync(file)).concat(data);
+            data = JSON.parse(fs.readFileSync(file, 'utf8')).concat(data);
         } catch (err) {
             adapter.log.error(`Cannot read file ${file}: ${err}`);
         }
@@ -938,7 +938,7 @@ function appendFile(id, states) {
         if (!fs.existsSync(adapter.config.storeDir + day)) {
             fs.mkdirSync(adapter.config.storeDir + day);
         }
-        fs.writeFileSync(file, JSON.stringify(data, null, 2));
+        fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
     } catch (ex) {
         adapter.log.error(`Cannot store file ${file}: ${ex}`);
     }
@@ -1041,7 +1041,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
             options.debugLog && adapter.log.debug(`handleFileData: ${day} -> ${file}`);
             if (fs.existsSync(file)) {
                 try {
-                    let _data = JSON.parse(fs.readFileSync(file)).sort(tsSort);
+                    let _data = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(tsSort);
                     //adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                     let last = false;
 
@@ -1337,7 +1337,7 @@ function getHistory(msg) {
                 });
 
                 if (options.debugLog && gh.stdout) {
-                    gh.stdout.on('debug', (...args) => {
+                    gh.on('debug', (...args) => {
                         adapter.log.debug(`${options.logId} GetHistory fork: ${args && args.join(',')}`);
                     });
                 }
@@ -1480,7 +1480,7 @@ function update(id, state) {
 
             if (fs.existsSync(file)) {
                 try {
-                    const res = JSON.parse(fs.readFileSync(file));
+                    const res = JSON.parse(fs.readFileSync(file, 'utf8'));
 
                     for (let i = 0; i < res.length; i++) {
                         // if a ts in seconds is in then convert on the fly
@@ -1506,7 +1506,7 @@ function update(id, state) {
                     }
                     if (found) {
                         // save file
-                        fs.writeFileSync(file, JSON.stringify(res, null, 2));
+                        fs.writeFileSync(file, JSON.stringify(res, null, 2), 'utf8');
                     }
                 } catch (error) {
                     adapter.log.error(`Cannot process file "${file}": ${error}`);
@@ -1596,7 +1596,7 @@ function _delete(id, state) {
         files.forEach(entry => {
             try {
                 const tsCheck = new Date(Math.floor(entry.day/10000),0, 1).getTime();
-                let res = JSON.parse(fs.readFileSync(entry.file)).sort(tsSort);
+                let res = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(tsSort);
 
                 if (!state.ts && !state.start && !state.end) {
                     res = [];
@@ -1633,7 +1633,7 @@ function _delete(id, state) {
                 if (found) {
                     // save file
                     if (res.length) {
-                        fs.writeFileSync(entry.file, JSON.stringify(res, null, 2));
+                        fs.writeFileSync(entry.file, JSON.stringify(res, null, 2), 'utf8');
                     } else {
                         // delete file if no data
                         fs.unlinkSync(entry.file);
