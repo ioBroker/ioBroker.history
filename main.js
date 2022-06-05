@@ -1382,7 +1382,7 @@ function getHistory(msg) {
                         if (line.includes(options.logId)) {
                             line = line.replace(`${options.logId} `, '');
                         }
-                        adapter.log.debug(`GetHistory fork: ${line}`);
+                        adapter.log.debug(`${options.logId} GetHistory fork: ${line}`);
                     }
                 });
             } catch (err) {
