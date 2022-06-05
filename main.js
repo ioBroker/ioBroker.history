@@ -1337,8 +1337,8 @@ function getHistory(msg) {
                 });
 
                 if (options.debugLog && gh.stdout) {
-                    gh.stdout.on('data', data => {
-                        adapter.log.debug(`${options.logId} GetHistory fork: ${data && data.toString()}`);
+                    gh.stdout.on('debug', (...args) => {
+                        adapter.log.debug(`${options.logId} GetHistory fork: ${args && args.join(',')}`);
                     });
                 }
 
