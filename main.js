@@ -1378,7 +1378,11 @@ function getHistory(msg) {
                             }, msg.callback);
                         }
                     } else if (cmd === 'debug') {
-                        adapter.log.debug(`${options.logId} GetHistory fork: ${data.join(',')}`);
+                        let line = data.slice(1).join(', ');
+                        if (line.includes(options.logId)) {
+                            line = line.replace(`${options.logId} `, '');
+                        }
+                        adapter.log.debug(`GetHistory fork: ${line}`);
                     }
                 });
             } catch (err) {
