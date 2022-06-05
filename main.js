@@ -1336,12 +1336,6 @@ function getHistory(msg) {
                     }, msg.callback);
                 });
 
-                if (options.debugLog && gh.stdout) {
-                    gh.on('debug', (...args) => {
-                        adapter.log.debug(`${options.logId} GetHistory fork: ${args && args.join(',')}`);
-                    });
-                }
-
                 gh.on('message', data => {
                     const cmd = data[0];
                     if (cmd === 'getCache') {
@@ -1383,6 +1377,8 @@ function getHistory(msg) {
                                 error: null
                             }, msg.callback);
                         }
+                    } else if (cmd === 'debug') {
+                        adapter.log.debug(`${options.logId} GetHistory fork: ${data.join(',')}`);
                     }
                 });
             } catch (err) {
