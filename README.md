@@ -23,6 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Huge performance optimizations for GetHistory calls
+
 ### 2.1.2 (2022-05-28)
 * (Apollon77) Fix crash case reported by Sentry
 
