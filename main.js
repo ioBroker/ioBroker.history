@@ -1257,7 +1257,7 @@ function getHistory(msg) {
             if (isFull && cacheData.length) {
                 cacheData = cacheData.sort(sortByTs);
                 if (options.count && cacheData.length > options.count && options.aggregate === 'none') {
-                    cacheData = cacheData.slice(-options.count);
+                    cacheData.splice(0, cacheData.length - options.count);
                     debugLog && adapter.log.debug(`${options.logId} cut cacheData to ${options.count} values`);
                 }
                 adapter.log.debug(`${options.logId} Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
@@ -1280,17 +1280,17 @@ function getHistory(msg) {
                     cacheData = cacheData.sort(sortByTs);
                     options.result = cacheData;
                     if (options.count && options.result.length > options.count && options.aggregate === 'none' && !options.returnNewestEntries) {
+                        let cutPoint = 0;
                         if (options.start) {
                             for (let i = 0; i < options.result.length; i++) {
-                                if (options.result[i].ts < options.start) {
-                                    options.result.splice(i, 1);
-                                    i--;
-                                } else {
+                                if (options.result[i].ts >= options.start) {
+                                    cutPoint = i;
                                     break;
                                 }
                             }
                         }
-                        options.result = options.result.slice(0, options.count);
+                        cutPoint > 0 && options.result.splice(0, cutPoint);
+                        options.result.length = options.count;
                         debugLog && adapter.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);
                     }
                     if (options.debugLog) {

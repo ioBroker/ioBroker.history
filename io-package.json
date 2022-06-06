@@ -118,6 +118,7 @@
     "loglevel": "info",
     "messagebox": true,
     "subscribe": "messagebox",
+    "eraseOnUpload": true,
     "keywords": [
       "charts",
       "history",
