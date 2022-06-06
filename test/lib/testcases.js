@@ -1059,7 +1059,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
     });
 
     it(`Test ${adapterShortName}: Read minmax values from DB using GetHistory with 1mio slices`, function (done) {
-        this.timeout(10000);
+        this.timeout(20000);
 
         sendTo(instanceName, 'getHistory', {
             id: `${instanceName}.testValue`,
