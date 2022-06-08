@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.2",
+    "version": "2.1.3",
     "news": {
+      "2.1.3": {
+        "en": "Huge performance optimizations for GetHistory calls",
+        "de": "Riesige Leistungsoptimierungen für GetHistory-Anrufe",
+        "ru": "Огромная оптимизация производительности для звонков GetHistory",
+        "pt": "Otimizações de desempenho enormes para chamadas GetHistory",
+        "nl": "Grote prestaties voor GetHistory",
+        "fr": "Des optimisations de performance énormes pour les appels GetHistory",
+        "it": "Ottimizzazione delle prestazioni enormi per le chiamate GetHistory",
+        "es": "Amplias optimizaciones de rendimiento para llamadas GetHistory",
+        "pl": "Optymalizacja wyników Huge'a dla GetHistory'ego nawołuje się do optymalizacji wydajności",
+        "zh-cn": "GetHistory呼声的优越性"
+      },
       "2.1.2": {
         "en": "Fix crash case reported by Sentry",
         "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
@@ -99,18 +111,6 @@
         "es": "Se agregó la eliminación de soporte y el cambio de valores almacenados.",
         "pl": "Dodano obsługę usuwania i zmiany zapisanych wartości.",
         "zh-cn": "添加了对存储值的删除和更改的支持。"
-      },
-      "1.10.6": {
-        "en": "Prevent some crash cases reported by Sentry",
-        "de": "Verhindern Sie einige von Sentry gemeldete Absturzfälle",
-        "ru": "Предотвращение некоторых случаев сбоев, о которых сообщает Sentry.",
-        "pt": "Prevenir alguns casos de travamento relatados pelo Sentinela",
-        "nl": "Voorkom enkele door Sentry gemelde crashgevallen",
-        "fr": "Empêcher certains cas de plantage signalés par Sentry",
-        "it": "Prevenire alcuni casi di crash segnalati da Sentry",
-        "es": "Evitar algunos casos de bloqueo informados por Sentry",
-        "pl": "Zapobiegaj niektórym przypadkom awarii zgłaszanych przez Sentry",
-        "zh-cn": "防止 Sentry 报告的一些崩溃案例"
       }
     },
     "mode": "daemon",

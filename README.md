@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.1.3 (2022-06-08)
 * (Apollon77) Huge performance optimizations for GetHistory calls
 
 ### 2.1.2 (2022-05-28)
