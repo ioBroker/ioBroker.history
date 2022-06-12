@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.3",
+    "version": "2.1.4",
     "news": {
+      "2.1.4": {
+        "en": "Make sure debug log is active according to the settings",
+        "de": "Stellen Sie sicher, dass das Debug-Log gemäß den Einstellungen aktiv ist",
+        "ru": "Убедитесь, что журнал debug активен в соответствии с настройками",
+        "pt": "Certifique-se de que o log de depuração está ativo de acordo com as configurações",
+        "nl": "Zorg ervoor dat het logboek actief is volgens de instellingen",
+        "fr": "Assurez-vous que le journal debug est actif selon les paramètres",
+        "it": "Assicurarsi che il registro di debug sia attivo in base alle impostazioni",
+        "es": "Asegúrese de que el registro de depuración está activo según la configuración",
+        "pl": "Umożliwia to, że log debug jest aktywny zgodnie z ustawieniami",
+        "zh-cn": "B. 根据环境,确保有色色逻辑积极。"
+      },
       "2.1.3": {
         "en": "Huge performance optimizations for GetHistory calls",
         "de": "Riesige Leistungsoptimierungen für GetHistory-Anrufe",
@@ -99,18 +111,6 @@
         "es": "Arreglar la versión mínima de js-controller y admin",
         "pl": "Napraw minimalną wersję kontrolera js i administratora",
         "zh-cn": "修复 js-controller 和 admin 最低版本"
-      },
-      "1.11.0": {
-        "en": "Added support deletion and changing of stored values.",
-        "de": "Unterstützung für das Löschen und Ändern gespeicherter Werte hinzugefügt.",
-        "ru": "Добавлена поддержка удаления и изменения сохраненных значений.",
-        "pt": "Adicionado suporte para exclusão e alteração de valores armazenados.",
-        "nl": "Ondersteuning toegevoegd voor het verwijderen en wijzigen van opgeslagen waarden.",
-        "fr": "Ajout de la suppression du support et de la modification des valeurs stockées.",
-        "it": "Aggiunto supporto per l'eliminazione e la modifica dei valori memorizzati.",
-        "es": "Se agregó la eliminación de soporte y el cambio de valores almacenados.",
-        "pl": "Dodano obsługę usuwania i zmiany zapisanych wartości.",
-        "zh-cn": "添加了对存储值的删除和更改的支持。"
       }
     },
     "mode": "daemon",

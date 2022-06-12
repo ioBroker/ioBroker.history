@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### __WORK IN PROGRESS__
+### 2.1.4 (2022-06-12)
 * (Apollon77) Make sure debug log is active according to the settings
 
 ### 2.1.3 (2022-06-08)
