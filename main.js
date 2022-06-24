@@ -1313,6 +1313,7 @@ function getHistory(msg) {
     } else {
         // to use parallel requests activate this.
         if (1 || typeof GetHistory === 'undefined') {
+            let responseSent = false;
             adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
             try {
                 let gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
@@ -1328,12 +1329,13 @@ function getHistory(msg) {
 
                 gh.on('error', err => {
                     gh = null;
-                    adapter.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
-                    adapter.sendTo(msg.from, msg.command, {
+                    !responseSent && adapter.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
+                    !responseSent && adapter.sendTo(msg.from, msg.command, {
                         result: [],
                         step: null,
                         error: null
                     }, msg.callback);
+                    responseSent = true;
                 });
 
                 gh.on('message', data => {
@@ -1362,20 +1364,22 @@ function getHistory(msg) {
                         const overallLength = data[2];
                         const step = data[3];
                         if (options.result) {
-                            adapter.log.debug(`${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
-                            adapter.sendTo(msg.from, msg.command, {
+                            !responseSent && adapter.log.debug(`${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`);
+                            !responseSent && adapter.sendTo(msg.from, msg.command, {
                                 result: options.result,
                                 step: step,
                                 error: null
                             }, msg.callback);
+                            responseSent = true;
                             options.result = null;
                         } else {
-                            adapter.log.info(`${options.logId} No Data`);
-                            adapter.sendTo(msg.from, msg.command, {
+                            !responseSent && adapter.log.info(`${options.logId} No Data`);
+                            !responseSent && adapter.sendTo(msg.from, msg.command, {
                                 result: [],
                                 step: null,
                                 error: null
                             }, msg.callback);
+                            responseSent = true;
                         }
                     } else if (cmd === 'debug') {
                         let line = data.slice(1).join(', ');
