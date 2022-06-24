@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.4",
+    "version": "2.1.5",
     "news": {
+      "2.1.5": {
+        "en": "Ignore errors from forked process after response was sent for GetHistory",
+        "de": "Ignorieren von Fehlern von forked Prozess nach Antwort wurde gesendet GetHistory",
+        "ru": "Игнорировать ошибки из forked процесса после отправки ответа на GetHistory",
+        "pt": "Ignorar erros de processo falsificado após a resposta foi enviado para GetHistory",
+        "nl": "Neger fouten van vervalsing na reactie werd verzonden",
+        "fr": "Ignore les erreurs du processus fourré après que la réponse a été envoyée pour GetHistory",
+        "it": "Ignora gli errori dal processo falsificato dopo la risposta è stato inviato per GetHistory",
+        "es": "Ignorar los errores del proceso prendido después de que la respuesta fue enviada para GetHistory",
+        "pl": "Ignore błędy po tym, jak odpowiedź została wysłana do GetHistory",
+        "zh-cn": "在对GetHistory的答复发出后,从便携式程序错误"
+      },
       "2.1.4": {
         "en": "Make sure debug log is active according to the settings",
         "de": "Stellen Sie sicher, dass das Debug-Log gemäß den Einstellungen aktiv ist",
@@ -99,18 +111,6 @@
         "es": "ÚLTIMA HORA: ¡La configuración solo funciona en la nueva interfaz de usuario de Admin 5!\nHizo ajustes más grandes a la lógica de grabación y agregó muchas características nuevas. Consulte el registro de cambios y la publicación del foro para obtener más detalles.",
         "pl": "ŁAMANIE: Konfiguracja działa tylko w nowym interfejsie użytkownika Admin 5!\nWprowadziłem większe poprawki w logice nagrywania i dodałem wiele nowych funkcji. Więcej informacji można znaleźć w dzienniku zmian i poście na forum.",
         "zh-cn": "突破：配置仅在新的 Admin 5 UI 中有效！\n对录制逻辑进行了更大的调整，并添加了许多新功能。有关详细信息，请参阅变更日志和论坛帖子。"
-      },
-      "1.11.1": {
-        "en": "Fix the js-controller and admin minimum version",
-        "de": "Korrigieren Sie die js-controller- und admin-Mindestversion",
-        "ru": "Исправить минимальную версию js-controller и admin",
-        "pt": "Corrija a versão mínima do controlador js e do administrador",
-        "nl": "Fix de js-controller en admin minimumversie",
-        "fr": "Correction de la version minimale de js-controller et admin",
-        "it": "Correggi la versione minima del controller js e dell'amministratore",
-        "es": "Arreglar la versión mínima de js-controller y admin",
-        "pl": "Napraw minimalną wersję kontrolera js i administratora",
-        "zh-cn": "修复 js-controller 和 admin 最低版本"
       }
     },
     "mode": "daemon",

@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.1.5 (2022-06-24)
 * (Apollon77) Ignore errors from forked process after response was sent for GetHistory
 
 ### 2.1.4 (2022-06-12)
