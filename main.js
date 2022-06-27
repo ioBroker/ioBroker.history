@@ -1153,7 +1153,7 @@ function getHistory(msg) {
         start:      msg.message.options.start,
         end:        msg.message.options.end || ((new Date()).getTime() + 5000000),
         step:       parseInt(msg.message.options.step,  10) || null,
-        count:      parseInt(msg.message.options.count, 10) || 500,
+        count:      parseInt(msg.message.options.count, 10),
         from:       msg.message.options.from || false,
         ack:        msg.message.options.ack  || false,
         q:          msg.message.options.q    || false,
@@ -1170,6 +1170,16 @@ function getHistory(msg) {
         removeBorderValues: msg.message.options.removeBorderValues || false,
         logId:     (msg.message.id ? msg.message.id : 'all') + Date.now() + Math.random()
     };
+
+    adapter.log.debug(`${options.logId} getHistory message: ${JSON.stringify(msg.message)}`);
+
+    if (!options.count || isNaN(options.count)) {
+        if (options.aggregate === 'none' || options.aggregate === 'onchange') {
+            options.count = options.limit;
+        } else {
+            options.count = 500;
+        }
+    }
 
     if (msg.message.options.round !== null && msg.message.options.round !== undefined && msg.message.options.round !== '') {
         msg.message.options.round = parseInt(msg.message.options.round, 10);
@@ -1205,8 +1215,6 @@ function getHistory(msg) {
     if (!options.start && options.count) {
         options.returnNewestEntries = true;
     }
-
-    adapter.log.debug(`${options.logId} getHistory call: ${JSON.stringify(options)}`);
 
     if (options.id && aliasMap[options.id]) {
         options.id = aliasMap[options.id];
@@ -1247,6 +1255,8 @@ function getHistory(msg) {
         options.ignoreNull = false;
     }
 
+    debugLog && adapter.log.debug(`${options.logId} getHistory options final: ${JSON.stringify(options)}`);
+
     if ((!options.start && options.count) || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') {
         getCachedData(options, (cacheData, isFull) => {
             debugLog && adapter.log.debug(`${options.logId} after getCachedData: length = ${cacheData.length}, isFull=${isFull}`);
@@ -1273,9 +1283,9 @@ function getHistory(msg) {
                     options.count -= cacheData.length;
                 }
                 getFileData(options, fileData => {
+                    debugLog && adapter.log.debug(`${options.logId} after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     options.count = origCount;
                     fileData = applyOptions(fileData, options);
-                    debugLog && adapter.log.debug(`${options.logId} after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`);
                     cacheData = cacheData.concat(fileData);
                     cacheData = cacheData.sort(sortByTs);
                     options.result = cacheData;
