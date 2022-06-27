@@ -23,6 +23,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### __WORK IN PROGRESS__
+* (Apollon77) Allow to remove a configuration value for "round" in config again
+
 ### 2.1.6 (2022-06-27)
 * (Apollon77) When not count is provided for aggregate "none" or "onchange" then the limit (default 2000) is used as count to define the number of data to return.
 
