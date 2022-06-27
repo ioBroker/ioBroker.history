@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.6",
+    "version": "2.1.7",
     "news": {
+      "2.1.7": {
+        "en": "Allow to remove a configuration value for \"round\" in config again",
+        "de": "Lassen Sie einen Konfigurationswert für Runde in config wieder entfernen",
+        "ru": "Разрешить удалить конфигурационную ценность для раунда в config снова",
+        "pt": "Permitir remover um valor de configuração para round em config novamente",
+        "nl": "Sta toe om weer een configuratiewaarde te verwijderen voor ronde in het leger",
+        "fr": "Permettre de supprimer une valeur de configuration pour round in config à nouveau",
+        "it": "Permette di rimuovere un valore di configurazione per round in config di nuovo",
+        "es": "Permitir eliminar de nuevo un valor de configuración para redondear en configuración",
+        "pl": "Allow, aby usunąć wartość konfiguracyjna w zakręcie ponownie w konfigunie",
+        "zh-cn": "允许再次取消一轮谈判的组合价值"
+      },
       "2.1.6": {
         "en": "When not count is provided for aggregate \"none\" or \"onchange\" then the limit (default 2000) is used as count to define the number of data to return.",
         "de": "Wenn für die Aggregate keine oder Onchange keine Zählung vorgesehen ist, wird die Grenze (Standard 2000) als Zählung verwendet, um die Anzahl der Daten zu definieren, um zurückzukehren.",
@@ -99,18 +111,6 @@
         "es": "Solucionar caso de bloqueo informado por Sentry",
         "pl": "Napraw przypadek awarii zgłoszony przez Sentry",
         "zh-cn": "修复 Sentry 报告的崩溃案例"
-      },
-      "2.1.0": {
-        "en": "Fix several crash cases reported by Sentry\nMake sure disabling \"Log changes only\" also really do not log the changes anymore\nAllow storeState and GetHistory also to be called for \"unknown ids\"",
-        "de": "Mehrere von Sentry gemeldete Absturzfälle behoben\nStellen Sie sicher, dass durch Deaktivieren von \"Nur Änderungen protokollieren\" die Änderungen auch wirklich nicht mehr protokolliert werden\nAufruf von storeState und GetHistory auch für \"unbekannte IDs\" zulassen",
-        "ru": "Исправьте несколько случаев сбоев, о которых сообщил Sentry.\nУбедитесь, что отключение «Только журнал изменений» также действительно больше не регистрирует изменения.\nРазрешить также вызывать storeState и GetHistory для «неизвестных идентификаторов».",
-        "pt": "Corrija vários casos de travamento relatados pelo Sentinela\nCertifique-se de desativar \"Somente alterações de log\" também não registra mais as alterações\nPermitir que storeState e GetHistory também sejam chamados para \"ids desconhecidos\"",
-        "nl": "Herstel verschillende crashgevallen gemeld door Sentry\nZorg ervoor dat het uitschakelen van \"Alleen wijzigingen loggen\" ook echt de wijzigingen niet meer logt\nToestaan dat storeState en GetHistory ook worden aangeroepen voor \"onbekende id's\"",
-        "fr": "Correction de plusieurs cas de crash signalés par Sentry\nAssurez-vous que la désactivation de \"Log changes only\" n'enregistre plus vraiment les modifications\nAutoriser storeState et GetHistory à être également appelés pour les \"identifiants inconnus\"",
-        "it": "Risolvi diversi casi di crash segnalati da Sentry\nAssicurati anche che la disabilitazione di \"Registra solo modifiche\" non registri più le modifiche\nConsenti anche a storeState e GetHistory di essere chiamati per \"ID sconosciuti\"",
-        "es": "Solucione varios casos de bloqueo informados por Sentry\nAsegúrese de deshabilitar \"Registrar solo cambios\" y realmente no registre más los cambios\nPermitir que storeState y GetHistory también se llamen para \"identificadores desconocidos\"",
-        "pl": "Napraw kilka przypadków awarii zgłoszonych przez Sentry\nUpewnij się, że wyłączenie opcji „Zapisuj tylko zmiany” również naprawdę nie powoduje już rejestrowania zmian\nZezwalaj na wywoływanie storeState i GetHistory również dla „nieznanych identyfikatorów”",
-        "zh-cn": "修复 Sentry 报告的几个崩溃案例\n确保禁用“仅记录更改”也不再记录更改\n还允许为“未知 ID”调用 storeState 和 GetHistory"
       }
     },
     "mode": "daemon",
