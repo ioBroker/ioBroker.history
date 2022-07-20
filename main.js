@@ -1133,6 +1133,12 @@ function applyOptions(data, options) {
         if (!options.addId && item.id !== undefined) {
             delete item.id;
         }
+        if (!options.user && item.user !== undefined) {
+            delete item.user;
+        }
+        if (!options.comment && item.c !== undefined) {
+            delete item.c;
+        }
     });
 
     return data;
