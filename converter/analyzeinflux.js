@@ -6,10 +6,10 @@
 
 //usage: nodejs analyzeinflux.js <InfluxDB-Instance>  [<Loglevel>]
 //usage: nodejs analyzeinflux.js influxdb.0 info
-const utils   = require('@iobroker/adapter-core'); // Get common adapter utils
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-var fs        = require('fs');
-var path      = require('path');
+var fs = require('fs');
+var path = require('path');
 
 var deepAnalyze = false;
 var influxInstance = "influxdb.0";
@@ -34,16 +34,16 @@ var breakIt = false;
 
 var stdin = process.stdin;
 // without this, we would only get streams once enter is pressed
-stdin.setRawMode( true );
+stdin.setRawMode(true);
 // resume stdin in the parent process (node app won't quit all by itself
 // unless an error or process.exit() happens)
 stdin.resume();
 // i don't want binary, do you?
-stdin.setEncoding( 'utf8' );
+stdin.setEncoding('utf8');
 // on any data into stdin
-stdin.on( 'data', function( key ){
+stdin.on('data', function (key) {
     // ctrl-c ( end of text )
-    if ( key === 'x' || key === '\u0003') {
+    if (key === 'x' || key === '\u0003') {
         breakIt = true;
     }
     // write the key to stdout all normal like
@@ -57,7 +57,7 @@ adapter.on('ready', function () {
 function main() {
     var inited = false;
     var counter = 0;
-    adapter.sendTo(influxInstance, "query", "SHOW MEASUREMENTS", function(result) {
+    adapter.sendTo(influxInstance, "query", "SHOW MEASUREMENTS", function (result) {
         if (result.error) {
             console.error(result.error);
         } else {
@@ -67,10 +67,10 @@ function main() {
 
             function analyze() {
                 if (breakIt) process.exit();
-                if (dp_list.length>0) {
+                if (dp_list.length > 0) {
                     counter++;
-                    if (counter%100 === 0) {
-                        setTimeout(analyze,5000);
+                    if (counter % 100 === 0) {
+                        setTimeout(analyze, 5000);
                     }
                     else {
                         var dp = dp_list.shift();
@@ -79,7 +79,7 @@ function main() {
                             query += ";SELECT count(ack) AS val FROM \"" + dp.name + "\" where time<now() group by time(1d)";
                             query += ";SELECT LAST(value) as val FROM \"" + dp.name + "\"";
                         }
-                        adapter.sendTo(influxInstance, "query", query, function(resultDP) {
+                        adapter.sendTo(influxInstance, "query", query, function (resultDP) {
                             if (resultDP.error) {
                                 console.error(resultDP.error);
                             } else {
@@ -88,21 +88,21 @@ function main() {
                                     console.log('FirstVal ID: ' + dp.name + ', Rows: ' + JSON.stringify(resultDP.result[0]) + ' --> ' + new Date(earliestDBValue[dp.name]).toString());
                                 }
                                 if ((deepAnalyze) && (resultDP.result[1])) {
-                                    existingData[dp.name]=[];
-                                    for (var j = 0;j < resultDP.result[1].length; j++) {
+                                    existingData[dp.name] = [];
+                                    for (var j = 0; j < resultDP.result[1].length; j++) {
                                         if (resultDP.result[1][j].val > 0) {
                                             var ts = new Date(resultDP.result[1][j].ts);
                                             existingData[dp.name].push(parseInt(ts2day(ts), 10));
                                         }
                                     }
-                                    console.log('DayVals ID: '+dp.name+': '+JSON.stringify(existingData[dp.name]));
+                                    console.log('DayVals ID: ' + dp.name + ': ' + JSON.stringify(existingData[dp.name]));
                                 }
                                 if ((deepAnalyze) && (resultDP.result[2]) && (resultDP.result[2][0])) {
-                                    existingTypes[dp.name]=typeof resultDP.result[2][0].val;
-                                    console.log('ValType ID: '+dp.name+': '+JSON.stringify(existingTypes[dp.name]));
+                                    existingTypes[dp.name] = typeof resultDP.result[2][0].val;
+                                    console.log('ValType ID: ' + dp.name + ': ' + JSON.stringify(existingTypes[dp.name]));
                                 }
                             }
-                            setTimeout(analyze,500);
+                            setTimeout(analyze, 500);
                         });
                     }
                 }

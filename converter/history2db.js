@@ -6,11 +6,11 @@
 
 //usage: nodejs history2db.js [<DB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
 //usage: nodejs history2db.js influxdb.0 info 20161001 /path/to/data
-const utils   = require('@iobroker/adapter-core'); // Get common adapter utils
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-var fs        = require('fs');
-var path      = require('path');
-var dataDir   = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
+var fs = require('fs');
+var path = require('path');
+var dataDir = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
 var historydir = dataDir + 'history-data';
 
 var earliestDBValue = {};
@@ -32,13 +32,13 @@ var dbInstance = "";
 var endDay = 0; // 20160917; // or 0
 var ignoreEarliesDBValues = false;
 var logChangesOnly = false;
-var logChangesOnlyTime = 60*60*1000;
+var logChangesOnlyTime = 60 * 60 * 1000;
 var delayMultiplicator = 1;
 var processCounter = 0;
 
 if (process.argv[2]) {
     dbInstance = process.argv[2];
-    if ((process.argv[4]) && (parseInt(process.argv[4],10) > 0)) endDay = parseInt(process.argv[4], 10);
+    if ((process.argv[4]) && (parseInt(process.argv[4], 10) > 0)) endDay = parseInt(process.argv[4], 10);
     if (process.argv[5]) historydir = process.argv[5];
     if ((process.argv[6]) && (!isNaN(parseFloat(process.argv[6])))) delayMultiplicator = parseFloat(process.argv[6]);
     if (process.argv.indexOf('--ignoreExistingDBValues') !== -1) ignoreEarliesDBValues = true;
@@ -51,9 +51,9 @@ if (process.argv[2]) {
     var logchangesPos = process.argv.indexOf('--logChangesOnly');
     if (logchangesPos !== -1) {
         logChangesOnly = true;
-        if (process.argv[logchangesPos+1]) {
-            var logTime = parseInt(process.argv[logchangesPos+1], 10);
-            if ((! isNaN(logTime)) &&  (logTime > 0)) {
+        if (process.argv[logchangesPos + 1]) {
+            var logTime = parseInt(process.argv[logchangesPos + 1], 10);
+            if ((!isNaN(logTime)) && (logTime > 0)) {
                 logChangesOnlyTime = logTime * 60000;
             }
         }
@@ -68,7 +68,7 @@ console.log('Send Data to ' + dbInstance);
 if (endDay !== 0) console.log('Start at ' + endDay);
 console.log('Use historyDir ' + historydir);
 if (delayMultiplicator != 1) console.log('Use Delay multiplicator ' + delayMultiplicator);
-if (logChangesOnly) console.log('Log changes only once per ' + (logChangesOnlyTime/60000) + ' minutes');
+if (logChangesOnly) console.log('Log changes only once per ' + (logChangesOnlyTime / 60000) + ' minutes');
 
 var adapter = utils.Adapter('history');
 
@@ -76,20 +76,20 @@ var breakIt = false;
 
 var stdin = process.stdin;
 // without this, we would only get streams once enter is pressed
-stdin.setRawMode( true );
+stdin.setRawMode(true);
 // resume stdin in the parent process (node app won't quit all by itself
 // unless an error or process.exit() happens)
 stdin.resume();
 // i don't want binary, do you?
-stdin.setEncoding( 'utf8' );
+stdin.setEncoding('utf8');
 // on any data into stdin
-stdin.on( 'data', function( key ){
-  // ctrl-c ( end of text )
-  if ( key === 'x' || key === '\u0003') {
-    breakIt = true;
-  }
-  // write the key to stdout all normal like
-  console.log('Received Keypress: ' + key);
+stdin.on('data', function (key) {
+    // ctrl-c ( end of text )
+    if (key === 'x' || key === '\u0003') {
+        breakIt = true;
+    }
+    // write the key to stdout all normal like
+    console.log('Received Keypress: ' + key);
 });
 
 adapter.on('ready', function () {
@@ -176,9 +176,9 @@ function processFiles() {
 
     for (var i = 0; i < dayList.length; i++) {
         var day = parseInt(dayList[i], 10);
-        if ((!isNaN(day)) && (day<=endDay)) {
+        if ((!isNaN(day)) && (day <= endDay)) {
             var dir = historydir + '/' + dayList[i].toString() + '/';
-            allFiles[dayList[i].toString()]={};
+            allFiles[dayList[i].toString()] = {};
             allFiles[dayList[i].toString()].dirname = dir;
             allFiles[dayList[i].toString()].files = getFiles(dir);
         }
@@ -190,20 +190,20 @@ function processFile() {
     if (breakIt) finish(true);
     if (Object.keys(allFiles).length === 0) finish(true);
 
-    var day = parseInt(Object.keys(allFiles)[Object.keys(allFiles).length-1], 10);
-    var tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
+    var day = parseInt(Object.keys(allFiles)[Object.keys(allFiles).length - 1], 10);
+    var tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
 
-    if (allFiles[day].files.length>0) {
+    if (allFiles[day].files.length > 0) {
         var dir = allFiles[day].dirname;
         var file = allFiles[day].files.shift();
-        var id = file.substring(8,file.length-5);
+        var id = file.substring(8, file.length - 5);
         var weatherunderground_special_handling = ((id.indexOf('weatherunderground') !== -1) && (id.indexOf('current.precip') !== -1));
-        console.log('Day ' + day + ' - ' + file );
+        console.log('Day ' + day + ' - ' + file);
 
         if (earliesValCachefileExists) {
             if ((!earliestDBValue[id]) || (earliestDBValue[id] === 0)) {
-                console.log('    Ignore ID ' + file +': ' + id);
-                setTimeout(processFile,10);
+                console.log('    Ignore ID ' + file + ': ' + id);
+                setTimeout(processFile, 10);
                 return;
             }
         }
@@ -211,10 +211,10 @@ function processFile() {
             if (!earliestDBValue[id]) earliestDBValue[id] = Date.now();
         }
         if (processNonExistingValues) {
-            existingDBValues[id] && console.log("Check: "+day+" / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
+            existingDBValues[id] && console.log("Check: " + day + " / pos " + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
             if ((existingDBValues[id]) && (existingDBValues[id].indexOf(day) !== -1)) {
-                console.log('    Ignore existing ID ' + file +': ' + id);
-                setTimeout(processFile,10);
+                console.log('    Ignore existing ID ' + file + ': ' + id);
+                setTimeout(processFile, 10);
                 return;
             }
         }
@@ -247,7 +247,7 @@ function processFile() {
             for (k = 0; k < fileData.length; k++) {
                 if (fileData[k].ts >= earliestDBValue[id]) break;
             }
-            fileData = fileData.slice(0,k);
+            fileData = fileData.slice(0, k);
             console.log('cut filedata to ' + fileData.length);
         }
         var lastValue = null;
@@ -256,9 +256,9 @@ function processFile() {
             var sendData = {};
             sendData.id = id;
             sendData.state = [];
-            for (var j = 0; j< fileData.length; j++) {
+            for (var j = 0; j < fileData.length; j++) {
                 if (fileData[j].ts < earliestDBValue[id]) earliestDBValue[id] = fileData[j].ts;
-                if ((lastValue === null) || (fileData[j].val != lastValue) || (!logChangesOnly) || ((logChangesOnly) && (Math.abs(fileData[j].ts-lastTime) > logChangesOnlyTime))) {
+                if ((lastValue === null) || (fileData[j].val != lastValue) || (!logChangesOnly) || ((logChangesOnly) && (Math.abs(fileData[j].ts - lastTime) > logChangesOnlyTime))) {
                     sendData.state.push(fileData[j]);
                     lastValue = fileData[j].val;
                     lastTime = fileData[j].ts;
@@ -269,52 +269,52 @@ function processFile() {
             console.log('  datapoints reduced from ' + fileData.length + ' --> ' + sendData.state.length);
             if (existingTypesCachefileExists) {
                 if (!existingTypes[id]) {
-                    existingTypes[id] = typeof sendData.state[sendData.state.length-1].val;
+                    existingTypes[id] = typeof sendData.state[sendData.state.length - 1].val;
                     console.log('  used last value to initialize type: ' + existingTypes[id]);
                 }
                 var sortedOut = 0;
-                for (var jj = 0; jj< sendData.state.length; jj++) {
+                for (var jj = 0; jj < sendData.state.length; jj++) {
                     var currType = typeof sendData.state[jj].val;
                     if (currType != existingTypes[id]) {
                         switch (existingTypes[id]) {
-                            case 'number':      switch (currType) {
-                                                    case 'boolean': if (sendData.state[jj].val === false) sendData.state[jj].val = 0;
-                                                                        else sendData.state[jj].val = 1;
-                                                                    break;
-                                                    case 'string':  if (sendData.state[jj].val === "true") {
-                                                                        sendData.state[jj].val = 1;
-                                                                    } else if (sendData.state[jj].val === "false") {
-                                                                        sendData.state[jj].val = 0;
-                                                                    } else {
-                                                                        sendData.state[jj].val = parseFloat(sendData.state[jj].val);
-                                                                        if (isNaN(sendData.state[jj].val)) {
-                                                                            sendData.state[jj].val = null;
-                                                                            sortedOut++;
-                                                                        }
-                                                                    }
-                                                                    break;
-                                                    default:        sendData.state[jj].val = null; // value will be sorted out!
-                                                                    sortedOut++;
-                                                }
-                                                break;
-                            case 'boolean':     switch (currType) {
-                                                    case 'number':  if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
-                                                                        else sendData.state[jj].val = true;
-                                                                    break;
-                                                    case 'string':  if (sendData.state[jj].val === "true") {
-                                                                        sendData.state[jj].val = true;
-                                                                    } else if (sendData.state[jj].val === "false") {
-                                                                        sendData.state[jj].val = false;
-                                                                    } else {
-                                                                        sendData.state[jj].val = parseInt(sendData.state[jj].val);
-                                                                        if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
-                                                                            else sendData.state[jj].val = true;
-                                                                    }
-                                                                    break;
-                                                    default:        sendData.state[jj].val = null; // value will be sorted out!
-                                                                    sortedOut++;
-                                                }
-                                                break;
+                            case 'number': switch (currType) {
+                                case 'boolean': if (sendData.state[jj].val === false) sendData.state[jj].val = 0;
+                                else sendData.state[jj].val = 1;
+                                    break;
+                                case 'string': if (sendData.state[jj].val === "true") {
+                                    sendData.state[jj].val = 1;
+                                } else if (sendData.state[jj].val === "false") {
+                                    sendData.state[jj].val = 0;
+                                } else {
+                                    sendData.state[jj].val = parseFloat(sendData.state[jj].val);
+                                    if (isNaN(sendData.state[jj].val)) {
+                                        sendData.state[jj].val = null;
+                                        sortedOut++;
+                                    }
+                                }
+                                    break;
+                                default: sendData.state[jj].val = null; // value will be sorted out!
+                                    sortedOut++;
+                            }
+                                break;
+                            case 'boolean': switch (currType) {
+                                case 'number': if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
+                                else sendData.state[jj].val = true;
+                                    break;
+                                case 'string': if (sendData.state[jj].val === "true") {
+                                    sendData.state[jj].val = true;
+                                } else if (sendData.state[jj].val === "false") {
+                                    sendData.state[jj].val = false;
+                                } else {
+                                    sendData.state[jj].val = parseInt(sendData.state[jj].val);
+                                    if (sendData.state[jj].val === 0) sendData.state[jj].val = false;
+                                    else sendData.state[jj].val = true;
+                                }
+                                    break;
+                                default: sendData.state[jj].val = null; // value will be sorted out!
+                                    sortedOut++;
+                            }
+                                break;
                         }
                         console.log('  type mismatch ' + existingTypes[id] + ' vs. ' + currType + ': fixed=' + (sendData.state[jj].val !== null) + ' --> ' + sendData.state[jj].val);
                     }
@@ -343,7 +343,7 @@ function processFile() {
                         var delay = 300;
                         if (result.success && result.seriesBufferFlushPlanned) {
                             delay = 1500; // 1,5 seconds
-                            if (result.seriesBufferCounter > 1000) delay += 500*(result.seriesBufferCounter/1000);
+                            if (result.seriesBufferCounter > 1000) delay += 500 * (result.seriesBufferCounter / 1000);
                         }
                         delay = delay * delayMultiplicator;
                         setTimeout(processFile, delay);
@@ -354,11 +354,11 @@ function processFile() {
                 }
             }
             else {
-                setTimeout(processFile,10);
+                setTimeout(processFile, 10);
             }
         }
         else {
-            setTimeout(processFile,10);
+            setTimeout(processFile, 10);
         }
     }
     else {
