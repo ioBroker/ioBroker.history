@@ -4,40 +4,46 @@
   "items": {
     "dbTab": {
       "type": "panel",
-      "label": "DB settings",
+      "label": "Storage settings",
       "items": {
         "_note": {
           "type": "staticText",
           "text": "note",
-          "sm": 12
+          "sm": 12,
+          "md": 12,
+          "lg": 12
         },
-
         "storeDir": {
           "newLine": true,
           "type": "text",
           "label": "storeDir",
           "sm": 12,
-          "md": 4
+          "md": 4,
+          "lg": 4
         },
         "storeFrom": {
           "newLine": true,
           "type": "checkbox",
           "label": "storeFrom",
           "sm": 12,
-          "md": 4
+          "md": 8,
+          "lg": 8
         },
         "storeAck": {
+          "newLine": true,
           "type": "checkbox",
           "label": "storeAck",
           "sm": 12,
-          "md": 4
+          "md": 8,
+          "lg": 8
         },
         "writeNulls": {
           "newLine": true,
           "label": "Write NULL values on start/stop boundaries",
           "type": "checkbox",
           "sm": 12,
-          "md": 4
+          "md": 8,
+          "lg": 8
         }
       }
     },
@@ -50,6 +56,7 @@
           "type": "number",
           "sm": 12,
           "md": 4,
+          "lg": 4,
           "min": 0,
           "max": 86400000,
           "label": "De-bounce time",
@@ -59,6 +66,7 @@
           "type": "number",
           "sm": 12,
           "md": 4,
+          "lg": 4,
           "min": 0,
           "max": 86400000,
           "label": "Block time",
@@ -68,22 +76,27 @@
         "changesRelogInterval": {
           "newLine": true,
           "type": "number",
-          "label": "log changes interval(s)",
-          "help": "0 = disable",
           "sm": 12,
-          "md": 4
+          "md": 4,
+          "lg": 4,
+          "label": "log changes interval(s)",
+          "help": "0 = disable"
         },
         "changesMinDelta": {
           "type": "number",
-          "label": "log changes minimal delta",
-          "help": "0 = disable delta check",
           "sm": 12,
-          "md": 4
+          "md": 4,
+          "lg": 4,
+          "label": "log changes minimal delta",
+          "help": "0 = disable delta check"
         },
         "retention": {
           "newLine": true,
           "type": "select",
-          "label": "retention",
+          "sm": 12,
+          "md": 4,
+          "lg": 4,
+          "label": "Storage retention",
           "options": [
             {
               "value": 0,
@@ -133,58 +146,61 @@
               "value": -1,
               "label": "Custom timeframe"
             }
-          ],
-          "sm": 12,
-          "md": 4
+          ]
         },
         "customRetentionDuration": {
           "type": "number",
-          "label": "Custom retention duration (days)",
           "min": 1,
           "sm": 12,
           "md": 4,
+          "lg": 4,
           "hidden": "(data.retention !== -1)",
+          "label": "Custom retention duration (days)",
           "help": "Number of days to keep the data."
         },
         "maxLength": {
           "newLine": true,
           "type": "number",
-          "label": "maximum datapoint count in RAM",
           "min": 0,
           "max": 100000,
           "sm": 12,
-          "md": 4
+          "md": 4,
+          "lg": 4,
+          "label": "maximum datapoint count in RAM"
         },
         "round": {
           "newLine": true,
           "type": "text",
-          "label": "Round real to",
           "sm": 12,
           "md": 4,
-          "lg": 3,
+          "lg": 4,
           "validator": "((data.round || '').toString().length === 0) || isFinite(data.round)",
           "validatorErrorText": "Enter a number or leave the field empty",
-          "validatorNoSaveOnError": true
+          "validatorNoSaveOnError": true,
+          "label": "Round real to"
         },
         "disableSkippedValueLogging": {
           "newLine": true,
-          "label": "Disable charting optimized logging of skipped values",
           "type": "checkbox",
           "sm": 12,
-          "md": 4
+          "md": 8,
+          "lg": 8,
+          "label": "Disable charting optimized logging of skipped values"
         },
         "enableDebugLogs": {
           "newLine": true,
           "label": "Enable enhanced debug logs for the datapoint",
           "type": "checkbox",
           "sm": 12,
-          "md": 4
+          "md": 8,
+          "lg": 8
         },
         "debounce": {
           "type": "number",
+          "min": 0,
           "sm": 12,
           "md": 4,
-          "min": 0,
+          "lg": 4,
           "label": "De-bounce time",
           "help": "debounce",
           "hidden": "true"

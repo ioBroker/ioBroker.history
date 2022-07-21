@@ -36,11 +36,10 @@
   },
   "main": "main.js",
   "files": [
-    "admin/",
+    "admin{,/!(src)/**}/!(tsconfig|tsconfig.*).json",
+    "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
     "converter/",
-    "docs/",
     "lib/",
-    "log/",
     "io-package.json",
     "LICENSE",
     "main.js"
