@@ -263,7 +263,7 @@ function processFile() {
 
             for (let j = 0; j < fileData.length; j++) {
                 if (fileData[j].ts < earliestDBValue[id]) earliestDBValue[id] = fileData[j].ts;
-                if (lastValue === null || fileData[j].val != lastValue || !logChangesOnly || (logChangesOnly && Math.abs(fileData[j].ts - lastTime) > logChangesOnlyTime)) {
+                if (fileData[j].val !== null && (lastValue === null || fileData[j].val != lastValue || !logChangesOnly || (logChangesOnly && Math.abs(fileData[j].ts - lastTime) > logChangesOnlyTime))) {
                     sendData.state.push(fileData[j]);
                     lastValue = fileData[j].val;
                     lastTime = fileData[j].ts;
