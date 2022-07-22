@@ -23,6 +23,11 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) make sure getHistory works for all cases
+* (Bluefox/Apollon77) Add option to add comment and user info to results
+
 ### 2.1.7 (2022-06-27)
 * (Apollon77) Allow to remove a configuration value for "round" in config again
 

@@ -72,6 +72,8 @@ Possible options:
 - **from** - if *from* field should be included in answer
 - **ack** - if *ack* field should be included in answer
 - **q** - if *q* field should be included in answer
+- **user** - if *user* field should be included in answer
+- **comment** - if *c* field should be included in answer
 - **addId** - if *id* field should be included in answer
 - **limit** - do not return more entries than limit
 - **round** - round result to number of digits after decimal point

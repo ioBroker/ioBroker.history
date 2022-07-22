@@ -1489,6 +1489,12 @@ function update(id, state) {
                     if (state.ack !== undefined) {
                         res[i].ack = state.ack;
                     }
+                    if (state.user !== undefined) {
+                        res[i].user = state.user;
+                    }
+                    if (state.c !== undefined) {
+                        res[i].c = state.c;
+                    }
                     found = true;
                     break;
                 }
@@ -1523,6 +1529,12 @@ function update(id, state) {
                             }
                             if (state.ack !== undefined) {
                                 res[i].ack = state.ack;
+                            }
+                            if (state.user !== undefined) {
+                                res[i].user = state.user;
+                            }
+                            if (state.c !== undefined) {
+                                res[i].c = state.c;
                             }
                             found = true;
                             break;
