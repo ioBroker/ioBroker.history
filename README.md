@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.2.0 (2022-07-22)
 * (Apollon77) make sure getHistory works for all cases
 * (Bluefox/Apollon77) Add option to add comment and user info to results
 

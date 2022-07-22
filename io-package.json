@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.1.7",
+    "version": "2.2.0",
     "news": {
+      "2.2.0": {
+        "en": "make sure getHistory works for all cases\nAdd option to add comment and user info to results",
+        "de": "! Geschichte funktioniert für alle Fälle\nFügen Sie die Option, Kommentare und Benutzerinformationen zu den Ergebnissen hinzuzufügen",
+        "ru": "убедитесь, что получите История работает для всех случаев\nДобавить опцию, чтобы добавить комментарий и информацию пользователя к результатам",
+        "pt": "certifique-se de obter A história funciona para todos os casos\nAdicionar opção para adicionar comentários e informações do usuário aos resultados",
+        "nl": "zorg ervoor dat je ervoor zorgt Geschiedenis werkt voor alle gevallen\nVoeg optie toe om commentaar en gebruikers info toe te voegen aan resultaten",
+        "fr": "assure-toi. Histoire fonctionne pour tous les cas\nAjouter l'option pour ajouter des commentaires et des informations utilisateur aux résultats",
+        "it": "assicurarsi di ottenere La storia funziona per tutti i casi\nAggiungi l'opzione per aggiungere commento e informazioni utente ai risultati",
+        "es": "asegúrese de La historia funciona para todos los casos\nAñadir opción para añadir comentario y información del usuario a los resultados",
+        "pl": "upewnić się Historia trwa wszystkie przypadki\nW celu dodania komentarzy i informacji użytkownika do wyników",
+        "zh-cn": "确保 历史为所有案件进行工作\n增加评论和用户以成果为目的的选择"
+      },
       "2.1.7": {
         "en": "Allow to remove a configuration value for \"round\" in config again",
         "de": "Lassen Sie einen Konfigurationswert für Runde in config wieder entfernen",
@@ -89,18 +101,6 @@
         "zh-cn": "GetHistory呼声的优越性"
       },
       "2.1.2": {
-        "en": "Fix crash case reported by Sentry",
-        "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
-        "ru": "Исправить случай сбоя, о котором сообщил Sentry",
-        "pt": "Corrigir caso de falha relatado pelo Sentinela",
-        "nl": "Herstel crashgeval gemeld door Sentry",
-        "fr": "Correction d'un cas de crash signalé par Sentry",
-        "it": "Risolto il caso di crash segnalato da Sentry",
-        "es": "Solucionar caso de bloqueo informado por Sentry",
-        "pl": "Napraw przypadek awarii zgłoszony przez Sentry",
-        "zh-cn": "修复 Sentry 报告的崩溃案例"
-      },
-      "2.1.1": {
         "en": "Fix crash case reported by Sentry",
         "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
         "ru": "Исправить случай сбоя, о котором сообщил Sentry",
