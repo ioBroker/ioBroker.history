@@ -408,18 +408,12 @@ function getFiles(path) {
 }
 
 function ts2day(ts) {
-    var dateObj = new Date(ts);
+    const dateObj = new Date(ts);
+    const y = dateObj.getFullYear();
+    const m = dateObj.getMonth() + 1;
+    const d = dateObj.getDate();
 
-    var text = dateObj.getFullYear().toString();
-    var v = dateObj.getMonth() + 1;
-    if (v < 10) text += '0';
-    text += v.toString();
-
-    v = dateObj.getDate();
-    if (v < 10) text += '0';
-    text += v.toString();
-
-    return text;
+    return `${y}${(m < 10) ? `0${m}` : m}${(d < 10) ? `0${d}` : d}`;
 }
 
 process.on('SIGINT', function () {
