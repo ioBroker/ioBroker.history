@@ -1039,45 +1039,49 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
             const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
 
             options.debugLog && adapter.log.debug(`handleFileData: ${day} -> ${file}`);
-            if (fs.existsSync(file)) {
-                try {
-                    let _data = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(tsSort);
-                    //adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
-                    let last = false;
+            try {
+                if (fs.existsSync(file)) {
+                    try {
+                        let _data = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(tsSort);
+                        //adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
+                        let last = false;
 
-                    for (const ii in _data) {
-                        if (!_data.hasOwnProperty(ii)) {
-                            continue;
-                        }
+                        for (const ii in _data) {
+                            if (!_data.hasOwnProperty(ii)) {
+                                continue;
+                            }
 
-                        // if a ts in seconds is in then convert on the fly
-                        if (_data[ii].ts && _data[ii].ts < tsCheck) {
-                            _data[ii].ts *= 1000;
-                        }
+                            // if a ts in seconds is in then convert on the fly
+                            if (_data[ii].ts && _data[ii].ts < tsCheck) {
+                                _data[ii].ts *= 1000;
+                            }
 
-                        if (typeof _data[ii].val === 'number' && isFinite(_data[ii].val) && options.round) {
-                            _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                            if (typeof _data[ii].val === 'number' && isFinite(_data[ii].val) && options.round) {
+                                _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                            }
+                            if (options.ack) {
+                                _data[ii].ack = !!_data[ii].ack;
+                            }
+                            if (addId) {
+                                _data[ii].id = id;
+                            }
+                            data.push(_data[ii]);
+                            if ((options.returnNewestEntries || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') && data.length >= options.count) {
+                                break;
+                            }
+                            if (last) {
+                                break;
+                            }
+                            if (options.start && _data[ii].ts < options.start) {
+                                last = true;
+                            }
                         }
-                        if (options.ack) {
-                            _data[ii].ack = !!_data[ii].ack;
-                        }
-                        if (addId) {
-                            _data[ii].id = id;
-                        }
-                        data.push(_data[ii]);
-                        if ((options.returnNewestEntries || options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none') && data.length >= options.count) {
-                            break;
-                        }
-                        if (last) {
-                            break;
-                        }
-                        if (options.start && _data[ii].ts < options.start) {
-                            last = true;
-                        }
+                    } catch (e) {
+                        console.log(`Cannot parse file ${file}: ${e.message}`);
                     }
-                } catch (e) {
-                    console.log(`Cannot parse file ${file}: ${e.message}`);
                 }
+            } catch (e) {
+                console.log(`Cannot read file ${file}: ${e.message}`);
             }
         }
 
