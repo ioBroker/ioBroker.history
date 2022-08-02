@@ -7,9 +7,9 @@
 
 //usage: nodejs analyzesql.js <SQL-Instance>  [<Loglevel>]
 //usage: nodejs analyzesql.js sql.0 info
-const utils   = require('@iobroker/adapter-core'); // Get common adapter utils
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-var fs        = require('fs');
+var fs = require('fs');
 
 var deepAnalyze = false;
 var dbInstance = "sql.0";
@@ -39,7 +39,7 @@ adapter.on('ready', function () {
 
 function main() {
     console.log('Send');
-    adapter.sendTo(dbInstance, "getDpOverview", "", function(result) {
+    adapter.sendTo(dbInstance, "getDpOverview", "", function (result) {
         console.log(JSON.stringify(result));
         if (result.error) {
             console.error(result.error);

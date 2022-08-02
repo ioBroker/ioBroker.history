@@ -15,7 +15,7 @@ This adapter saves state history in a two-staged process.
 
 ## Configuration
 * [English description](docs/en/README.md)
-* [deutsche Beschreibung](docs/de/README.md)
+* [Deutsche Beschreibung](docs/de/README.md)
 
 <!--
 	Placeholder for the next version (at the beginning of the line):
