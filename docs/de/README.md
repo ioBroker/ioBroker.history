@@ -472,7 +472,7 @@ Befehl ``node``.
 Zur Migration wird folgender Ablauf empfohlen:
 
 1. Zuerst die neue Logging Methode aktivieren und alle Datenpunkte richtig konfigurieren. Prüfen, dass alle Werte ankommen wie geplant. Logging erfolgt "doppelt" (in History und im neuen Ziel).
-2. Analyse-Skripte laufen lassen um den exakten Beriech zu ermittlen, welcher migriert werden soll.
+2. Analyse-Skripte laufen lassen um den exakten Bereich zu ermitteln, welcher migriert werden soll.
 3. History Adapter stoppen un die Migration ausführen. Dies kann etwas dauern. Die alten Werte werden hinzugefügt.
 4. Wenn alles passt (und die Logfiles ausgewertet sind): History Daten löschen und Adapter deaktivieren.
 
