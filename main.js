@@ -370,7 +370,7 @@ function processMessage(msg) {
 function processStartValues() {
     if (tasksStart && tasksStart.length) {
         const task = tasksStart.shift();
-        if (history[task.id][adapter.namespace].changesOnly) {
+        if (history[task.id] && history[task.id][adapter.namespace] && history[task.id][adapter.namespace].changesOnly) {
             adapter.getForeignState(history[task.id].realId, (err, state) => {
                 const now = task.now || Date.now();
                 pushHistory(task.id, {

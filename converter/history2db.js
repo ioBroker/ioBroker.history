@@ -243,7 +243,7 @@ function processFile() {
 
         //console.log('    File ' + j +': ' + id + ' --> ' + fileData.length);
 
-        if (fileData && fileData[fileData.length - 1].ts >= earliestDBValue[id]) {
+        if (fileData && fileData.length > 1 && fileData[fileData.length - 1].ts >= earliestDBValue[id]) {
             let k;
             for (k = 0; k < fileData.length; k++) {
                 if (fileData[k].ts >= earliestDBValue[id]) break;
