@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.2.0",
+    "version": "2.2.1",
     "news": {
+      "2.2.1": {
+        "en": "Fix crash cases reported by Sentry",
+        "de": "Reparieren Crashfälle gemeldet von Sentry",
+        "ru": "Исправление случаев аварии, описанных Sentry",
+        "pt": "Corrigir casos de acidente relatados por Sentry",
+        "nl": "Vertaling:",
+        "fr": "Troubles de crash signalés par Sentry",
+        "it": "Correzione dei casi di crash segnalati da Sentry",
+        "es": "Casos de accidente fijo reportados por Sentry",
+        "pl": "Sprawy katastrofy Fix podane przez Sentry’a",
+        "zh-cn": "Sentry所报告的六例事故"
+      },
       "2.2.0": {
         "en": "make sure getHistory works for all cases\nAdd option to add comment and user info to results",
         "de": "! Geschichte funktioniert für alle Fälle\nFügen Sie die Option, Kommentare und Benutzerinformationen zu den Ergebnissen hinzuzufügen",
@@ -99,18 +111,6 @@
         "es": "Amplias optimizaciones de rendimiento para llamadas GetHistory",
         "pl": "Optymalizacja wyników Huge'a dla GetHistory'ego nawołuje się do optymalizacji wydajności",
         "zh-cn": "GetHistory呼声的优越性"
-      },
-      "2.1.2": {
-        "en": "Fix crash case reported by Sentry",
-        "de": "Absturzfall behoben, der von Sentry gemeldet wurde",
-        "ru": "Исправить случай сбоя, о котором сообщил Sentry",
-        "pt": "Corrigir caso de falha relatado pelo Sentinela",
-        "nl": "Herstel crashgeval gemeld door Sentry",
-        "fr": "Correction d'un cas de crash signalé par Sentry",
-        "it": "Risolto il caso di crash segnalato da Sentry",
-        "es": "Solucionar caso de bloqueo informado por Sentry",
-        "pl": "Napraw przypadek awarii zgłoszony przez Sentry",
-        "zh-cn": "修复 Sentry 报告的崩溃案例"
       }
     },
     "mode": "daemon",
