@@ -25,6 +25,7 @@ This adapter saves state history in a two-staged process.
 ## Changelog
 ### 2.2.1 (2022-08-13)
 * (Apollon77) Fix crash cases reported by Sentry
+* (kleinOr) Updated converter scripts to work with influxdb 2.x
 
 ### 2.2.0 (2022-07-22)
 * (Apollon77) make sure getHistory works for all cases
