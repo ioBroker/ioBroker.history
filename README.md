@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### 2.2.2 (2022-09-12)
+### __WORK IN PROGRESS__
 * (Apollon77) Fix error in history2db converter script
 
 ### 2.2.1 (2022-08-13)
