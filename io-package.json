@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.2.2",
+    "version": "2.2.3",
     "news": {
+      "2.2.3": {
+        "en": "Fix error in history2db converter script",
+        "de": "Fehler in history2db Konverter-Skript beheben",
+        "ru": "Исправление ошибки в history2db конвертер скрипт",
+        "pt": "Corrigir erro no script conversor history2db",
+        "nl": "Quality over Quantity (QoQ) Releases Vertaling:",
+        "fr": "Erreur fixe dans le script de convertisseur history2db",
+        "it": "Risolvere l'errore nella sceneggiatura del convertitore storico2db",
+        "es": "Error de fijación en la historia2db convertidor script",
+        "pl": "Błąd w historii2db",
+        "zh-cn": "A. 历史上2b 转换成文的错误"
+      },
       "2.2.1": {
         "en": "Fix crash cases reported by Sentry",
         "de": "Reparieren Crashfälle gemeldet von Sentry",
