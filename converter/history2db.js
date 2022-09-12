@@ -279,7 +279,7 @@ function processFile() {
                     console.log('  used last value to initialize type: ' + existingTypes[id]);
                 }
                 let sortedOut = 0;
-                for (const jj = 0; jj < sendData.state.length; jj++) {
+                for (let jj = 0; jj < sendData.state.length; jj++) {
                     const currType = typeof sendData.state[jj].val;
                     if (currType != existingTypes[id]) {
                         switch (existingTypes[id]) {

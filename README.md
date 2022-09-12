@@ -23,6 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Fix error in history2db converter script
+
 ### 2.2.1 (2022-08-13)
 * (Apollon77) Fix crash cases reported by Sentry
 * (kleinOr) Updated converter scripts to work with influxdb 2.x
