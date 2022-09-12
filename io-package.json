@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.2.1",
+    "version": "2.2.2",
     "news": {
+      "2.2.2": {
+        "en": "Fix error in history2db converter script",
+        "de": "Fehler in history2db Konverter-Skript beheben",
+        "ru": "Исправление ошибки в history2db конвертер скрипт",
+        "pt": "Corrigir erro no script conversor history2db",
+        "nl": "Quality over Quantity (QoQ) Releases Vertaling:",
+        "fr": "Erreur fixe dans le script de convertisseur history2db",
+        "it": "Risolvere l'errore nella sceneggiatura del convertitore storico2db",
+        "es": "Error de fijación en la historia2db convertidor script",
+        "pl": "Błąd w historii2db",
+        "zh-cn": "A. 历史上2b 转换成文的错误"
+      },
       "2.2.1": {
         "en": "Fix crash cases reported by Sentry",
         "de": "Reparieren Crashfälle gemeldet von Sentry",
@@ -99,18 +111,6 @@
         "es": "Asegúrese de que el registro de depuración está activo según la configuración",
         "pl": "Umożliwia to, że log debug jest aktywny zgodnie z ustawieniami",
         "zh-cn": "B. 根据环境,确保有色色逻辑积极。"
-      },
-      "2.1.3": {
-        "en": "Huge performance optimizations for GetHistory calls",
-        "de": "Riesige Leistungsoptimierungen für GetHistory-Anrufe",
-        "ru": "Огромная оптимизация производительности для звонков GetHistory",
-        "pt": "Otimizações de desempenho enormes para chamadas GetHistory",
-        "nl": "Grote prestaties voor GetHistory",
-        "fr": "Des optimisations de performance énormes pour les appels GetHistory",
-        "it": "Ottimizzazione delle prestazioni enormi per le chiamate GetHistory",
-        "es": "Amplias optimizaciones de rendimiento para llamadas GetHistory",
-        "pl": "Optymalizacja wyników Huge'a dla GetHistory'ego nawołuje się do optymalizacji wydajności",
-        "zh-cn": "GetHistory呼声的优越性"
       }
     },
     "mode": "daemon",
