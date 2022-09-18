@@ -42,12 +42,25 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - uses: ioBroker/testing-action-adapter@v1
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          os: ${{ matrix.os }}
-          # Uncomment the following line if your adapter cannot be installed using 'npm ci'
-          # install-command: 'npm install'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run local tests
+        run: npm test:integration
+    #      - name: Run unit tests
+    #        run: npm run test:unit
+    #      - name: Run integration tests # (linux/osx)
+    #        if: startsWith(runner.OS, 'windows') == false
+    #        run: DEBUG=testing:* npm run test:integration
+    #      - name: Run integration tests # (windows)
+    #        if: startsWith(runner.OS, 'windows')
+    #        run: set DEBUG=testing:* & npm run test:integration
 
   # Deploys the final package to NPM
   deploy:
@@ -71,6 +84,6 @@ jobs:
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
           sentry-project: "iobroker-history"
-          sentry-version-prefix: "ioBroker.history"
+          sentry-version-prefix: "iobroker.history"
           # If your sentry project is linked to a GitHub repository, you can enable the following option
           sentry-github-integration: true
