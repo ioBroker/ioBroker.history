@@ -1851,6 +1851,7 @@ function storeStatePushData(id, state, applyRules) {
             throw new Error(`history not enabled for ${id}, so can not apply the rules as requested`);
         }
         history[id] = history[id] || {};
+        history[id].realId = id;
     }
     pushFunc(id, state);
 }
