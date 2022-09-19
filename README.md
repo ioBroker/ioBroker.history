@@ -23,6 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Update for future js-controller versions
+
 ### 2.2.3 (2022-09-12)
 * (Apollon77) Fix error in history2db converter script
 
