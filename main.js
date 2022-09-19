@@ -4,7 +4,6 @@
 'use strict';
 const cp          = require('child_process');
 const utils       = require('@iobroker/adapter-core'); // Get common adapter utils
-const path        = require('path');
 const dataDir     = utils.getAbsoluteDefaultDataDir();
 const fs          = require('fs');
 const GetHistory  = require('./lib/getHistory.js');
