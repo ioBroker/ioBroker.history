@@ -26,8 +26,20 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.2.3",
+    "version": "2.2.4",
     "news": {
+      "2.2.4": {
+        "en": "Update for future js-controller versions",
+        "de": "Update für zukünftige js-controller Versionen",
+        "ru": "Обновление для будущих версий js-controller",
+        "pt": "Atualização para futuras versões js-controller",
+        "nl": "Update voor toekomstige Js-controller versie",
+        "fr": "Update for future js-controller versions",
+        "it": "Aggiornamento per future versioni js-controller",
+        "es": "Actualización para futuras versiones js-controller",
+        "pl": "Wersja js-controllerowa",
+        "zh-cn": "B. 今后控制容忍版本的最新情况"
+      },
       "2.2.3": {
         "en": "Fix error in history2db converter script",
         "de": "Fehler in history2db Konverter-Skript beheben",
@@ -99,18 +111,6 @@
         "es": "Ignorar los errores del proceso prendido después de que la respuesta fue enviada para GetHistory",
         "pl": "Ignore błędy po tym, jak odpowiedź została wysłana do GetHistory",
         "zh-cn": "在对GetHistory的答复发出后,从便携式程序错误"
-      },
-      "2.1.4": {
-        "en": "Make sure debug log is active according to the settings",
-        "de": "Stellen Sie sicher, dass das Debug-Log gemäß den Einstellungen aktiv ist",
-        "ru": "Убедитесь, что журнал debug активен в соответствии с настройками",
-        "pt": "Certifique-se de que o log de depuração está ativo de acordo com as configurações",
-        "nl": "Zorg ervoor dat het logboek actief is volgens de instellingen",
-        "fr": "Assurez-vous que le journal debug est actif selon les paramètres",
-        "it": "Assicurarsi che il registro di debug sia attivo in base alle impostazioni",
-        "es": "Asegúrese de que el registro de depuración está activo según la configuración",
-        "pl": "Umożliwia to, że log debug jest aktywny zgodnie z ustawieniami",
-        "zh-cn": "B. 根据环境,确保有色色逻辑积极。"
       }
     },
     "mode": "daemon",

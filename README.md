@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.2.4 (2022-09-19)
 * (Apollon77) Update for future js-controller versions
 
 ### 2.2.3 (2022-09-12)
