@@ -85,7 +85,7 @@ function startAdapter(options) {
                         checkForRemove = false;
                     }
                     else {
-                        adapter.log.warn('Ignoring Alias-ID because identical to ID for ' + id);
+                        adapter.log.warn(`Ignoring Alias-ID because identical to ID for ${id}`);
                         obj.common.custom[adapter.namespace].aliasId = '';
                     }
                 }
@@ -228,7 +228,7 @@ function startAdapter(options) {
                 }
                 id = formerAliasId;
                 if (history[id]) {
-                    adapter.log.info('disabled logging of ' + id);
+                    adapter.log.info(`disabled logging of ${id}`);
                     if (history[id].relogTimeout) {
                         clearTimeout(history[id].relogTimeout);
                         history[id].relogTimeout = null;
@@ -274,11 +274,11 @@ function storeCached(isFinishing, onlyId) {
                 history[id].skipped = null;
             }
             if (adapter.config.writeNulls) {
-                const nullValue = {val: null, ts: now, lc: now, q: 0x40, from: 'system.adapter.' + adapter.namespace};
+                const nullValue = {val: null, ts: now, lc: now, q: 0x40, from: `system.adapter.${adapter.namespace}`};
                 if (history[id][adapter.namespace] && history[id][adapter.namespace].changesOnly && history[id].state && history[id].state !== null) {
                     const state = Object.assign({}, history[id].state);
                     state.ts   = now;
-                    state.from = 'system.adapter.' + adapter.namespace;
+                    state.from = `system.adapter.${adapter.namespace}`;
                     history[id].list.push(state);
                     nullValue.ts += 1;
                     nullValue.lc += 1;
@@ -290,7 +290,7 @@ function storeCached(isFinishing, onlyId) {
         }
 
         if (history[id].list && history[id].list.length) {
-            adapter.log.debug('Store the rest for ' + id);
+            adapter.log.debug(`Store the rest for ${id}`);
             appendFile(id, history[id].list);
         }
     }
@@ -377,12 +377,12 @@ function processStartValues() {
                     ts:   now,
                     ack:  true,
                     q:    0x40,
-                    from: 'system.adapter.' + adapter.namespace
+                    from: `system.adapter.${adapter.namespace}`
                 });
 
                 if (state) {
                     state.ts   = now;
-                    state.from = 'system.adapter.' + adapter.namespace;
+                    state.from = `system.adapter.${adapter.namespace}`;
                     pushHistory(task.id, state);
                 }
                 setImmediate(processStartValues);
@@ -393,7 +393,7 @@ function processStartValues() {
                 ts:   task.now || Date.now(),
                 ack:  true,
                 q:    0x40,
-                from: 'system.adapter.' + adapter.namespace
+                from: `system.adapter.${adapter.namespace}`
             });
 
             setImmediate(processStartValues);
@@ -429,9 +429,9 @@ function main() { //start
             obj.common.defaultHistory = adapter.namespace;
             adapter.setForeignObject('system.config', obj, err => {
                 if (err) {
-                    adapter.log.error('Cannot set default history instance: ' + err);
+                    adapter.log.error(`Cannot set default history instance: ${err}`);
                 } else {
-                    adapter.log.info('Set default history instance to "' + adapter.namespace + '"');
+                    adapter.log.info(`Set default history instance to "${adapter.namespace}"`);
                 }
             });
         }
@@ -503,7 +503,7 @@ function main() { //start
             fs.mkdirSync(adapter.config.storeDir);
         }
     } catch (err) {
-        adapter.log.error('Could not create Storage directory: ' + err);
+        adapter.log.error(`Could not create Storage directory: ${err}`);
     }
 
     adapter.getObjectView('system', 'custom', {}, (err, doc) => {
@@ -746,7 +746,7 @@ function pushHistory(id, state, timerRelog) {
         if (timerRelog) {
             state = Object.assign({}, state);
             state.ts = Date.now();
-            state.from = 'system.adapter.' + adapter.namespace;
+            state.from = `system.adapter.${adapter.namespace}`;
             settings.enableDebugLogs && adapter.log.debug(`timed-relog ${id}, value=${state.val}, lastLogTime=${history[id].lastLogTime}, ts=${state.ts}`);
             ignoreDebonce = true;
         } else {
@@ -791,7 +791,7 @@ function pushHistory(id, state, timerRelog) {
 
 function reLogHelper(_id) {
     if (!history[_id]) {
-        adapter.log.info('non-existing id ' + _id);
+        adapter.log.info(`non-existing id ${_id}`);
         return;
     }
 
@@ -1177,7 +1177,7 @@ function getHistory(msg) {
         integralUnit: msg.message.options.aggregate === 'integral' ? parseInt(msg.message.options.integralUnit, 10) || 60 : null,
         integralInterpolation: msg.message.options.aggregate === 'integral' ? msg.message.options.integralInterpolation || 'none' : null,
         removeBorderValues: msg.message.options.removeBorderValues || false,
-        logId:     (msg.message.id ? msg.message.id : 'all') + Date.now() + Math.random()
+        logId:     `${msg.message.id ? msg.message.id : 'all'}${Date.now()}${Math.random()}`
     };
 
     adapter.log.debug(`${options.logId} getHistory message: ${JSON.stringify(msg.message)}`);
@@ -1207,7 +1207,7 @@ function getHistory(msg) {
         }
     } catch (err) {
         return adapter.sendTo(msg.from, msg.command, {
-            error:  'Invalid call. Start date ' + JSON.stringify(options.start) + ' is not a valid date'
+            error:  `Invalid call. Start date ${JSON.stringify(options.start)} is not a valid date`
         }, msg.callback);
     }
 
@@ -1217,7 +1217,7 @@ function getHistory(msg) {
         }
     } catch (err) {
         return adapter.sendTo(msg.from, msg.command, {
-            error:  'Invalid call. End date ' + JSON.stringify(options.end) + ' is not a valid date'
+            error:  `Invalid call. End date ${JSON.stringify(options.end)} is not a valid date`
         }, msg.callback);
     }
 
@@ -1335,7 +1335,7 @@ function getHistory(msg) {
             let responseSent = false;
             adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
             try {
-                let gh = cp.fork(__dirname + '/lib/getHistory.js', [JSON.stringify(options)], {silent: false});
+                let gh = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], {silent: false});
 
                 let ghTimeout = setTimeout(() => {
                     try {
@@ -1455,7 +1455,7 @@ function getDirectories(path) {
     try {
         return fs.readdirSync(path).filter(file => {
             try {
-                return !file.startsWith('.') && fs.statSync(path + '/' + file).isDirectory()
+                return !file.startsWith('.') && fs.statSync(`${path}/${file}`).isDirectory()
             } catch (e) {
                 // ignore entry
                 return false;
@@ -1938,7 +1938,7 @@ function enableHistory(msg) {
     obj.common.custom[adapter.namespace].enabled = true;
     adapter.extendForeignObject(msg.message.id, obj, err => {
         if (err) {
-            adapter.log.error('enableHistory: ' + err);
+            adapter.log.error(`enableHistory: ${err}`);
             adapter.sendTo(msg.from, msg.command, {
                 error: err
             }, msg.callback);
@@ -1966,7 +1966,7 @@ function disableHistory(msg) {
     obj.common.custom[adapter.namespace].enabled = false;
     adapter.extendForeignObject(msg.message.id, obj, err => {
         if (err) {
-            adapter.log.error('disableHistory: ' + err);
+            adapter.log.error(`disableHistory: ${err}`);
             adapter.sendTo(msg.from, msg.command, {
                 error: err
             }, msg.callback);

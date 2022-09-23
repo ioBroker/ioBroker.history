@@ -23,6 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Fix getHistory when aggregations were used in some cases
+
 ### 2.2.4 (2022-09-19)
 * (Apollon77) Update for future js-controller versions
 
