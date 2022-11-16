@@ -1098,9 +1098,9 @@ function getFileData(options, callback) {
     // get list of directories
     let dayList = getDirectories(options.path);
     if (options.returnNewestEntries) {
-        dayList = dayList.sort((a, b) => b - a)
+        dayList = dayList.sort((a, b) => b - a);
     } else {
-        dayList = dayList.sort((a, b) => a - b)
+        dayList = dayList.sort((a, b) => a - b);
     }
 
     if (options.id && options.id !== '*') {
