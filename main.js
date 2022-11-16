@@ -1035,7 +1035,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
         const day = parseInt(dayList[i], 10);
         if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
             const file = GetHistory.getFilenameForID(options.path, day, id);
-            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
+            const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
 
             options.debugLog && adapter.log.debug(`handleFileData: ${day} -> ${file}`);
             try {
@@ -1505,7 +1505,7 @@ function update(id, state) {
         const day = GetHistory.ts2day(state.ts);
         if (!isNaN(day)) {
             const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
-            const tsCheck = new Date(Math.floor(day/10000),0, 1).getTime();
+            const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
 
             if (fs.existsSync(file)) {
                 try {
@@ -1630,7 +1630,7 @@ function _delete(id, state) {
 
         files.forEach(entry => {
             try {
-                const tsCheck = new Date(Math.floor(entry.day/10000),0, 1).getTime();
+                const tsCheck = new Date(Math.floor(entry.day / 10000), 0, 1).getTime();
                 let res = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(tsSort);
 
                 if (!state.ts && !state.start && !state.end) {
