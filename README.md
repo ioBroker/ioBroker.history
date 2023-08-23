@@ -23,8 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.2.5 (2023-08-23)
 * (Apollon77) Fix getHistory when aggregations were used in some cases
 
 ### 2.2.4 (2022-09-19)
@@ -297,7 +296,7 @@ This adapter saves state history in a two-staged process.
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2022 Bluefox <dogafox@gmail.com>, Apollon77
+Copyright (c) 2014-2023 Bluefox <dogafox@gmail.com>, Apollon77
 
 Copyright (c) 2016 Smiling_Jack
 

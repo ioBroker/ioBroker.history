@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.2.4",
+    "version": "2.2.5",
     "news": {
+      "2.2.5": {
+        "en": "Fix getHistory when aggregations were used in some cases",
+        "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
+        "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
+        "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
+        "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
+        "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
+        "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
+        "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
+        "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
+        "uk": "Виправлення Історія при агрегаціях",
+        "zh-cn": "固定 在有些情况下使用汇总的历史"
+      },
       "2.2.4": {
         "en": "Update for future js-controller versions",
         "de": "Update für zukünftige js-controller Versionen",
@@ -99,18 +112,6 @@
         "es": "Cuando no se cuenta se proporciona para agregado ninguno o cambio entonces el límite (por defecto 2000) se utiliza como cuenta para definir el número de datos para regresar.",
         "pl": "Jeśli nieliczanie jest dostarczane dla agregacji ani zmian, to limit (default 2000) jest używany jako określenie liczby danych do powrotu.",
         "zh-cn": "当没有计算总额时,或当时的汇率(2000年)用来确定返回的数据数量。."
-      },
-      "2.1.5": {
-        "en": "Ignore errors from forked process after response was sent for GetHistory",
-        "de": "Ignorieren von Fehlern von forked Prozess nach Antwort wurde gesendet GetHistory",
-        "ru": "Игнорировать ошибки из forked процесса после отправки ответа на GetHistory",
-        "pt": "Ignorar erros de processo falsificado após a resposta foi enviado para GetHistory",
-        "nl": "Neger fouten van vervalsing na reactie werd verzonden",
-        "fr": "Ignore les erreurs du processus fourré après que la réponse a été envoyée pour GetHistory",
-        "it": "Ignora gli errori dal processo falsificato dopo la risposta è stato inviato per GetHistory",
-        "es": "Ignorar los errores del proceso prendido después de que la respuesta fue enviada para GetHistory",
-        "pl": "Ignore błędy po tym, jak odpowiedź została wysłana do GetHistory",
-        "zh-cn": "在对GetHistory的答复发出后,从便携式程序错误"
       }
     },
     "mode": "daemon",
