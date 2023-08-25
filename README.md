@@ -23,6 +23,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (foxriver76) fix history2db.js with controller v5
+
 ### 2.2.6 (2023-08-23)
 * (Apollon77) Fix getHistory when aggregations were used in some cases
 
