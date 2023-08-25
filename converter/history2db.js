@@ -8,8 +8,8 @@ const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 const fs = require('fs');
 const path = require('path');
 
-const dataDir = path.normalize(utils.controllerDir + '/' + require(utils.controllerDir + '/lib/tools').getDefaultDataDir());
-let historydir = dataDir + 'history-data';
+const dataDir = utils.getAbsoluteDefaultDataDir();
+let historydir = path.join(dataDir, 'history-data');
 
 let earliestDBValue = {};
 const earliesValCachefile = __dirname + '/earliestDBValues.json';
