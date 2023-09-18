@@ -633,7 +633,7 @@ function main() { //start
 
         adapter.config.writeNulls && writeNulls();
 
-        // store all buffered data every 10 minutes to not lost the data
+        // store all buffered data every 10 minutes to not lose the data
         bufferChecker = setInterval(() => storeCached(), 10 * 60000);
     });
 
@@ -1330,7 +1330,7 @@ function getHistory(msg) {
             }
         });
     } else {
-        // to use parallel requests activate this.
+        // to use parallel requests, activate this.
         if (1 || typeof GetHistory === 'undefined') {
             let responseSent = false;
             adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
