@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "2.2.6",
+    "version": "3.0.0",
     "news": {
+      "3.0.0": {
+        "en": "fix history2db.js with controller v5\nMinimal node.sj version is 16\nAdded support for `count` aggregate type on getHistory",
+        "de": "fix history2db.js mit controller v5\nMinimal node.sj version is 16\nUnterstützung für Grafit-Aggregat-Typ auf getHistory",
+        "ru": "исправить history2db.js с контроллером v5\nМинимальная версия node.sj 16\nДобавлена поддержка подсчета агрегатного типа на getHistory",
+        "pt": "corrigir history2db.js com controlador v5\nVersão mínima do node.sj é 16\nAdicionado suporte para contar o tipo agregado em getHistory",
+        "nl": "vertaling:\nMinimale node\nVermeldde steun voor het tel aggregate type",
+        "fr": "corriger history2db.js avec controller v5\nMinimal node.sj version est 16\nAjout du support pour compter le type agrégé sur getHistory",
+        "it": "correzione cronologia2db.js con controller v5\nVersione minimal node.sj è 16\nAggiunto supporto per conteggio tipo aggregato su getHistory",
+        "es": "fijar historia2db.js con controlador v5\nNodo mínimo.sj versión es 16\nSoporte añadido para el tipo de cuenta agregado en getHistory",
+        "pl": "poprawiona historia2db z kontrolerem v5\nWersja minimalna jest 16\nWsparcie dla liczby zbitych typów",
+        "uk": "виправити історію2db.js з контролером v5\nMinimal node.sj версія 16\nДодано підтримку підрахунку агрегатного типу на getHistory",
+        "zh-cn": "fix 历史2db.j with controller v5\n米切尔·诺贝尔(签名)\n增加对准礼品总值的支持"
+      },
       "2.2.6": {
         "en": "Fix getHistory when aggregations were used in some cases",
         "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
@@ -101,18 +114,6 @@
         "es": "asegúrese de La historia funciona para todos los casos\nAñadir opción para añadir comentario y información del usuario a los resultados",
         "pl": "upewnić się Historia trwa wszystkie przypadki\nW celu dodania komentarzy i informacji użytkownika do wyników",
         "zh-cn": "确保 历史为所有案件进行工作\n增加评论和用户以成果为目的的选择"
-      },
-      "2.1.7": {
-        "en": "Allow to remove a configuration value for \"round\" in config again",
-        "de": "Lassen Sie einen Konfigurationswert für Runde in config wieder entfernen",
-        "ru": "Разрешить удалить конфигурационную ценность для раунда в config снова",
-        "pt": "Permitir remover um valor de configuração para round em config novamente",
-        "nl": "Sta toe om weer een configuratiewaarde te verwijderen voor ronde in het leger",
-        "fr": "Permettre de supprimer une valeur de configuration pour round in config à nouveau",
-        "it": "Permette di rimuovere un valore di configurazione per round in config di nuovo",
-        "es": "Permitir eliminar de nuevo un valor de configuración para redondear en configuración",
-        "pl": "Allow, aby usunąć wartość konfiguracyjna w zakręcie ponownie w konfigunie",
-        "zh-cn": "允许再次取消一轮谈判的组合价值"
       }
     },
     "mode": "daemon",
