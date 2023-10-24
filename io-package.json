@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "3.0.0",
+    "version": "3.0.1",
     "news": {
+      "3.0.1": {
+        "en": "activated the round option when averaging",
+        "de": "aktiviert die runde option bei der mittelung",
+        "ru": "активировал круглый вариант при аверсии",
+        "pt": "ativado a opção redonda quando uma média",
+        "nl": "de ronde optie geactiveerd",
+        "fr": "a activé l ' option ronde lorsque la moyenne",
+        "it": "attiva l'opzione rotonda quando si media",
+        "es": "activa la opción redonda cuando el promedio",
+        "pl": "ostateczna opcja aktywowana została w trakcie awarii",
+        "uk": "активований круглий варіант при перетворенні",
+        "zh-cn": "变 时采用圆桌会议选择"
+      },
       "3.0.0": {
         "en": "fix history2db.js with controller v5\nMinimal node.sj version is 16\nAdded support for `count` aggregate type on getHistory",
         "de": "fix history2db.js mit controller v5\nMinimal node.sj version is 16\nUnterstützung für Grafit-Aggregat-Typ auf getHistory",
@@ -102,18 +115,6 @@
         "es": "Casos de accidente fijo reportados por Sentry",
         "pl": "Sprawy katastrofy Fix podane przez Sentry’a",
         "zh-cn": "Sentry所报告的六例事故"
-      },
-      "2.2.0": {
-        "en": "make sure getHistory works for all cases\nAdd option to add comment and user info to results",
-        "de": "! Geschichte funktioniert für alle Fälle\nFügen Sie die Option, Kommentare und Benutzerinformationen zu den Ergebnissen hinzuzufügen",
-        "ru": "убедитесь, что получите История работает для всех случаев\nДобавить опцию, чтобы добавить комментарий и информацию пользователя к результатам",
-        "pt": "certifique-se de obter A história funciona para todos os casos\nAdicionar opção para adicionar comentários e informações do usuário aos resultados",
-        "nl": "zorg ervoor dat je ervoor zorgt Geschiedenis werkt voor alle gevallen\nVoeg optie toe om commentaar en gebruikers info toe te voegen aan resultaten",
-        "fr": "assure-toi. Histoire fonctionne pour tous les cas\nAjouter l'option pour ajouter des commentaires et des informations utilisateur aux résultats",
-        "it": "assicurarsi di ottenere La storia funziona per tutti i casi\nAggiungi l'opzione per aggiungere commento e informazioni utente ai risultati",
-        "es": "asegúrese de La historia funciona para todos los casos\nAñadir opción para añadir comentario y información del usuario a los resultados",
-        "pl": "upewnić się Historia trwa wszystkie przypadki\nW celu dodania komentarzy i informacji użytkownika do wyników",
-        "zh-cn": "确保 历史为所有案件进行工作\n增加评论和用户以成果为目的的选择"
       }
     },
     "mode": "daemon",

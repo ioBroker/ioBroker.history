@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.0.1 (2023-10-24)
 * (tuxyme) activated the round option when averaging
 
 ### 3.0.0 (2023-09-19)
