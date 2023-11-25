@@ -53,7 +53,7 @@
     "log changes minimal delta (0 = disable delta check)": "Minimum difference from last value<br>(0 = disable delta check)",
     "log changes only": "Record changes only",
     "maxLength": "Maximal number of stored in RAM values",
-    "maximum datapoint count in RAM": "Maximum datapoint count in RAM",
+    "maximum datapoint count in RAM": "Maximum state count in RAM",
     "note": "History settings must be done for every state individually on the tab \"States\" and only if adapter is active",
     "retention": "Storage retention",
     "storeAck": "Store acknowledge of value",
