@@ -23,6 +23,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (simatec) Responsive Design added
+
 ### 3.0.1 (2023-10-24)
 * (tuxyme) activated the round option when averaging
 

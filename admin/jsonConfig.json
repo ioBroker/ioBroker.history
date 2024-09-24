@@ -9,6 +9,7 @@
         "_note": {
           "type": "staticText",
           "text": "note",
+          "xs": 12,
           "sm": 12,
           "md": 12,
           "lg": 12
@@ -17,6 +18,7 @@
           "newLine": true,
           "type": "text",
           "label": "storeDir",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4
@@ -25,6 +27,7 @@
           "newLine": true,
           "type": "checkbox",
           "label": "storeFrom",
+          "xs": 12,
           "sm": 12,
           "md": 8,
           "lg": 8
@@ -33,6 +36,7 @@
           "newLine": true,
           "type": "checkbox",
           "label": "storeAck",
+          "xs": 12,
           "sm": 12,
           "md": 8,
           "lg": 8
@@ -41,6 +45,7 @@
           "newLine": true,
           "label": "Write NULL values on start/stop boundaries",
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 8,
           "lg": 8
@@ -54,6 +59,7 @@
         "debounceTime": {
           "newLine": true,
           "type": "number",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -64,6 +70,7 @@
         },
         "blockTime": {
           "type": "number",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -76,6 +83,7 @@
         "changesRelogInterval": {
           "newLine": true,
           "type": "number",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -84,6 +92,7 @@
         },
         "changesMinDelta": {
           "type": "number",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -93,6 +102,7 @@
         "retention": {
           "newLine": true,
           "type": "select",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -151,6 +161,7 @@
         "customRetentionDuration": {
           "type": "number",
           "min": 1,
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -163,6 +174,7 @@
           "type": "number",
           "min": 0,
           "max": 100000,
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -171,6 +183,7 @@
         "round": {
           "newLine": true,
           "type": "text",
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
@@ -182,6 +195,7 @@
         "disableSkippedValueLogging": {
           "newLine": true,
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 8,
           "lg": 8,
@@ -191,6 +205,7 @@
           "newLine": true,
           "label": "Enable enhanced debug logs for the datapoint",
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 8,
           "lg": 8
@@ -198,6 +213,7 @@
         "debounce": {
           "type": "number",
           "min": 0,
+          "xs": 12,
           "sm": 12,
           "md": 4,
           "lg": 4,
