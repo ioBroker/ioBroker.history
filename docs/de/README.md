@@ -34,18 +34,18 @@ JSON Format in zwei Schritten gespeichert wird
 
 Hier den Ordnernamen eingeben, in dem die Dateien gespeichert werden sollen.
 
-Der Ordner wird relativ zum Standardverzeichnis ``/opt/iobroker/iobroker-data`` angelegt.  
+Der Ordner wird relativ zum Standardverzeichnis `/opt/iobroker/iobroker-data` angelegt.  
 
 In diesem Ordner wird jeden Tag ein neuer Unterordner erstellt in dem die geloggten 
 Daten gespeichert werden.
 
-> Ohne Angabe eines Speicherverzeichnisses wird der Ordner ``/opt/iobroker/iobroker-data/history``
+> Ohne Angabe eines Speicherverzeichnisses wird der Ordner `/opt/iobroker/iobroker-data/history`
 automatisch angelegt
 
-> Absolute Verzeichnisse wie z.B.: ``/mnt/history`` (Linux) oder ``D:/history`` (Windows) können
+> Absolute Verzeichnisse wie z.B.: `/mnt/history` (Linux) oder `D:/history` (Windows) können
 ebenso eingegeben werden
 
-> Daten dürfen niemals in einem ``node_modules`` Verzeichnis gespeichert werden!
+> Daten dürfen niemals in einem `node_modules` Verzeichnis gespeichert werden!
 
 **Speichere Quelle vom Ereignis**
 Legt fest, ob die Quelle der Datenänderung (der auslösende Adapter) mit gespeichert
@@ -149,7 +149,7 @@ werden soll. Wert 0 bedeutet, dass jeder Wert gespeichert werden soll.
 
 
 **Ignoriere 0 oder Nullwerte (==0)**
-Mit dieser Option kann vermieden werden, dass die Werte ``0`` oder ``null`` in die
+Mit dieser Option kann vermieden werden, dass die Werte `0` oder `null` in die
 Datenbank gespeichert werden
 
 **Optimierte Protokollierung übersprungener Werte für Diagramme deaktivieren**
@@ -235,7 +235,7 @@ sendTo('history.0', 'getHistory', {
 });
 ```
 
-- Abrufen der in der letzten Stunde gespeicherten Werte für Datenpunkt ``system.adapter.admin.0.memRss``
+- Abrufen der in der letzten Stunde gespeicherten Werte für Datenpunkt `system.adapter.admin.0.memRss`
 
 ```javascript
 var end = Date.now();
@@ -255,45 +255,37 @@ sendTo('history.0', 'getHistory', {
 
 Verfügbare Optionen:
 
-- **start** - (optional) Zeit in ms - *Date.now()*'
-- **end** - (optional) Zeit in ms - *Date.now()*', Standarwert
- (jetzt + 5.000 s)
-- **step** - (optional) Nutzung bei Aggregation (m4, max, min, average, total)
- Schritte in ms Intervall
-- **count** - Anzahl der Werte, wenn das Aggregat 'onchange' ist, oder wenn eine
- andere Aggregatmethode verwendet wird Anzahl der Intervalle. Count wird ignoriert,
- wenn **step** gesetzt ist, sonst ist der Default-Wert 500 wenn count nicht angegeben.
-- **from** - wenn *from* Feld in Antwort enthalten sein soll
-- **ack** - wenn *ack* Feld in Antwort enthalten sein soll
-- **q** - wenn *q* Feld in Antwort enthalten sein soll
-- **addId** - wenn *id* Feld in Antwort enthalten sein soll
-- **limit** - limitiert die Anzahl der zurückgegebenen Einträge
-- **round** - Rundet das Ergebnis auf die definierte Anzahl Nachkommastellen
-- **ignoreNull** - wenn Nullwerte enthalten sein sollen (false), ersetzt durch den
-  letzten Nicht-Nullwert (true) oder ersetzt durch 0 (0)
-- **removeBorderValues** - Im Standard werden Grenzwerte zurückgegeben, um Diagramme zu optimieren. Diese Option kann genutzt werden, um das Verhalten zu deaktivieren
-- **returnNewestEntries** - Die zurückgegebenen Daten werden immer aufsteigend nach Datum zurückgegeben. Falls aggregrate "none" zusammen mit "count" oder "limit" genutzt wird, werden normalerweise nur die ältesten Einträge zurückgegeben (falls kein "start" übergeben wurde). Mit dieser Option werden stattdessen die neuesten Einträge zurückgegeben.
-- **aggregate** - Aggregations Methoden:
-    - *minmax* - verwendet speziellen Algorithmus. Verbindet den gesamten
-     Zeitbereich in kleinen Intervallen und finde für jedes Intervall Max-, Min-,
-     Start- und Endwerte.
-    - *max* - Verbinde den gesamten Zeitbereich in kleinen Intervallen und finde
-     für jedes Intervall den Maximalwert und verwende ihn für dieses Intervall
-     (Nullen werden ignoriert).
-    - *min* - Wie max, aber mit minimalem Wert.
-    - *average* - Wie max, aber mit Durchschnittswert
-    - *total* - Wie max, aber Gesamtwert wird berechnet.
-    - *count* - Entspricht max, berechnet aber die Anzahl der Werte (Nullen werden berechnet).
-    - *percentile* - 
-    - *quantile* - 
-    - *integral* - 
-    - *none* - Überhaupt keine Aggregation. Nur Rohwerte im angegebenen Zeitraum.
-- **percentile** - 
-- **quantile** - 
-- **integralUnit** - 
-- **integralInterpolation** - 
-    - *linear* - 
-    - *none* - 
+- `start` - (optional) Zeit in ms - `Date.now()`
+- `end` - (optional) Zeit in ms - `Date.now()`, Standarwert (jetzt + 5.000 s)
+- `step` - (optional) Nutzung bei Aggregation (m4, max, min, average, total) Schritte in ms Intervall
+- `count` - Anzahl der Werte, wenn das Aggregat 'onchange' ist, oder wenn eine andere Aggregatmethode verwendet wird Anzahl der Intervalle. `Count` wird ignoriert, wenn `step` gesetzt ist, sonst ist der Default-Wert 500 wenn count nicht angegeben.
+- `from` - wenn `from` Feld in Antwort enthalten sein soll
+- `ack` - wenn `ack` Feld in Antwort enthalten sein soll
+- `q` - wenn `q` Feld in Antwort enthalten sein soll
+- `addId` - wenn `id` Feld in Antwort enthalten sein soll
+- `limit` - limitiert die Anzahl der zurückgegebenen Einträge
+- `round` - Rundet das Ergebnis auf die definierte Anzahl Nachkommastellen
+- `ignoreNull` - wenn Nullwerte enthalten sein sollen (false), ersetzt durch den letzten Nicht-Nullwert (true) oder ersetzt durch 0 (0)
+- `removeBorderValues` - Im Standard werden Grenzwerte zurückgegeben, um Diagramme zu optimieren. Diese Option kann genutzt werden, um das Verhalten zu deaktivieren
+- `returnNewestEntries` - Die zurückgegebenen Daten werden immer aufsteigend nach Datum zurückgegeben. Falls aggregate `none` zusammen mit `count` oder `limit` genutzt wird, werden normalerweise nur die ältesten Einträge zurückgegeben (falls kein "start" übergeben wurde). Mit dieser Option werden stattdessen die neuesten Einträge zurückgegeben.
+- `aggregate` - Aggregations Methoden:
+    - `minmax` - verwendet speziellen Algorithmus. Verbindet den gesamten Zeitbereich in kleinen Intervallen und finde für jedes Intervall Max-, Min-, Start- und Endwerte.
+    - `max` - Verbinde den gesamten Zeitbereich in kleinen Intervallen und finde für jedes Intervall den Maximalwert und verwende ihn für dieses Intervall (Nullen werden ignoriert).
+    - `min` - Wie `max`, aber mit minimalem Wert.
+    - `average` - Wie `max`, aber mit Durchschnittswert
+    - `total` - Wie `max`, aber Gesamtwert wird berechnet.
+    - `count` - Entspricht `max`, berechnet aber die Anzahl der Werte (Nullen werden berechnet).
+    - `percentile` - 
+    - `quantile` - 
+    - `integral` - 
+    - `none` - Überhaupt keine Aggregation. Nur Rohwerte im angegebenen Zeitraum.
+- `percentile` - 
+- `quantile` - 
+- `integralUnit` - 
+- `integralInterpolation` - 
+    - `linear` - 
+    - `none` - 
+- `integralTotal` - Berechnet den Integral über dem gesamten Zeitintervall und liefert nur einen Wert im Antwort
 
 Der erste und der letzte Punkt werden für Aggregationen berechnet, mit Ausnahme
 der Aggregation **none**. Bei manueller Anforderung einer Aggregation, sollten der
@@ -336,7 +328,7 @@ sendTo('history.0', 'storeState', [
 ], result => console.log('added'));
 ```
 
-Zusätzlich kann das Attribut ``rules: true`` verwendet werden, um alle definierten Regeln auf dem Objekt zu aktivieren (z.B. ``counter``, ``changesOnly``, ``de-bounce``, usw.).
+Zusätzlich kann das Attribut `rules: true` verwendet werden, um alle definierten Regeln auf dem Objekt zu aktivieren (z.B. `counter`, `changesOnly`, `de-bounce`, usw.).
 
 ### Daten löschen
 
@@ -369,7 +361,7 @@ sendTo('history.0', 'deleteRange', [
 
 Die Zeit könnte ms seit Epoche oder eine Zeichenfolge sein, die durch das Javascript-Datumsobjekt konvertiert werden könnte.
 
-Werte werden **inklusive definierter Grenzen** gelöscht (``ts >= start AND ts <= end``).
+Werte werden **inklusive definierter Grenzen** gelöscht (`ts >= start AND ts <= end`).
 
 ### Daten aktualisieren
 
@@ -382,7 +374,7 @@ sendTo('history.0', 'update', [
 ], result => console.log('deleted'));
 ```
 
-``ts`` ist obligatorisch. Mindestens ein weiteres Flag muss im Zustandsobjekt enthalten sein.
+`ts` ist obligatorisch. Mindestens ein weiteres Flag muss im Zustandsobjekt enthalten sein.
 
 ## Verlaufsprotokollierung über JavaScript
 
@@ -392,7 +384,7 @@ ihren Einstellungen.
 
 ### Aktivieren
 
-Es wird die ``id`` des Datenpunkts benötigt und optional ``options`` zum Definieren
+Es wird die `id` des Datenpunkts benötigt und optional `options` zum Definieren
 von Datenpunkt-spezifischen Einstellungen:
 
 ```javascript
@@ -418,7 +410,7 @@ sendTo('history.0', 'enableHistory', {
 
 ### Deaktivieren
 
-Es wird die ``id`` des Datenpunkts benötigt.
+Es wird die `id` des Datenpunkts benötigt.
 
 ```javascript
 sendTo('history.0', 'disableHistory', {
@@ -463,9 +455,9 @@ Adapter für SQL-Datenbanken (PostgreSQL, MS-SQL, MySQL, SQLite) und für Influx
 gibt, wäre es sinnvoll bereits gesammelte Daten des History-Adapters in die neue
 Zieldatenbank übernehmen zu können.
 
-Diese Aufgabe wird von Skripts im Linux Verzeichnis ``/opt/iobroker/node_modules/iobroker.history/converter``
+Diese Aufgabe wird von Skripts im Linux Verzeichnis `/opt/iobroker/node_modules/iobroker.history/converter`
 erledigt. Die Ausführung erfolgt dort über die Kommandozeile mit vorangesetzten
-Befehl ``node``.
+Befehl `node`.
 
 ### Empfohlene Vorgehensweise bei der Migration
 
@@ -505,17 +497,17 @@ Dieses Skript sammelt die oben genannten Daten für eine InfluxDB-Instanz.
 
 **Verwendung**:
 
-``node analyzeinflux.js [InfluxDB-Instanz] [Loglevel] [--deepAnalyze]``
+`node analyzeinflux.js [InfluxDB-Instanz] [Loglevel] [--deepAnalyze]`
 
 **Beispiel**:
 
-``node analyzeinflux.js influxdb.0 info --deepAnalyze``
+`node analyzeinflux.js influxdb.0 info --deepAnalyze`
 
 Parameter:
 
 - Welche InfluxDB-Instanz soll verwendet werden? (Standard: influxdb.0) Wenn benutzt, muss dies der erste Parameter nach dem Skriptnamen sein.
 - Loglevel für die Ausgabe (Standard: info). Wenn gesetzt, muss dies der zweite Parameter nach dem Skriptnamen sein.
-- ``--deepAnalyze`` sammelt auch die vorhandenen Werte pro Tag, standardmäßig wird nur der früheste Wert abgefragt.
+- `--deepAnalyze` sammelt auch die vorhandenen Werte pro Tag, standardmäßig wird nur der früheste Wert abgefragt.
 
 Das Skript generiert dann eine oder drei .json-Dateien mit den gesammelten Daten.
 Diese Dateien werden dann vom eigentlichen Konverter Skript verwendet.
@@ -526,11 +518,11 @@ Dieses Skript sammelt Teile der oben genannten Daten für eine SQL-Instanz.
 
 **Verwendung**:
 
-``node analyzesql.js [SQL-Instanz] [Loglevel]``
+`node analyzesql.js [SQL-Instanz] [Loglevel]`
 
 **Beispiel**:
 
-``node analyzesql.js sql.0 info``
+`node analyzesql.js sql.0 info`
 
 Parameter:
 
@@ -572,16 +564,16 @@ Das Konverter Skript selbst sollte mit allen Verlaufs-Adaptern funktionieren, we
 > Hinweis: Die Migration vieler Daten führt zu einer bestimmten Systemlast, insbesondere
 > wenn Konverter und Zieldatenbankinstanz auf demselben Computer ausgeführt werden.
 > Die Auslastung und Leistung des Systems während der Aktion sollte überwacht werden
-> und möglicherweise der Parameter ``delayMultiplicator`` verwendet werden, um ein
+> und möglicherweise der Parameter `delayMultiplicator` verwendet werden, um ein
 > verzögertes Abarbeiten der Daten zu nutzen.
 
 **Verwendung:**
 
-``node history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]``
+`node history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]`
 
 **Beispiel**:
 
-``node history2db.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly``
+`node history2db.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly`
 
 Mögliche Optionen und Parameter:
 

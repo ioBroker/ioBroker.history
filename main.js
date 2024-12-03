@@ -2,10 +2,10 @@
 /* jshint strict: false */
 /* jslint node: true */
 'use strict';
-const cp          = require('child_process');
+const cp          = require('node:child_process');
 const utils       = require('@iobroker/adapter-core'); // Get common adapter utils
 const dataDir     = utils.getAbsoluteDefaultDataDir();
-const fs          = require('fs');
+const fs          = require('node:fs');
 const GetHistory  = require('./lib/getHistory.js');
 const Aggregate   = require('./lib/aggregate.js');
 const adapterName = require('./package.json').name.split('.').pop();

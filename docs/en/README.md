@@ -32,15 +32,15 @@ This adapter saves state history in a two-staged process.
 **Storage directory**
 Path to the directory, where the files will be stored.
 
-The directory will be created relative to the default directory ``/opt/iobroker/iobroker-data``.
+The directory will be created relative to the default directory `/opt/iobroker/iobroker-data`.
 
 This directory will contain a new subdirectory for every new day, which contains the logged information.
 
-> Without a path definition, data will be stored to the default location ``/opt/iobroker/iobroker-data/history``
+> Without a path definition, data will be stored to the default location `/opt/iobroker/iobroker-data/history`
 
-> Absolute paths like ``/mnt/history`` (Linux) or ``D:/History`` (Windows) are also supported
+> Absolute paths like `/mnt/history` (Linux) or `D:/History` (Windows) are also supported
 
-> Please DO NOT store the data in any ``node_modules`` directory!
+> Please DO NOT store the data in any `node_modules` directory!
 
 **Store origin of value**
 Defines, if the "from" attribute will be stored, too.
@@ -60,7 +60,7 @@ Every value can be changed individually for each state afterwards.
 Protection against unstable values to make sure that only stable values are
 logged when the value did not change in the defined amount of Milliseconds.
 
-**Blocktime**
+**Block time**
 Defines for how long after storing the last value no further value is stored.
 When the given time in Milliseconds is over then the next value that fulfills
 all other checks is logged.
@@ -81,7 +81,7 @@ is reached as soon as new data should be stored for a datapoint.
 **Maximum datapoint count in RAM**
 Define how many number of values will be hold in RAM before persisting them on
 disk. You can control how much I/O is done. This can be useful for systems
-which uses a SD card for storage to extend the life time.
+which uses a SD card for storage to extend the lifetime.
 
 **On query round numbers to**
 Define how many digits should be rounded to when querying the values.
@@ -112,7 +112,7 @@ Activate the logging of the state
 Protection against unstable values to make sure that only stable values are
 logged when the value did not change in the defined amount of Milliseconds.
 
-**Blocktime**
+**Block time**
 Defines for how long after storing the last value no further value is stored.
 When the given time in Milliseconds is over then the next value that fulfills
 all other checks is logged.
@@ -137,7 +137,7 @@ Do not log values which are smaller than this value.
 Do not log values which are bigger than this value.
 
 **Ignore 0 or null values (==0)**
-This option prevents the storage of the values ``0`` or ``null`` into the database.
+This option prevents the storage of the values `0` or `null` into the database.
 
 **Disable charting optimized logging of skipped values**
 ??
@@ -153,7 +153,7 @@ is reached as soon as new data should be stored for a datapoint.
 **Maximum datapoint count in RAM**
 Define how many number of values will be hold in RAM before persisting them on
 disk. You can control how much I/O is done. This can be useful for systems
-which uses a SD card for storage to extend the life time.
+which uses a SD card for storage to extend the lifetime.
 
 **On query round numbers to**
 Define how many digits should be rounded to when querying the values.
@@ -167,7 +167,7 @@ This helps in debugging issues or understanding why the adapter is logging a val
 
 ### History data
 
-A click on the cog symbol of the object opens the settings. You can find the stored history
+A click on the cog symbol of the object opens the settings. You can find the stored
 history data in the tab "history data":
 
 ![State-History](img/state-history.png)
@@ -217,7 +217,7 @@ sendTo('history.0', 'getHistory', {
 });
 ```
 
-- Get stored values for ``system.adapter.admin.0.memRss`` in last hour
+- Get stored values for `system.adapter.admin.0.memRss` in last hour
 
 ```javascript
 var end = Date.now();
@@ -237,53 +237,56 @@ sendTo('history.0', 'getHistory', {
 
 Available options:
 
-- **start** - (optional) time in ms - *Date.now()*'
-- **end** - (optional) time in ms - *Date.now()*', by default is (now + 5000 seconds)
-- **step** - (optional) used in aggregate (max, min, average, total, ...) step in ms of intervals
-- **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set, else default is 500 if not set
-- **from** - if *from* field should be included in answer
-- **ack** - if *ack* field should be included in answer
-- **q** - if *q* field should be included in answer
-- **user** - if *user* field should be included in answer
-- **comment** - if *c* field should be included in answer
-- **addId** - if *id* field should be included in answer
-- **limit** - do not return more entries than limit
-- **round** - round result to number of digits after decimal point
-- **ignoreNull** - if null values should be included (false), replaced by last not null value (true) or replaced with 0 (0)
-- **removeBorderValues** - By default additional border values are returned to optimize charting. Set this option to true if this is not wanted (e.g. for script data processing)
-- **returnNewestEntries** - The returned data are always sorted by timestamp ascending. When using aggregate "none" and also providing "count" or "limit" this means that normally the oldest entries are returned (unless no "start" data is provided). Set this option to true to get the newest entries instead.
-- **aggregate** - aggregate method (Default: 'average'):
-    - *minmax* - used special algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
-    - *max* - Splice the whole time range in small intervals and find for every interval max value and use it for this interval (nulls will be ignored).
-    - *min* - Same as max, but take minimal value.
-    - *average* - Same as max, but take average value.
-    - *total* - Same as max, but calculate total value.
-    - *count* - Same as max, but calculate number of values (nulls will be calculated).
-    - *percentile* - Calculate n-th percentile (n is given in options.percentile or defaults to 50 if not provided).
-    - *quantile* - Calculate n quantile (n is given in options.quantile or defaults to 0.5 if not provided).
-    - *integral* - Calculate integral (additional parameters see below).
-    - *none* - No aggregation at all. Only raw values in given period.
-- **percentile** - (optional) when using aggregate method "percentile" defines the percentile level (0..100)(defaults to 50)
-- **quantile** - (optional) when using aggregate method "quantile" defines the quantile level (0..1)(defaults to 0.5)
-- **integralUnit** - (optional) when using aggregate method "integral" defines the unit in seconds (defaults to 60s). e.g. to get integral in hours for Wh or such, set to 3600.
-- **integralInterpolation** - (optional) when using aggregate method "integral" defines the interpolation method (defaults to "none").
-    - *linear* - linear interpolation
-    - *none* - no/stepwise interpolation 
+- `start` - (optional) time in ms - `Date.now()`
+- `end` - (optional) time in ms - `Date.now()`, by default is (now + 5000 seconds)
+- `step` - (optional) used in aggregate (max, min, average, total, ...) step in ms of intervals
+- `count` - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set, else default is 500 if not set
+- `from` - if `from` field should be included in answer
+- `ack` - if `ack` field should be included in answer
+- `q` - if `q` field should be included in answer
+- `user` - if `user` field should be included in answer
+- `comment` - if `c` field should be included in answer
+- `addId` - if `id` field should be included in answer
+- `limit` - do not return more entries than limit
+- `round` - round result to number of digits after decimal point
+- `ignoreNull` - if null values should be included (false), replaced by last not null value (true) or replaced with 0 (0)
+- `removeBorderValues` - By default additional border values are returned to optimize charting. Set this option to true if this is not wanted (e.g. for script data processing)
+- `returnNewestEntries` - The returned data are always sorted by timestamp ascending. When using aggregate `none` and also providing `count` or `limit` this means that normally the oldest entries are returned (unless no "start" data is provided). Set this option to true to get the newest entries instead.
+- `aggregate` - aggregate method (Default: 'average'):
+    - `minmax` - used special algorithm. Splice the whole time range in small intervals and find for every interval max, min, start and end values.
+    - `max` - Splice the whole time range in small intervals and find for every interval max value and use it for this interval (nulls will be ignored).
+    - `min` - Same as `max`, but take minimal value.
+    - `average` - Same as `max`, but take average value.
+    - `total` - Same as `max`, but calculate total value.
+    - `count` - Same as `max`, but calculate number of values (nulls will be calculated).
+    - `percentile` - Calculate n-th percentile (n is given in `options.percentile` or defaults to 50 if not provided).
+    - `quantile` - Calculate n quantile (n is given in `options.quantile` or defaults to 0.5 if not provided).
+    - `integral` - Calculate integral (additional parameters see below).
+    - `none` - No aggregation at all. Only raw values in given period.
+- `percentile` - (optional) when using aggregate method `percentile` defines the percentile level (0..100)(defaults to 50)
+- `quantile` - (optional) when using aggregate method `quantile` defines the quantile level (0..1)(defaults to 0.5)
+- `integralUnit` - (optional) when using aggregate method `integral` defines the unit in seconds (defaults to 60s). e.g. to get integral in hours for Wh or such, set to 3600.
+- `integralInterpolation` - (optional) when using aggregate method `integral` defines the interpolation method (defaults to `none`).
+    - `linear` - linear interpolation
+    - `none` - no/stepwise interpolation
+- `integralTotal` - calculates one integral over all defined time interval
 
-The first and last points will be calculated for aggregations, except aggregation **none**.
+The first and last points will be calculated for aggregations, except aggregation `none`.
 If you manually request some aggregation you should ignore first and last values,
 because they are calculated from values outside of period.
 
 ### storeState
 
 If you want to write other data into the history DB you can use the build
-in system function **storeState**. This function can also be used to convert
+in system function `storeState`. This function can also be used to convert
 data from other History adapters like History or SQL.
 
 A successful response do not mean that the data are really written out to
 the disk. It just means that they were processed!
 
-The given ids are not checked against the ioBroker database and do not need to be set up or enabled there. If own IDs are used without settings then the "rules" parameter is not supported and will result in an error. The default "Maximal number of stored in RAM values" is used for such IDs.
+The given ids are not checked against the ioBroker database and do not need to be set up or enabled there.
+If own IDs are used without settings then the "rules" parameter is not supported and will result in an error.
+The default "Maximal number of stored in RAM values" is used for such IDs.
 
 The Message can have one of the following three formats:
 
@@ -294,7 +297,7 @@ The Message can have one of the following three formats:
 ```javascript
 sendTo('history.0', 'storeState', [
     id: 'mbus.0.counter.xxx',
-    state: {ts: 1589458809352, val: 123, ack: false, from: 'system.adapter.whatever.0', ...}
+    state: { ts: 1589458809352, val: 123, ack: false, from: 'system.adapter.whatever.0', ... }
 ], result => console.log('added'));
 
 sendTo('history.0', 'storeState', {
@@ -311,11 +314,11 @@ sendTo('history.0', 'storeState', [
 ], result => console.log('added'));
 ```
 
-Additionally, you can add attribute ``rules: true`` in message to activate all rules, like ``counter``, ``changesOnly``, ``de-bounce`` and so on.
+Additionally, you can add attribute `rules: true` in message to activate all rules, like `counter`, `changesOnly`, `de-bounce` and so on.
 
 ### Delete states
 
-If you want to delete entries from the database you can use the build in system function **delete**:
+If you want to delete entries from the database you can use the build in system function `delete`:
 
 ```javascript
 sendTo('history.0', 'delete', [
@@ -344,11 +347,11 @@ sendTo('history.0', 'deleteRange', [
 
 Time could be ms since epoch or ans string, that could be converted by javascript Date object.
 
-Values will be deleted **including defined limits** (``ts >= start AND ts <= end``).
+Values will be deleted **including defined limits** (`ts >= start AND ts <= end`).
 
 ## Update states
 
-If you want to change values, quality or acknowledge flag in the database you can use the build in system function **update**:
+If you want to change values, quality or acknowledge flag in the database you can use the build in system function `update`:
 
 ```javascript
 sendTo('history.0', 'update', [
@@ -357,7 +360,7 @@ sendTo('history.0', 'update', [
 ], result => console.log('deleted'));
 ```
 
-``ts`` is mandatory. At least one other flags must be included in state object.
+`ts` is mandatory. At least one other flags must be included in state object.
 
 ## History logging management via Javascript
 
@@ -366,8 +369,8 @@ and also retrieving the list of enabled data points with their settings.
 
 ### Enable
 
-The message requires to have the ``id`` of the datapoint. Additionally,
-optional ``options`` to define the datapoint specific settings:
+The message requires to have the `id` of the datapoint. Additionally,
+optional `options` to define the datapoint specific settings:
 
 ```javascript
 sendTo('history.0', 'enableHistory', {
@@ -392,7 +395,7 @@ sendTo('history.0', 'enableHistory', {
 
 ### Disable
 
-The message requires to have the ``id`` of the datapoint.
+The message requires to have the `id` of the datapoint.
 
 ```javascript
 sendTo('history.0', 'disableHistory', {
@@ -433,10 +436,11 @@ sendTo('history.0', 'getEnabledDPs', {}, function (result) {
 
 ### General idea
 
-When you have more data over time then the history adapter may not be the best choice and a real database is better. For this there are more adapters for data storage. E.g. for SQL databases (PostgreSQL, MS-SQL, MySQL, SQLite) and InfluxDB.
+When you have more data over time then the history adapter may not be the best choice and a real database is better.
+For this there are more adapters for data storage. E.g. for SQL databases (PostgreSQL, MS-SQL, MySQL, SQLite) and InfluxDB.
 With this change the question comes up how to convert the collected data from the past to these new adapters.
 
-For this some converter scripts have been placed in the directory ``/opt/iobroker/node_modules/iobroker.history/converter`` that can help and do the job. These scripts are called from the command line with ``node``.
+For this some converter scripts have been placed in the directory `/opt/iobroker/node_modules/iobroker.history/converter` that can help and do the job. These scripts are called from the command line with `node`.
 
 ### Best practice when executing the conversion
 
@@ -472,16 +476,16 @@ This script collects the mentioned data for an InfluxDB instance.
 
 **Usage**:
 
-``node analyzeinflux.js [InfluxDB-Instance] [Loglevel] [--deepAnalyze]``
+`node analyzeinflux.js [InfluxDB-Instance] [Loglevel] [--deepAnalyze]`
 
 **Example**:
 
-``node analyzeinflux.js influxdb.0 info --deepAnalyze``
+`node analyzeinflux.js influxdb.0 info --deepAnalyze`
 
 Parameters:
 - InfluxDB-Instance: which influxdb-Adapter instance should be used? (Default: influxdb.0) If set needs to be first parameter after script name.
 - Loglevel: Loglevel for output (Default: info). If set needs to be second parameter after script name.
-- ``--deepAnalyze``: collect the existing values per day too, by default only the earliest value is queried.
+- `--deepAnalyze`: collect the existing values per day too, by default only the earliest value is queried.
 
 The script will then generate one or three .json files with the collected data. These files are then used by the real converter script.
 
@@ -491,11 +495,11 @@ This script collects the mentioned data for an SQL instance.
 
 **Usage**:
 
-``node analyzesql.js [SQL-Instance] [Loglevel]``
+`node analyzesql.js [SQL-Instance] [Loglevel]`
 
 **Example**:
 
-``node analyzesql.js sql.0 info``
+`node analyzesql.js sql.0 info`
 
 Parameters:
 - SQL-Instance: which SQL-Adapter instance should be used? (Default: sql.0) If set needs to be first parameter after script name.
@@ -531,15 +535,15 @@ The converter script itself should work with all History adapters which support 
 > Note: Migrating many data will produce a certain load on the system, especially
 > when converter and target database instance are running on the same machine.
 > Monitor your systems load and performance during the action and maybe use the
-> ``delayMultiplicator`` parameter to increase delays in the converter.
+> `delayMultiplicator` parameter to increase delays in the converter.
 
 **Usage:**
 
-``node history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]``
+`node history2db.js [DB-Instanz] [Loglevel] [Date-to-start|0] [path-to-Data] [delayMultiplicator] [--logChangesOnly [relog-Interval(m)]] [--ignoreExistingDBValues] [--processNonExistingValuesOnly] [--processAllDPs] [--simulate]`
 
 **Example**:
 
-``node history2db.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly``
+`node history2db.js influxdb.0 info 20161001 /path/to/data 2 --logChangesOnly 30 --processNonExistingValuesOnly`
 
 Possible options and parameters:
 
