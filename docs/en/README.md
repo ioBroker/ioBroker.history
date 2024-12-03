@@ -262,6 +262,7 @@ Available options:
     - `percentile` - Calculate n-th percentile (n is given in `options.percentile` or defaults to 50 if not provided).
     - `quantile` - Calculate n quantile (n is given in `options.quantile` or defaults to 0.5 if not provided).
     - `integral` - Calculate integral (additional parameters see below).
+    - `integralTotal` - calculates one integral over all defined time interval
     - `none` - No aggregation at all. Only raw values in given period.
 - `percentile` - (optional) when using aggregate method `percentile` defines the percentile level (0..100)(defaults to 50)
 - `quantile` - (optional) when using aggregate method `quantile` defines the quantile level (0..1)(defaults to 0.5)
@@ -269,7 +270,6 @@ Available options:
 - `integralInterpolation` - (optional) when using aggregate method `integral` defines the interpolation method (defaults to `none`).
     - `linear` - linear interpolation
     - `none` - no/stepwise interpolation
-- `integralTotal` - calculates one integral over all defined time interval
 
 The first and last points will be calculated for aggregations, except aggregation `none`.
 If you manually request some aggregation you should ignore first and last values,

@@ -278,6 +278,7 @@ Verfügbare Optionen:
     - `percentile` - 
     - `quantile` - 
     - `integral` - 
+    - `integralTotal` - Berechnet den Integral über dem gesamten Zeitintervall und liefert nur einen Wert im Antwort
     - `none` - Überhaupt keine Aggregation. Nur Rohwerte im angegebenen Zeitraum.
 - `percentile` - 
 - `quantile` - 
@@ -285,7 +286,6 @@ Verfügbare Optionen:
 - `integralInterpolation` - 
     - `linear` - 
     - `none` - 
-- `integralTotal` - Berechnet den Integral über dem gesamten Zeitintervall und liefert nur einen Wert im Antwort
 
 Der erste und der letzte Punkt werden für Aggregationen berechnet, mit Ausnahme
 der Aggregation **none**. Bei manueller Anforderung einer Aggregation, sollten der
