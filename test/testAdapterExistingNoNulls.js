@@ -1,8 +1,8 @@
-/* jshint -W097 */// jshint strict:false
+/* jshint -W097 */ // jshint strict:false
 /*jslint node: true */
 /*jshint expr: true*/
 const expect = require('chai').expect;
-const setup = require(__dirname + '/lib/setup');
+const setup = require('./lib/setup');
 const tests = require('./lib/testcases');
 
 let objects = null;
@@ -21,15 +21,15 @@ function sendTo(target, command, message, callback) {
     };
 
     states.pushMessage('system.adapter.' + target, {
-        command:    command,
-        message:    message,
-        from:       'system.adapter.test.0',
+        command: command,
+        message: message,
+        from: 'system.adapter.test.0',
         callback: {
             message: message,
-            id:      sendToID++,
-            ack:     false,
-            time:    (new Date()).getTime()
-        }
+            id: sendToID++,
+            ack: false,
+            time: new Date().getTime(),
+        },
     });
 }
 
@@ -77,14 +77,14 @@ function checkValueOfState(id, value, cb, counter) {
 }
 */
 
-describe('Test ' + adapterShortName + '-existing adapter', function() {
+describe('Test ' + adapterShortName + '-existing adapter', function () {
     before('Test ' + adapterShortName + '-existing adapter: Start js-controller', function (_done) {
         this.timeout(600000); // because of first install from npm
 
         setup.setupController(async function () {
             var config = await setup.getAdapterConfig();
             // enable adapter
-            config.common.enabled  = true;
+            config.common.enabled = true;
             config.common.loglevel = 'debug';
 
             config.native.writeNulls = false;
@@ -93,17 +93,21 @@ describe('Test ' + adapterShortName + '-existing adapter', function() {
 
             await setup.setAdapterConfig(config.common, config.native);
 
-            setup.startController(true, function(id, obj) {}, function (id, state) {
+            setup.startController(
+                true,
+                function (id, obj) {},
+                function (id, state) {
                     if (onStateChanged) onStateChanged(id, state);
                 },
                 async (_objects, _states) => {
                     objects = _objects;
-                    states  = _states;
+                    states = _states;
 
                     await tests.preInit(objects, states, sendTo, adapterShortName);
 
                     _done();
-                });
+                },
+            );
         });
     });
 
