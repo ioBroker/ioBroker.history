@@ -20,7 +20,7 @@ function sendTo(target, command, message, callback) {
         }
     };
 
-    states.pushMessage('system.adapter.' + target, {
+    states.pushMessage(`system.adapter.${target}`, {
         command: command,
         message: message,
         from: 'system.adapter.test.0',
@@ -35,14 +35,14 @@ function sendTo(target, command, message, callback) {
 
 function checkConnectionOfAdapter(cb, counter) {
     counter = counter || 0;
-    console.log('Try check #' + counter);
+    console.log(`Try check #${counter}`);
     if (counter > 30) {
         if (cb) cb('Cannot check connection');
         return;
     }
 
-    console.log('Checking alive key for key : ' + adapterShortName);
-    states.getState('system.adapter.' + adapterShortName + '.0.alive', function (err, state) {
+    console.log(`Checking alive key for key: ${adapterShortName}`);
+    states.getState(`system.adapter.${adapterShortName}.0.alive`, function (err, state) {
         if (err) console.error(err);
         if (state && state.val) {
             if (cb) cb();
@@ -77,8 +77,8 @@ function checkValueOfState(id, value, cb, counter) {
 }
 */
 
-describe('Test ' + adapterShortName + '-writeNulls adapter', function () {
-    before('Test ' + adapterShortName + '-writeNulls adapter: Start js-controller', function (_done) {
+describe(`Test ${adapterShortName}-writeNulls adapter`, function () {
+    before(`Test ${adapterShortName}-writeNulls adapter: Start js-controller`, function (_done) {
         this.timeout(600000); // because of first install from npm
 
         setup.setupController(async function () {
@@ -110,7 +110,7 @@ describe('Test ' + adapterShortName + '-writeNulls adapter', function () {
         });
     });
 
-    it('Test ' + adapterShortName + '-writeNulls adapter: Check if adapter started', function (done) {
+    it(`Test ${adapterShortName}-writeNulls adapter: Check if adapter started`, function (done) {
         this.timeout(60000);
         checkConnectionOfAdapter(function (res) {
             if (res) console.log(res);
@@ -121,11 +121,11 @@ describe('Test ' + adapterShortName + '-writeNulls adapter', function () {
 
     tests.register(it, expect, sendTo, adapterShortName, true, 0, 0);
 
-    after('Test ' + adapterShortName + '-writeNulls adapter: Stop js-controller', function (done) {
+    after(`Test ${adapterShortName}-writeNulls adapter: Stop js-controller`, function (done) {
         this.timeout(20000);
 
         setup.stopController(function (normalTerminated) {
-            console.log('Adapter normal terminated: ' + normalTerminated);
+            console.log(`Adapter normal terminated: ${normalTerminated}`);
             setTimeout(done, 10000);
         });
     });
