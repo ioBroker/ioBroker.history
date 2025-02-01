@@ -7,7 +7,7 @@ export interface DataEntry {
 }
 
 export interface IobDataEntry {
-    val: number;
+    val: number | null;
     ts: number;
     time?: string;
     id?: string;
