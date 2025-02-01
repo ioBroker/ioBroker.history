@@ -5,22 +5,24 @@
 
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-const fs = require('fs');
+const fs = require('node:fs');
 
 const earliestDBValue = {};
-const earliesValCachefile = __dirname + '/earliestDBValues.json';
+const earliesValCachefile = `${__dirname}/earliestDBValues.json`;
 const existingData = {};
-const existingDataCachefile = __dirname + '/existingDBValues.json';
+const existingDataCachefile = `${__dirname}/existingDBValues.json`;
 const existingTypes = {};
-const existingTypesCachefile = __dirname + '/existingDBTypes.json';
+const existingTypesCachefile = `${__dirname}/existingDBTypes.json`;
 
 let deepAnalyze = false;
 let influxInstance = 'influxdb.0';
 let influxDbVersion = 1;
 let bucket = 'iobroker';
 
-if (process.argv.indexOf('--deepAnalyze') !== -1) deepAnalyze = true;
-if (process.argv[2] && (process.argv[2].indexOf('influxdb') === 0)) {
+if (process.argv.includes('--deepAnalyze')) {
+    deepAnalyze = true;
+}
+if (process.argv[2] && process.argv[2].startsWith('influxdb')) {
     influxInstance = process.argv[2];
 }
 process.argv[2] = '--install';
@@ -32,7 +34,7 @@ if (deepAnalyze) {
 let breakIt = false;
 const adapter = new utils.Adapter({
     name: 'history',
-    ready: main
+    ready: main,
 });
 
 const stdin = process.stdin;
@@ -44,12 +46,12 @@ stdin.resume();
 // i don't want binary, do you?
 stdin.setEncoding('utf8');
 // on any data into stdin
-stdin.on('data', (key) => {
+stdin.on('data', key => {
     // write the key to stdout all normal like
     console.log(`Received Keypress: ${key.toString()}`);
 
     // ctrl-c ( end of text )
-    if (key == 'x' || key == '\u0003') {
+    if (key === 'x' || key === '\u0003') {
         console.log('Trying to stop...');
         breakIt = true;
     }
@@ -80,7 +82,7 @@ async function main() {
                 query = `import "influxdata/influxdb/schema" schema.measurements(bucket: "${bucket}")`;
             }
 
-            adapter.sendTo(influxInstance, 'query', query, (result) => {
+            adapter.sendTo(influxInstance, 'query', query, result => {
                 if (result) {
                     dpList = result.result[0];
 
@@ -105,7 +107,7 @@ function analyze() {
             setTimeout(analyze, 5000);
         } else {
             const dp = dpList.shift();
-            const dpName = (influxDbVersion == 2) ? dp._value : dp.name;
+            const dpName = influxDbVersion == 2 ? dp._value : dp.name;
 
             let query = `SELECT FIRST(ack) AS val FROM "${dpName}"`;
             if (deepAnalyze) {
@@ -135,13 +137,15 @@ function analyze() {
                 }
             }
 
-            adapter.sendTo(influxInstance, 'query', query, (resultDP) => {
+            adapter.sendTo(influxInstance, 'query', query, resultDP => {
                 if (resultDP.error) {
                     console.error(resultDP.error);
                 } else {
                     if (resultDP.result[0]) {
                         earliestDBValue[dpName] = resultDP.result[0][0].ts;
-                        console.log(`FirstVal ID: ${dpName}, Rows: ${JSON.stringify(resultDP.result[0])} --> ${new Date(earliestDBValue[dpName]).toString()}`);
+                        console.log(
+                            `FirstVal ID: ${dpName}, Rows: ${JSON.stringify(resultDP.result[0])} --> ${new Date(earliestDBValue[dpName]).toString()}`,
+                        );
                     }
 
                     if (deepAnalyze) {
@@ -164,7 +168,10 @@ function analyze() {
                         }
 
                         if (resultDP.result[2] && resultDP.result[2][0]) {
-                            existingTypes[dpName] = (influxDbVersion == 2) ? typeof resultDP.result[2][0]._value : typeof resultDP.result[2][0].val;
+                            existingTypes[dpName] =
+                                influxDbVersion == 2
+                                    ? typeof resultDP.result[2][0]._value
+                                    : typeof resultDP.result[2][0].val;
                             console.log(`ValType ID: ${dpName}: ${JSON.stringify(existingTypes[dpName])}`);
                         }
                     }
@@ -198,7 +205,7 @@ function ts2day(ts) {
     const m = dateObj.getMonth() + 1;
     const d = dateObj.getDate();
 
-    return `${y}${(m < 10) ? `0${m}` : m}${(d < 10) ? `0${d}` : d}`;
+    return `${y}${m < 10 ? `0${m}` : m}${d < 10 ? `0${d}` : d}`;
 }
 
 process.on('SIGINT', function () {
