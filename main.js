@@ -907,46 +907,67 @@ function checkRetention(id) {
 }
 
 function appendFile(id, states) {
-    const day = GetHistory.ts2day(states[states.length - 1].ts);
-
-    const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
-    let data;
-
-    let i;
-    for (i = states.length - 1; i >= 0; i--) {
-        if (!states[i]) {
-            continue;
+    // Check storage type from config
+    if (adapter.config.storageType === 'mongodb') {
+        // Use MongoDB storage
+        const mongodb = require('./lib/mongodb-storage');
+        if (!mongodb.client) {
+            mongodb.connect(adapter.config.mongoUrl, adapter.config.mongoDatabase)
+                .then(() => {
+                    states.forEach(state => {
+                        mongodb.storeValue(id, state);
+                    });
+                })
+                .catch(err => {
+                    adapter.log.error(`Cannot store data in MongoDB: ${err}`);
+                });
+        } else {
+            states.forEach(state => {
+                mongodb.storeValue(id, state);
+            });
         }
-        if (GetHistory.ts2day(states[i].ts) !== day) {
-            break;
+    } else {
+        // Use file storage (default)
+        const day = GetHistory.ts2day(states[states.length - 1].ts);
+        const file = GetHistory.getFilenameForID(adapter.config.storeDir, day, id);
+        let data;
+
+        let i;
+        for (i = states.length - 1; i >= 0; i--) {
+            if (!states[i]) {
+                continue;
+            }
+            if (GetHistory.ts2day(states[i].ts) !== day) {
+                break;
+            }
         }
-    }
 
-    data = states.splice(i - states.length + 1);
+        data = states.splice(i - states.length + 1);
 
-    if (fs.existsSync(file)) {
+        if (fs.existsSync(file)) {
+            try {
+                data = JSON.parse(fs.readFileSync(file, 'utf8')).concat(data);
+            } catch (err) {
+                adapter.log.error(`Cannot read file ${file}: ${err}`);
+            }
+        }
+
         try {
-            data = JSON.parse(fs.readFileSync(file, 'utf8')).concat(data);
-        } catch (err) {
-            adapter.log.error(`Cannot read file ${file}: ${err}`);
+            // create directory
+            if (!fs.existsSync(adapter.config.storeDir + day)) {
+                fs.mkdirSync(adapter.config.storeDir + day);
+            }
+            fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+        } catch (ex) {
+            adapter.log.error(`Cannot store file ${file}: ${ex}`);
         }
-    }
 
-    try {
-        // create directory
-        if (!fs.existsSync(adapter.config.storeDir + day)) {
-            fs.mkdirSync(adapter.config.storeDir + day);
+        if (states.length) {
+            appendFile(id, states);
         }
-        fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
-    } catch (ex) {
-        adapter.log.error(`Cannot store file ${file}: ${ex}`);
-    }
 
-    if (states.length) {
-        appendFile(id, states);
+        checkRetention(id);
     }
-
-    checkRetention(id);
 }
 
 function getOneCachedData(id, options, cache, addId) {

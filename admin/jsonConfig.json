@@ -13,13 +13,41 @@
           "md": 12,
           "lg": 12
         },
+        "storageType": {
+            "type": "select",
+            "label": "Storage Type",
+            "sm": 12,
+            "md": 4,
+            "lg": 4,
+            "options": [
+                {"label": "File Storage", "value": "file"},
+                {"label": "MongoDB", "value": "mongodb"}
+            ]
+        },
+        "mongoUrl": {
+            "type": "text",
+            "label": "MongoDB URL",
+            "sm": 12,
+            "md": 4,
+            "lg": 4,
+            "hidden": "data.storageType !== 'mongodb'"
+        },
+        "mongoDatabase": {
+            "type": "text", 
+            "label": "MongoDB Database",
+            "sm": 12,
+            "md": 4,
+            "lg": 4,
+            "hidden": "data.storageType !== 'mongodb'"
+        },
         "storeDir": {
           "newLine": true,
           "type": "text",
           "label": "storeDir",
           "sm": 12,
           "md": 4,
-          "lg": 4
+          "lg": 4,
+          "hidden": "data.storageType !== 'file'"
         },
         "storeFrom": {
           "newLine": true,
