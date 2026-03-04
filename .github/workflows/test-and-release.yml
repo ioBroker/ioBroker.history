@@ -1,3 +1,6 @@
+# This is a composition of lint and test scripts
+# Make sure to update this file along with the others
+
 name: Test and Release
 
 # Run this job on all pushes and pull requests
@@ -5,12 +8,12 @@ name: Test and Release
 on:
   push:
     branches:
-      - "master"
+      - '*'
     tags:
       # normal versions
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - 'v?[0-9]+.[0-9]+.[0-9]+'
       # pre-releases
-      - "v[0-9]+.[0-9]+.[0-9]+-**"
+      - 'v?[0-9]+.[0-9]+.[0-9]+-**'
   pull_request: {}
 
 # Cancel previous PR/branch runs when a new commit is pushed
@@ -28,32 +31,38 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-check@v1
         with:
-          node-version: '18.x'
+          node-version: '22.x'
           lint: true
 
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
+    needs: [check-and-lint]
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 22.x, 24.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: ioBroker/testing-action-adapter@v1
         with:
+          build: true
+          os: 'ubuntu-latest'
           node-version: ${{ matrix.node-version }}
-          os: ${{ matrix.os }}
-          # Uncomment the following line if your adapter cannot be installed using 'npm ci'
-          # install-command: 'npm install'
 
   # Deploys the final package to NPM
   deploy:
     needs: [check-and-lint, adapter-tests]
 
-   # Trigger this step only when a commit on any branch is tagged with a version number
+    # Permissions are required to create GitHub releases and npm trusted publishing
+    permissions:
+      contents: write
+      id-token: write
+
+    # Trigger this step only when a commit on any branch is tagged with a version number
     if: |
       contains(github.event.head_commit.message, '[skip ci]') == false &&
       github.event_name == 'push' &&
@@ -64,13 +73,12 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-deploy@v1
         with:
-          node-version: '18.x'
-          npm-token: ${{ secrets.NPM_TOKEN }}
+          node-version: '22.x'
+          build: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
           sentry-project: "iobroker-history"
           sentry-version-prefix: "iobroker.history"
-          # If your sentry project is linked to a GitHub repository, you can enable the following option
-          sentry-github-integration: true
+          sentry-url: "https://sentry.iobroker.net"
+          sentry-org: "iobroker"
