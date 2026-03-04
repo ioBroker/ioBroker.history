@@ -1,7 +1,6 @@
 # Dependabot will run on day 7 of each month at 02:49 (Europe/Berlin timezone)
 version: 2
 updates:
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

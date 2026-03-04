@@ -1,254 +1,234 @@
 {
-  "common": {
-    "name": "history",
-    "title": "History",
-    "titleLang": {
-      "en": "History",
-      "de": "History",
-      "ru": "History",
-      "pt": "History",
-      "nl": "History",
-      "fr": "History",
-      "it": "History",
-      "es": "History",
-      "pl": "History",
-      "zh-cn": "历史"
-    },
-    "desc": {
-      "en": "Logging of the state history in files",
-      "de": "Protokollierung der Zustandsgeschichte in Dateien",
-      "ru": "Ведение истории событий в файлах",
-      "pt": "Registro do histórico de estado em arquivos",
-      "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
-      "fr": "Consignation de l'historique des états dans les fichiers",
-      "it": "Registrazione della cronologia di stato nei file",
-      "es": "Registro del historial del estado en archivos",
-      "pl": "Rejestrowanie historii stanu w plikach",
-      "zh-cn": "在文件中记录状态历史记录"
-    },
-    "version": "3.0.1",
-    "news": {
-      "3.0.1": {
-        "en": "activated the round option when averaging",
-        "de": "aktiviert die runde option bei der mittelung",
-        "ru": "активировал круглый вариант при аверсии",
-        "pt": "ativado a opção redonda quando uma média",
-        "nl": "de ronde optie geactiveerd",
-        "fr": "a activé l ' option ronde lorsque la moyenne",
-        "it": "attiva l'opzione rotonda quando si media",
-        "es": "activa la opción redonda cuando el promedio",
-        "pl": "ostateczna opcja aktywowana została w trakcie awarii",
-        "uk": "активований круглий варіант при перетворенні",
-        "zh-cn": "变 时采用圆桌会议选择"
-      },
-      "3.0.0": {
-        "en": "fix history2db.js with controller v5\nMinimal node.sj version is 16\nAdded support for `count` aggregate type on getHistory",
-        "de": "fix history2db.js mit controller v5\nMinimal node.sj version is 16\nUnterstützung für Grafit-Aggregat-Typ auf getHistory",
-        "ru": "исправить history2db.js с контроллером v5\nМинимальная версия node.sj 16\nДобавлена поддержка подсчета агрегатного типа на getHistory",
-        "pt": "corrigir history2db.js com controlador v5\nVersão mínima do node.sj é 16\nAdicionado suporte para contar o tipo agregado em getHistory",
-        "nl": "vertaling:\nMinimale node\nVermeldde steun voor het tel aggregate type",
-        "fr": "corriger history2db.js avec controller v5\nMinimal node.sj version est 16\nAjout du support pour compter le type agrégé sur getHistory",
-        "it": "correzione cronologia2db.js con controller v5\nVersione minimal node.sj è 16\nAggiunto supporto per conteggio tipo aggregato su getHistory",
-        "es": "fijar historia2db.js con controlador v5\nNodo mínimo.sj versión es 16\nSoporte añadido para el tipo de cuenta agregado en getHistory",
-        "pl": "poprawiona historia2db z kontrolerem v5\nWersja minimalna jest 16\nWsparcie dla liczby zbitych typów",
-        "uk": "виправити історію2db.js з контролером v5\nMinimal node.sj версія 16\nДодано підтримку підрахунку агрегатного типу на getHistory",
-        "zh-cn": "fix 历史2db.j with controller v5\n米切尔·诺贝尔(签名)\n增加对准礼品总值的支持"
-      },
-      "2.2.6": {
-        "en": "Fix getHistory when aggregations were used in some cases",
-        "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
-        "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
-        "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
-        "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
-        "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
-        "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
-        "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
-        "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
-        "uk": "Виправлення Історія при агрегаціях",
-        "zh-cn": "固定 在有些情况下使用汇总的历史"
-      },
-      "2.2.5": {
-        "en": "Fix getHistory when aggregations were used in some cases",
-        "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
-        "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
-        "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
-        "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
-        "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
-        "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
-        "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
-        "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
-        "uk": "Виправлення Історія при агрегаціях",
-        "zh-cn": "固定 在有些情况下使用汇总的历史"
-      },
-      "2.2.4": {
-        "en": "Update for future js-controller versions",
-        "de": "Update für zukünftige js-controller Versionen",
-        "ru": "Обновление для будущих версий js-controller",
-        "pt": "Atualização para futuras versões js-controller",
-        "nl": "Update voor toekomstige Js-controller versie",
-        "fr": "Update for future js-controller versions",
-        "it": "Aggiornamento per future versioni js-controller",
-        "es": "Actualización para futuras versiones js-controller",
-        "pl": "Wersja js-controllerowa",
-        "zh-cn": "B. 今后控制容忍版本的最新情况"
-      },
-      "2.2.3": {
-        "en": "Fix error in history2db converter script",
-        "de": "Fehler in history2db Konverter-Skript beheben",
-        "ru": "Исправление ошибки в history2db конвертер скрипт",
-        "pt": "Corrigir erro no script conversor history2db",
-        "nl": "Quality over Quantity (QoQ) Releases Vertaling:",
-        "fr": "Erreur fixe dans le script de convertisseur history2db",
-        "it": "Risolvere l'errore nella sceneggiatura del convertitore storico2db",
-        "es": "Error de fijación en la historia2db convertidor script",
-        "pl": "Błąd w historii2db",
-        "zh-cn": "A. 历史上2b 转换成文的错误"
-      },
-      "2.2.1": {
-        "en": "Fix crash cases reported by Sentry",
-        "de": "Reparieren Crashfälle gemeldet von Sentry",
-        "ru": "Исправление случаев аварии, описанных Sentry",
-        "pt": "Corrigir casos de acidente relatados por Sentry",
-        "nl": "Vertaling:",
-        "fr": "Troubles de crash signalés par Sentry",
-        "it": "Correzione dei casi di crash segnalati da Sentry",
-        "es": "Casos de accidente fijo reportados por Sentry",
-        "pl": "Sprawy katastrofy Fix podane przez Sentry’a",
-        "zh-cn": "Sentry所报告的六例事故"
-      }
-    },
-    "mode": "daemon",
-    "platform": "Javascript/Node.js",
-    "loglevel": "info",
-    "messagebox": true,
-    "subscribe": "messagebox",
-    "eraseOnUpload": true,
-    "keywords": [
-      "charts",
-      "history",
-      "logging",
-      "graphs",
-      "Graphen",
-      "data",
-      "archive"
-    ],
-    "enabled": true,
-    "compact": true,
-    "preserveSettings": "custom",
-    "authors": [
-      "bluefox <dogafox@gmail.com>",
-      "hobbyquaker <hq@ccu.io>",
-      "Apollon77 <ingo@fischer-ka.de>"
-    ],
-    "license": "MIT",
-    "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
-    "icon": "history.png",
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
-    "type": "storage",
-    "supportCustoms": true,
-    "getHistory": true,
-    "dependencies": [
-      {
-        "js-controller": ">=3.3.0"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=5.1.28"
-      }
-    ],
-    "supportStopInstance": 10000,
-    "stopTimeout": 10000,
-    "docs": {
-      "en": [
-        "docs/en/README.md"
-      ],
-      "de": [
-        "docs/de/README.md"
-      ]
-    },
-    "plugins": {
-      "sentry": {
-        "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
-      }
-    },
-    "adminUI": {
-      "config": "json",
-      "custom": "json"
-    },
-    "connectionType": "none",
-    "dataSource": "push",
-    "tier": 1,
-    "messages": [
-      {
-        "condition": {
-          "operand": "and",
-          "rules": [
-            "oldVersion<2.0.0",
-            "newVersion>=2.0.0"
-          ]
+    "common": {
+        "name": "history",
+        "title": "History",
+        "titleLang": {
+            "en": "History",
+            "de": "History",
+            "ru": "History",
+            "pt": "History",
+            "nl": "History",
+            "fr": "History",
+            "it": "History",
+            "es": "History",
+            "pl": "History",
+            "zh-cn": "历史"
         },
-        "title": {
-          "en": "Important notice!",
-          "de": "Wichtiger Hinweis!",
-          "ru": "Важное замечание!",
-          "pt": "Notícia importante!",
-          "nl": "Belangrijke mededeling!",
-          "fr": "Avis important!",
-          "it": "Avviso IMPORTANTE!",
-          "es": "Noticia importante!",
-          "pl": "Ważna uwaga!",
-          "zh-cn": "重要通知!"
+        "desc": {
+            "en": "Logging of the state history in files",
+            "de": "Protokollierung der Zustandsgeschichte in Dateien",
+            "ru": "Ведение истории событий в файлах",
+            "pt": "Registro do histórico de estado em arquivos",
+            "nl": "Logboekregistratie van de statusgeschiedenis in bestanden",
+            "fr": "Consignation de l'historique des états dans les fichiers",
+            "it": "Registrazione della cronologia di stato nei file",
+            "es": "Registro del historial del estado en archivos",
+            "pl": "Rejestrowanie historii stanu w plikach",
+            "zh-cn": "在文件中记录状态历史记录"
         },
-        "text": {
-          "en": "This new version introduces several changes how values are logged because we fixed several issues and added new features. Please especially check the defined \"debounce\" and \"block time\" settings in your datapoints if values are not logged as expected and make sure the settings make sense. For more details please refer to the changelog and Readme.",
-          "de": "Diese neue Version führt mehrere Änderungen ein, wie Werte protokolliert werden, da wir mehrere Probleme behoben und neue Funktionen hinzugefügt haben. Bitte überprüfen Sie insbesondere die definierten „Entprellen“- und „Sperrzeit“-Einstellungen in Ihren Datenpunkten, wenn Werte nicht wie erwartet protokolliert werden, und stellen Sie sicher, dass die Einstellungen sinnvoll sind. Weitere Details finden Sie im Changelog und in der Readme.",
-          "ru": "В этой новой версии внесено несколько изменений в регистрацию значений, поскольку мы исправили несколько проблем и добавили новые функции. Пожалуйста, особенно проверьте определенные настройки «debounce» и «block time» в ваших точках данных, если значения не регистрируются должным образом, и убедитесь, что настройки имеют смысл. Для получения более подробной информации, пожалуйста, обратитесь к журналу изменений и Readme.",
-          "pt": "Esta nova versão apresenta várias alterações na forma como os valores são registrados, pois corrigimos vários problemas e adicionamos novos recursos. Verifique especialmente as configurações definidas de \"debounce\" e \"block time\" em seus pontos de dados se os valores não forem registrados conforme o esperado e verifique se as configurações fazem sentido. Para obter mais detalhes, consulte o log de alterações e o Leiame.",
-          "nl": "Deze nieuwe versie introduceert verschillende wijzigingen in de manier waarop waarden worden geregistreerd, omdat we verschillende problemen hebben opgelost en nieuwe functies hebben toegevoegd. Controleer vooral de gedefinieerde \"debounce\" en \"block time\" instellingen in uw datapunten als de waarden niet zijn vastgelegd zoals verwacht en zorg ervoor dat de instellingen kloppen. Raadpleeg de changelog en Readme voor meer informatie.",
-          "fr": "Cette nouvelle version introduit plusieurs changements dans la journalisation des valeurs car nous avons corrigé plusieurs problèmes et ajouté de nouvelles fonctionnalités. Veuillez vérifier en particulier les paramètres \"anti-rebond\" et \"temps de blocage\" définis dans vos points de données si les valeurs ne sont pas enregistrées comme prévu et assurez-vous que les paramètres ont un sens. Pour plus de détails, veuillez consulter le journal des modifications et le fichier Lisez-moi.",
-          "it": "Questa nuova versione introduce diverse modifiche al modo in cui i valori vengono registrati perché abbiamo risolto diversi problemi e aggiunto nuove funzionalità. Controllare in particolare le impostazioni definite \"debounce\" e \"block time\" nei propri datapoint se i valori non sono registrati come previsto e assicurarsi che le impostazioni abbiano un senso. Per maggiori dettagli, fare riferimento al log delle modifiche e al Leggimi.",
-          "es": "Esta nueva versión introduce varios cambios en la forma en que se registran los valores porque solucionamos varios problemas y agregamos nuevas funciones. Verifique especialmente la configuración definida de \"antirrebote\" y \"tiempo de bloqueo\" en sus puntos de datos si los valores no se registran como se esperaba y asegúrese de que la configuración tenga sentido. Para obtener más detalles, consulte el registro de cambios y el archivo Léame.",
-          "pl": "Ta nowa wersja wprowadza kilka zmian w sposobie rejestrowania wartości, ponieważ naprawiliśmy kilka problemów i dodaliśmy nowe funkcje. W szczególności sprawdź zdefiniowane ustawienia „odbicia” i „czasu blokowania” w punktach danych, jeśli wartości nie są rejestrowane zgodnie z oczekiwaniami i upewnij się, że ustawienia mają sens. Aby uzyskać więcej informacji, zapoznaj się z dziennikiem zmian i Readme.",
-          "zh-cn": "这个新版本引入了一些更改值的记录方式，因为我们修复了几个问题并添加了新功能。如果未按预期记录值，请特别检查数据点中定义的“去抖动”和“阻塞时间”设置，并确保设置有意义。有关更多详细信息，请参阅更改日志和自述文件。"
+        "version": "3.0.1",
+        "news": {
+            "3.0.1": {
+                "en": "activated the round option when averaging",
+                "de": "aktiviert die runde option bei der mittelung",
+                "ru": "активировал круглый вариант при аверсии",
+                "pt": "ativado a opção redonda quando uma média",
+                "nl": "de ronde optie geactiveerd",
+                "fr": "a activé l ' option ronde lorsque la moyenne",
+                "it": "attiva l'opzione rotonda quando si media",
+                "es": "activa la opción redonda cuando el promedio",
+                "pl": "ostateczna opcja aktywowana została w trakcie awarii",
+                "uk": "активований круглий варіант при перетворенні",
+                "zh-cn": "变 时采用圆桌会议选择"
+            },
+            "3.0.0": {
+                "en": "fix history2db.js with controller v5\nMinimal node.sj version is 16\nAdded support for `count` aggregate type on getHistory",
+                "de": "fix history2db.js mit controller v5\nMinimal node.sj version is 16\nUnterstützung für Grafit-Aggregat-Typ auf getHistory",
+                "ru": "исправить history2db.js с контроллером v5\nМинимальная версия node.sj 16\nДобавлена поддержка подсчета агрегатного типа на getHistory",
+                "pt": "corrigir history2db.js com controlador v5\nVersão mínima do node.sj é 16\nAdicionado suporte para contar o tipo agregado em getHistory",
+                "nl": "vertaling:\nMinimale node\nVermeldde steun voor het tel aggregate type",
+                "fr": "corriger history2db.js avec controller v5\nMinimal node.sj version est 16\nAjout du support pour compter le type agrégé sur getHistory",
+                "it": "correzione cronologia2db.js con controller v5\nVersione minimal node.sj è 16\nAggiunto supporto per conteggio tipo aggregato su getHistory",
+                "es": "fijar historia2db.js con controlador v5\nNodo mínimo.sj versión es 16\nSoporte añadido para el tipo de cuenta agregado en getHistory",
+                "pl": "poprawiona historia2db z kontrolerem v5\nWersja minimalna jest 16\nWsparcie dla liczby zbitych typów",
+                "uk": "виправити історію2db.js з контролером v5\nMinimal node.sj версія 16\nДодано підтримку підрахунку агрегатного типу на getHistory",
+                "zh-cn": "fix 历史2db.j with controller v5\n米切尔·诺贝尔(签名)\n增加对准礼品总值的支持"
+            },
+            "2.2.6": {
+                "en": "Fix getHistory when aggregations were used in some cases",
+                "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
+                "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
+                "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
+                "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
+                "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
+                "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
+                "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
+                "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
+                "uk": "Виправлення Історія при агрегаціях",
+                "zh-cn": "固定 在有些情况下使用汇总的历史"
+            },
+            "2.2.5": {
+                "en": "Fix getHistory when aggregations were used in some cases",
+                "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
+                "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
+                "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
+                "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
+                "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
+                "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
+                "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
+                "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
+                "uk": "Виправлення Історія при агрегаціях",
+                "zh-cn": "固定 在有些情况下使用汇总的历史"
+            },
+            "2.2.4": {
+                "en": "Update for future js-controller versions",
+                "de": "Update für zukünftige js-controller Versionen",
+                "ru": "Обновление для будущих версий js-controller",
+                "pt": "Atualização para futuras versões js-controller",
+                "nl": "Update voor toekomstige Js-controller versie",
+                "fr": "Update for future js-controller versions",
+                "it": "Aggiornamento per future versioni js-controller",
+                "es": "Actualización para futuras versiones js-controller",
+                "pl": "Wersja js-controllerowa",
+                "zh-cn": "B. 今后控制容忍版本的最新情况"
+            },
+            "2.2.3": {
+                "en": "Fix error in history2db converter script",
+                "de": "Fehler in history2db Konverter-Skript beheben",
+                "ru": "Исправление ошибки в history2db конвертер скрипт",
+                "pt": "Corrigir erro no script conversor history2db",
+                "nl": "Quality over Quantity (QoQ) Releases Vertaling:",
+                "fr": "Erreur fixe dans le script de convertisseur history2db",
+                "it": "Risolvere l'errore nella sceneggiatura del convertitore storico2db",
+                "es": "Error de fijación en la historia2db convertidor script",
+                "pl": "Błąd w historii2db",
+                "zh-cn": "A. 历史上2b 转换成文的错误"
+            },
+            "2.2.1": {
+                "en": "Fix crash cases reported by Sentry",
+                "de": "Reparieren Crashfälle gemeldet von Sentry",
+                "ru": "Исправление случаев аварии, описанных Sentry",
+                "pt": "Corrigir casos de acidente relatados por Sentry",
+                "nl": "Vertaling:",
+                "fr": "Troubles de crash signalés par Sentry",
+                "it": "Correzione dei casi di crash segnalati da Sentry",
+                "es": "Casos de accidente fijo reportados por Sentry",
+                "pl": "Sprawy katastrofy Fix podane przez Sentry’a",
+                "zh-cn": "Sentry所报告的六例事故"
+            }
         },
-        "link": "https://github.com/ioBroker/ioBroker.history/blob/master/docs/en/README.md#settings",
-        "level": "warn",
-        "linkText": {
-          "en": "Readme",
-          "de": "Liesmich",
-          "ru": "Прочти меня",
-          "pt": "Leia-me",
-          "nl": "Leesmij",
-          "fr": "Lisez-moi",
-          "it": "Leggimi",
-          "es": "Léame",
-          "pl": "Readme",
-          "zh-cn": "自述文件"
+        "mode": "daemon",
+        "platform": "Javascript/Node.js",
+        "loglevel": "info",
+        "messagebox": true,
+        "eraseOnUpload": true,
+        "keywords": ["charts", "history", "logging", "graphs", "Graphen", "data", "archive"],
+        "enabled": true,
+        "compact": true,
+        "preserveSettings": "custom",
+        "authors": ["bluefox <dogafox@gmail.com>", "hobbyquaker <hq@ccu.io>", "Apollon77 <ingo@fischer-ka.de>"],
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
         },
-        "buttons": [
-          "agree",
-          "cancel"
+        "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
+        "icon": "history.png",
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
+        "type": "storage",
+        "supportCustoms": true,
+        "getHistory": true,
+        "dependencies": [
+            {
+                "js-controller": ">=3.3.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.1.28"
+            }
+        ],
+        "supportStopInstance": 10000,
+        "stopTimeout": 10000,
+        "docs": {
+            "en": ["docs/en/README.md"],
+            "de": ["docs/de/README.md"]
+        },
+        "plugins": {
+            "sentry": {
+                "dsn": "https://08fcc63117684cf3af4fa0e551857b5d@sentry.iobroker.net/35"
+            }
+        },
+        "adminUI": {
+            "config": "json",
+            "custom": "json"
+        },
+        "connectionType": "none",
+        "dataSource": "push",
+        "tier": 1,
+        "messages": [
+            {
+                "condition": {
+                    "operand": "and",
+                    "rules": ["oldVersion<2.0.0", "newVersion>=2.0.0"]
+                },
+                "title": {
+                    "en": "Important notice!",
+                    "de": "Wichtiger Hinweis!",
+                    "ru": "Важное замечание!",
+                    "pt": "Notícia importante!",
+                    "nl": "Belangrijke mededeling!",
+                    "fr": "Avis important!",
+                    "it": "Avviso IMPORTANTE!",
+                    "es": "Noticia importante!",
+                    "pl": "Ważna uwaga!",
+                    "zh-cn": "重要通知!"
+                },
+                "text": {
+                    "en": "This new version introduces several changes how values are logged because we fixed several issues and added new features. Please especially check the defined \"debounce\" and \"block time\" settings in your datapoints if values are not logged as expected and make sure the settings make sense. For more details please refer to the changelog and Readme.",
+                    "de": "Diese neue Version führt mehrere Änderungen ein, wie Werte protokolliert werden, da wir mehrere Probleme behoben und neue Funktionen hinzugefügt haben. Bitte überprüfen Sie insbesondere die definierten „Entprellen“- und „Sperrzeit“-Einstellungen in Ihren Datenpunkten, wenn Werte nicht wie erwartet protokolliert werden, und stellen Sie sicher, dass die Einstellungen sinnvoll sind. Weitere Details finden Sie im Changelog und in der Readme.",
+                    "ru": "В этой новой версии внесено несколько изменений в регистрацию значений, поскольку мы исправили несколько проблем и добавили новые функции. Пожалуйста, особенно проверьте определенные настройки «debounce» и «block time» в ваших точках данных, если значения не регистрируются должным образом, и убедитесь, что настройки имеют смысл. Для получения более подробной информации, пожалуйста, обратитесь к журналу изменений и Readme.",
+                    "pt": "Esta nova versão apresenta várias alterações na forma como os valores são registrados, pois corrigimos vários problemas e adicionamos novos recursos. Verifique especialmente as configurações definidas de \"debounce\" e \"block time\" em seus pontos de dados se os valores não forem registrados conforme o esperado e verifique se as configurações fazem sentido. Para obter mais detalhes, consulte o log de alterações e o Leiame.",
+                    "nl": "Deze nieuwe versie introduceert verschillende wijzigingen in de manier waarop waarden worden geregistreerd, omdat we verschillende problemen hebben opgelost en nieuwe functies hebben toegevoegd. Controleer vooral de gedefinieerde \"debounce\" en \"block time\" instellingen in uw datapunten als de waarden niet zijn vastgelegd zoals verwacht en zorg ervoor dat de instellingen kloppen. Raadpleeg de changelog en Readme voor meer informatie.",
+                    "fr": "Cette nouvelle version introduit plusieurs changements dans la journalisation des valeurs car nous avons corrigé plusieurs problèmes et ajouté de nouvelles fonctionnalités. Veuillez vérifier en particulier les paramètres \"anti-rebond\" et \"temps de blocage\" définis dans vos points de données si les valeurs ne sont pas enregistrées comme prévu et assurez-vous que les paramètres ont un sens. Pour plus de détails, veuillez consulter le journal des modifications et le fichier Lisez-moi.",
+                    "it": "Questa nuova versione introduce diverse modifiche al modo in cui i valori vengono registrati perché abbiamo risolto diversi problemi e aggiunto nuove funzionalità. Controllare in particolare le impostazioni definite \"debounce\" e \"block time\" nei propri datapoint se i valori non sono registrati come previsto e assicurarsi che le impostazioni abbiano un senso. Per maggiori dettagli, fare riferimento al log delle modifiche e al Leggimi.",
+                    "es": "Esta nueva versión introduce varios cambios en la forma en que se registran los valores porque solucionamos varios problemas y agregamos nuevas funciones. Verifique especialmente la configuración definida de \"antirrebote\" y \"tiempo de bloqueo\" en sus puntos de datos si los valores no se registran como se esperaba y asegúrese de que la configuración tenga sentido. Para obtener más detalles, consulte el registro de cambios y el archivo Léame.",
+                    "pl": "Ta nowa wersja wprowadza kilka zmian w sposobie rejestrowania wartości, ponieważ naprawiliśmy kilka problemów i dodaliśmy nowe funkcje. W szczególności sprawdź zdefiniowane ustawienia „odbicia” i „czasu blokowania” w punktach danych, jeśli wartości nie są rejestrowane zgodnie z oczekiwaniami i upewnij się, że ustawienia mają sens. Aby uzyskać więcej informacji, zapoznaj się z dziennikiem zmian i Readme.",
+                    "zh-cn": "这个新版本引入了一些更改值的记录方式，因为我们修复了几个问题并添加了新功能。如果未按预期记录值，请特别检查数据点中定义的“去抖动”和“阻塞时间”设置，并确保设置有意义。有关更多详细信息，请参阅更改日志和自述文件。"
+                },
+                "link": "https://github.com/ioBroker/ioBroker.history/blob/master/docs/en/README.md#settings",
+                "level": "warn",
+                "linkText": {
+                    "en": "Readme",
+                    "de": "Liesmich",
+                    "ru": "Прочти меня",
+                    "pt": "Leia-me",
+                    "nl": "Leesmij",
+                    "fr": "Lisez-moi",
+                    "it": "Leggimi",
+                    "es": "Léame",
+                    "pl": "Readme",
+                    "zh-cn": "自述文件"
+                },
+                "buttons": ["agree", "cancel"]
+            }
         ]
-      }
-    ]
-  },
-  "native": {
-    "maxLength": 960,
-    "limit": 2000,
-    "storeDir": "",
-    "blockTime": 0,
-    "debounceTime": 0,
-    "retention": 31536000,
-    "storeFrom": false,
-    "storeAck": true,
-    "changesRelogInterval": 0,
-    "changesMinDelta": 0,
-    "writeNulls": true,
-    "disableSkippedValueLogging": false,
-    "enableLogging": false,
-    "round": "",
-    "customRetentionDuration": 365
-  },
-  "objects": []
+    },
+    "native": {
+        "maxLength": 960,
+        "limit": 2000,
+        "storeDir": "",
+        "blockTime": 0,
+        "debounceTime": 0,
+        "retention": 31536000,
+        "storeFrom": false,
+        "storeAck": true,
+        "changesRelogInterval": 0,
+        "changesMinDelta": 0,
+        "writeNulls": true,
+        "disableSkippedValueLogging": false,
+        "enableLogging": false,
+        "round": "",
+        "customRetentionDuration": 365
+    },
+    "objects": []
 }

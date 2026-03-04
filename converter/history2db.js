@@ -1,26 +1,26 @@
 'use strict';
 
-//usage: nodejs history2db.js [<DB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
-//usage: nodejs history2db.js influxdb.0 info 20161001 /path/to/data
+// usage: nodejs history2db.js [<DB-Instance>] [<Loglevel>] [<Date-to-start>|0] [<path-to-Data>] [<delayMultiplicator>] [--logChangesOnly [<relog-Interval(s)>]] [--ignoreExistingDBValues]
+// usage: nodejs history2db.js influxdb.0 info 20161001 /path/to/data
 
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const dataDir = utils.getAbsoluteDefaultDataDir();
-let historydir = path.join(dataDir, 'history-data');
+let historyDir = path.join(dataDir, 'history-data');
 
 let earliestDBValue = {};
-const earliesValCachefile = __dirname + '/earliestDBValues.json';
+const earliesValCachefile = `${__dirname}/earliestDBValues.json`;
 let earliesValCachefileExists = false;
 
 let existingDBValues = {};
-const existingDataCachefile = __dirname + '/existingDBValues.json';
+const existingDataCachefile = `${__dirname}/existingDBValues.json`;
 let processNonExistingValues = false;
 
 let existingTypes = {};
-const existingTypesCachefile = __dirname + '/existingDBTypes.json';
+const existingTypesCachefile = `${__dirname}/existingDBTypes.json`;
 let existingTypesCachefileExists = false;
 
 let processAllDPs = false;
@@ -36,22 +36,34 @@ let processCounter = 0;
 
 if (process.argv[2]) {
     dbInstance = process.argv[2];
-    if (process.argv[4] && parseInt(process.argv[4], 10) > 0) endDay = parseInt(process.argv[4], 10);
-    if (process.argv[5]) historydir = process.argv[5];
-    if (process.argv[6] && !isNaN(parseFloat(process.argv[6]))) delayMultiplicator = parseFloat(process.argv[6]);
-    if (process.argv.indexOf('--ignoreExistingDBValues') !== -1) ignoreEarliesDBValues = true;
+    if (process.argv[4] && parseInt(process.argv[4], 10) > 0) {
+        endDay = parseInt(process.argv[4], 10);
+    }
+    if (process.argv[5]) {
+        historyDir = process.argv[5];
+    }
+    if (process.argv[6] && !isNaN(parseFloat(process.argv[6]))) {
+        delayMultiplicator = parseFloat(process.argv[6]);
+    }
+    if (process.argv.indexOf('--ignoreExistingDBValues') !== -1) {
+        ignoreEarliesDBValues = true;
+    }
     if (process.argv.indexOf('--processNonExistingValuesOnly') !== -1) {
         ignoreEarliesDBValues = true;
         processNonExistingValues = true;
     }
-    if (process.argv.indexOf('--processAllDPs') !== -1) processAllDPs = true;
-    if (process.argv.indexOf('--simulate') !== -1) simulate = true;
+    if (process.argv.indexOf('--processAllDPs') !== -1) {
+        processAllDPs = true;
+    }
+    if (process.argv.indexOf('--simulate') !== -1) {
+        simulate = true;
+    }
 
-    const logchangesPos = process.argv.indexOf('--logChangesOnly');
-    if (logchangesPos !== -1) {
+    const logChangesPos = process.argv.indexOf('--logChangesOnly');
+    if (logChangesPos !== -1) {
         logChangesOnly = true;
-        if (process.argv[logchangesPos + 1]) {
-            const logTime = parseInt(process.argv[logchangesPos + 1], 10);
+        if (process.argv[logChangesPos + 1]) {
+            const logTime = parseInt(process.argv[logChangesPos + 1], 10);
             if (!isNaN(logTime) && logTime > 0) {
                 logChangesOnlyTime = logTime * 60000;
             }
@@ -64,11 +76,17 @@ if (process.argv[2]) {
 }
 
 console.log(`Send Data to ${dbInstance}`);
-if (endDay !== 0) console.log(`Start at ${endDay}`);
-console.log(`Use historyDir ${historydir}`);
+if (endDay !== 0) {
+    console.log(`Start at ${endDay}`);
+}
+console.log(`Use historyDir ${historyDir}`);
 
-if (delayMultiplicator != 1) console.log(`Use Delay multiplicator ${delayMultiplicator}`);
-if (logChangesOnly) console.log(`Log changes only once per ${logChangesOnlyTime / 60000} minutes`);
+if (delayMultiplicator !== 1) {
+    console.log(`Use Delay multiplicator ${delayMultiplicator}`);
+}
+if (logChangesOnly) {
+    console.log(`Log changes only once per ${logChangesOnlyTime / 60000} minutes`);
+}
 
 const adapter = utils.Adapter('history');
 
@@ -89,7 +107,7 @@ stdin.on('data', function (key) {
         breakIt = true;
     }
     // write the key to stdout all normal like
-    console.log('Received Keypress: ' + key);
+    console.log(`Received Keypress: ${key}`);
 });
 
 adapter.on('ready', function () {
@@ -120,7 +138,9 @@ function main() {
             if (ignoreEarliesDBValues) {
                 const dateNow = Date.now();
                 for (const id in earliestDBValue) {
-                    if (!earliestDBValue.hasOwnProperty(id)) continue;
+                    if (!earliestDBValue.hasOwnProperty(id)) {
+                        continue;
+                    }
                     earliestDBValue[id] = dateNow;
                 }
                 console.log(`earliesDBValues overwritten with ${dateNow}`);
@@ -136,7 +156,7 @@ function main() {
         if (fs.statSync(existingTypesCachefile).isFile()) {
             const exFileContent = fs.readFileSync(existingTypesCachefile);
             existingTypes = JSON.parse(exFileContent);
-            console.log('ExistingDBTypes initialized from cache ' + Object.keys(existingTypes).length);
+            console.log(`ExistingDBTypes initialized from cache ${Object.keys(existingTypes).length}`);
             existingTypesCachefileExists = true;
         } else {
             existingTypesCachefileExists = false;
@@ -156,7 +176,9 @@ function processFiles() {
     if (endDay === 0) {
         let endDayTs = 0;
         for (const id in earliestDBValue) {
-            if (!earliestDBValue.hasOwnProperty(id)) continue;
+            if (!earliestDBValue.hasOwnProperty(id)) {
+                continue;
+            }
             if (earliestDBValue[id] > endDayTs) {
                 endDayTs = earliestDBValue[id];
                 //console.log('new minimum = ' + id + '(' + endDayTs + ')');
@@ -167,14 +189,12 @@ function processFiles() {
     console.log(`We start earliest at ${endDay}`);
 
     // get list of directories
-    const dayList = getDirectories(historydir).sort((a, b) => {
-        return b - a;
-    });
+    const dayList = getDirectories(historyDir).sort((a, b) => b - a);
 
     for (let i = 0; i < dayList.length; i++) {
         const day = parseInt(dayList[i], 10);
         if (!isNaN(day) && day <= endDay) {
-            const dir = historydir + '/' + dayList[i].toString() + '/';
+            const dir = `${historyDir}/${dayList[i].toString()}/`;
 
             allFiles[dayList[i].toString()] = {};
             allFiles[dayList[i].toString()].dirname = dir;
@@ -186,8 +206,12 @@ function processFiles() {
 }
 
 function processFile() {
-    if (breakIt) finish(true);
-    if (Object.keys(allFiles).length === 0) finish(true);
+    if (breakIt) {
+        finish(true);
+    }
+    if (Object.keys(allFiles).length === 0) {
+        finish(true);
+    }
 
     const day = parseInt(Object.keys(allFiles)[Object.keys(allFiles).length - 1], 10);
     const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
@@ -196,12 +220,13 @@ function processFile() {
         const dir = allFiles[day].dirname;
         const file = allFiles[day].files.shift();
         const id = file.substring(8, file.length - 5);
-        const weatherunderground_special_handling = (id.indexOf('weatherunderground') !== -1 && id.indexOf('current.precip') !== -1);
-        console.log('Day ' + day + ' - ' + file);
+        const weatherunderground_special_handling =
+            id.indexOf('weatherunderground') !== -1 && id.includes('current.precip');
+        console.log(`Day ${day} - ${file}`);
 
         if (earliesValCachefileExists) {
             if (!earliestDBValue[id] || earliestDBValue[id] === 0) {
-                console.log('    Ignore ID ' + file + ': ' + id);
+                console.log(`    Ignore ID ${file}: ${id}`);
                 setTimeout(processFile, 10);
                 return;
             }
@@ -212,9 +237,12 @@ function processFile() {
         }
 
         if (processNonExistingValues) {
-            existingDBValues[id] && console.log('Check: ' + day + ' / pos ' + existingDBValues[id].indexOf(day) /*+ " :" +JSON.stringify(existingDBValues[id])*/);
+            existingDBValues[id] &&
+                console.log(
+                    `Check: ${day} / pos ${existingDBValues[id].indexOf(day)}` /*+ " :" +JSON.stringify(existingDBValues[id])*/,
+                );
             if (existingDBValues[id] && existingDBValues[id].indexOf(day) !== -1) {
-                console.log('    Ignore existing ID ' + file + ': ' + id);
+                console.log(`    Ignore existing ID ${file}: ${id}`);
                 setTimeout(processFile, 10);
                 return;
             }
@@ -222,11 +250,11 @@ function processFile() {
 
         let fileData;
         try {
-            const fileContent = fs.readFileSync(dir + '/' + file);
+            const fileContent = fs.readFileSync(`${dir}/${file}`);
 
-            fileData = JSON.parse(fileContent, function (key, value) {
+            fileData = JSON.parse(fileContent, (key, value) => {
                 if (key === 'ts') {
-                    // if the ts is smaller then the one from the 1.1. of the relevant year, it is in seconds and needs to be adjusted
+                    // if the ts is smaller than the one from the 1.1. of the relevant year, it is in seconds and needs to be adjusted
                     if (value < tsCheck) value *= 1000;
                 } else if (key === 'ack') {
                     value = !!value;
@@ -238,7 +266,7 @@ function processFile() {
                 return value;
             });
         } catch (e) {
-            console.log('Cannot parse file ' + dir + '/' + file + ': ' + e.message);
+            console.log(`Cannot parse file ${dir}/${file}: ${e.message}`);
         }
 
         //console.log('    File ' + j +': ' + id + ' --> ' + fileData.length);
@@ -249,7 +277,7 @@ function processFile() {
                 if (fileData[k].ts >= earliestDBValue[id]) break;
             }
             fileData = fileData.slice(0, k);
-            console.log('cut filedata to ' + fileData.length);
+            console.log(`cut filedata to ${fileData.length}`);
         }
 
         let lastValue = null;
@@ -258,12 +286,18 @@ function processFile() {
         if (fileData && fileData.length > 0) {
             const sendData = {
                 id: id,
-                state: []
+                state: [],
             };
 
             for (let j = 0; j < fileData.length; j++) {
                 if (fileData[j].ts < earliestDBValue[id]) earliestDBValue[id] = fileData[j].ts;
-                if (fileData[j].val !== null && (lastValue === null || fileData[j].val != lastValue || !logChangesOnly || (logChangesOnly && Math.abs(fileData[j].ts - lastTime) > logChangesOnlyTime))) {
+                if (
+                    fileData[j].val !== null &&
+                    (lastValue === null ||
+                        fileData[j].val != lastValue ||
+                        !logChangesOnly ||
+                        (logChangesOnly && Math.abs(fileData[j].ts - lastTime) > logChangesOnlyTime))
+                ) {
                     sendData.state.push(fileData[j]);
                     lastValue = fileData[j].val;
                     lastTime = fileData[j].ts;
@@ -272,11 +306,11 @@ function processFile() {
                 // else console.log('not use value = ' + fileData[j].val)
             }
 
-            console.log('  datapoints reduced from ' + fileData.length + ' --> ' + sendData.state.length);
+            console.log(`  datapoints reduced from ${fileData.length} --> ${sendData.state.length}`);
             if (existingTypesCachefileExists) {
                 if (!existingTypes[id]) {
                     existingTypes[id] = typeof sendData.state[sendData.state.length - 1].val;
-                    console.log('  used last value to initialize type: ' + existingTypes[id]);
+                    console.log(`  used last value to initialize type: ${existingTypes[id]}`);
                 }
                 let sortedOut = 0;
                 for (let jj = 0; jj < sendData.state.length; jj++) {
@@ -334,10 +368,12 @@ function processFile() {
 
                                 break;
                         }
-                        console.log('  type mismatch ' + existingTypes[id] + ' vs. ' + currType + ': fixed=' + (sendData.state[jj].val !== null) + ' --> ' + sendData.state[jj].val);
+                        console.log(
+                            `  type mismatch ${existingTypes[id]} vs. ${currType}: fixed=${sendData.state[jj].val !== null} --> ${sendData.state[jj].val}`,
+                        );
                     }
                 }
-                console.log('  sorted out ' + sortedOut + ' values');
+                console.log(`  sorted out ${sortedOut} values`);
                 if (sortedOut === sendData.state.length) {
                     sendData.state = [];
                 }
@@ -350,14 +386,14 @@ function processFile() {
                     existingDBValues[id].push(day);
                 }
                 if (!simulate) {
-                    adapter.sendTo(dbInstance, 'storeState', sendData, function (result) {
+                    adapter.sendTo(dbInstance, 'storeState', sendData, result => {
                         if (result.error) {
                             console.error(result.error);
                             finish(false);
                         }
 
                         if (result.success && !result.connected) {
-                            console.error('Data stored but db not available anymore, break. ' + JSON.stringify(result));
+                            console.error(`Data stored but db not available anymore, break. ${JSON.stringify(result)}`);
                             finish(true);
                         }
 
@@ -371,7 +407,7 @@ function processFile() {
                         setTimeout(processFile, delay);
                     });
                 } else {
-                    console.log('  SIMULATE: Not really writing ... ' + sendData.state.length + ' values for ' + id);
+                    console.log(`  SIMULATE: Not really writing ... ${sendData.state.length} values for ${id}`);
                     setTimeout(processFile, 10);
                 }
             } else {
@@ -382,15 +418,25 @@ function processFile() {
         }
     } else {
         delete allFiles[day];
-        if (!ignoreEarliesDBValues && !simulate) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue, null, 2));
-        if (processNonExistingValues && !simulate) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues, null, 2));
-        if (existingTypesCachefileExists && !simulate) fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes, null, 2));
+        if (!ignoreEarliesDBValues && !simulate) {
+            fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue, null, 2));
+        }
+        if (processNonExistingValues && !simulate) {
+            fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues, null, 2));
+        }
+        if (existingTypesCachefileExists && !simulate) {
+            fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes, null, 2));
+        }
 
         console.log('Day end');
 
         let dayDelay = 30000;
-        if (processCounter < 10) dayDelay = 1000;
-        if (processCounter === 0) dayDelay = 10;
+        if (processCounter < 10) {
+            dayDelay = 1000;
+        }
+        if (processCounter === 0) {
+            dayDelay = 10;
+        }
         processCounter = 0;
         setTimeout(processFile, dayDelay);
     }
@@ -398,31 +444,31 @@ function processFile() {
 
 function finish(updateData) {
     console.log('DONE');
-    if (updateData && !ignoreEarliesDBValues && !simulate) fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue, null, 2));
-    if (updateData && processNonExistingValues && !simulate) fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues, null, 2));
-    if (updateData && existingTypesCachefileExists && !simulate) fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes, null, 2));
+    if (updateData && !ignoreEarliesDBValues && !simulate) {
+        fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue, null, 2));
+    }
+    if (updateData && processNonExistingValues && !simulate) {
+        fs.writeFileSync(existingDataCachefile, JSON.stringify(existingDBValues, null, 2));
+    }
+    if (updateData && existingTypesCachefileExists && !simulate) {
+        fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes, null, 2));
+    }
 
     process.exit();
 }
 
 function getDirectories(path) {
     try {
-        return fs.readdirSync(path).filter((file) => {
-            return fs.statSync(path + '/' + file).isDirectory();
-        });
-    }
-    catch (e) {
+        return fs.readdirSync(path).filter(file => fs.statSync(`${path}/${file}`).isDirectory());
+    } catch (e) {
         return [];
     }
 }
 
 function getFiles(path) {
     try {
-        return fs.readdirSync(path).filter(function (file) {
-            return fs.statSync(path + '/' + file).isFile();
-        });
-    }
-    catch (e) {
+        return fs.readdirSync(path).filter(file => fs.statSync(`${path}/${file}`).isFile());
+    } catch (e) {
         return [];
     }
 }
@@ -433,13 +479,9 @@ function ts2day(ts) {
     const m = dateObj.getMonth() + 1;
     const d = dateObj.getDate();
 
-    return `${y}${(m < 10) ? `0${m}` : m}${(d < 10) ? `0${d}` : d}`;
+    return `${y}${m < 10 ? `0${m}` : m}${d < 10 ? `0${d}` : d}`;
 }
 
-process.on('SIGINT', function () {
-    breakIt = true;
-});
+process.on('SIGINT', () => (breakIt = true));
 
-process.on('uncaughtException', function () {
-    breakIt = true;
-});
+process.on('uncaughtException', () => (breakIt = true));
