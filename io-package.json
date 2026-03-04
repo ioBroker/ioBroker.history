@@ -1,7 +1,6 @@
 {
     "common": {
         "name": "history",
-        "title": "History",
         "titleLang": {
             "en": "History",
             "de": "History",
