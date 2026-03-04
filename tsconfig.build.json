@@ -5,8 +5,8 @@
         "checkJs": false,
         "noEmit": false,
         "declaration": false,
-        "types": ["@iobroker/types"]
+        "rootDir": "src",
+        "outDir": "build"
     },
-    "include": ["lib/**/*.ts"],
-    "exclude": ["src/excludeMe.ts"]
+    "include": ["src/**/*.ts"]
 }

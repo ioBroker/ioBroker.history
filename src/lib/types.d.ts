@@ -9,9 +9,12 @@ export interface DataEntry {
 export interface IobDataEntry {
     val: number | null;
     ts: number;
+    lc?: number;
     time?: string;
     id?: string;
-    ack?: boolean;
+    ack?: boolean | 0 | 1;
+    user?: string;
+    c?: string;
     from?: string;
     q?: number;
     /** Interpolated value */
@@ -116,7 +119,7 @@ export interface GetHistoryOptionsExtended extends GetHistoryOptions {
 }
 
 export interface InternalHistoryOptions extends GetHistoryOptions {
-    id?: string;
+    id: string;
     logDebug?: boolean;
     log?: typeof console.log;
     processing?: {
@@ -138,4 +141,9 @@ export interface InternalHistoryOptions extends GetHistoryOptions {
 
     timeIntervals?: TimeInterval[];
     currentTimeInterval?: number;
+    logId: string;
+    length?: number;
+    path: string;
+    user?: boolean;
+    comment?: boolean;
 }

@@ -5,8 +5,8 @@
 
 //noinspection JSUnresolvedFunction
 
-//usage: nodejs analyzesql.js <SQL-Instance>  [<Loglevel>]
-//usage: nodejs analyzesql.js sql.0 info
+// usage: nodejs analyzesql.js <SQL-Instance>  [<Loglevel>]
+// usage: nodejs analyzesql.js sql.0 info
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
 const fs = require('node:fs');
@@ -28,8 +28,8 @@ if (deepAnalyze) {
 
 const earliestDBValue = {};
 const earliesValCachefile = `${__dirname}/earliestDBValues.json`;
-//const existingData = {};
-//const existingDataCachefile = __dirname + '/existingDBValues.json';
+// const existingData = {};
+// const existingDataCachefile = __dirname + '/existingDBValues.json';
 const existingTypes = {};
 const existingTypesCachefile = `${__dirname}/existingDBTypes.json`;
 
@@ -51,7 +51,9 @@ function main() {
             console.log(JSON.stringify(result.result));
             for (const id in result.result) {
                 earliestDBValue[id] = result.result[id].ts;
-                if (result.result[id].type !== 'undefined') existingTypes[id] = result.result[id].type;
+                if (result.result[id].type !== 'undefined') {
+                    existingTypes[id] = result.result[id].type;
+                }
             }
             fs.writeFileSync(existingTypesCachefile, JSON.stringify(existingTypes));
             fs.writeFileSync(earliesValCachefile, JSON.stringify(earliestDBValue));
@@ -60,11 +62,9 @@ function main() {
     });
 }
 
-process.on('SIGINT', function () {
-    process.exit();
-});
+process.on('SIGINT', () => process.exit());
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', err => {
     console.log(err);
     process.exit();
 });

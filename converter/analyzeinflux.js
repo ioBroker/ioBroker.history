@@ -1,7 +1,7 @@
 'use strict';
 
-//usage: nodejs analyzeinflux.js <InfluxDB-Instance> [<Loglevel>]
-//usage: nodejs analyzeinflux.js influxdb.0 info
+// usage: nodejs analyzeinflux.js <InfluxDB-Instance> [<Loglevel>]
+// usage: nodejs analyzeinflux.js influxdb.0 info
 
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
@@ -151,15 +151,15 @@ function analyze() {
                     if (deepAnalyze) {
                         if (resultDP.result[1]) {
                             existingData[dpName] = [];
-                            for (var j = 0; j < resultDP.result[1].length; j++) {
+                            for (let j = 0; j < resultDP.result[1].length; j++) {
                                 if (influxDbVersion == 2) {
                                     if (resultDP.result[1][j]._value > 0) {
-                                        var ts = new Date(resultDP.result[1][j]._time);
+                                        let ts = new Date(resultDP.result[1][j]._time);
                                         existingData[dpName].push(parseInt(ts2day(ts), 10));
                                     }
                                 } else {
                                     if (resultDP.result[1][j].val > 0) {
-                                        var ts = new Date(resultDP.result[1][j].ts);
+                                        let ts = new Date(resultDP.result[1][j].ts);
                                         existingData[dpName].push(parseInt(ts2day(ts), 10));
                                     }
                                 }
@@ -167,7 +167,7 @@ function analyze() {
                             console.log(`DayVals ID: ${dpName}: ${JSON.stringify(existingData[dpName])}`);
                         }
 
-                        if (resultDP.result[2] && resultDP.result[2][0]) {
+                        if (resultDP.result[2]?.[0]) {
                             existingTypes[dpName] =
                                 influxDbVersion == 2
                                     ? typeof resultDP.result[2][0]._value
@@ -208,12 +208,12 @@ function ts2day(ts) {
     return `${y}${m < 10 ? `0${m}` : m}${d < 10 ? `0${d}` : d}`;
 }
 
-process.on('SIGINT', function () {
+process.on('SIGINT', () => {
     console.log('SIGINT');
     breakIt = true;
 });
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', err => {
     console.log(`uncaughtException: ${err}`);
     breakIt = true;
 });
