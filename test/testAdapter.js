@@ -1,9 +1,10 @@
-/* jshint -W097 */ // jshint strict:false
-/*jslint node: true */
-/*jshint expr: true*/
+/* jshint -W097 */
+/* jshint strict: false */
+/* jslint node: true */
+/* jshint expr: true */
 const expect = require('chai').expect;
-const setup = require(`${__dirname}/lib/setup`);
-const tests = require('./lib/testcases');
+const setup = require('@iobroker/legacy-testing');
+const tests = require('./lib/testCases');
 
 let objects = null;
 let states = null;
@@ -34,47 +35,22 @@ function sendTo(target, command, message, callback) {
 
 function checkConnectionOfAdapter(cb, counter) {
     counter = counter || 0;
-    console.log('Try check #' + counter);
+    console.log(`Try check #${counter}`);
     if (counter > 30) {
         if (cb) cb('Cannot check connection');
         return;
     }
 
-    console.log('Checking alive key for key : ' + adapterShortName);
-    states.getState('system.adapter.' + adapterShortName + '.0.alive', function (err, state) {
-        if (err) console.error(err);
-        if (state && state.val) {
-            if (cb) cb();
+    console.log(`Checking alive key for key : ${adapterShortName}`);
+    states.getState(`system.adapter.${adapterShortName}.0.alive`, (err, state) => {
+        err && console.error(err);
+        if (state?.val) {
+            cb?.();
         } else {
-            setTimeout(function () {
-                checkConnectionOfAdapter(cb, counter + 1);
-            }, 1000);
+            setTimeout(() => checkConnectionOfAdapter(cb, counter + 1), 1000);
         }
     });
 }
-/*
-function checkValueOfState(id, value, cb, counter) {
-    counter = counter || 0;
-    if (counter > 20) {
-        if (cb) cb('Cannot check value Of State ' + id);
-        return;
-    }
-
-    states.getState(id, function (err, state) {
-        if (err) console.error(err);
-        if (value === null && !state) {
-            if (cb) cb();
-        } else
-        if (state && (value === undefined || state.val === value)) {
-            if (cb) cb();
-        } else {
-            setTimeout(function () {
-                checkValueOfState(id, value, cb, counter + 1);
-            }, 500);
-        }
-    });
-}
-*/
 
 describe(`Test ${adapterShortName}-writeNulls adapter`, function () {
     before(`Test ${adapterShortName}-writeNulls adapter: Start js-controller`, function (_done) {
