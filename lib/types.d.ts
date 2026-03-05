@@ -140,7 +140,7 @@ export interface GetHistoryOptionsExtended extends GetHistoryOptions {
 export interface InternalHistoryOptions extends GetHistoryOptions {
     id: string;
     logDebug?: boolean;
-    log?: typeof console.log;
+    log?: (msg: string) => void;
     processing?: {
         val: { ts: number | null; val: number | null };
         max: { ts: number | null; val: number | null };

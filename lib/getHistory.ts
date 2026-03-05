@@ -226,7 +226,7 @@ function response(options: InternalHistoryOptions): ResponseTuple | void {
 }
 
 function processData(options: InternalHistoryOptions): void {
-    options.log!(`${Date.now()}: Initialize structures`);
+    options.log!(`${Date.now()}: Initialize structures: ${JSON.stringify(options)}`);
     // initAggregate mutates options in-place and returns the same object
     initAggregate(options);
     initialized = true;
