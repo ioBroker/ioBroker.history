@@ -31,12 +31,12 @@ interface CustomStateConfig {
 
 interface HistoryStateStore {
     config: CustomStateConfig;
-    list: IobDataEntry[];
-    timeout: ReturnType<typeof setTimeout> | null;
-    relogTimeout: ReturnType<typeof setTimeout> | null;
-    skipped: IobDataEntry | null;
-    state: IobDataEntry | null;
     realId: string;
+    list: IobDataEntry[];
+    timeout?: ReturnType<typeof setTimeout> | null;
+    relogTimeout?: ReturnType<typeof setTimeout> | null;
+    skipped?: IobDataEntry | null;
+    state?: IobDataEntry | null;
     lastLogTime?: number;
     lastCheck?: number;
 }
@@ -185,6 +185,7 @@ class HistoryAdapter extends Adapter {
                         this.history[formerAliasId].relogTimeout = null;
                     }
 
+                    this.history[id] ||= {} as HistoryStateStore;
                     this.history[id].config = customConfig;
                     this.history[id].state = state;
                     this.history[id].list = list || [];

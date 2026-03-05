@@ -1,6 +1,7 @@
 {
     "i18n": true,
     "type": "panel",
+    "statesFilter": "^history\\.\\d\\..*$",
     "items": {
         "debounceTime": {
             "newLine": true,
