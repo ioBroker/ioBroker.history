@@ -39,7 +39,7 @@
     "engines": {
         "node": ">=20"
     },
-    "main": "main.ts",
+    "main": "main.js",
     "files": [
         "admin/",
         "converter/",
