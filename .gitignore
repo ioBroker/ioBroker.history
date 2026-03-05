@@ -6,3 +6,4 @@ iob_npm.done
 
 # ioBroker dev-server
 .dev-server/
+/tmp/

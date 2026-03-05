@@ -1,14 +1,13 @@
-/* jshint -W097 */// jshint strict:false
+/* jshint -W097 */ // jshint strict:false
 /*jslint node: true */
 /*jshint expr: true*/
 const expect = require('chai').expect;
-const setup = require(__dirname + '/lib/setup');
+const setup = require(`${__dirname}/lib/setup`);
 const tests = require('./lib/testcases');
 
 let objects = null;
 let states = null;
 let onStateChanged = null;
-//var onObjectChanged = null;
 let sendToID = 1;
 
 const adapterShortName = setup.adapterName.substring(setup.adapterName.indexOf('.') + 1);
@@ -21,15 +20,15 @@ function sendTo(target, command, message, callback) {
     };
 
     states.pushMessage('system.adapter.' + target, {
-        command:    command,
-        message:    message,
-        from:       'system.adapter.test.0',
+        command: command,
+        message: message,
+        from: 'system.adapter.test.0',
         callback: {
             message: message,
-            id:      sendToID++,
-            ack:     false,
-            time:    (new Date()).getTime()
-        }
+            id: sendToID++,
+            ack: false,
+            time: new Date().getTime(),
+        },
     });
 }
 
@@ -77,14 +76,14 @@ function checkValueOfState(id, value, cb, counter) {
 }
 */
 
-describe('Test ' + adapterShortName + '-writeNulls adapter', function() {
-    before('Test ' + adapterShortName + '-writeNulls adapter: Start js-controller', function (_done) {
+describe(`Test ${adapterShortName}-writeNulls adapter`, function () {
+    before(`Test ${adapterShortName}-writeNulls adapter: Start js-controller`, function (_done) {
         this.timeout(600000); // because of first install from npm
 
         setup.setupController(async function () {
             var config = await setup.getAdapterConfig();
             // enable adapter
-            config.common.enabled  = true;
+            config.common.enabled = true;
             config.common.loglevel = 'debug';
 
             config.native.enableDebugLogs = true;
@@ -92,21 +91,25 @@ describe('Test ' + adapterShortName + '-writeNulls adapter', function() {
 
             await setup.setAdapterConfig(config.common, config.native);
 
-            setup.startController(true, function(id, obj) {}, function (id, state) {
+            setup.startController(
+                true,
+                function (id, obj) {},
+                function (id, state) {
                     if (onStateChanged) onStateChanged(id, state);
                 },
                 async (_objects, _states) => {
                     objects = _objects;
-                    states  = _states;
+                    states = _states;
 
                     await tests.preInit(objects, states, sendTo, adapterShortName);
 
                     _done();
-                });
+                },
+            );
         });
     });
 
-    it('Test ' + adapterShortName + '-writeNulls adapter: Check if adapter started', function (done) {
+    it(`Test ${adapterShortName}-writeNulls adapter: Check if adapter started`, function (done) {
         this.timeout(60000);
         checkConnectionOfAdapter(function (res) {
             if (res) console.log(res);
@@ -117,7 +120,7 @@ describe('Test ' + adapterShortName + '-writeNulls adapter', function() {
 
     tests.register(it, expect, sendTo, adapterShortName, true, 0, 0);
 
-    after('Test ' + adapterShortName + '-writeNulls adapter: Stop js-controller', function (done) {
+    after(`Test ${adapterShortName}-writeNulls adapter: Stop js-controller`, function (done) {
         this.timeout(20000);
 
         setup.stopController(function (normalTerminated) {
