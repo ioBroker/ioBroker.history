@@ -5,8 +5,8 @@
 
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const dataDir = utils.getAbsoluteDefaultDataDir();
 let historydir = path.join(dataDir, 'history-data');

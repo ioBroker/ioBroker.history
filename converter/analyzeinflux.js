@@ -5,7 +5,7 @@
 
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-const fs = require('fs');
+const fs = require('node:fs');
 
 const earliestDBValue = {};
 const earliesValCachefile = `${__dirname}/earliestDBValues.json`;

@@ -49,6 +49,7 @@
         "main.js"
     ],
     "scripts": {
+        "build": "tsc -p tsconfig.build.json",
         "test:package": "mocha test/package --exit",
         "test:integration": "mocha test/test* --exit",
         "test": "npm run test:integration && npm run test:package",

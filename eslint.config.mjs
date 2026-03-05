@@ -16,10 +16,13 @@ export default [
         ignores: [
             'src-admin/**/*',
             'admin/**/*',
+            'converter/**/*',
             'node_modules/**/*',
             'test/**/*',
             'build/**/*',
             'tasks.js',
+            'lib/getHistory.js',
+            'lib/time.js',
             'tmp/**/*',
             '.**/*',
         ],

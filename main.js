@@ -1179,7 +1179,7 @@ function pushHelper(_id, state) {
 }
 
 function checkRetention(id) {
-    if (history[id] && history[id][adapter.namespace] && history[id][adapter.namespace].retention) {
+    if (history[id]?.[adapter.namespace]?.retention) {
         const d = new Date();
         const dt = d.getTime();
         // check every 6 hours
@@ -1352,9 +1352,11 @@ function tsSort(a, b) {
 }
 
 function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
-    addId = addId || options.addId;
+    addId ||= options.addId;
 
-    options.debugLog && adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
+    if (options.debugLog) {
+        adapter.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
+    }
 
     // get all files in directory
     for (let i = 0; i < dayList.length; i++) {
