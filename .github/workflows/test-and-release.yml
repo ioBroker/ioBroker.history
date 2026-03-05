@@ -49,7 +49,6 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-adapter@v1
         with:
-          build: true
           os: 'ubuntu-latest'
           node-version: ${{ matrix.node-version }}
 
@@ -74,7 +73,6 @@ jobs:
       - uses: ioBroker/testing-action-deploy@v1
         with:
           node-version: '22.x'
-          build: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
