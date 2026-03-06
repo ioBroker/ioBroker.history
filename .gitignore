@@ -6,3 +6,5 @@ iob_npm.done
 .dev-server/
 /tmp/
 *.tgz
+/CLAUDE.md
+/.claude/settings.local.json

@@ -1130,11 +1130,11 @@ class HistoryAdapter extends adapter_core_1.Adapter {
             }, msg.callback);
         }
         const options = {
-            id: msg.message.id || '',
+            id: msg.message.id ? msg.message.id : null,
             path: this.config.storeDir,
             start: msg.message.options.start,
             end: msg.message.options.end || new Date().getTime() + 5000000,
-            step: parseInt(msg.message.options.step, 10) || undefined,
+            step: parseInt(msg.message.options.step, 10) || null,
             count: parseInt(msg.message.options.count, 10),
             from: msg.message.options.from || false,
             ack: msg.message.options.ack || false,
@@ -1150,13 +1150,13 @@ class HistoryAdapter extends adapter_core_1.Adapter {
             returnNewestEntries: msg.message.options.returnNewestEntries || false,
             percentile: msg.message.options.aggregate === 'percentile'
                 ? parseInt(msg.message.options.percentile, 10) || 50
-                : undefined,
+                : null,
             quantile: msg.message.options.aggregate === 'quantile'
                 ? parseFloat(msg.message.options.quantile) || 0.5
-                : undefined,
+                : null,
             integralUnit: msg.message.options.aggregate === 'integral'
                 ? parseInt(msg.message.options.integralUnit, 10) || 60
-                : undefined,
+                : null,
             integralInterpolation: msg.message.options.aggregate === 'integral'
                 ? msg.message.options.integralInterpolation || 'none'
                 : null,

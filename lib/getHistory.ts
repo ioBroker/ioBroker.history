@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import { initAggregate, aggregation, finishAggregation } from './aggregate';
 import type { IobDataEntry, InternalHistoryOptions } from './types';
 
-type ResponseTuple = ['response', IobDataEntry[] | undefined, number | undefined, number | undefined];
+type ResponseTuple = ['response', IobDataEntry[] | undefined, number | undefined, number | null | undefined];
 
 // ─── Module-level state ──────────────────────────────────────────────────────
 

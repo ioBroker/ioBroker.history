@@ -54,7 +54,7 @@ function checkConnectionOfAdapter(cb, counter) {
 
 describe(`Test ${adapterShortName}-writeNulls adapter`, function () {
     before(`Test ${adapterShortName}-writeNulls adapter: Start js-controller`, function (_done) {
-        this.timeout(600000); // because of first install from npm
+        this.timeout(600000); // because of the first install from npm
 
         setup.setupController(async function () {
             var config = await setup.getAdapterConfig();

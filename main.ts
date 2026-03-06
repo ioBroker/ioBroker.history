@@ -1450,7 +1450,7 @@ class HistoryAdapter extends Adapter {
             this.history[options.id]?.config?.enableDebugLogs || this.config.enableDebugLogs
         ));
 
-        // include nulls and replace them with last value
+        // include nulls and replace them with the last value
         // @ts-expect-error allow string options
         if (options.ignoreNull === 'true') {
             options.ignoreNull = true;
@@ -1575,6 +1575,7 @@ class HistoryAdapter extends Adapter {
             // to use parallel requests, activate this.
             let responseSent = false;
             this.log.debug(`${options.logId} use parallel requests for getHistory`);
+            options.result = [];
             try {
                 let gh: cp.ChildProcess | null = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], {
                     silent: false,

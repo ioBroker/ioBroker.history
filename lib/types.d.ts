@@ -50,9 +50,9 @@ interface GetHistoryOptions {
     /** Step in ms of intervals. Used in aggregate (max, min, average, total, ...)  */
     step?: number;
 
-    /** Start of smart intervals. It calculates the statistics according to real month length */
+    /** Start of the smart intervals. It calculates the statistics according to real month length */
     smartStart?: SmartDate;
-    /** Type of smart intervals  */
+    /** Type of the smart intervals  */
     smartType?: 'hour' | 'day' | 'month';
     /** End of smart intervals. It calculates the statistics according to real month length. If not defined, the end is "now" */
     smartEnd?: SmartDate;
@@ -93,11 +93,11 @@ interface GetHistoryOptions {
     returnNewestEntries?: boolean;
     /** By default, the additional border values are returned to optimize charting. Set this option to true if this is not wanted (e.g. for script data processing) */
     removeBorderValues?: boolean;
-    /** when using aggregate method `percentile` defines the percentile level (0..100)(defaults to 50) */
+    /** when using the aggregate method, `percentile` defines the percentile level (0..100)(defaults to 50) */
     percentile?: number;
-    /** when using aggregate method `quantile` defines the quantile level (0..1)(defaults to 0.5) */
+    /** when using the aggregate method, `quantile` defines the quantile level (0..1)(defaults to 0.5) */
     quantile?: number;
-    /** when using aggregate method `integral` defines the unit in seconds (defaults to 60s). e.g. to get integral in hours for Wh or such, set to 3600. */
+    /** when using an aggregate method, `integral` defines the unit in seconds (defaults to 60s). e.g. to get integral in hours for Wh or such, set to 3600. */
     integralUnit?: number;
     /** when using aggregate method `integral` defines the interpolation method (defaults to `none`). */
     integralInterpolation?: 'none' | 'linear';
