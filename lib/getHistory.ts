@@ -214,9 +214,9 @@ function response(options: InternalHistoryOptions): ResponseTuple | void {
 
     if (require.main === module) {
         if (process.send) {
-            process.send(['response', options.result, options.overallLength, options.step], () => {
-                setTimeout(() => process.exit(), 200);
-            });
+            process.send(['response', options.result, options.overallLength, options.step], () =>
+                setTimeout(() => process.exit(), 200),
+            );
         } else {
             setTimeout(() => process.exit(), 500);
         }

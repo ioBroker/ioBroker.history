@@ -46,7 +46,7 @@
         "lib/",
         "io-package.json",
         "LICENSE",
-        "main.ts"
+        "main.js"
     ],
     "scripts": {
         "build": "tsc -p tsconfig.build.json",

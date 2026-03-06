@@ -21,7 +21,6 @@ export default [
             'test/**/*',
             'build/**/*',
             'tasks.js',
-            'main.js',
             'lib/getHistory.js',
             'lib/time.js',
             'tmp/**/*',

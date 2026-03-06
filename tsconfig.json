@@ -21,6 +21,6 @@
         "lib": ["es2021"],
         "types": ["@iobroker/types", "@types/node"]
     },
-    "include": ["lib/*.ts", "lib/*.d.ts", "lib/aggregate.js", "main.ts"],
+    "include": ["lib/*.ts", "lib/*.d.ts", "lib/aggregate.js", "main.js"],
     "exclude": ["node_modules", "build"]
 }
