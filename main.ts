@@ -1,12 +1,46 @@
-const cp = require('node:child_process');
-const { Adapter, getAbsoluteDefaultDataDir } = require('@iobroker/adapter-core'); // Get common adapter utils
+import cp from 'node:child_process';
+import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
+import fs from 'node:fs';
+import { ts2day, getFilenameForID } from './lib/getHistory';
+// @ts-expect-error no types
+import Aggregate from './lib/aggregate';
+import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 const dataDir = getAbsoluteDefaultDataDir();
-const fs = require('node:fs');
-const GetHistory = require('./lib/getHistory');
-const Aggregate = require('./lib/aggregate');
 
-function isEqual(a, b) {
-    //console.log('Compare ' + JSON.stringify(a) + ' with ' +  JSON.stringify(b));
+interface CustomStateConfig {
+    enabled: boolean;
+    maxLength?: number | string;
+    aliasId?: string;
+    retention: number | string;
+    customRetentionDuration: number | string;
+    blockTime: number | string;
+    debounce: number | string;
+    debounceTime: number | string;
+    changesOnly: boolean | 'true' | 'false';
+    changesRelogInterval: number | string;
+    changesMinDelta: number | string;
+    ignoreZero: boolean | 'true' | 'false';
+    ignoreBelowZero: boolean | 'true' | 'false';
+    ignoreAboveNumber: number | string | null;
+    ignoreBelowNumber: number | string | null;
+    disableSkippedValueLogging: boolean | 'true' | 'false' | null | '';
+    round: number | string | null;
+    enableDebugLogs: boolean | 'true' | 'false' | null | '';
+}
+
+interface HistoryStateStore {
+    config: CustomStateConfig;
+    realId: string;
+    list: IobDataEntry[];
+    timeout?: ReturnType<typeof setTimeout> | null;
+    relogTimeout?: ReturnType<typeof setTimeout> | null;
+    skipped?: IobDataEntry | null;
+    state?: IobDataEntry | null;
+    lastLogTime?: number;
+    lastCheck?: number;
+}
+
+function isEqual(a: any, b: any): boolean {
     // Create arrays of property names
     if (a === null || a === undefined || b === null || b === undefined) {
         return a === b;
@@ -18,7 +52,6 @@ function isEqual(a, b) {
     // If number of properties is different,
     // objects are not equivalent
     if (aProps.length !== bProps.length) {
-        //console.log('num props different: ' + JSON.stringify(aProps) + ' / ' + JSON.stringify(bProps));
         return false;
     }
 
@@ -26,7 +59,6 @@ function isEqual(a, b) {
         const propName = aProps[i];
 
         if (typeof a[propName] !== typeof b[propName]) {
-            //console.log('type props ' + propName + ' different');
             return false;
         }
         if (typeof a[propName] === 'object') {
@@ -37,7 +69,6 @@ function isEqual(a, b) {
             // If values of same property are not equal,
             // objects are not equivalent
             if (a[propName] !== b[propName]) {
-                //console.log('props ' + propName + ' different');
                 return false;
             }
         }
@@ -48,29 +79,27 @@ function isEqual(a, b) {
     return true;
 }
 
-function sortByTs(a, b) {
+function sortByTs(a: IobDataEntry, b: IobDataEntry): -1 | 1 | 0 {
     const aTs = a.ts;
     const bTs = b.ts;
     return aTs < bTs ? -1 : aTs > bTs ? 1 : 0;
 }
 
-function tsSort(a, b) {
-    return b.ts - a.ts;
-}
-
 class HistoryAdapter extends Adapter {
-    history = {};
-    aliasMap = {};
-    subscribeAll = false;
-    bufferChecker = null;
-    tasksStart = [];
-    finished = false;
+    declare config: HistoryAdapterConfig;
 
-    constructor(options) {
+    private history: Record<string, HistoryStateStore> = {};
+    private aliasMap: Record<string, string> = {};
+    private subscribeAll = false;
+    private bufferChecker: ReturnType<typeof setInterval> | null = null;
+    private tasksStart: { id: string; now: number }[] = [];
+    private finished = false;
+
+    public constructor(options: Partial<AdapterOptions> = {}) {
         super({
             ...options,
             name: 'history',
-            objectChange: (id, obj) => {
+            objectChange: (id: string, obj: ioBroker.Object | null | undefined) => {
                 const formerAliasId = this.aliasMap[id] ? this.aliasMap[id] : id;
 
                 const customConfig = obj?.common?.custom?.[this.namespace];
@@ -113,7 +142,7 @@ class HistoryAdapter extends Adapter {
                         this.subscribeForeignStates('*');
                     }
 
-                    this.parseConfig(customConfig);
+                    this.parseStateConfig(customConfig);
 
                     if (
                         this.history[formerAliasId]?.config &&
@@ -127,17 +156,20 @@ class HistoryAdapter extends Adapter {
                         this.history[formerAliasId].relogTimeout = null;
                     }
 
-                    this.history[id] = { config: customConfig };
+                    this.history[id] = { config: customConfig } as HistoryStateStore;
                     this.history[id].state = state;
                     this.history[id].list = list || [];
                     this.history[id].timeout = timeout;
                     this.history[id].realId = realId;
 
-                    if (this.history[id].config?.changesOnly && this.history[id].config.changesRelogInterval > 0) {
+                    if (
+                        this.history[id].config?.changesOnly &&
+                        (this.history[id].config.changesRelogInterval as number) > 0
+                    ) {
                         this.history[id].relogTimeout = setTimeout(
                             _id => this.reLogHelper(_id),
-                            this.history[id].config.changesRelogInterval * 500 * Math.random() +
-                                this.history[id].config.changesRelogInterval * 500,
+                            (this.history[id].config.changesRelogInterval as number) * 500 * Math.random() +
+                                (this.history[id].config.changesRelogInterval as number) * 500,
                             id,
                         );
                     }
@@ -155,12 +187,14 @@ class HistoryAdapter extends Adapter {
                     id = formerAliasId;
                     if (this.history[id]) {
                         this.log.info(`disabled logging of ${id}`);
-                        if (this.history[id].relogTimeout) {
-                            clearTimeout(this.history[id].relogTimeout);
+                        const relogTimeout = this.history[id].relogTimeout;
+                        if (relogTimeout) {
+                            clearTimeout(relogTimeout);
                             this.history[id].relogTimeout = null;
                         }
-                        if (this.history[id].timeout) {
-                            clearTimeout(this.history[id].timeout);
+                        const timeout = this.history[id].timeout;
+                        if (timeout) {
+                            clearTimeout(timeout);
                             this.history[id].timeout = null;
                         }
                         this.storeCached(true, id);
@@ -169,30 +203,30 @@ class HistoryAdapter extends Adapter {
                 }
             },
 
-            stateChange: (id, state) => {
+            stateChange: (id: string, state: ioBroker.State | null | undefined): void => {
                 id = this.aliasMap[id] ? this.aliasMap[id] : id;
-                this.pushHistory(id, state);
+                this.pushHistory(id, state as IobDataEntry);
             },
 
-            unload: callback => this.finish(callback),
+            unload: (callback: () => void) => this.finish(callback),
 
             ready: () => this.main(),
 
-            message: obj => this.processMessage(obj),
+            message: (obj: ioBroker.Message) => this.processMessage(obj),
         });
     }
 
-    parseConfig(customConfig) {
+    parseStateConfig(customConfig: CustomStateConfig): void {
         if (!customConfig.maxLength && customConfig.maxLength !== '0' && customConfig.maxLength !== 0) {
-            customConfig.maxLength = parseInt(this.config.maxLength, 10) || 960;
+            customConfig.maxLength = parseInt(this.config.maxLength as string, 10) || 960;
         } else {
-            customConfig.maxLength = parseInt(customConfig.maxLength, 10);
+            customConfig.maxLength = parseInt(customConfig.maxLength as string, 10);
         }
 
         if (!customConfig.retention && customConfig.retention !== '0' && customConfig.retention !== 0) {
-            customConfig.retention = parseInt(this.config.retention, 10) || 0;
+            customConfig.retention = parseInt(this.config.retention as string, 10) || 0;
         } else {
-            customConfig.retention = parseInt(customConfig.retention, 10) || 0;
+            customConfig.retention = parseInt(customConfig.retention as string, 10) || 0;
         }
         if (customConfig.retention === -1) {
             // customRetentionDuration
@@ -201,26 +235,27 @@ class HistoryAdapter extends Adapter {
                 customConfig.customRetentionDuration !== null &&
                 customConfig.customRetentionDuration !== ''
             ) {
-                customConfig.customRetentionDuration = parseInt(customConfig.customRetentionDuration, 10) || 0;
+                customConfig.customRetentionDuration =
+                    parseInt(customConfig.customRetentionDuration as string, 10) || 0;
             } else {
                 customConfig.customRetentionDuration = this.config.customRetentionDuration;
             }
-            customConfig.retention = customConfig.customRetentionDuration * 24 * 60 * 60;
+            customConfig.retention = (customConfig.customRetentionDuration as number) * 24 * 60 * 60;
         }
 
         if (!customConfig.blockTime && customConfig.blockTime !== '0' && customConfig.blockTime !== 0) {
             if (!customConfig.debounce && customConfig.debounce !== '0' && customConfig.debounce !== 0) {
-                customConfig.blockTime = parseInt(this.config.blockTime, 10) || 0;
+                customConfig.blockTime = parseInt(this.config.blockTime as string, 10) || 0;
             } else {
-                customConfig.blockTime = parseInt(customConfig.debounce, 10) || 0;
+                customConfig.blockTime = parseInt(customConfig.debounce as string, 10) || 0;
             }
         } else {
-            customConfig.blockTime = parseInt(customConfig.blockTime, 10) || 0;
+            customConfig.blockTime = parseInt(customConfig.blockTime as string, 10) || 0;
         }
         if (!customConfig.debounceTime && customConfig.debounceTime !== '0' && customConfig.debounceTime !== 0) {
-            customConfig.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
+            customConfig.debounceTime = parseInt(this.config.debounceTime as string, 10) || 0;
         } else {
-            customConfig.debounceTime = parseInt(customConfig.debounceTime, 10) || 0;
+            customConfig.debounceTime = parseInt(customConfig.debounceTime as string, 10) || 0;
         }
         customConfig.changesOnly = customConfig.changesOnly === 'true' || customConfig.changesOnly === true;
         if (
@@ -228,7 +263,7 @@ class HistoryAdapter extends Adapter {
             customConfig.changesRelogInterval !== null &&
             customConfig.changesRelogInterval !== ''
         ) {
-            customConfig.changesRelogInterval = parseInt(customConfig.changesRelogInterval, 10) || 0;
+            customConfig.changesRelogInterval = parseInt(customConfig.changesRelogInterval as string, 10) || 0;
         } else {
             customConfig.changesRelogInterval = this.config.changesRelogInterval;
         }
@@ -249,14 +284,14 @@ class HistoryAdapter extends Adapter {
             customConfig.ignoreAboveNumber !== null &&
             customConfig.ignoreAboveNumber !== ''
         ) {
-            customConfig.ignoreAboveNumber = parseFloat(customConfig.ignoreAboveNumber) || null;
+            customConfig.ignoreAboveNumber = parseFloat(customConfig.ignoreAboveNumber as string) || null;
         }
         if (
             customConfig.ignoreBelowNumber !== undefined &&
             customConfig.ignoreBelowNumber !== null &&
             customConfig.ignoreBelowNumber !== ''
         ) {
-            customConfig.ignoreBelowNumber = parseFloat(customConfig.ignoreBelowNumber) || null;
+            customConfig.ignoreBelowNumber = parseFloat(customConfig.ignoreBelowNumber as string) || null;
         } else if (customConfig.ignoreBelowZero === 'true' || customConfig.ignoreBelowZero === true) {
             customConfig.ignoreBelowNumber = 0;
         }
@@ -273,12 +308,12 @@ class HistoryAdapter extends Adapter {
         }
 
         // round
-        if (customConfig.round !== null && customConfig.round !== undefined && customConfig !== '') {
-            customConfig.round = parseInt(customConfig, 10);
+        if (customConfig.round !== null && customConfig.round !== undefined && customConfig.round !== '') {
+            customConfig.round = parseInt(customConfig.round as string, 10);
             if (!isFinite(customConfig.round) || customConfig.round < 0) {
                 customConfig.round = this.config.round;
             } else {
-                customConfig.round = Math.pow(10, parseInt(customConfig.round, 10));
+                customConfig.round = Math.pow(10, customConfig.round);
             }
         } else {
             customConfig.round = this.config.round;
@@ -301,7 +336,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    storeCached(isFinishing, onlyId) {
+    storeCached(isFinishing?: boolean, onlyId?: string): void {
         const now = Date.now();
 
         for (const id in this.history) {
@@ -344,7 +379,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    finish(callback) {
+    finish(callback?: () => void): void {
         if (!this.subscribeAll) {
             for (const _id in this.history) {
                 if (Object.prototype.hasOwnProperty.call(this.history, _id)) {
@@ -382,7 +417,7 @@ class HistoryAdapter extends Adapter {
         callback?.();
     }
 
-    processMessage(msg) {
+    processMessage(msg: ioBroker.Message): void {
         if (msg.command === 'features') {
             this.sendTo(
                 msg.from,
@@ -393,13 +428,13 @@ class HistoryAdapter extends Adapter {
         } else if (msg.command === 'update') {
             this.updateState(msg);
         } else if (msg.command === 'delete') {
-            this.deleteState(msg);
+            this.deleteStateHistory(msg);
         } else if (msg.command === 'deleteAll') {
             this.deleteStateAll(msg);
         } else if (msg.command === 'deleteRange') {
-            this.deleteState(msg);
+            this.deleteStateHistory(msg);
         } else if (msg.command === 'getHistory') {
-            this.getHistory(msg);
+            this.handleGetHistory(msg);
         } else if (msg.command === 'storeState') {
             this.storeState(msg);
         } else if (msg.command === 'enableHistory') {
@@ -418,9 +453,12 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    processStartValues() {
-        if (this.tasksStart && this.tasksStart.length) {
+    processStartValues(): void {
+        if (this.tasksStart?.length) {
             const task = this.tasksStart.shift();
+            if (!task) {
+                return;
+            }
             if (this.history[task.id]?.config?.changesOnly) {
                 this.getForeignState(this.history[task.id].realId, (err, state) => {
                     const now = task.now || Date.now();
@@ -435,7 +473,7 @@ class HistoryAdapter extends Adapter {
                     if (state) {
                         state.ts = now;
                         state.from = `system.adapter.${this.namespace}`;
-                        this.pushHistory(task.id, state);
+                        this.pushHistory(task.id, state as IobDataEntry);
                     }
                     setImmediate(() => this.processStartValues());
                 });
@@ -453,7 +491,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    writeNulls(id, now) {
+    writeNulls(id?: string, now?: number): void {
         if (!id) {
             now = Date.now();
             for (const _id in this.history) {
@@ -467,35 +505,33 @@ class HistoryAdapter extends Adapter {
             if (this.tasksStart.length === 1) {
                 this.processStartValues();
             }
-            if (this.history[id].config?.changesOnly && this.history[id].config.changesRelogInterval > 0) {
+            if (this.history[id].config?.changesOnly && (this.history[id].config.changesRelogInterval as number) > 0) {
                 if (this.history[id].relogTimeout) {
                     clearTimeout(this.history[id].relogTimeout);
                 }
                 this.history[id].relogTimeout = setTimeout(
                     _id => this.reLogHelper(_id),
-                    this.history[id].config.changesRelogInterval * 500 * Math.random() +
-                        this.history[id].config.changesRelogInterval * 500,
+                    (this.history[id].config.changesRelogInterval as number) * 500 * Math.random() +
+                        (this.history[id].config.changesRelogInterval as number) * 500,
                     id,
                 );
             }
         }
     }
 
-    main() {
+    async main(): Promise<void> {
         //start
         // set default history if not yet set
-        this.getForeignObject('system.config', (err, obj) => {
-            if (obj?.common && !obj.common.defaultHistory) {
-                obj.common.defaultHistory = this.namespace;
-                this.setForeignObject('system.config', obj, err => {
-                    if (err) {
-                        this.log.error(`Cannot set default history instance: ${err}`);
-                    } else {
-                        this.log.info(`Set default history instance to "${this.namespace}"`);
-                    }
-                });
+        const systemConfig = await this.getForeignObjectAsync('system.config');
+        if (systemConfig && !systemConfig.common?.defaultHistory) {
+            systemConfig.common.defaultHistory = this.namespace;
+            try {
+                await this.setForeignObject('system.config', systemConfig);
+                this.log.info(`Set default history instance to "${this.namespace}"`);
+            } catch (err) {
+                this.log.error(`Cannot set default history instance: ${err}`);
             }
-        });
+        }
 
         this.config.storeDir ||= 'history';
         this.config.storeDir = this.config.storeDir.replace(/\\/g, '/');
@@ -513,14 +549,14 @@ class HistoryAdapter extends Adapter {
         }
         this.config.storeDir += '/';
 
-        this.config.retention = parseInt(this.config.retention, 10) || 0;
+        this.config.retention = parseInt(this.config.retention as string, 10) || 0;
         if (this.config.retention === -1) {
             // Custom timeframe
-            this.config.retention = (parseInt(this.config.customRetentionDuration, 10) || 0) * 24 * 60 * 60;
+            this.config.retention = (parseInt(this.config.customRetentionDuration as string, 10) || 0) * 24 * 60 * 60;
         }
 
         if (this.config.changesRelogInterval !== null && this.config.changesRelogInterval !== undefined) {
-            this.config.changesRelogInterval = parseInt(this.config.changesRelogInterval, 10);
+            this.config.changesRelogInterval = parseInt(this.config.changesRelogInterval as string, 10);
         } else {
             this.config.changesRelogInterval = 0;
         }
@@ -532,28 +568,28 @@ class HistoryAdapter extends Adapter {
         }
 
         if (this.config.blockTime !== null && this.config.blockTime !== undefined) {
-            this.config.blockTime = parseInt(this.config.blockTime, 10) || 0;
+            this.config.blockTime = parseInt(this.config.blockTime as string, 10) || 0;
         } else {
             if (this.config.debounce !== null && this.config.debounce !== undefined) {
-                this.config.debounce = parseInt(this.config.debounce, 10) || 0;
+                this.config.debounce = parseInt(this.config.debounce as string, 10) || 0;
             } else {
                 this.config.blockTime = 0;
             }
         }
 
         if (this.config.debounceTime !== null && this.config.debounceTime !== undefined) {
-            this.config.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
+            this.config.debounceTime = parseInt(this.config.debounceTime as string, 10) || 0;
         } else {
             this.config.debounceTime = 0;
         }
 
         if (this.config.round !== null && this.config.round !== undefined && this.config.round !== '') {
-            this.config.round = parseInt(this.config.round, 10);
+            this.config.round = parseInt(this.config.round as string, 10);
             if (!isFinite(this.config.round) || this.config.round < 0) {
                 this.config.round = null;
                 this.log.info(`Invalid round value: ${this.config.round} - ignore, do not round values`);
             } else {
-                this.config.round = Math.pow(10, parseInt(this.config.round, 10));
+                this.config.round = Math.pow(10, this.config.round);
             }
         } else {
             this.config.round = null;
@@ -585,9 +621,9 @@ class HistoryAdapter extends Adapter {
                         if (customConfig && typeof customConfig === 'object' && customConfig.enabled) {
                             count++;
                             this.log.info(`enabled logging of ${id} (Count=${count}), Alias=${id !== realId}`);
-                            this.parseConfig(customConfig);
+                            this.parseStateConfig(customConfig);
 
-                            this.history[id] = { config: customConfig };
+                            this.history[id] = { config: customConfig } as HistoryStateStore;
                             this.history[id].realId = realId;
                             this.history[id].list ||= [];
                         }
@@ -616,7 +652,7 @@ class HistoryAdapter extends Adapter {
         this.subscribeForeignObjects('*');
     }
 
-    pushHistory(id, state, timerRelog) {
+    pushHistory(id: string, state: IobDataEntry, timerRelog?: boolean): void {
         if (timerRelog === undefined) {
             timerRelog = false;
         }
@@ -638,10 +674,11 @@ class HistoryAdapter extends Adapter {
                 }
             }
 
-            settings.enableDebugLogs &&
+            if (settings.enableDebugLogs) {
                 this.log.debug(
                     `new value received for ${id}, new-value=${state.val}, ts=${state.ts}, relog=${timerRelog}`,
                 );
+            }
 
             let ignoreDebounce = false;
 
@@ -668,7 +705,7 @@ class HistoryAdapter extends Adapter {
                     !valueUnstable &&
                     settings.blockTime &&
                     this.history[id].state &&
-                    this.history[id].state.ts + settings.blockTime > state.ts
+                    this.history[id].state.ts + (settings.blockTime as number) > state.ts
                 ) {
                     settings.enableDebugLogs &&
                         this.log.debug(
@@ -724,23 +761,26 @@ class HistoryAdapter extends Adapter {
                         if (
                             (this.history[id].state.val !== null || state.val === null) &&
                             state.ts !== state.lc &&
-                            Math.abs(this.history[id].lastLogTime - state.ts) < settings.changesRelogInterval * 1000
+                            Math.abs(this.history[id].lastLogTime - state.ts) <
+                                (settings.changesRelogInterval as number) * 1000
                         ) {
                             // remember new timestamp
                             if (!valueUnstable && !settings.disableSkippedValueLogging) {
                                 this.history[id].skipped = state;
                             }
-                            settings.enableDebugLogs &&
+                            if (settings.enableDebugLogs) {
                                 this.log.debug(
                                     `value not changed ${id}, last-value=${this.history[id].state.val}, new-value=${state.val}, ts=${state.ts}`,
                                 );
+                            }
                             return;
                         }
                         if (state.ts !== state.lc) {
-                            settings.enableDebugLogs &&
+                            if (settings.enableDebugLogs) {
                                 this.log.debug(
                                     `value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${this.history[id].lastLogTime}, ts=${state.ts}`,
                                 );
+                            }
                             ignoreDebounce = true;
                         }
                     }
@@ -748,7 +788,7 @@ class HistoryAdapter extends Adapter {
                         if (
                             this.history[id].state.val !== null &&
                             settings.changesMinDelta !== 0 &&
-                            Math.abs(this.history[id].state.val - state.val) < settings.changesMinDelta
+                            Math.abs(this.history[id].state.val - state.val) < (settings.changesMinDelta as number)
                         ) {
                             if (!valueUnstable && !settings.disableSkippedValueLogging) {
                                 this.history[id].skipped = state;
@@ -819,15 +859,15 @@ class HistoryAdapter extends Adapter {
                                 `Value logged ${id}, value=${this.history[id].state.val}, ts=${this.history[id].state.ts}`,
                             );
                         this.pushHelper(id);
-                        if (settings.changesOnly && settings.changesRelogInterval > 0) {
+                        if (settings.changesOnly && (settings.changesRelogInterval as number) > 0) {
                             this.history[id].relogTimeout = setTimeout(
                                 _id => this.reLogHelper(_id),
-                                settings.changesRelogInterval * 1000,
+                                (settings.changesRelogInterval as number) * 1000,
                                 id,
                             );
                         }
                     },
-                    settings.debounceTime,
+                    settings.debounceTime as number,
                     id,
                     state,
                 );
@@ -837,15 +877,16 @@ class HistoryAdapter extends Adapter {
                 }
                 this.history[id].lastLogTime = state.ts;
 
-                settings.enableDebugLogs &&
+                if (settings.enableDebugLogs) {
                     this.log.debug(
-                        `Value logged ${id}, value=${this.history[id].state.val}, ts=${this.history[id].state.ts}`,
+                        `Value logged ${id}, value=${this.history[id].state?.val}, ts=${this.history[id].state?.ts}`,
                     );
+                }
                 this.pushHelper(id, state);
-                if (settings.changesOnly && settings.changesRelogInterval > 0) {
+                if (settings.changesOnly && (settings.changesRelogInterval as number) > 0) {
                     this.history[id].relogTimeout = setTimeout(
                         _id => this.reLogHelper(_id),
-                        settings.changesRelogInterval * 1000,
+                        (settings.changesRelogInterval as number) * 1000,
                         id,
                     );
                 }
@@ -853,7 +894,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    reLogHelper(_id) {
+    reLogHelper(_id: string): void {
         if (!this.history[_id]) {
             this.log.info(`non-existing id ${_id}`);
             return;
@@ -877,20 +918,18 @@ class HistoryAdapter extends Adapter {
                     this.log.debug(
                         `init timed Relog: getState ${_id}:  Value=${state.val}, ack=${state.ack}, ts=${state.ts}, lc=${state.lc}`,
                     );
-                    this.history[_id].state = state;
+                    this.history[_id].state = state as IobDataEntry;
                     this.pushHistory(_id, this.history[_id].state, true);
                 }
             });
         }
     }
 
-    pushHelper(_id, state) {
+    pushHelper(_id: string, state?: IobDataEntry): void {
         if (!this.history[_id] || (!this.history[_id].state && !state)) {
             return;
         }
-        if (!state) {
-            state = this.history[_id].state;
-        }
+        state ||= this.history[_id].state!;
 
         // if it was not deleted in this time
         this.history[_id].list ||= [];
@@ -899,8 +938,10 @@ class HistoryAdapter extends Adapter {
             if (isFinite(state.val)) {
                 state.val = parseFloat(state.val);
             } else if (state.val === 'true') {
+                // @ts-expect-error allow boolean to be stored
                 state.val = true;
             } else if (state.val === 'false') {
+                // @ts-expect-error allow boolean to be stored
                 state.val = false;
             }
         }
@@ -920,15 +961,18 @@ class HistoryAdapter extends Adapter {
 
         const _settings = (this.history[_id] && this.history[_id].config) || {};
         const maxLength =
-            _settings.maxLength !== undefined ? _settings.maxLength : parseInt(this.config.maxLength, 10) || 960;
+            _settings.maxLength !== undefined
+                ? (_settings.maxLength as number)
+                : parseInt(this.config.maxLength as string, 10) || 960;
         if (_settings && this.history[_id].list.length > maxLength) {
-            _settings.enableDebugLogs &&
+            if (_settings.enableDebugLogs) {
                 this.log.debug(`moving ${this.history[_id].list.length} entries from ${_id} to file`);
+            }
             this.appendFile(_id, this.history[_id].list);
         }
     }
 
-    checkRetention(id) {
+    checkRetention(id: string): void {
         if (this.history[id]?.config?.retention) {
             const d = new Date();
             const dt = d.getTime();
@@ -936,15 +980,15 @@ class HistoryAdapter extends Adapter {
             if (!this.history[id].lastCheck || dt - this.history[id].lastCheck >= 21600000 /* 6 hours */) {
                 this.history[id].lastCheck = dt;
                 // get list of directories
-                const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => a - b);
+                const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => a.localeCompare(b));
                 // calculate date
-                d.setSeconds(-this.history[id].config.retention);
+                d.setSeconds(-(this.history[id].config.retention as number));
 
-                const day = GetHistory.ts2day(d.getTime());
+                const day = ts2day(d.getTime());
 
                 for (let i = 0; i < dayList.length; i++) {
                     if (dayList[i] < day) {
-                        const file = GetHistory.getFilenameForID(this.config.storeDir, dayList[i], id);
+                        const file = getFilenameForID(this.config.storeDir, dayList[i], id);
                         if (fs.existsSync(file)) {
                             this.log.info(`Delete old history "${file}"`);
                             try {
@@ -977,18 +1021,18 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    appendFile(id, states) {
-        const day = GetHistory.ts2day(states[states.length - 1].ts);
+    appendFile(id: string, states: IobDataEntry[]): void {
+        const day = ts2day(states[states.length - 1].ts);
 
-        const file = GetHistory.getFilenameForID(this.config.storeDir, day, id);
-        let data;
+        const file = getFilenameForID(this.config.storeDir, day, id);
+        let data: IobDataEntry[];
 
         let i;
         for (i = states.length - 1; i >= 0; i--) {
             if (!states[i]) {
                 continue;
             }
-            if (GetHistory.ts2day(states[i].ts) !== day) {
+            if (ts2day(states[i].ts) !== day) {
                 break;
             }
         }
@@ -1020,7 +1064,7 @@ class HistoryAdapter extends Adapter {
         this.checkRetention(id);
     }
 
-    getOneCachedData(id, options, cache, addId) {
+    getOneCachedData(id: string, options: InternalHistoryOptions, cache: IobDataEntry[], addId?: boolean): void {
         addId ||= options.addId;
 
         if (this.history[id]) {
@@ -1048,7 +1092,7 @@ class HistoryAdapter extends Adapter {
                         // add one before start
                         cache.unshift(resEntry);
                         break;
-                    } else if (resEntry.ts > options.end) {
+                    } else if (resEntry.ts > options.end!) {
                         // add one after end
                         vLast = resEntry;
                         continue;
@@ -1063,8 +1107,10 @@ class HistoryAdapter extends Adapter {
 
                     if (
                         options.returnNewestEntries &&
-                        cache.length >= options.count &&
-                        (options.aggregate === 'onchange' || options.aggregate === '' || options.aggregate === 'none')
+                        cache.length >= (options.count as number) &&
+                        (options.aggregate === 'onchange' ||
+                            (options.aggregate as any) === '' ||
+                            options.aggregate === 'none')
                     ) {
                         break;
                     }
@@ -1080,8 +1126,8 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    getCachedData(options, callback) {
-        const cache = [];
+    getCachedData(options: InternalHistoryOptions, callback: (cache: IobDataEntry[], isFull: boolean) => void): void {
+        const cache: IobDataEntry[] = [];
 
         if (options.id && options.id !== '*') {
             this.getOneCachedData(options.id, options, cache);
@@ -1094,13 +1140,21 @@ class HistoryAdapter extends Adapter {
         }
 
         options.length = cache.length;
-        callback(cache, options.returnNewestEntries && cache.length >= options.count);
+        callback(cache, !!options.returnNewestEntries && cache.length >= options.count!);
     }
 
-    getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
+    getOneFileData(
+        dayList: string[],
+        dayStart: number,
+        dayEnd: number,
+        id: string,
+        options: InternalHistoryOptions,
+        data: IobDataEntry[],
+        addId?: boolean,
+    ): void {
         addId ||= options.addId;
 
-        if (options.debugLog) {
+        if (options.logDebug) {
             this.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
         }
 
@@ -1108,14 +1162,16 @@ class HistoryAdapter extends Adapter {
         for (let i = 0; i < dayList.length; i++) {
             const day = parseInt(dayList[i], 10);
             if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-                const file = GetHistory.getFilenameForID(options.path, day, id);
+                const file = getFilenameForID(options.path, day, id);
                 const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
 
-                options.debugLog && this.log.debug(`handleFileData: ${day} -> ${file}`);
+                if (options.logDebug) {
+                    this.log.debug(`handleFileData: ${day} -> ${file}`);
+                }
                 try {
                     if (fs.existsSync(file)) {
                         try {
-                            let _data = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(tsSort);
+                            const _data: IobDataEntry[] = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(sortByTs);
                             // adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                             let last = false;
 
@@ -1142,9 +1198,10 @@ class HistoryAdapter extends Adapter {
                                 if (
                                     (options.returnNewestEntries ||
                                         options.aggregate === 'onchange' ||
+                                        // @ts-expect-error assume it could be empty
                                         options.aggregate === '' ||
                                         options.aggregate === 'none') &&
-                                    data.length >= options.count
+                                    data.length >= options.count!
                                 ) {
                                     break;
                                 }
@@ -1164,23 +1221,23 @@ class HistoryAdapter extends Adapter {
                 }
             }
 
-            if (data.length >= options.count) {
+            if (data.length >= options.count!) {
                 break;
             }
         }
     }
 
-    getFileData(options, callback) {
-        const dayStart = options.start ? parseInt(GetHistory.ts2day(options.start), 10) : 0;
-        const dayEnd = parseInt(GetHistory.ts2day(options.end), 10);
-        const fileData = [];
+    getFileData(options: InternalHistoryOptions, callback: (fileData: IobDataEntry[]) => void): void {
+        const dayStart = options.start ? parseInt(ts2day(options.start), 10) : 0;
+        const dayEnd = parseInt(ts2day(options.end!), 10);
+        const fileData: IobDataEntry[] = [];
 
         // get list of directories
         let dayList = this.getDirectories(options.path);
         if (options.returnNewestEntries) {
-            dayList = dayList.sort((a, b) => b - a);
+            dayList = dayList.sort((a, b) => b.localeCompare(a));
         } else {
-            dayList = dayList.sort((a, b) => a - b);
+            dayList = dayList.sort((a, b) => a.localeCompare(b));
         }
 
         if (options.id && options.id !== '*') {
@@ -1196,7 +1253,7 @@ class HistoryAdapter extends Adapter {
         callback(fileData);
     }
 
-    applyOptions(data, options) {
+    applyOptions(data: IobDataEntry[], options: InternalHistoryOptions): IobDataEntry[] {
         data.forEach(item => {
             if (!options.ack && item.ack !== undefined) {
                 delete item.ack;
@@ -1221,7 +1278,7 @@ class HistoryAdapter extends Adapter {
         return data;
     }
 
-    getHistory(msg) {
+    handleGetHistory(msg: ioBroker.Message): void {
         const startTime = Date.now();
 
         if (!msg.message?.options) {
@@ -1235,12 +1292,12 @@ class HistoryAdapter extends Adapter {
             );
         }
 
-        const options = {
+        const options: InternalHistoryOptions = {
             id: msg.message.id ? msg.message.id : null,
             path: this.config.storeDir,
             start: msg.message.options.start,
             end: msg.message.options.end || new Date().getTime() + 5000000,
-            step: parseInt(msg.message.options.step, 10) || null,
+            step: parseInt(msg.message.options.step, 10) || undefined,
             count: parseInt(msg.message.options.count, 10),
             from: msg.message.options.from || false,
             ack: msg.message.options.ack || false,
@@ -1250,21 +1307,23 @@ class HistoryAdapter extends Adapter {
             limit:
                 parseInt(msg.message.options.limit, 10) ||
                 parseInt(msg.message.options.count, 10) ||
-                this.config.limit ||
+                (this.config.limit as number) ||
                 2000,
             addId: msg.message.options.addId || false,
             sessionId: msg.message.options.sessionId,
             returnNewestEntries: msg.message.options.returnNewestEntries || false,
             percentile:
                 msg.message.options.aggregate === 'percentile'
-                    ? parseInt(msg.message.options.percentile, 10) || 50
-                    : null,
+                    ? parseInt(msg.message.options.percentile as string, 10) || 50
+                    : undefined,
             quantile:
-                msg.message.options.aggregate === 'quantile' ? parseFloat(msg.message.options.quantile) || 0.5 : null,
+                msg.message.options.aggregate === 'quantile'
+                    ? parseFloat(msg.message.options.quantile) || 0.5
+                    : undefined,
             integralUnit:
                 msg.message.options.aggregate === 'integral'
                     ? parseInt(msg.message.options.integralUnit, 10) || 60
-                    : null,
+                    : undefined,
             integralInterpolation:
                 msg.message.options.aggregate === 'integral'
                     ? msg.message.options.integralInterpolation || 'none'
@@ -1290,12 +1349,12 @@ class HistoryAdapter extends Adapter {
         ) {
             msg.message.options.round = parseInt(msg.message.options.round, 10);
             if (!isFinite(msg.message.options.round) || msg.message.options.round < 0) {
-                options.round = this.config.round;
+                options.round = this.config.round as number;
             } else {
                 options.round = Math.pow(10, parseInt(msg.message.options.round, 10));
             }
         } else {
-            options.round = this.config.round;
+            options.round = this.config.round as number;
         }
 
         try {
@@ -1336,7 +1395,7 @@ class HistoryAdapter extends Adapter {
             options.id = this.aliasMap[options.id];
         }
 
-        if (options.start > options.end) {
+        if (options.start! > options.end!) {
             const _end = options.end;
             options.end = options.start;
             options.start = _end;
@@ -1346,12 +1405,18 @@ class HistoryAdapter extends Adapter {
             options.start = Date.now() - 86400000; // - 1 day
         }
 
-        if ((options.aggregate === 'percentile' && options.percentile < 0) || options.percentile > 100) {
+        if (
+            options.aggregate === 'percentile' &&
+            (typeof options.percentile !== 'number' || options.percentile < 0 || options.percentile > 100)
+        ) {
             this.log.error(`Invalid percentile value: ${options.percentile}, use 50 as default`);
             options.percentile = 50;
         }
 
-        if ((options.aggregate === 'quantile' && options.quantile < 0) || options.quantile > 1) {
+        if (
+            options.aggregate === 'quantile' &&
+            (typeof options.quantile !== 'number' || options.quantile < 0 || options.quantile > 1)
+        ) {
             this.log.error(`Invalid quantile value: ${options.quantile}, use 0.5 as default`);
             options.quantile = 0.5;
         }
@@ -1364,20 +1429,23 @@ class HistoryAdapter extends Adapter {
             options.integralUnit = 60;
         }
 
-        this.history[options.id] ||= {};
-        const debugLog = (options.debugLog = !!(
+        this.history[options.id] ||= {} as HistoryStateStore;
+        const logDebug = (options.logDebug = !!(
             this.history[options.id]?.config?.enableDebugLogs || this.config.enableDebugLogs
         ));
 
         // include nulls and replace them with last value
+        // @ts-expect-error assume it could be a string
         if (options.ignoreNull === 'true') {
             options.ignoreNull = true;
         }
         // include nulls
+        // @ts-expect-error assume it could be a string
         if (options.ignoreNull === 'false') {
             options.ignoreNull = false;
         }
         // include nulls and replace them with 0
+        // @ts-expect-error assume it could be a string
         if (options.ignoreNull === '0') {
             options.ignoreNull = 0;
         }
@@ -1385,18 +1453,19 @@ class HistoryAdapter extends Adapter {
             options.ignoreNull = false;
         }
 
-        if (debugLog) {
+        if (logDebug) {
             this.log.debug(`${options.logId} getHistory options final: ${JSON.stringify(options)}`);
         }
 
         if (
             (!options.start && options.count) ||
             options.aggregate === 'onchange' ||
+            // @ts-expect-error assume it could be an empty string
             options.aggregate === '' ||
             options.aggregate === 'none'
         ) {
             this.getCachedData(options, (cacheData, isFull) => {
-                if (debugLog) {
+                if (logDebug) {
                     this.log.debug(
                         `${options.logId} after getCachedData: length = ${cacheData.length}, isFull=${isFull}`,
                     );
@@ -1409,7 +1478,7 @@ class HistoryAdapter extends Adapter {
                     cacheData = cacheData.sort(sortByTs);
                     if (options.count && cacheData.length > options.count && options.aggregate === 'none') {
                         cacheData.splice(0, cacheData.length - options.count);
-                        debugLog && this.log.debug(`${options.logId} cut cacheData to ${options.count} values`);
+                        logDebug && this.log.debug(`${options.logId} cut cacheData to ${options.count} values`);
                     }
                     this.log.debug(`${options.logId} Send: ${cacheData.length} values in: ${Date.now() - startTime}ms`);
 
@@ -1426,10 +1495,10 @@ class HistoryAdapter extends Adapter {
                 } else {
                     const origCount = options.count;
                     if (options.returnNewestEntries) {
-                        options.count -= cacheData.length;
+                        options.count! -= cacheData.length;
                     }
                     this.getFileData(options, fileData => {
-                        if (debugLog) {
+                        if (logDebug) {
                             this.log.debug(
                                 `${options.logId} after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`,
                             );
@@ -1456,16 +1525,16 @@ class HistoryAdapter extends Adapter {
                             }
                             cutPoint > 0 && options.result.splice(0, cutPoint);
                             options.result.length = options.count;
-                            if (debugLog) {
+                            if (logDebug) {
                                 this.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);
                             }
                         }
-                        if (options.debugLog) {
+                        if (options.logDebug) {
                             options.log = this.log.debug;
                         }
                         Aggregate.beautify(options);
 
-                        if (debugLog) {
+                        if (logDebug) {
                             this.log.debug(
                                 `${options.logId} after beautify: options.result.length = ${options.result.length}`,
                             );
@@ -1493,11 +1562,13 @@ class HistoryAdapter extends Adapter {
             let responseSent = false;
             this.log.debug(`${options.logId} use parallel requests for getHistory`);
             try {
-                let gh = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], { silent: false });
+                let gh: cp.ChildProcess | null = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], {
+                    silent: false,
+                });
 
-                let ghTimeout = setTimeout(() => {
+                let ghTimeout: NodeJS.Timeout | null = setTimeout(() => {
                     try {
-                        gh.kill('SIGINT');
+                        gh?.kill('SIGINT');
                     } catch (err) {
                         this.log.error(err.message);
                     }
@@ -1522,31 +1593,43 @@ class HistoryAdapter extends Adapter {
                     responseSent = true;
                 });
 
-                gh.on('message', data => {
-                    const cmd = data[0];
-                    if (cmd === 'getCache') {
-                        const settings = data[1];
+                gh.on('message', (rawData: unknown): void => {
+                    const getCacheCommand: [command: 'getCache', options: InternalHistoryOptions] = rawData as [
+                        command: 'getCache',
+                        options: InternalHistoryOptions,
+                    ];
+                    const resultCommand: [
+                        command: 'response',
+                        result: IobDataEntry[],
+                        overallLength: number,
+                        step: number,
+                    ] = rawData as [command: 'response', result: IobDataEntry[], overallLength: number, step: number];
+                    const debugCommand: [command: 'debug', ...string[]] = rawData as [command: 'debug', ...string[]];
+                    if (getCacheCommand[0] === 'getCache') {
+                        const settings = getCacheCommand[1];
                         this.getCachedData(settings, cacheData => {
                             try {
-                                gh.send(['cacheData', cacheData]);
+                                gh?.send(['cacheData', cacheData]);
                             } catch (err) {
                                 this.log.info(`${options.logId} Can not send data to forked process: ${err.message}`);
                             }
                         });
-                    } else if (cmd === 'response') {
-                        clearTimeout(ghTimeout);
-                        ghTimeout = null;
+                    } else if (resultCommand[0] === 'response') {
+                        if (ghTimeout) {
+                            clearTimeout(ghTimeout);
+                            ghTimeout = null;
+                        }
 
                         try {
-                            gh.send(['exit']);
+                            gh?.send(['exit']);
                         } catch (err) {
                             this.log.info(`${options.logId} Can not exit forked process: ${err.message}`);
                         }
                         gh = null;
 
-                        options.result = this.applyOptions(data[1], options);
-                        const overallLength = data[2];
-                        const step = data[3];
+                        options.result = this.applyOptions(resultCommand[1], options);
+                        const overallLength = resultCommand[2];
+                        const step = resultCommand[3];
                         if (options.result) {
                             !responseSent &&
                                 this.log.debug(
@@ -1564,10 +1647,10 @@ class HistoryAdapter extends Adapter {
                                     msg.callback,
                                 );
                             responseSent = true;
-                            options.result = null;
+                            options.result = undefined;
                         } else {
-                            !responseSent && this.log.info(`${options.logId} No Data`);
-                            !responseSent &&
+                            if (!responseSent) {
+                                this.log.info(`${options.logId} No Data`);
                                 this.sendTo(
                                     msg.from,
                                     msg.command,
@@ -1578,10 +1661,11 @@ class HistoryAdapter extends Adapter {
                                     },
                                     msg.callback,
                                 );
-                            responseSent = true;
+                                responseSent = true;
+                            }
                         }
-                    } else if (cmd === 'debug') {
-                        let line = data.slice(1).join(', ');
+                    } else if (debugCommand[0] === 'debug') {
+                        let line = debugCommand.slice(1).join(', ');
                         if (line.includes(options.logId)) {
                             line = line.replace(`${options.logId} `, '');
                         }
@@ -1594,7 +1678,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    getDirectories(path) {
+    getDirectories(path: string): string[] {
         if (!fs.existsSync(path)) {
             this.log.warn(`Data directory ${path} does not exist`);
             return [];
@@ -1615,7 +1699,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    update(id, state) {
+    update(id: string, state: ioBroker.State): boolean {
         // first try to find the value in not yet saved data
         let found = false;
         if (this.history[id]) {
@@ -1624,7 +1708,7 @@ class HistoryAdapter extends Adapter {
                 for (let i = res.length - 1; i >= 0; i--) {
                     if (res[i].ts === state.ts) {
                         if (state.val !== undefined) {
-                            res[i].val = state.val;
+                            res[i].val = state.val as number | null;
                         }
                         if (state.q !== undefined && res[i].q !== undefined) {
                             res[i].q = state.q;
@@ -1649,14 +1733,15 @@ class HistoryAdapter extends Adapter {
         }
 
         if (!found) {
-            const day = GetHistory.ts2day(state.ts);
+            const dayStr = ts2day(state.ts);
+            const day = parseInt(dayStr, 10);
             if (!isNaN(day)) {
-                const file = GetHistory.getFilenameForID(this.config.storeDir, day, id);
+                const file = getFilenameForID(this.config.storeDir, day, id);
                 const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
 
                 if (fs.existsSync(file)) {
                     try {
-                        const res = JSON.parse(fs.readFileSync(file, 'utf8'));
+                        const res: IobDataEntry[] = JSON.parse(fs.readFileSync(file, 'utf8'));
 
                         for (let i = 0; i < res.length; i++) {
                             // if a ts in seconds is in then convert on the fly
@@ -1665,7 +1750,7 @@ class HistoryAdapter extends Adapter {
                             }
                             if (res[i].ts === state.ts) {
                                 if (state.val !== undefined) {
-                                    res[i].val = state.val;
+                                    res[i].val = state.val as number | null;
                                 }
                                 if (state.q !== undefined && res[i].q !== undefined) {
                                     res[i].q = state.q;
@@ -1700,7 +1785,7 @@ class HistoryAdapter extends Adapter {
         return found;
     }
 
-    _delete(id, state) {
+    _delete(id: string, state: { ts?: number; start?: number; end?: number }): boolean {
         // first try to find the value in not yet saved data
         let found = false;
         if (this.history[id]) {
@@ -1735,9 +1820,10 @@ class HistoryAdapter extends Adapter {
         if (!found) {
             const files = [];
             if (state.ts) {
-                const day = GetHistory.ts2day(state.ts);
+                const dayStr = ts2day(state.ts);
+                const day = parseInt(dayStr, 10);
                 if (!isNaN(day)) {
-                    const file = GetHistory.getFilenameForID(this.config.storeDir, day, id);
+                    const file = getFilenameForID(this.config.storeDir, day, id);
 
                     if (fs.existsSync(file)) {
                         files.push({ file, day });
@@ -1747,26 +1833,26 @@ class HistoryAdapter extends Adapter {
                 let dayStart;
                 let dayEnd;
                 if (state.start && state.end) {
-                    dayStart = parseInt(GetHistory.ts2day(state.start), 10);
-                    dayEnd = parseInt(GetHistory.ts2day(state.end), 10);
+                    dayStart = parseInt(ts2day(state.start), 10);
+                    dayEnd = parseInt(ts2day(state.end), 10);
                 } else if (state.start) {
-                    dayStart = parseInt(GetHistory.ts2day(state.start), 10);
-                    dayEnd = parseInt(GetHistory.ts2day(Date.now()), 10);
+                    dayStart = parseInt(ts2day(state.start), 10);
+                    dayEnd = parseInt(ts2day(Date.now()), 10);
                 } else if (state.end) {
                     dayStart = 0;
-                    dayEnd = parseInt(GetHistory.ts2day(state.end), 10);
+                    dayEnd = parseInt(ts2day(state.end), 10);
                 } else {
                     dayStart = 0;
-                    dayEnd = parseInt(GetHistory.ts2day(Date.now()), 10);
+                    dayEnd = parseInt(ts2day(Date.now()), 10);
                 }
 
-                const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => b - a);
+                const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => b.localeCompare(a));
 
                 for (let i = 0; i < dayList.length; i++) {
                     const day = parseInt(dayList[i], 10);
 
                     if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
-                        const file = GetHistory.getFilenameForID(this.config.storeDir, dayList[i], id);
+                        const file = getFilenameForID(this.config.storeDir, dayList[i], id);
                         if (fs.existsSync(file)) {
                             files.push({ file, day });
                         }
@@ -1777,7 +1863,7 @@ class HistoryAdapter extends Adapter {
             files.forEach(entry => {
                 try {
                     const tsCheck = new Date(Math.floor(entry.day / 10000), 0, 1).getTime();
-                    let res = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(tsSort);
+                    let res: IobDataEntry[] = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(sortByTs);
 
                     if (!state.ts && !state.start && !state.end) {
                         res = [];
@@ -1829,7 +1915,7 @@ class HistoryAdapter extends Adapter {
         return found;
     }
 
-    updateState(msg) {
+    updateState(msg: ioBroker.Message): void {
         if (!msg.message) {
             this.log.error('updateState called with invalid data');
             return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
@@ -1870,16 +1956,16 @@ class HistoryAdapter extends Adapter {
         this.sendTo(msg.from, msg.command, { success }, msg.callback);
     }
 
-    deleteState(msg) {
+    deleteStateHistory(msg: ioBroker.Message): void {
         if (!msg.message) {
-            this.log.error('deleteState called with invalid data');
+            this.log.error('deleteStateHistory called with invalid data');
             return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
         }
 
         let id;
         let success = true;
         if (Array.isArray(msg.message)) {
-            this.log.debug(`deleteState ${msg.message.length} items`);
+            this.log.debug(`deleteStateHistory ${msg.message.length} items`);
             for (let i = 0; i < msg.message.length; i++) {
                 id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
 
@@ -1912,7 +1998,7 @@ class HistoryAdapter extends Adapter {
                 }
             }
         } else if (Array.isArray(msg.message.state)) {
-            this.log.debug(`deleteState ${msg.message.state.length} items`);
+            this.log.debug(`deleteStateHistory ${msg.message.state.length} items`);
             id = this.aliasMap[msg.message.id] || msg.message.id;
 
             for (let j = 0; j < msg.message.state.length; j++) {
@@ -1938,7 +2024,7 @@ class HistoryAdapter extends Adapter {
                 }
             }
         } else if (msg.message.ts && Array.isArray(msg.message.ts)) {
-            this.log.debug(`deleteState ${msg.message.ts.length} items`);
+            this.log.debug(`deleteStateHistory ${msg.message.ts.length} items`);
             id = this.aliasMap[msg.message.id] || msg.message.id;
             for (let j = 0; j < msg.message.ts.length; j++) {
                 if (msg.message.ts[j] && typeof msg.message.ts[j] === 'number') {
@@ -1948,24 +2034,24 @@ class HistoryAdapter extends Adapter {
                 }
             }
         } else if (msg.message.id && msg.message.state && typeof msg.message.state === 'object') {
-            this.log.debug('deleteState 1 item');
+            this.log.debug('deleteStateHistory 1 item');
             id = this.aliasMap[msg.message.id] || msg.message.id;
             success = this._delete(id, { ts: msg.message.state.ts });
         } else if (msg.message.id && msg.message.ts && typeof msg.message.ts === 'number') {
-            this.log.debug('deleteState 1 item');
+            this.log.debug('deleteStateHistory 1 item');
             id = this.aliasMap[msg.message.id] || msg.message.id;
             success = this._delete(id, { ts: msg.message.ts });
         } else {
-            this.log.error('deleteState called with invalid data');
+            this.log.error('deleteStateHistory called with invalid data');
             return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
         }
 
         this.sendTo(msg.from, msg.command, { success }, msg.callback);
     }
 
-    deleteStateAll(msg) {
+    deleteStateAll(msg: ioBroker.Message): void {
         if (!msg.message) {
-            this.log.error('deleteState called with invalid data');
+            this.log.error('deleteStateAll called with invalid data');
             return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
         }
 
@@ -1988,7 +2074,7 @@ class HistoryAdapter extends Adapter {
         this.sendTo(msg.from, msg.command, { success: true }, msg.callback);
     }
 
-    storeStatePushData(id, state, applyRules) {
+    storeStatePushData(id: string, state: IobDataEntry, applyRules?: boolean): void {
         if (!state || typeof state !== 'object') {
             throw new Error(`State ${JSON.stringify(state)} for ${id} is not valid`);
         }
@@ -1997,7 +2083,7 @@ class HistoryAdapter extends Adapter {
             if (applyRules) {
                 throw new Error(`history not enabled for ${id}, so can not apply the rules as requested`);
             }
-            this.history[id] ||= {};
+            this.history[id] ||= {} as HistoryStateStore;
             this.history[id].realId = id;
         }
         if (applyRules) {
@@ -2007,7 +2093,7 @@ class HistoryAdapter extends Adapter {
         }
     }
 
-    async storeState(msg) {
+    storeState(msg: ioBroker.Message): void {
         if (msg.message && (msg.message.success || msg.message.error)) {
             // Seems we got a callback from running converter
             return;
@@ -2024,14 +2110,14 @@ class HistoryAdapter extends Adapter {
             );
         }
 
-        let errors = [];
+        const errors = [];
         let successCount = 0;
         if (Array.isArray(msg.message)) {
             this.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
             for (let i = 0; i < msg.message.length; i++) {
                 const id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
                 try {
-                    this.storeStatePushData(id, msg.message[i].state, msg.message.rules);
+                    this.storeStatePushData(id, msg.message[i].state, msg.message[i].rules);
                     successCount++;
                 } catch (err) {
                     errors.push(err.message);
@@ -2086,7 +2172,7 @@ class HistoryAdapter extends Adapter {
         this.sendTo(msg.from, msg.command, { success: true, successCount }, msg.callback);
     }
 
-    enableHistory(msg) {
+    enableHistory(msg: ioBroker.Message): void {
         if (!msg.message?.id) {
             this.log.error('enableHistory called with invalid data');
             this.sendTo(
@@ -2099,8 +2185,8 @@ class HistoryAdapter extends Adapter {
             );
             return;
         }
-        const obj = {};
-        obj.common = {};
+        const obj: ioBroker.StateObject = {} as ioBroker.StateObject;
+        obj.common = {} as ioBroker.StateCommon;
         obj.common.custom = {};
         if (msg.message.options) {
             obj.common.custom[this.namespace] = msg.message.options;
@@ -2133,7 +2219,7 @@ class HistoryAdapter extends Adapter {
         });
     }
 
-    disableHistory(msg) {
+    disableHistory(msg: ioBroker.Message): void {
         if (!msg.message?.id) {
             this.log.error('disableHistory called with invalid data');
             this.sendTo(
@@ -2146,8 +2232,8 @@ class HistoryAdapter extends Adapter {
             );
             return;
         }
-        const obj = {};
-        obj.common = {};
+        const obj: ioBroker.StateObject = {} as ioBroker.StateObject;
+        obj.common = {} as ioBroker.StateCommon;
         obj.common.custom = {};
         obj.common.custom[this.namespace] = {};
         obj.common.custom[this.namespace].enabled = false;
@@ -2176,8 +2262,8 @@ class HistoryAdapter extends Adapter {
         });
     }
 
-    getEnabledDPs(msg) {
-        const data = {};
+    getEnabledDPs(msg: ioBroker.Message): void {
+        const data: Record<string, CustomStateConfig> = {};
         for (const id in this.history) {
             if (Object.prototype.hasOwnProperty.call(this.history, id) && this.history[id]?.config?.enabled) {
                 data[this.history[id].realId] = this.history[id].config;
@@ -2189,9 +2275,10 @@ class HistoryAdapter extends Adapter {
 }
 
 // If started as allInOne/compact mode => return function to create instance
-if (module && module.parent) {
-    module.exports = options => new HistoryAdapter(options);
+if (require.main !== module) {
+    // Export the constructor in compact mode
+    module.exports = (options: Partial<AdapterOptions> | undefined) => new HistoryAdapter(options);
 } else {
-    // or start the instance directly
+    // otherwise start the instance directly
     (() => new HistoryAdapter())();
 }

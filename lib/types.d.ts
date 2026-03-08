@@ -70,7 +70,7 @@ interface GetHistoryOptions {
     /** do not return more entries than limit */
     limit?: number;
     /** round result to number of digits after decimal point */
-    round?: number;
+    round?: number | undefined;
     /** if null values should be included (false), replaced by last not null value (true) or replaced with 0 (0) */
     ignoreNull?: boolean | 0;
     /** This number will be returned in answer, so the client can assign the request for it */
