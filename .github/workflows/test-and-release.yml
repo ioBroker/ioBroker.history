@@ -72,6 +72,7 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-deploy@v1
         with:
+          build: true
           node-version: '22.x'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sentry: true

@@ -39,14 +39,14 @@
     "engines": {
         "node": ">=20"
     },
-    "main": "main.ts",
+    "main": "main.js",
     "files": [
         "admin/",
         "converter/",
         "lib/",
         "io-package.json",
         "LICENSE",
-        "main.ts"
+        "main.js"
     ],
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
