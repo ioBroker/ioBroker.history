@@ -94,7 +94,7 @@ class HistoryAdapter extends Adapter {
                         delete this.aliasMap[id];
                     }
 
-                    const writeNull = !this.history[id]?.config;
+                    const doWriteNull = !this.history[id]?.config;
                     const state = this.history[id] ? this.history[id].state : null;
                     const list = this.history[id] ? this.history[id].list : null;
                     const timeout = this.history[id] ? this.history[id].timeout : null;
@@ -113,129 +113,7 @@ class HistoryAdapter extends Adapter {
                         this.subscribeForeignStates('*');
                     }
 
-                    if (!customConfig.maxLength && customConfig.maxLength !== '0' && customConfig.maxLength !== 0) {
-                        customConfig.maxLength = parseInt(this.config.maxLength, 10) || 960;
-                    } else {
-                        customConfig.maxLength = parseInt(customConfig.maxLength, 10);
-                    }
-
-                    if (!customConfig.retention && customConfig.retention !== '0' && customConfig.retention !== 0) {
-                        customConfig.retention = parseInt(this.config.retention, 10) || 0;
-                    } else {
-                        customConfig.retention = parseInt(customConfig.retention, 10) || 0;
-                    }
-                    if (customConfig.retention === -1) {
-                        // customRetentionDuration
-                        if (
-                            customConfig.customRetentionDuration !== undefined &&
-                            customConfig.customRetentionDuration !== null &&
-                            customConfig.customRetentionDuration !== ''
-                        ) {
-                            customConfig.customRetentionDuration =
-                                parseInt(customConfig.customRetentionDuration, 10) || 0;
-                        } else {
-                            customConfig.customRetentionDuration = this.config.customRetentionDuration;
-                        }
-                        customConfig.retention = customConfig.customRetentionDuration * 24 * 60 * 60;
-                    }
-
-                    if (!customConfig.blockTime && customConfig.blockTime !== '0' && customConfig.blockTime !== 0) {
-                        if (!customConfig.debounce && customConfig.debounce !== '0' && customConfig.debounce !== 0) {
-                            customConfig.blockTime = parseInt(this.config.blockTime, 10) || 0;
-                        } else {
-                            customConfig.blockTime = parseInt(customConfig.debounce, 10) || 0;
-                        }
-                    } else {
-                        customConfig.blockTime = parseInt(customConfig.blockTime, 10) || 0;
-                    }
-                    if (
-                        !customConfig.debounceTime &&
-                        customConfig.debounceTime !== '0' &&
-                        customConfig.debounceTime !== 0
-                    ) {
-                        customConfig.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
-                    } else {
-                        customConfig.debounceTime = parseInt(customConfig.debounceTime, 10) || 0;
-                    }
-                    customConfig.changesOnly = customConfig.changesOnly === 'true' || customConfig.changesOnly === true;
-                    if (
-                        customConfig.changesRelogInterval !== undefined &&
-                        customConfig.changesRelogInterval !== null &&
-                        customConfig.changesRelogInterval !== ''
-                    ) {
-                        customConfig.changesRelogInterval = parseInt(customConfig.changesRelogInterval, 10) || 0;
-                    } else {
-                        customConfig.changesRelogInterval = this.config.changesRelogInterval;
-                    }
-                    if (
-                        customConfig.changesMinDelta !== undefined &&
-                        customConfig.changesMinDelta !== null &&
-                        customConfig.changesMinDelta !== ''
-                    ) {
-                        customConfig.changesMinDelta =
-                            parseFloat(customConfig.changesMinDelta.toString().replace(/,/g, '.')) || 0;
-                    } else {
-                        customConfig.changesMinDelta = this.config.changesMinDelta;
-                    }
-
-                    customConfig.ignoreZero = customConfig.ignoreZero === 'true' || customConfig.ignoreZero === true;
-
-                    if (
-                        customConfig.ignoreAboveNumber !== undefined &&
-                        customConfig.ignoreAboveNumber !== null &&
-                        customConfig.ignoreAboveNumber !== ''
-                    ) {
-                        customConfig.ignoreAboveNumber = parseFloat(customConfig.ignoreAboveNumber) || null;
-                    }
-                    if (
-                        customConfig.ignoreBelowNumber !== undefined &&
-                        customConfig.ignoreBelowNumber !== null &&
-                        customConfig.ignoreBelowNumber !== ''
-                    ) {
-                        customConfig.ignoreBelowNumber = parseFloat(customConfig.ignoreBelowNumber) || null;
-                    } else if (customConfig.ignoreBelowZero === 'true' || customConfig.ignoreBelowZero === true) {
-                        customConfig.ignoreBelowNumber = 0;
-                    }
-
-                    if (
-                        customConfig.disableSkippedValueLogging !== undefined &&
-                        customConfig.disableSkippedValueLogging !== null &&
-                        customConfig.disableSkippedValueLogging !== ''
-                    ) {
-                        customConfig.disableSkippedValueLogging =
-                            customConfig.disableSkippedValueLogging === 'true' ||
-                            customConfig.disableSkippedValueLogging === true;
-                    } else {
-                        customConfig.disableSkippedValueLogging = this.config.disableSkippedValueLogging;
-                    }
-
-                    // round
-                    if (customConfig.round !== null && customConfig.round !== undefined && customConfig !== '') {
-                        customConfig.round = parseInt(customConfig, 10);
-                        if (!isFinite(customConfig.round) || customConfig.round < 0) {
-                            customConfig.round = this.config.round;
-                        } else {
-                            customConfig.round = Math.pow(10, parseInt(customConfig.round, 10));
-                        }
-                    } else {
-                        customConfig.round = this.config.round;
-                    }
-
-                    if (
-                        customConfig.enableDebugLogs !== undefined &&
-                        customConfig.enableDebugLogs !== null &&
-                        customConfig.enableDebugLogs !== ''
-                    ) {
-                        customConfig.enableDebugLogs =
-                            customConfig.enableDebugLogs === 'true' || customConfig.enableDebugLogs === true;
-                    } else {
-                        customConfig.enableDebugLogs = this.config.enableDebugLogs;
-                    }
-
-                    // add one day if retention is too small
-                    if (customConfig.retention && customConfig.retention <= 604800) {
-                        customConfig.retention += 86400;
-                    }
+                    this.parseConfig(customConfig);
 
                     if (
                         this.history[formerAliasId]?.config &&
@@ -264,11 +142,11 @@ class HistoryAdapter extends Adapter {
                         );
                     }
 
-                    if (writeNull && this.config.writeNulls) {
+                    if (doWriteNull && this.config.writeNulls) {
                         this.writeNulls(id);
                     }
 
-                    this.log.info(`enabled logging of ${id}, Alias=${id !== realId}, WriteNulls=${writeNull}`);
+                    this.log.info(`enabled logging of ${id}, Alias=${id !== realId}, WriteNulls=${doWriteNull}`);
                 } else {
                     if (this.aliasMap[id]) {
                         this.log.debug(`Removed Alias: ${id} !-> ${this.aliasMap[id]}`);
@@ -302,6 +180,125 @@ class HistoryAdapter extends Adapter {
 
             message: obj => this.processMessage(obj),
         });
+    }
+
+    parseConfig(customConfig) {
+        if (!customConfig.maxLength && customConfig.maxLength !== '0' && customConfig.maxLength !== 0) {
+            customConfig.maxLength = parseInt(this.config.maxLength, 10) || 960;
+        } else {
+            customConfig.maxLength = parseInt(customConfig.maxLength, 10);
+        }
+
+        if (!customConfig.retention && customConfig.retention !== '0' && customConfig.retention !== 0) {
+            customConfig.retention = parseInt(this.config.retention, 10) || 0;
+        } else {
+            customConfig.retention = parseInt(customConfig.retention, 10) || 0;
+        }
+        if (customConfig.retention === -1) {
+            // customRetentionDuration
+            if (
+                customConfig.customRetentionDuration !== undefined &&
+                customConfig.customRetentionDuration !== null &&
+                customConfig.customRetentionDuration !== ''
+            ) {
+                customConfig.customRetentionDuration = parseInt(customConfig.customRetentionDuration, 10) || 0;
+            } else {
+                customConfig.customRetentionDuration = this.config.customRetentionDuration;
+            }
+            customConfig.retention = customConfig.customRetentionDuration * 24 * 60 * 60;
+        }
+
+        if (!customConfig.blockTime && customConfig.blockTime !== '0' && customConfig.blockTime !== 0) {
+            if (!customConfig.debounce && customConfig.debounce !== '0' && customConfig.debounce !== 0) {
+                customConfig.blockTime = parseInt(this.config.blockTime, 10) || 0;
+            } else {
+                customConfig.blockTime = parseInt(customConfig.debounce, 10) || 0;
+            }
+        } else {
+            customConfig.blockTime = parseInt(customConfig.blockTime, 10) || 0;
+        }
+        if (!customConfig.debounceTime && customConfig.debounceTime !== '0' && customConfig.debounceTime !== 0) {
+            customConfig.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
+        } else {
+            customConfig.debounceTime = parseInt(customConfig.debounceTime, 10) || 0;
+        }
+        customConfig.changesOnly = customConfig.changesOnly === 'true' || customConfig.changesOnly === true;
+        if (
+            customConfig.changesRelogInterval !== undefined &&
+            customConfig.changesRelogInterval !== null &&
+            customConfig.changesRelogInterval !== ''
+        ) {
+            customConfig.changesRelogInterval = parseInt(customConfig.changesRelogInterval, 10) || 0;
+        } else {
+            customConfig.changesRelogInterval = this.config.changesRelogInterval;
+        }
+        if (
+            customConfig.changesMinDelta !== undefined &&
+            customConfig.changesMinDelta !== null &&
+            customConfig.changesMinDelta !== ''
+        ) {
+            customConfig.changesMinDelta = parseFloat(customConfig.changesMinDelta.toString().replace(/,/g, '.')) || 0;
+        } else {
+            customConfig.changesMinDelta = this.config.changesMinDelta;
+        }
+
+        customConfig.ignoreZero = customConfig.ignoreZero === 'true' || customConfig.ignoreZero === true;
+
+        if (
+            customConfig.ignoreAboveNumber !== undefined &&
+            customConfig.ignoreAboveNumber !== null &&
+            customConfig.ignoreAboveNumber !== ''
+        ) {
+            customConfig.ignoreAboveNumber = parseFloat(customConfig.ignoreAboveNumber) || null;
+        }
+        if (
+            customConfig.ignoreBelowNumber !== undefined &&
+            customConfig.ignoreBelowNumber !== null &&
+            customConfig.ignoreBelowNumber !== ''
+        ) {
+            customConfig.ignoreBelowNumber = parseFloat(customConfig.ignoreBelowNumber) || null;
+        } else if (customConfig.ignoreBelowZero === 'true' || customConfig.ignoreBelowZero === true) {
+            customConfig.ignoreBelowNumber = 0;
+        }
+
+        if (
+            customConfig.disableSkippedValueLogging !== undefined &&
+            customConfig.disableSkippedValueLogging !== null &&
+            customConfig.disableSkippedValueLogging !== ''
+        ) {
+            customConfig.disableSkippedValueLogging =
+                customConfig.disableSkippedValueLogging === 'true' || customConfig.disableSkippedValueLogging === true;
+        } else {
+            customConfig.disableSkippedValueLogging = this.config.disableSkippedValueLogging;
+        }
+
+        // round
+        if (customConfig.round !== null && customConfig.round !== undefined && customConfig !== '') {
+            customConfig.round = parseInt(customConfig, 10);
+            if (!isFinite(customConfig.round) || customConfig.round < 0) {
+                customConfig.round = this.config.round;
+            } else {
+                customConfig.round = Math.pow(10, parseInt(customConfig.round, 10));
+            }
+        } else {
+            customConfig.round = this.config.round;
+        }
+
+        if (
+            customConfig.enableDebugLogs !== undefined &&
+            customConfig.enableDebugLogs !== null &&
+            customConfig.enableDebugLogs !== ''
+        ) {
+            customConfig.enableDebugLogs =
+                customConfig.enableDebugLogs === 'true' || customConfig.enableDebugLogs === true;
+        } else {
+            customConfig.enableDebugLogs = this.config.enableDebugLogs;
+        }
+
+        // add one day if retention is too small
+        if (customConfig.retention && customConfig.retention <= 604800) {
+            customConfig.retention += 86400;
+        }
     }
 
     storeCached(isFinishing, onlyId) {
@@ -465,7 +462,7 @@ class HistoryAdapter extends Adapter {
                 }
             }
         } else {
-            now = now || Date.now();
+            now ||= Date.now();
             this.tasksStart.push({ id, now });
             if (this.tasksStart.length === 1) {
                 this.processStartValues();
@@ -500,7 +497,7 @@ class HistoryAdapter extends Adapter {
             }
         });
 
-        this.config.storeDir = this.config.storeDir || 'history';
+        this.config.storeDir ||= 'history';
         this.config.storeDir = this.config.storeDir.replace(/\\/g, '/');
         if (this.config.writeNulls === undefined) {
             this.config.writeNulls = true;
@@ -573,200 +570,24 @@ class HistoryAdapter extends Adapter {
 
         this.getObjectView('system', 'custom', {}, (err, doc) => {
             let count = 0;
-            if (doc && doc.rows) {
+            if (doc?.rows) {
                 for (let i = 0, l = doc.rows.length; i < l; i++) {
                     if (doc.rows[i].value) {
                         let id = doc.rows[i].id;
                         const realId = id;
-                        if (doc.rows[i].value[this.namespace] && doc.rows[i].value[this.namespace].aliasId) {
+                        const customConfig = doc.rows[i].value[this.namespace];
+                        if (customConfig?.aliasId) {
                             this.aliasMap[id] = doc.rows[i].value[this.namespace].aliasId;
                             this.log.debug(`Found Alias: ${id} --> ${this.aliasMap[id]}`);
                             id = this.aliasMap[id];
                         }
-                        this.history[id] = { config: doc.rows[i].value[this.namespace] };
 
-                        if (
-                            !this.history[id].config ||
-                            typeof this.history[id].config !== 'object' ||
-                            this.history[id].config.enabled === false
-                        ) {
-                            delete this.history[id];
-                        } else {
+                        if (customConfig && typeof customConfig === 'object' && customConfig.enabled) {
                             count++;
                             this.log.info(`enabled logging of ${id} (Count=${count}), Alias=${id !== realId}`);
-                            if (
-                                !this.history[id].config.maxLength &&
-                                this.history[id].config.maxLength !== '0' &&
-                                this.history[id].config.maxLength !== 0
-                            ) {
-                                this.history[id].config.maxLength = parseInt(this.config.maxLength, 10) || 960;
-                            } else {
-                                this.history[id].config.maxLength = parseInt(this.history[id].config.maxLength, 10);
-                            }
-                            if (
-                                !this.history[id].config.retention &&
-                                this.history[id].config.retention !== '0' &&
-                                this.history[id].config.retention !== 0
-                            ) {
-                                this.history[id].config.retention = parseInt(this.config.retention, 10) || 0;
-                            } else {
-                                this.history[id].config.retention =
-                                    parseInt(this.history[id].config.retention, 10) || 0;
-                            }
-                            if (this.history[id].config.retention === -1) {
-                                // customRetentionDuration
-                                if (
-                                    this.history[id].config.customRetentionDuration !== undefined &&
-                                    this.history[id].config.customRetentionDuration !== null &&
-                                    this.history[id].config.customRetentionDuration !== ''
-                                ) {
-                                    this.history[id].config.customRetentionDuration =
-                                        parseInt(this.history[id].config.customRetentionDuration, 10) || 0;
-                                } else {
-                                    this.history[id].config.customRetentionDuration =
-                                        this.config.customRetentionDuration;
-                                }
-                                this.history[id].config.retention =
-                                    this.history[id].config.customRetentionDuration * 24 * 60 * 60;
-                            }
+                            this.parseConfig(customConfig);
 
-                            if (
-                                !this.history[id].config.blockTime &&
-                                this.history[id].config.blockTime !== '0' &&
-                                this.history[id].config.blockTime !== 0
-                            ) {
-                                if (
-                                    !this.history[id].config.debounce &&
-                                    this.history[id].config.debounce !== '0' &&
-                                    this.history[id].config.debounce !== 0
-                                ) {
-                                    this.history[id].config.blockTime = parseInt(this.config.blockTime, 10) || 0;
-                                } else {
-                                    this.history[id].config.blockTime =
-                                        parseInt(this.history[id].config.debounce, 10) || 0;
-                                }
-                            } else {
-                                this.history[id].config.blockTime =
-                                    parseInt(this.history[id].config.blockTime, 10) || 0;
-                            }
-                            if (
-                                !this.history[id].config.debounceTime &&
-                                this.history[id].config.debounceTime !== '0' &&
-                                this.history[id].config.debounceTime !== 0
-                            ) {
-                                this.history[id].config.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
-                            } else {
-                                this.history[id].config.debounceTime =
-                                    parseInt(this.history[id].config.debounceTime, 10) || 0;
-                            }
-                            this.history[id].config.changesOnly =
-                                this.history[id].config.changesOnly === 'true' ||
-                                this.history[id].config.changesOnly === true;
-                            if (
-                                this.history[id].config.changesRelogInterval !== undefined &&
-                                this.history[id].config.changesRelogInterval !== null &&
-                                this.history[id].config.changesRelogInterval !== ''
-                            ) {
-                                this.history[id].config.changesRelogInterval =
-                                    parseInt(this.history[id].config.changesRelogInterval, 10) || 0;
-                            } else {
-                                this.history[id].config.changesRelogInterval = this.config.changesRelogInterval;
-                            }
-                            if (this.history[id].config.changesRelogInterval > 0) {
-                                this.history[id].relogTimeout = setTimeout(
-                                    _id => this.reLogHelper(_id),
-                                    this.history[id].config.changesRelogInterval * 500 * Math.random() +
-                                        this.history[id].config.changesRelogInterval * 500,
-                                    id,
-                                );
-                            }
-                            if (
-                                this.history[id].config.changesMinDelta !== undefined &&
-                                this.history[id].config.changesMinDelta !== null &&
-                                this.history[id].config.changesMinDelta !== ''
-                            ) {
-                                this.history[id].config.changesMinDelta =
-                                    parseFloat(this.history[id].config.changesMinDelta.toString().replace(/,/g, '.')) ||
-                                    0;
-                            } else {
-                                this.history[id].config.changesMinDelta = this.config.changesMinDelta;
-                            }
-
-                            // add one day if retention is too small
-                            if (this.history[id].config.retention && this.history[id].config.retention <= 604800) {
-                                this.history[id].config.retention += 86400;
-                            }
-
-                            this.history[id].config.ignoreZero =
-                                this.history[id].config.ignoreZero === 'true' ||
-                                this.history[id].config.ignoreZero === true;
-
-                            if (
-                                this.history[id].config.ignoreAboveNumber !== undefined &&
-                                this.history[id].config.ignoreAboveNumber !== null &&
-                                this.history[id].config.ignoreAboveNumber !== ''
-                            ) {
-                                this.history[id].config.ignoreAboveNumber =
-                                    parseFloat(this.history[id].config.ignoreAboveNumber) || null;
-                            }
-                            if (
-                                this.history[id].config.ignoreBelowNumber !== undefined &&
-                                this.history[id].config.ignoreBelowNumber !== null &&
-                                this.history[id].config.ignoreBelowNumber !== ''
-                            ) {
-                                this.history[id].config.ignoreBelowNumber =
-                                    parseFloat(this.history[id].config.ignoreBelowNumber) || null;
-                            } else if (
-                                this.history[id].config.ignoreBelowZero === 'true' ||
-                                this.history[id].config.ignoreBelowZero === true
-                            ) {
-                                this.history[id].config.ignoreBelowNumber = 0;
-                            }
-
-                            if (
-                                this.history[id].config.disableSkippedValueLogging !== undefined &&
-                                this.history[id].config.disableSkippedValueLogging !== null &&
-                                this.history[id].config.disableSkippedValueLogging !== ''
-                            ) {
-                                this.history[id].config.disableSkippedValueLogging =
-                                    this.history[id].config.disableSkippedValueLogging === 'true' ||
-                                    this.history[id].config.disableSkippedValueLogging === true;
-                            } else {
-                                this.history[id].config.disableSkippedValueLogging =
-                                    this.config.disableSkippedValueLogging;
-                            }
-
-                            if (
-                                this.history[id].config.enableDebugLogs !== undefined &&
-                                this.history[id].config.enableDebugLogs !== null &&
-                                this.history[id].config.enableDebugLogs !== ''
-                            ) {
-                                this.history[id].config.enableDebugLogs =
-                                    this.history[id].config.enableDebugLogs === 'true' ||
-                                    this.history[id].config.enableDebugLogs === true;
-                            } else {
-                                this.history[id].config.enableDebugLogs = this.config.enableDebugLogs;
-                            }
-
-                            // round
-                            if (
-                                this.history[id].config.round !== null &&
-                                this.history[id].config.round !== undefined &&
-                                this.history[id].config !== ''
-                            ) {
-                                this.history[id].config.round = parseInt(this.history[id].config, 10);
-                                if (!isFinite(this.history[id].config.round) || this.history[id].config.round < 0) {
-                                    this.history[id].config.round = this.config.round;
-                                } else {
-                                    this.history[id].config.round = Math.pow(
-                                        10,
-                                        parseInt(this.history[id].config.round, 10),
-                                    );
-                                }
-                            } else {
-                                this.history[id].config.round = this.config.round;
-                            }
-
+                            this.history[id] = { config: customConfig };
                             this.history[id].realId = realId;
                             this.history[id].list ||= [];
                         }
@@ -1072,7 +893,7 @@ class HistoryAdapter extends Adapter {
         }
 
         // if it was not deleted in this time
-        this.history[_id].list = this.history[_id].list || [];
+        this.history[_id].list ||= [];
 
         if (typeof state.val === 'string') {
             if (isFinite(state.val)) {
@@ -1200,7 +1021,7 @@ class HistoryAdapter extends Adapter {
     }
 
     getOneCachedData(id, options, cache, addId) {
-        addId = addId || options.addId;
+        addId ||= options.addId;
 
         if (this.history[id]) {
             const res = this.history[id].list;
@@ -2027,7 +1848,7 @@ class HistoryAdapter extends Adapter {
                     this.log.warn(`Invalid state for ${JSON.stringify(msg.message[i])}`);
                 }
             }
-        } else if (msg.message.state && Array.isArray(msg.message.state)) {
+        } else if (Array.isArray(msg.message.state)) {
             this.log.debug(`updateState ${msg.message.state.length} items`);
             id = this.aliasMap[msg.message.id] || msg.message.id;
             for (let j = 0; j < msg.message.state.length; j++) {
@@ -2313,7 +2134,7 @@ class HistoryAdapter extends Adapter {
     }
 
     disableHistory(msg) {
-        if (!msg.message || !msg.message.id) {
+        if (!msg.message?.id) {
             this.log.error('disableHistory called with invalid data');
             this.sendTo(
                 msg.from,
