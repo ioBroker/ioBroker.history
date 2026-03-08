@@ -1739,154 +1739,106 @@ function getHistory(msg) {
     } else {
         // to use parallel requests, activate this.
         // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
-        if (1 || typeof GetHistory === 'undefined') {
-            let responseSent = false;
-            adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
-            try {
-                let gh = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], { silent: false });
+        let responseSent = false;
+        adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
+        try {
+            let gh = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], { silent: false });
 
-                let ghTimeout = setTimeout(() => {
-                    try {
-                        gh.kill('SIGINT');
-                    } catch (err) {
-                        adapter.log.error(err.message);
-                    }
-                    gh = null;
-                }, 120000);
+            let ghTimeout = setTimeout(() => {
+                try {
+                    gh.kill('SIGINT');
+                } catch (err) {
+                    adapter.log.error(err.message);
+                }
+                gh = null;
+            }, 120000);
 
-                gh.on('error', err => {
-                    gh = null;
-                    !responseSent &&
-                        adapter.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
-                    !responseSent &&
-                        adapter.sendTo(
-                            msg.from,
-                            msg.command,
-                            {
-                                result: [],
-                                step: null,
-                                error: null,
-                            },
-                            msg.callback,
-                        );
-                    responseSent = true;
-                });
+            gh.on('error', err => {
+                gh = null;
+                !responseSent &&
+                    adapter.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
+                !responseSent &&
+                    adapter.sendTo(
+                        msg.from,
+                        msg.command,
+                        {
+                            result: [],
+                            step: null,
+                            error: null,
+                        },
+                        msg.callback,
+                    );
+                responseSent = true;
+            });
 
-                gh.on('message', data => {
-                    const cmd = data[0];
-                    if (cmd === 'getCache') {
-                        const settings = data[1];
-                        getCachedData(settings, cacheData => {
-                            try {
-                                gh.send(['cacheData', cacheData]);
-                            } catch (err) {
-                                adapter.log.info(
-                                    `${options.logId} Can not send data to forked process: ${err.message}`,
-                                );
-                            }
-                        });
-                    } else if (cmd === 'response') {
-                        clearTimeout(ghTimeout);
-                        ghTimeout = null;
-
+            gh.on('message', data => {
+                const cmd = data[0];
+                if (cmd === 'getCache') {
+                    const settings = data[1];
+                    getCachedData(settings, cacheData => {
                         try {
-                            gh.send(['exit']);
+                            gh.send(['cacheData', cacheData]);
                         } catch (err) {
-                            adapter.log.info(`${options.logId} Can not exit forked process: ${err.message}`);
+                            adapter.log.info(`${options.logId} Can not send data to forked process: ${err.message}`);
                         }
-                        gh = null;
+                    });
+                } else if (cmd === 'response') {
+                    clearTimeout(ghTimeout);
+                    ghTimeout = null;
 
-                        options.result = applyOptions(data[1], options);
-                        const overallLength = data[2];
-                        const step = data[3];
-                        if (options.result) {
-                            !responseSent &&
-                                adapter.log.debug(
-                                    `${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`,
-                                );
-                            !responseSent &&
-                                adapter.sendTo(
-                                    msg.from,
-                                    msg.command,
-                                    {
-                                        result: options.result,
-                                        step: step,
-                                        error: null,
-                                    },
-                                    msg.callback,
-                                );
-                            responseSent = true;
-                            options.result = null;
-                        } else {
-                            !responseSent && adapter.log.info(`${options.logId} No Data`);
-                            !responseSent &&
-                                adapter.sendTo(
-                                    msg.from,
-                                    msg.command,
-                                    {
-                                        result: [],
-                                        step: null,
-                                        error: null,
-                                    },
-                                    msg.callback,
-                                );
-                            responseSent = true;
-                        }
-                    } else if (cmd === 'debug') {
-                        let line = data.slice(1).join(', ');
-                        if (line.includes(options.logId)) {
-                            line = line.replace(`${options.logId} `, '');
-                        }
-                        adapter.log.debug(`${options.logId} GetHistory fork: ${line}`);
+                    try {
+                        gh.send(['exit']);
+                    } catch (err) {
+                        adapter.log.info(`${options.logId} Can not exit forked process: ${err.message}`);
                     }
-                });
-            } catch (err) {
-                adapter.log.info(`${options.logId} Can not use parallel requests: ${err.message}`);
-            }
-        } else {
-            if (options.debugLog) {
-                options.log = adapter.log.debug;
-            }
-            GetHistory.initAggregate(options);
-            GetHistory.getFileData(options);
-            getCachedData(options, cachedData => {
-                GetHistory.aggregation(options, cachedData);
-                const data = GetHistory.response(options);
+                    gh = null;
 
-                if (data[0] === 'response') {
-                    if (data[1]) {
-                        adapter.log.debug(
-                            `${options.logId} Send: ${data[1].length} of: ${data[2]} in: ${Date.now() - startTime}ms`,
-                        );
-                        options.result = applyOptions(data[1], options);
-                        adapter.sendTo(
-                            msg.from,
-                            msg.command,
-                            {
-                                result: options.result,
-                                step: data[3],
-                                error: null,
-                            },
-                            msg.callback,
-                        );
+                    options.result = applyOptions(data[1], options);
+                    const overallLength = data[2];
+                    const step = data[3];
+                    if (options.result) {
+                        !responseSent &&
+                            adapter.log.debug(
+                                `${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`,
+                            );
+                        !responseSent &&
+                            adapter.sendTo(
+                                msg.from,
+                                msg.command,
+                                {
+                                    result: options.result,
+                                    step: step,
+                                    error: null,
+                                },
+                                msg.callback,
+                            );
+                        responseSent = true;
                         options.result = null;
                     } else {
-                        adapter.log.info(`${options.logId} No Data`);
-                        adapter.sendTo(
-                            msg.from,
-                            msg.command,
-                            {
-                                result: [],
-                                step: null,
-                                error: null,
-                            },
-                            msg.callback,
-                        );
+                        !responseSent && adapter.log.info(`${options.logId} No Data`);
+                        !responseSent &&
+                            adapter.sendTo(
+                                msg.from,
+                                msg.command,
+                                {
+                                    result: [],
+                                    step: null,
+                                    error: null,
+                                },
+                                msg.callback,
+                            );
+                        responseSent = true;
                     }
-                } else {
-                    adapter.log.error(`${options.logId} Unknown response type: ${data[0]}`);
+                } else if (cmd === 'debug') {
+                    let line = data.slice(1).join(', ');
+                    if (line.includes(options.logId)) {
+                        line = line.replace(`${options.logId} `, '');
+                    }
+                    adapter.log.debug(`${options.logId} GetHistory fork: ${line}`);
                 }
             });
+        } catch (err) {
+            adapter.log.info(`${options.logId} Can not use parallel requests: ${err.message}`);
         }
     }
 }
