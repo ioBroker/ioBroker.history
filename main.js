@@ -108,7 +108,10 @@ function startAdapter(options) {
                 if (!(history[formerAliasId] && history[formerAliasId][adapter.namespace]) && !subscribeAll) {
                     // unsubscribe
                     for (const _id in history) {
-                        if (history.hasOwnProperty(_id) && history.hasOwnProperty(history[_id].realId)) {
+                        if (
+                            Object.prototype.hasOwnProperty.call(history, _id) &&
+                            Object.prototype.hasOwnProperty.call(history, history[_id].realId)
+                        ) {
                             adapter.unsubscribeForeignStates(history[_id].realId);
                         }
                     }
@@ -371,7 +374,7 @@ function storeCached(isFinishing, onlyId) {
     const now = Date.now();
 
     for (const id in history) {
-        if (!history.hasOwnProperty(id) || (onlyId !== undefined && onlyId !== id)) {
+        if (!Object.prototype.hasOwnProperty.call(history, id) || (onlyId !== undefined && onlyId !== id)) {
             continue;
         }
 
@@ -415,7 +418,7 @@ function storeCached(isFinishing, onlyId) {
 function finish(callback) {
     if (!subscribeAll) {
         for (const _id in history) {
-            if (history.hasOwnProperty(_id)) {
+            if (Object.prototype.hasOwnProperty.call(history, _id)) {
                 adapter.unsubscribeForeignStates(history[_id].realId);
             }
         }
@@ -428,7 +431,7 @@ function finish(callback) {
         bufferChecker = null;
     }
     for (const id in history) {
-        if (!history.hasOwnProperty(id)) {
+        if (!Object.prototype.hasOwnProperty.call(history, id)) {
             continue;
         }
 
@@ -529,7 +532,7 @@ function writeNulls(id, now) {
     if (!id) {
         now = Date.now();
         for (const _id in history) {
-            if (history.hasOwnProperty(_id)) {
+            if (Object.prototype.hasOwnProperty.call(history, _id)) {
                 writeNulls(_id, now);
             }
         }
@@ -573,7 +576,9 @@ function main() {
 
     adapter.config.storeDir = adapter.config.storeDir || 'history';
     adapter.config.storeDir = adapter.config.storeDir.replace(/\\/g, '/');
-    if (adapter.config.writeNulls === undefined) adapter.config.writeNulls = true;
+    if (adapter.config.writeNulls === undefined) {
+        adapter.config.writeNulls = true;
+    }
 
     // remove last "/"
     if (adapter.config.storeDir[adapter.config.storeDir.length - 1] === '/') {
@@ -855,7 +860,7 @@ function main() {
         }
         if (count < 20) {
             for (const _id in history) {
-                if (history.hasOwnProperty(_id)) {
+                if (Object.prototype.hasOwnProperty.call(history, _id)) {
                     adapter.subscribeForeignStates(history[_id].realId);
                 }
             }
@@ -874,7 +879,9 @@ function main() {
 }
 
 function pushHistory(id, state, timerRelog) {
-    if (timerRelog === undefined) timerRelog = false;
+    if (timerRelog === undefined) {
+        timerRelog = false;
+    }
     // Push into history
     if (history[id]) {
         const settings = history[id][adapter.namespace];
@@ -1129,7 +1136,9 @@ function reLogHelper(_id) {
 }
 
 function pushHelper(_id, state) {
-    if (!history[_id] || (!history[_id].state && !state)) return;
+    if (!history[_id] || (!history[_id].state && !state)) {
+        return;
+    }
     if (!state) {
         state = history[_id].state;
     }
@@ -1197,7 +1206,7 @@ function checkRetention(id) {
                         let files;
                         try {
                             files = fs.readdirSync(adapter.config.storeDir + dayList[i]);
-                        } catch (err) {
+                        } catch {
                             files = [];
                         }
                         if (!files.length) {
@@ -1329,7 +1338,7 @@ function getCachedData(options, callback) {
         getOneCachedData(options.id, options, cache);
     } else {
         for (const id in history) {
-            if (history.hasOwnProperty(id)) {
+            if (Object.prototype.hasOwnProperty.call(history, id)) {
                 getOneCachedData(id, options, cache, true);
             }
         }
@@ -1364,7 +1373,7 @@ function getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
                         let last = false;
 
                         for (const ii in _data) {
-                            if (!_data.hasOwnProperty(ii)) {
+                            if (!Object.prototype.hasOwnProperty.call(_data, ii)) {
                                 continue;
                             }
 
@@ -1431,7 +1440,7 @@ function getFileData(options, callback) {
         getOneFileData(dayList, dayStart, dayEnd, options.id, options, fileData);
     } else {
         for (const id in history) {
-            if (history.hasOwnProperty(id)) {
+            if (Object.prototype.hasOwnProperty.call(history, id)) {
                 getOneFileData(dayList, dayStart, dayEnd, id, options, fileData, true);
             }
         }
@@ -1545,7 +1554,7 @@ function getHistory(msg) {
         if (options.start && typeof options.start !== 'number') {
             options.start = new Date(options.start).getTime();
         }
-    } catch (err) {
+    } catch {
         return adapter.sendTo(
             msg.from,
             msg.command,
@@ -1560,7 +1569,7 @@ function getHistory(msg) {
         if (options.end && typeof options.end !== 'number') {
             options.end = new Date(options.end).getTime();
         }
-    } catch (err) {
+    } catch {
         return adapter.sendTo(
             msg.from,
             msg.command,
@@ -1612,14 +1621,25 @@ function getHistory(msg) {
         adapter.config.enableDebugLogs
     ));
 
-    if (options.ignoreNull === 'true') options.ignoreNull = true; // include nulls and replace them with last value
-    if (options.ignoreNull === 'false') options.ignoreNull = false; // include nulls
-    if (options.ignoreNull === '0') options.ignoreNull = 0; // include nulls and replace them with 0
+    // include nulls and replace them with last value
+    if (options.ignoreNull === 'true') {
+        options.ignoreNull = true;
+    }
+    // include nulls
+    if (options.ignoreNull === 'false') {
+        options.ignoreNull = false;
+    }
+    // include nulls and replace them with 0
+    if (options.ignoreNull === '0') {
+        options.ignoreNull = 0;
+    }
     if (options.ignoreNull !== true && options.ignoreNull !== false && options.ignoreNull !== 0) {
         options.ignoreNull = false;
     }
 
-    debugLog && adapter.log.debug(`${options.logId} getHistory options final: ${JSON.stringify(options)}`);
+    if (debugLog) {
+        adapter.log.debug(`${options.logId} getHistory options final: ${JSON.stringify(options)}`);
+    }
 
     if (
         (!options.start && options.count) ||
@@ -1718,6 +1738,7 @@ function getHistory(msg) {
         });
     } else {
         // to use parallel requests, activate this.
+        // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
         if (1 || typeof GetHistory === 'undefined') {
             let responseSent = false;
             adapter.log.debug(`${options.logId} use parallel requests for getHistory`);
@@ -1879,7 +1900,7 @@ function getDirectories(path) {
         return fs.readdirSync(path).filter(file => {
             try {
                 return !file.startsWith('.') && fs.statSync(`${path}/${file}`).isDirectory();
-            } catch (e) {
+            } catch {
                 // ignore entry
                 return false;
             }
@@ -2446,12 +2467,7 @@ function disableHistory(msg) {
 function getEnabledDPs(msg) {
     const data = {};
     for (const id in history) {
-        if (
-            history.hasOwnProperty(id) &&
-            history[id] &&
-            history[id][adapter.namespace] &&
-            history[id][adapter.namespace].enabled
-        ) {
+        if (Object.prototype.hasOwnProperty.call(history, id) && history[id]?.[adapter.namespace]?.enabled) {
             data[history[id].realId] = history[id][adapter.namespace];
         }
     }
