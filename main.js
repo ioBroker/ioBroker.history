@@ -2,12 +2,12 @@
 /* jshint strict: false */
 /* jslint node: true */
 'use strict';
-const cp = require('child_process');
+const cp = require('node:child_process');
 const { Adapter, getAbsoluteDefaultDataDir } = require('@iobroker/adapter-core'); // Get common adapter utils
 const dataDir = getAbsoluteDefaultDataDir();
-const fs = require('fs');
-const GetHistory = require('./lib/getHistory.js');
-const Aggregate = require('./lib/aggregate.js');
+const fs = require('node:fs');
+const GetHistory = require('./lib/getHistory');
+const Aggregate = require('./lib/aggregate');
 
 function isEqual(a, b) {
     //console.log('Compare ' + JSON.stringify(a) + ' with ' +  JSON.stringify(b));
@@ -77,26 +77,20 @@ class HistoryAdapter extends Adapter {
             objectChange: (id, obj) => {
                 const formerAliasId = this.aliasMap[id] ? this.aliasMap[id] : id;
 
-                if (
-                    obj?.common?.custom?.[this.namespace] &&
-                    typeof obj.common.custom[this.namespace] === 'object' &&
-                    obj.common.custom[this.namespace].enabled
-                ) {
+                const customConfig = obj?.common?.custom?.[this.namespace];
+
+                if (customConfig && typeof customConfig === 'object' && customConfig.enabled) {
                     const realId = id;
                     let checkForRemove = true;
-                    if (
-                        obj.common.custom &&
-                        obj.common.custom[this.namespace] &&
-                        obj.common.custom[this.namespace].aliasId
-                    ) {
-                        if (obj.common.custom[this.namespace].aliasId !== id) {
-                            this.aliasMap[id] = obj.common.custom[this.namespace].aliasId;
+                    if (customConfig.aliasId) {
+                        if (customConfig.aliasId !== id) {
+                            this.aliasMap[id] = customConfig.aliasId;
                             this.log.debug(`Registered Alias: ${id} --> ${this.aliasMap[id]}`);
                             id = this.aliasMap[id];
                             checkForRemove = false;
                         } else {
                             this.log.warn(`Ignoring Alias-ID because identical to ID for ${id}`);
-                            obj.common.custom[this.namespace].aliasId = '';
+                            customConfig.aliasId = '';
                         }
                     }
                     if (checkForRemove && this.aliasMap[id]) {
@@ -104,15 +98,12 @@ class HistoryAdapter extends Adapter {
                         delete this.aliasMap[id];
                     }
 
-                    const writeNull = !(this.history[id] && this.history[id][this.namespace]);
+                    const writeNull = !this.history[id]?.config;
                     const state = this.history[id] ? this.history[id].state : null;
                     const list = this.history[id] ? this.history[id].list : null;
                     const timeout = this.history[id] ? this.history[id].timeout : null;
 
-                    if (
-                        !(this.history[formerAliasId] && this.history[formerAliasId][this.namespace]) &&
-                        !this.subscribeAll
-                    ) {
+                    if (!this.history[formerAliasId]?.config && !this.subscribeAll) {
                         // unsubscribe
                         for (const _id in this.history) {
                             if (
@@ -126,210 +117,153 @@ class HistoryAdapter extends Adapter {
                         this.subscribeForeignStates('*');
                     }
 
-                    if (
-                        !obj.common.custom[this.namespace].maxLength &&
-                        obj.common.custom[this.namespace].maxLength !== '0' &&
-                        obj.common.custom[this.namespace].maxLength !== 0
-                    ) {
-                        obj.common.custom[this.namespace].maxLength = parseInt(this.config.maxLength, 10) || 960;
+                    if (!customConfig.maxLength && customConfig.maxLength !== '0' && customConfig.maxLength !== 0) {
+                        customConfig.maxLength = parseInt(this.config.maxLength, 10) || 960;
                     } else {
-                        obj.common.custom[this.namespace].maxLength = parseInt(
-                            obj.common.custom[this.namespace].maxLength,
-                            10,
-                        );
+                        customConfig.maxLength = parseInt(customConfig.maxLength, 10);
                     }
 
-                    if (
-                        !obj.common.custom[this.namespace].retention &&
-                        obj.common.custom[this.namespace].retention !== '0' &&
-                        obj.common.custom[this.namespace].retention !== 0
-                    ) {
-                        obj.common.custom[this.namespace].retention = parseInt(this.config.retention, 10) || 0;
+                    if (!customConfig.retention && customConfig.retention !== '0' && customConfig.retention !== 0) {
+                        customConfig.retention = parseInt(this.config.retention, 10) || 0;
                     } else {
-                        obj.common.custom[this.namespace].retention =
-                            parseInt(obj.common.custom[this.namespace].retention, 10) || 0;
+                        customConfig.retention = parseInt(customConfig.retention, 10) || 0;
                     }
-                    if (obj.common.custom[this.namespace].retention === -1) {
+                    if (customConfig.retention === -1) {
                         // customRetentionDuration
                         if (
-                            obj.common.custom[this.namespace].customRetentionDuration !== undefined &&
-                            obj.common.custom[this.namespace].customRetentionDuration !== null &&
-                            obj.common.custom[this.namespace].customRetentionDuration !== ''
+                            customConfig.customRetentionDuration !== undefined &&
+                            customConfig.customRetentionDuration !== null &&
+                            customConfig.customRetentionDuration !== ''
                         ) {
-                            obj.common.custom[this.namespace].customRetentionDuration =
-                                parseInt(obj.common.custom[this.namespace].customRetentionDuration, 10) || 0;
+                            customConfig.customRetentionDuration =
+                                parseInt(customConfig.customRetentionDuration, 10) || 0;
                         } else {
-                            obj.common.custom[this.namespace].customRetentionDuration =
-                                this.config.customRetentionDuration;
+                            customConfig.customRetentionDuration = this.config.customRetentionDuration;
                         }
-                        obj.common.custom[this.namespace].retention =
-                            obj.common.custom[this.namespace].customRetentionDuration * 24 * 60 * 60;
+                        customConfig.retention = customConfig.customRetentionDuration * 24 * 60 * 60;
                     }
 
-                    if (
-                        !obj.common.custom[this.namespace].blockTime &&
-                        obj.common.custom[this.namespace].blockTime !== '0' &&
-                        obj.common.custom[this.namespace].blockTime !== 0
-                    ) {
-                        if (
-                            !obj.common.custom[this.namespace].debounce &&
-                            obj.common.custom[this.namespace].debounce !== '0' &&
-                            obj.common.custom[this.namespace].debounce !== 0
-                        ) {
-                            obj.common.custom[this.namespace].blockTime = parseInt(this.config.blockTime, 10) || 0;
+                    if (!customConfig.blockTime && customConfig.blockTime !== '0' && customConfig.blockTime !== 0) {
+                        if (!customConfig.debounce && customConfig.debounce !== '0' && customConfig.debounce !== 0) {
+                            customConfig.blockTime = parseInt(this.config.blockTime, 10) || 0;
                         } else {
-                            obj.common.custom[this.namespace].blockTime =
-                                parseInt(obj.common.custom[this.namespace].debounce, 10) || 0;
+                            customConfig.blockTime = parseInt(customConfig.debounce, 10) || 0;
                         }
                     } else {
-                        obj.common.custom[this.namespace].blockTime =
-                            parseInt(obj.common.custom[this.namespace].blockTime, 10) || 0;
+                        customConfig.blockTime = parseInt(customConfig.blockTime, 10) || 0;
                     }
                     if (
-                        !obj.common.custom[this.namespace].debounceTime &&
-                        obj.common.custom[this.namespace].debounceTime !== '0' &&
-                        obj.common.custom[this.namespace].debounceTime !== 0
+                        !customConfig.debounceTime &&
+                        customConfig.debounceTime !== '0' &&
+                        customConfig.debounceTime !== 0
                     ) {
-                        obj.common.custom[this.namespace].debounceTime = parseInt(this.config.debounceTime, 10) || 0;
+                        customConfig.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
                     } else {
-                        obj.common.custom[this.namespace].debounceTime =
-                            parseInt(obj.common.custom[this.namespace].debounceTime, 10) || 0;
+                        customConfig.debounceTime = parseInt(customConfig.debounceTime, 10) || 0;
                     }
-                    obj.common.custom[this.namespace].changesOnly =
-                        obj.common.custom[this.namespace].changesOnly === 'true' ||
-                        obj.common.custom[this.namespace].changesOnly === true;
+                    customConfig.changesOnly = customConfig.changesOnly === 'true' || customConfig.changesOnly === true;
                     if (
-                        obj.common.custom[this.namespace].changesRelogInterval !== undefined &&
-                        obj.common.custom[this.namespace].changesRelogInterval !== null &&
-                        obj.common.custom[this.namespace].changesRelogInterval !== ''
+                        customConfig.changesRelogInterval !== undefined &&
+                        customConfig.changesRelogInterval !== null &&
+                        customConfig.changesRelogInterval !== ''
                     ) {
-                        obj.common.custom[this.namespace].changesRelogInterval =
-                            parseInt(obj.common.custom[this.namespace].changesRelogInterval, 10) || 0;
+                        customConfig.changesRelogInterval = parseInt(customConfig.changesRelogInterval, 10) || 0;
                     } else {
-                        obj.common.custom[this.namespace].changesRelogInterval = this.config.changesRelogInterval;
+                        customConfig.changesRelogInterval = this.config.changesRelogInterval;
                     }
                     if (
-                        obj.common.custom[this.namespace].changesMinDelta !== undefined &&
-                        obj.common.custom[this.namespace].changesMinDelta !== null &&
-                        obj.common.custom[this.namespace].changesMinDelta !== ''
+                        customConfig.changesMinDelta !== undefined &&
+                        customConfig.changesMinDelta !== null &&
+                        customConfig.changesMinDelta !== ''
                     ) {
-                        obj.common.custom[this.namespace].changesMinDelta =
-                            parseFloat(
-                                obj.common.custom[this.namespace].changesMinDelta.toString().replace(/,/g, '.'),
-                            ) || 0;
+                        customConfig.changesMinDelta =
+                            parseFloat(customConfig.changesMinDelta.toString().replace(/,/g, '.')) || 0;
                     } else {
-                        obj.common.custom[this.namespace].changesMinDelta = this.config.changesMinDelta;
+                        customConfig.changesMinDelta = this.config.changesMinDelta;
                     }
 
-                    obj.common.custom[this.namespace].ignoreZero =
-                        obj.common.custom[this.namespace].ignoreZero === 'true' ||
-                        obj.common.custom[this.namespace].ignoreZero === true;
+                    customConfig.ignoreZero = customConfig.ignoreZero === 'true' || customConfig.ignoreZero === true;
 
                     if (
-                        obj.common.custom[this.namespace].ignoreAboveNumber !== undefined &&
-                        obj.common.custom[this.namespace].ignoreAboveNumber !== null &&
-                        obj.common.custom[this.namespace].ignoreAboveNumber !== ''
+                        customConfig.ignoreAboveNumber !== undefined &&
+                        customConfig.ignoreAboveNumber !== null &&
+                        customConfig.ignoreAboveNumber !== ''
                     ) {
-                        obj.common.custom[this.namespace].ignoreAboveNumber =
-                            parseFloat(obj.common.custom[this.namespace].ignoreAboveNumber) || null;
+                        customConfig.ignoreAboveNumber = parseFloat(customConfig.ignoreAboveNumber) || null;
                     }
                     if (
-                        obj.common.custom[this.namespace].ignoreBelowNumber !== undefined &&
-                        obj.common.custom[this.namespace].ignoreBelowNumber !== null &&
-                        obj.common.custom[this.namespace].ignoreBelowNumber !== ''
+                        customConfig.ignoreBelowNumber !== undefined &&
+                        customConfig.ignoreBelowNumber !== null &&
+                        customConfig.ignoreBelowNumber !== ''
                     ) {
-                        obj.common.custom[this.namespace].ignoreBelowNumber =
-                            parseFloat(obj.common.custom[this.namespace].ignoreBelowNumber) || null;
-                    } else if (
-                        obj.common.custom[this.namespace].ignoreBelowZero === 'true' ||
-                        obj.common.custom[this.namespace].ignoreBelowZero === true
-                    ) {
-                        obj.common.custom[this.namespace].ignoreBelowNumber = 0;
+                        customConfig.ignoreBelowNumber = parseFloat(customConfig.ignoreBelowNumber) || null;
+                    } else if (customConfig.ignoreBelowZero === 'true' || customConfig.ignoreBelowZero === true) {
+                        customConfig.ignoreBelowNumber = 0;
                     }
 
                     if (
-                        obj.common.custom[this.namespace].disableSkippedValueLogging !== undefined &&
-                        obj.common.custom[this.namespace].disableSkippedValueLogging !== null &&
-                        obj.common.custom[this.namespace].disableSkippedValueLogging !== ''
+                        customConfig.disableSkippedValueLogging !== undefined &&
+                        customConfig.disableSkippedValueLogging !== null &&
+                        customConfig.disableSkippedValueLogging !== ''
                     ) {
-                        obj.common.custom[this.namespace].disableSkippedValueLogging =
-                            obj.common.custom[this.namespace].disableSkippedValueLogging === 'true' ||
-                            obj.common.custom[this.namespace].disableSkippedValueLogging === true;
+                        customConfig.disableSkippedValueLogging =
+                            customConfig.disableSkippedValueLogging === 'true' ||
+                            customConfig.disableSkippedValueLogging === true;
                     } else {
-                        obj.common.custom[this.namespace].disableSkippedValueLogging =
-                            this.config.disableSkippedValueLogging;
+                        customConfig.disableSkippedValueLogging = this.config.disableSkippedValueLogging;
                     }
 
                     // round
-                    if (
-                        obj.common.custom[this.namespace].round !== null &&
-                        obj.common.custom[this.namespace].round !== undefined &&
-                        obj.common.custom[this.namespace] !== ''
-                    ) {
-                        obj.common.custom[this.namespace].round = parseInt(obj.common.custom[this.namespace], 10);
-                        if (
-                            !isFinite(obj.common.custom[this.namespace].round) ||
-                            obj.common.custom[this.namespace].round < 0
-                        ) {
-                            obj.common.custom[this.namespace].round = this.config.round;
+                    if (customConfig.round !== null && customConfig.round !== undefined && customConfig !== '') {
+                        customConfig.round = parseInt(customConfig, 10);
+                        if (!isFinite(customConfig.round) || customConfig.round < 0) {
+                            customConfig.round = this.config.round;
                         } else {
-                            obj.common.custom[this.namespace].round = Math.pow(
-                                10,
-                                parseInt(obj.common.custom[this.namespace].round, 10),
-                            );
+                            customConfig.round = Math.pow(10, parseInt(customConfig.round, 10));
                         }
                     } else {
-                        obj.common.custom[this.namespace].round = this.config.round;
+                        customConfig.round = this.config.round;
                     }
 
                     if (
-                        obj.common.custom[this.namespace].enableDebugLogs !== undefined &&
-                        obj.common.custom[this.namespace].enableDebugLogs !== null &&
-                        obj.common.custom[this.namespace].enableDebugLogs !== ''
+                        customConfig.enableDebugLogs !== undefined &&
+                        customConfig.enableDebugLogs !== null &&
+                        customConfig.enableDebugLogs !== ''
                     ) {
-                        obj.common.custom[this.namespace].enableDebugLogs =
-                            obj.common.custom[this.namespace].enableDebugLogs === 'true' ||
-                            obj.common.custom[this.namespace].enableDebugLogs === true;
+                        customConfig.enableDebugLogs =
+                            customConfig.enableDebugLogs === 'true' || customConfig.enableDebugLogs === true;
                     } else {
-                        obj.common.custom[this.namespace].enableDebugLogs = this.config.enableDebugLogs;
+                        customConfig.enableDebugLogs = this.config.enableDebugLogs;
                     }
 
                     // add one day if retention is too small
-                    if (
-                        obj.common.custom[this.namespace].retention &&
-                        obj.common.custom[this.namespace].retention <= 604800
-                    ) {
-                        obj.common.custom[this.namespace].retention += 86400;
+                    if (customConfig.retention && customConfig.retention <= 604800) {
+                        customConfig.retention += 86400;
                     }
 
                     if (
-                        this.history[formerAliasId] &&
-                        this.history[formerAliasId][this.namespace] &&
-                        isEqual(obj.common.custom[this.namespace], this.history[formerAliasId][this.namespace])
+                        this.history[formerAliasId]?.config &&
+                        isEqual(customConfig, this.history[formerAliasId].config)
                     ) {
                         return this.log.debug(`Object ${id} unchanged. Ignore`);
                     }
 
-                    if (this.history[formerAliasId] && this.history[formerAliasId].relogTimeout) {
+                    if (this.history[formerAliasId]?.relogTimeout) {
                         clearTimeout(this.history[formerAliasId].relogTimeout);
                         this.history[formerAliasId].relogTimeout = null;
                     }
 
-                    this.history[id] = obj.common.custom;
+                    this.history[id] = { config: customConfig };
                     this.history[id].state = state;
                     this.history[id].list = list || [];
                     this.history[id].timeout = timeout;
                     this.history[id].realId = realId;
 
-                    if (
-                        this.history[id][this.namespace] &&
-                        this.history[id][this.namespace].changesOnly &&
-                        this.history[id][this.namespace].changesRelogInterval > 0
-                    ) {
+                    if (this.history[id].config?.changesOnly && this.history[id].config.changesRelogInterval > 0) {
                         this.history[id].relogTimeout = setTimeout(
                             _id => this.reLogHelper(_id),
-                            this.history[id][this.namespace].changesRelogInterval * 500 * Math.random() +
-                                this.history[id][this.namespace].changesRelogInterval * 500,
+                            this.history[id].config.changesRelogInterval * 500 * Math.random() +
+                                this.history[id].config.changesRelogInterval * 500,
                             id,
                         );
                     }
@@ -384,10 +318,7 @@ class HistoryAdapter extends Adapter {
 
             this.history[id].list ||= [];
             if (isFinishing) {
-                if (
-                    this.history[id].skipped &&
-                    !(this.history[id][this.namespace] && this.history[id][this.namespace].disableSkippedValueLogging)
-                ) {
+                if (this.history[id].skipped && !this.history[id].config?.disableSkippedValueLogging) {
                     this.history[id].list.push(this.history[id].skipped);
                     this.history[id].skipped = null;
                 }
@@ -400,8 +331,7 @@ class HistoryAdapter extends Adapter {
                         from: `system.adapter.${this.namespace}`,
                     };
                     if (
-                        this.history[id][this.namespace] &&
-                        this.history[id][this.namespace].changesOnly &&
+                        this.history[id].config?.changesOnly &&
                         this.history[id].state &&
                         this.history[id].state !== null
                     ) {
@@ -502,7 +432,7 @@ class HistoryAdapter extends Adapter {
     processStartValues() {
         if (this.tasksStart && this.tasksStart.length) {
             const task = this.tasksStart.shift();
-            if (this.history[task.id]?.[this.namespace]?.changesOnly) {
+            if (this.history[task.id]?.config?.changesOnly) {
                 this.getForeignState(this.history[task.id].realId, (err, state) => {
                     const now = task.now || Date.now();
                     this.pushHistory(task.id, {
@@ -548,16 +478,12 @@ class HistoryAdapter extends Adapter {
             if (this.tasksStart.length === 1) {
                 this.processStartValues();
             }
-            if (
-                this.history[id][this.namespace] &&
-                this.history[id][this.namespace].changesOnly &&
-                this.history[id][this.namespace].changesRelogInterval > 0
-            ) {
+            if (this.history[id].config?.changesOnly && this.history[id].config.changesRelogInterval > 0) {
                 this.history[id].relogTimeout && clearTimeout(this.history[id].relogTimeout);
                 this.history[id].relogTimeout = setTimeout(
                     _id => this.reLogHelper(_id),
-                    this.history[id][this.namespace].changesRelogInterval * 500 * Math.random() +
-                        this.history[id][this.namespace].changesRelogInterval * 500,
+                    this.history[id].config.changesRelogInterval * 500 * Math.random() +
+                        this.history[id].config.changesRelogInterval * 500,
                     id,
                 );
             }
@@ -663,201 +589,188 @@ class HistoryAdapter extends Adapter {
                             this.log.debug(`Found Alias: ${id} --> ${this.aliasMap[id]}`);
                             id = this.aliasMap[id];
                         }
-                        this.history[id] = doc.rows[i].value;
+                        this.history[id] = { config: doc.rows[i].value[this.namespace] };
 
                         if (
-                            !this.history[id][this.namespace] ||
-                            typeof this.history[id][this.namespace] !== 'object' ||
-                            this.history[id][this.namespace].enabled === false
+                            !this.history[id].config ||
+                            typeof this.history[id].config !== 'object' ||
+                            this.history[id].config.enabled === false
                         ) {
                             delete this.history[id];
                         } else {
                             count++;
                             this.log.info(`enabled logging of ${id} (Count=${count}), Alias=${id !== realId}`);
                             if (
-                                !this.history[id][this.namespace].maxLength &&
-                                this.history[id][this.namespace].maxLength !== '0' &&
-                                this.history[id][this.namespace].maxLength !== 0
+                                !this.history[id].config.maxLength &&
+                                this.history[id].config.maxLength !== '0' &&
+                                this.history[id].config.maxLength !== 0
                             ) {
-                                this.history[id][this.namespace].maxLength = parseInt(this.config.maxLength, 10) || 960;
+                                this.history[id].config.maxLength = parseInt(this.config.maxLength, 10) || 960;
                             } else {
-                                this.history[id][this.namespace].maxLength = parseInt(
-                                    this.history[id][this.namespace].maxLength,
-                                    10,
-                                );
+                                this.history[id].config.maxLength = parseInt(this.history[id].config.maxLength, 10);
                             }
                             if (
-                                !this.history[id][this.namespace].retention &&
-                                this.history[id][this.namespace].retention !== '0' &&
-                                this.history[id][this.namespace].retention !== 0
+                                !this.history[id].config.retention &&
+                                this.history[id].config.retention !== '0' &&
+                                this.history[id].config.retention !== 0
                             ) {
-                                this.history[id][this.namespace].retention = parseInt(this.config.retention, 10) || 0;
+                                this.history[id].config.retention = parseInt(this.config.retention, 10) || 0;
                             } else {
-                                this.history[id][this.namespace].retention =
-                                    parseInt(this.history[id][this.namespace].retention, 10) || 0;
+                                this.history[id].config.retention =
+                                    parseInt(this.history[id].config.retention, 10) || 0;
                             }
-                            if (this.history[id][this.namespace].retention === -1) {
+                            if (this.history[id].config.retention === -1) {
                                 // customRetentionDuration
                                 if (
-                                    this.history[id][this.namespace].customRetentionDuration !== undefined &&
-                                    this.history[id][this.namespace].customRetentionDuration !== null &&
-                                    this.history[id][this.namespace].customRetentionDuration !== ''
+                                    this.history[id].config.customRetentionDuration !== undefined &&
+                                    this.history[id].config.customRetentionDuration !== null &&
+                                    this.history[id].config.customRetentionDuration !== ''
                                 ) {
-                                    this.history[id][this.namespace].customRetentionDuration =
-                                        parseInt(this.history[id][this.namespace].customRetentionDuration, 10) || 0;
+                                    this.history[id].config.customRetentionDuration =
+                                        parseInt(this.history[id].config.customRetentionDuration, 10) || 0;
                                 } else {
-                                    this.history[id][this.namespace].customRetentionDuration =
+                                    this.history[id].config.customRetentionDuration =
                                         this.config.customRetentionDuration;
                                 }
-                                this.history[id][this.namespace].retention =
-                                    this.history[id][this.namespace].customRetentionDuration * 24 * 60 * 60;
+                                this.history[id].config.retention =
+                                    this.history[id].config.customRetentionDuration * 24 * 60 * 60;
                             }
 
                             if (
-                                !this.history[id][this.namespace].blockTime &&
-                                this.history[id][this.namespace].blockTime !== '0' &&
-                                this.history[id][this.namespace].blockTime !== 0
+                                !this.history[id].config.blockTime &&
+                                this.history[id].config.blockTime !== '0' &&
+                                this.history[id].config.blockTime !== 0
                             ) {
                                 if (
-                                    !this.history[id][this.namespace].debounce &&
-                                    this.history[id][this.namespace].debounce !== '0' &&
-                                    this.history[id][this.namespace].debounce !== 0
+                                    !this.history[id].config.debounce &&
+                                    this.history[id].config.debounce !== '0' &&
+                                    this.history[id].config.debounce !== 0
                                 ) {
-                                    this.history[id][this.namespace].blockTime =
-                                        parseInt(this.config.blockTime, 10) || 0;
+                                    this.history[id].config.blockTime = parseInt(this.config.blockTime, 10) || 0;
                                 } else {
-                                    this.history[id][this.namespace].blockTime =
-                                        parseInt(this.history[id][this.namespace].debounce, 10) || 0;
+                                    this.history[id].config.blockTime =
+                                        parseInt(this.history[id].config.debounce, 10) || 0;
                                 }
                             } else {
-                                this.history[id][this.namespace].blockTime =
-                                    parseInt(this.history[id][this.namespace].blockTime, 10) || 0;
+                                this.history[id].config.blockTime =
+                                    parseInt(this.history[id].config.blockTime, 10) || 0;
                             }
                             if (
-                                !this.history[id][this.namespace].debounceTime &&
-                                this.history[id][this.namespace].debounceTime !== '0' &&
-                                this.history[id][this.namespace].debounceTime !== 0
+                                !this.history[id].config.debounceTime &&
+                                this.history[id].config.debounceTime !== '0' &&
+                                this.history[id].config.debounceTime !== 0
                             ) {
-                                this.history[id][this.namespace].debounceTime =
-                                    parseInt(this.config.debounceTime, 10) || 0;
+                                this.history[id].config.debounceTime = parseInt(this.config.debounceTime, 10) || 0;
                             } else {
-                                this.history[id][this.namespace].debounceTime =
-                                    parseInt(this.history[id][this.namespace].debounceTime, 10) || 0;
+                                this.history[id].config.debounceTime =
+                                    parseInt(this.history[id].config.debounceTime, 10) || 0;
                             }
-                            this.history[id][this.namespace].changesOnly =
-                                this.history[id][this.namespace].changesOnly === 'true' ||
-                                this.history[id][this.namespace].changesOnly === true;
+                            this.history[id].config.changesOnly =
+                                this.history[id].config.changesOnly === 'true' ||
+                                this.history[id].config.changesOnly === true;
                             if (
-                                this.history[id][this.namespace].changesRelogInterval !== undefined &&
-                                this.history[id][this.namespace].changesRelogInterval !== null &&
-                                this.history[id][this.namespace].changesRelogInterval !== ''
+                                this.history[id].config.changesRelogInterval !== undefined &&
+                                this.history[id].config.changesRelogInterval !== null &&
+                                this.history[id].config.changesRelogInterval !== ''
                             ) {
-                                this.history[id][this.namespace].changesRelogInterval =
-                                    parseInt(this.history[id][this.namespace].changesRelogInterval, 10) || 0;
+                                this.history[id].config.changesRelogInterval =
+                                    parseInt(this.history[id].config.changesRelogInterval, 10) || 0;
                             } else {
-                                this.history[id][this.namespace].changesRelogInterval =
-                                    this.config.changesRelogInterval;
+                                this.history[id].config.changesRelogInterval = this.config.changesRelogInterval;
                             }
-                            if (this.history[id][this.namespace].changesRelogInterval > 0) {
+                            if (this.history[id].config.changesRelogInterval > 0) {
                                 this.history[id].relogTimeout = setTimeout(
                                     _id => this.reLogHelper(_id),
-                                    this.history[id][this.namespace].changesRelogInterval * 500 * Math.random() +
-                                        this.history[id][this.namespace].changesRelogInterval * 500,
+                                    this.history[id].config.changesRelogInterval * 500 * Math.random() +
+                                        this.history[id].config.changesRelogInterval * 500,
                                     id,
                                 );
                             }
                             if (
-                                this.history[id][this.namespace].changesMinDelta !== undefined &&
-                                this.history[id][this.namespace].changesMinDelta !== null &&
-                                this.history[id][this.namespace].changesMinDelta !== ''
+                                this.history[id].config.changesMinDelta !== undefined &&
+                                this.history[id].config.changesMinDelta !== null &&
+                                this.history[id].config.changesMinDelta !== ''
                             ) {
-                                this.history[id][this.namespace].changesMinDelta =
-                                    parseFloat(
-                                        this.history[id][this.namespace].changesMinDelta.toString().replace(/,/g, '.'),
-                                    ) || 0;
+                                this.history[id].config.changesMinDelta =
+                                    parseFloat(this.history[id].config.changesMinDelta.toString().replace(/,/g, '.')) ||
+                                    0;
                             } else {
-                                this.history[id][this.namespace].changesMinDelta = this.config.changesMinDelta;
+                                this.history[id].config.changesMinDelta = this.config.changesMinDelta;
                             }
 
                             // add one day if retention is too small
-                            if (
-                                this.history[id][this.namespace].retention &&
-                                this.history[id][this.namespace].retention <= 604800
-                            ) {
-                                this.history[id][this.namespace].retention += 86400;
+                            if (this.history[id].config.retention && this.history[id].config.retention <= 604800) {
+                                this.history[id].config.retention += 86400;
                             }
 
-                            this.history[id][this.namespace].ignoreZero =
-                                this.history[id][this.namespace].ignoreZero === 'true' ||
-                                this.history[id][this.namespace].ignoreZero === true;
+                            this.history[id].config.ignoreZero =
+                                this.history[id].config.ignoreZero === 'true' ||
+                                this.history[id].config.ignoreZero === true;
 
                             if (
-                                this.history[id][this.namespace].ignoreAboveNumber !== undefined &&
-                                this.history[id][this.namespace].ignoreAboveNumber !== null &&
-                                this.history[id][this.namespace].ignoreAboveNumber !== ''
+                                this.history[id].config.ignoreAboveNumber !== undefined &&
+                                this.history[id].config.ignoreAboveNumber !== null &&
+                                this.history[id].config.ignoreAboveNumber !== ''
                             ) {
-                                this.history[id][this.namespace].ignoreAboveNumber =
-                                    parseFloat(this.history[id][this.namespace].ignoreAboveNumber) || null;
+                                this.history[id].config.ignoreAboveNumber =
+                                    parseFloat(this.history[id].config.ignoreAboveNumber) || null;
                             }
                             if (
-                                this.history[id][this.namespace].ignoreBelowNumber !== undefined &&
-                                this.history[id][this.namespace].ignoreBelowNumber !== null &&
-                                this.history[id][this.namespace].ignoreBelowNumber !== ''
+                                this.history[id].config.ignoreBelowNumber !== undefined &&
+                                this.history[id].config.ignoreBelowNumber !== null &&
+                                this.history[id].config.ignoreBelowNumber !== ''
                             ) {
-                                this.history[id][this.namespace].ignoreBelowNumber =
-                                    parseFloat(this.history[id][this.namespace].ignoreBelowNumber) || null;
+                                this.history[id].config.ignoreBelowNumber =
+                                    parseFloat(this.history[id].config.ignoreBelowNumber) || null;
                             } else if (
-                                this.history[id][this.namespace].ignoreBelowZero === 'true' ||
-                                this.history[id][this.namespace].ignoreBelowZero === true
+                                this.history[id].config.ignoreBelowZero === 'true' ||
+                                this.history[id].config.ignoreBelowZero === true
                             ) {
-                                this.history[id][this.namespace].ignoreBelowNumber = 0;
+                                this.history[id].config.ignoreBelowNumber = 0;
                             }
 
                             if (
-                                this.history[id][this.namespace].disableSkippedValueLogging !== undefined &&
-                                this.history[id][this.namespace].disableSkippedValueLogging !== null &&
-                                this.history[id][this.namespace].disableSkippedValueLogging !== ''
+                                this.history[id].config.disableSkippedValueLogging !== undefined &&
+                                this.history[id].config.disableSkippedValueLogging !== null &&
+                                this.history[id].config.disableSkippedValueLogging !== ''
                             ) {
-                                this.history[id][this.namespace].disableSkippedValueLogging =
-                                    this.history[id][this.namespace].disableSkippedValueLogging === 'true' ||
-                                    this.history[id][this.namespace].disableSkippedValueLogging === true;
+                                this.history[id].config.disableSkippedValueLogging =
+                                    this.history[id].config.disableSkippedValueLogging === 'true' ||
+                                    this.history[id].config.disableSkippedValueLogging === true;
                             } else {
-                                this.history[id][this.namespace].disableSkippedValueLogging =
+                                this.history[id].config.disableSkippedValueLogging =
                                     this.config.disableSkippedValueLogging;
                             }
 
                             if (
-                                this.history[id][this.namespace].enableDebugLogs !== undefined &&
-                                this.history[id][this.namespace].enableDebugLogs !== null &&
-                                this.history[id][this.namespace].enableDebugLogs !== ''
+                                this.history[id].config.enableDebugLogs !== undefined &&
+                                this.history[id].config.enableDebugLogs !== null &&
+                                this.history[id].config.enableDebugLogs !== ''
                             ) {
-                                this.history[id][this.namespace].enableDebugLogs =
-                                    this.history[id][this.namespace].enableDebugLogs === 'true' ||
-                                    this.history[id][this.namespace].enableDebugLogs === true;
+                                this.history[id].config.enableDebugLogs =
+                                    this.history[id].config.enableDebugLogs === 'true' ||
+                                    this.history[id].config.enableDebugLogs === true;
                             } else {
-                                this.history[id][this.namespace].enableDebugLogs = this.config.enableDebugLogs;
+                                this.history[id].config.enableDebugLogs = this.config.enableDebugLogs;
                             }
 
                             // round
                             if (
-                                this.history[id][this.namespace].round !== null &&
-                                this.history[id][this.namespace].round !== undefined &&
-                                this.history[id][this.namespace] !== ''
+                                this.history[id].config.round !== null &&
+                                this.history[id].config.round !== undefined &&
+                                this.history[id].config !== ''
                             ) {
-                                this.history[id][this.namespace].round = parseInt(this.history[id][this.namespace], 10);
-                                if (
-                                    !isFinite(this.history[id][this.namespace].round) ||
-                                    this.history[id][this.namespace].round < 0
-                                ) {
-                                    this.history[id][this.namespace].round = this.config.round;
+                                this.history[id].config.round = parseInt(this.history[id].config, 10);
+                                if (!isFinite(this.history[id].config.round) || this.history[id].config.round < 0) {
+                                    this.history[id].config.round = this.config.round;
                                 } else {
-                                    this.history[id][this.namespace].round = Math.pow(
+                                    this.history[id].config.round = Math.pow(
                                         10,
-                                        parseInt(this.history[id][this.namespace].round, 10),
+                                        parseInt(this.history[id].config.round, 10),
                                     );
                                 }
                             } else {
-                                this.history[id][this.namespace].round = this.config.round;
+                                this.history[id].config.round = this.config.round;
                             }
 
                             this.history[id].realId = realId;
@@ -892,7 +805,7 @@ class HistoryAdapter extends Adapter {
         }
         // Push into history
         if (this.history[id]) {
-            const settings = this.history[id][this.namespace];
+            const settings = this.history[id].config;
 
             if (!settings || !state) {
                 return;
@@ -1187,7 +1100,7 @@ class HistoryAdapter extends Adapter {
 
         this.history[_id].list.push(state);
 
-        const _settings = (this.history[_id] && this.history[_id][this.namespace]) || {};
+        const _settings = (this.history[_id] && this.history[_id].config) || {};
         const maxLength =
             _settings.maxLength !== undefined ? _settings.maxLength : parseInt(this.config.maxLength, 10) || 960;
         if (_settings && this.history[_id].list.length > maxLength) {
@@ -1198,7 +1111,7 @@ class HistoryAdapter extends Adapter {
     }
 
     checkRetention(id) {
-        if (this.history[id] && this.history[id][this.namespace] && this.history[id][this.namespace].retention) {
+        if (this.history[id]?.config?.retention) {
             const d = new Date();
             const dt = d.getTime();
             // check every 6 hours
@@ -1207,7 +1120,7 @@ class HistoryAdapter extends Adapter {
                 // get list of directories
                 const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => a - b);
                 // calculate date
-                d.setSeconds(-this.history[id][this.namespace].retention);
+                d.setSeconds(-this.history[id].config.retention);
 
                 const day = GetHistory.ts2day(d.getTime());
 
@@ -1633,10 +1546,7 @@ class HistoryAdapter extends Adapter {
 
         this.history[options.id] = this.history[options.id] || {};
         const debugLog = (options.debugLog = !!(
-            (this.history[options.id] &&
-                this.history[options.id][this.namespace] &&
-                this.history[options.id][this.namespace].enableDebugLogs) ||
-            this.config.enableDebugLogs
+            this.history[options.id]?.config?.enableDebugLogs || this.config.enableDebugLogs
         ));
 
         // include nulls and replace them with last value
@@ -1756,7 +1666,6 @@ class HistoryAdapter extends Adapter {
             });
         } else {
             // to use parallel requests, activate this.
-            // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
             let responseSent = false;
             this.log.debug(`${options.logId} use parallel requests for getHistory`);
             try {
@@ -2268,7 +2177,7 @@ class HistoryAdapter extends Adapter {
             throw new Error(`State ${JSON.stringify(state)} for ${id} is not valid`);
         }
 
-        if (!this.history[id]?.[this.namespace]) {
+        if (!this.history[id]?.config) {
             if (applyRules) {
                 throw new Error(`history not enabled for ${id}, so can not apply the rules as requested`);
             }
@@ -2454,8 +2363,8 @@ class HistoryAdapter extends Adapter {
     getEnabledDPs(msg) {
         const data = {};
         for (const id in this.history) {
-            if (Object.prototype.hasOwnProperty.call(this.history, id) && this.history[id]?.[this.namespace]?.enabled) {
-                data[this.history[id].realId] = this.history[id][this.namespace];
+            if (Object.prototype.hasOwnProperty.call(this.history, id) && this.history[id]?.config?.enabled) {
+                data[this.history[id].realId] = this.history[id].config;
             }
         }
 
