@@ -460,7 +460,7 @@ class HistoryAdapter extends Adapter {
                 return;
             }
             if (this.history[task.id]?.config?.changesOnly) {
-                this.getForeignState(this.history[task.id].realId, (err, state) => {
+                void this.getForeignState(this.history[task.id].realId, (err, state) => {
                     const now = task.now || Date.now();
                     this.pushHistory(task.id, {
                         val: null,
@@ -907,7 +907,7 @@ class HistoryAdapter extends Adapter {
         } else if (this.history[_id].state) {
             this.pushHistory(_id, this.history[_id].state, true);
         } else {
-            this.getForeignState(this.history[_id].realId, (err, state) => {
+            void this.getForeignState(this.history[_id].realId, (err, state) => {
                 if (err) {
                     this.log.info(`init timed Relog: can not get State for ${_id} : ${err}`);
                 } else if (!state) {
@@ -1175,26 +1175,22 @@ class HistoryAdapter extends Adapter {
                             // adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                             let last = false;
 
-                            for (const ii in _data) {
-                                if (!Object.prototype.hasOwnProperty.call(_data, ii)) {
-                                    continue;
-                                }
-
+                            for (const item of _data) {
                                 // if a ts in seconds is in then convert on the fly
-                                if (_data[ii].ts && _data[ii].ts < tsCheck) {
-                                    _data[ii].ts *= 1000;
+                                if (item.ts && item.ts < tsCheck) {
+                                    item.ts *= 1000;
                                 }
 
-                                if (typeof _data[ii].val === 'number' && isFinite(_data[ii].val) && options.round) {
-                                    _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                                if (typeof item.val === 'number' && isFinite(item.val) && options.round) {
+                                    item.val = Math.round(item.val * options.round) / options.round;
                                 }
                                 if (options.ack) {
-                                    _data[ii].ack = !!_data[ii].ack;
+                                    item.ack = !!item.ack;
                                 }
                                 if (addId) {
-                                    _data[ii].id = id;
+                                    item.id = id;
                                 }
-                                data.push(_data[ii]);
+                                data.push(item);
                                 if (
                                     (options.returnNewestEntries ||
                                         options.aggregate === 'onchange' ||
@@ -1208,7 +1204,7 @@ class HistoryAdapter extends Adapter {
                                 if (last) {
                                     break;
                                 }
-                                if (options.start && _data[ii].ts < options.start) {
+                                if (options.start && item.ts < options.start) {
                                     last = true;
                                 }
                             }
