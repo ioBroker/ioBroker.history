@@ -1,7 +1,3 @@
-/* jshint -W097 */
-/* jshint strict: false */
-/* jslint node: true */
-'use strict';
 const cp = require('node:child_process');
 const { Adapter, getAbsoluteDefaultDataDir } = require('@iobroker/adapter-core'); // Get common adapter utils
 const dataDir = getAbsoluteDefaultDataDir();
@@ -330,11 +326,7 @@ class HistoryAdapter extends Adapter {
                         q: 0x40,
                         from: `system.adapter.${this.namespace}`,
                     };
-                    if (
-                        this.history[id].config?.changesOnly &&
-                        this.history[id].state &&
-                        this.history[id].state !== null
-                    ) {
+                    if (this.history[id].config?.changesOnly && this.history[id].state) {
                         const state = Object.assign({}, this.history[id].state);
                         state.ts = now;
                         state.from = `system.adapter.${this.namespace}`;
@@ -390,7 +382,7 @@ class HistoryAdapter extends Adapter {
             this.storeCached(true);
         }
 
-        callback && callback();
+        callback?.();
     }
 
     processMessage(msg) {
@@ -479,7 +471,9 @@ class HistoryAdapter extends Adapter {
                 this.processStartValues();
             }
             if (this.history[id].config?.changesOnly && this.history[id].config.changesRelogInterval > 0) {
-                this.history[id].relogTimeout && clearTimeout(this.history[id].relogTimeout);
+                if (this.history[id].relogTimeout) {
+                    clearTimeout(this.history[id].relogTimeout);
+                }
                 this.history[id].relogTimeout = setTimeout(
                     _id => this.reLogHelper(_id),
                     this.history[id].config.changesRelogInterval * 500 * Math.random() +
@@ -494,7 +488,7 @@ class HistoryAdapter extends Adapter {
         //start
         // set default history if not yet set
         this.getForeignObject('system.config', (err, obj) => {
-            if (obj && obj.common && !obj.common.defaultHistory) {
+            if (obj?.common && !obj.common.defaultHistory) {
                 obj.common.defaultHistory = this.namespace;
                 this.setForeignObject('system.config', obj, err => {
                     if (err) {
@@ -790,7 +784,9 @@ class HistoryAdapter extends Adapter {
                 this.subscribeForeignStates('*');
             }
 
-            this.config.writeNulls && this.writeNulls();
+            if (this.config.writeNulls) {
+                this.writeNulls();
+            }
 
             // store all buffered data every 10 minutes to not lose the data
             this.bufferChecker = setInterval(() => this.storeCached(), 10 * 60000);
@@ -826,7 +822,7 @@ class HistoryAdapter extends Adapter {
                     `new value received for ${id}, new-value=${state.val}, ts=${state.ts}, relog=${timerRelog}`,
                 );
 
-            let ignoreDebonce = false;
+            let ignoreDebounce = false;
 
             if (!timerRelog) {
                 const valueUnstable = !!this.history[id].timeout;
@@ -861,10 +857,11 @@ class HistoryAdapter extends Adapter {
                 }
 
                 if (settings.ignoreZero && (state.val === undefined || state.val === null || state.val === 0)) {
-                    settings.enableDebugLogs &&
+                    if (settings.enableDebugLogs) {
                         this.log.debug(
                             `value ignore because zero or null ${id}, new-value=${state.val}, ts=${state.ts}`,
                         );
+                    }
                     return;
                 } else if (
                     typeof settings.ignoreBelowNumber === 'number' &&
@@ -923,7 +920,7 @@ class HistoryAdapter extends Adapter {
                                 this.log.debug(
                                     `value-not-changed-relog ${id}, value=${state.val}, lastLogTime=${this.history[id].lastLogTime}, ts=${state.ts}`,
                                 );
-                            ignoreDebonce = true;
+                            ignoreDebounce = true;
                         }
                     }
                     if (typeof state.val === 'number') {
@@ -968,7 +965,7 @@ class HistoryAdapter extends Adapter {
                     this.log.debug(
                         `timed-relog ${id}, value=${state.val}, lastLogTime=${this.history[id].lastLogTime}, ts=${state.ts}`,
                     );
-                ignoreDebonce = true;
+                ignoreDebounce = true;
             } else {
                 if (settings.changesOnly && this.history[id].skipped) {
                     settings.enableDebugLogs &&
@@ -983,12 +980,12 @@ class HistoryAdapter extends Adapter {
                     ((this.history[id].state.val === null && state.val !== null) ||
                         (this.history[id].state.val !== null && state.val === null))
                 ) {
-                    ignoreDebonce = true;
+                    ignoreDebounce = true;
                 } else if (!this.history[id].state && state.val === null) {
-                    ignoreDebonce = true;
+                    ignoreDebounce = true;
                 }
             }
-            if (settings.debounceTime && !ignoreDebonce && !timerRelog) {
+            if (settings.debounceTime && !ignoreDebounce && !timerRelog) {
                 // Discard changes in de-bounce time to store last stable value
                 this.history[id].timeout && clearTimeout(this.history[id].timeout);
                 this.history[id].timeout = setTimeout(
@@ -1280,9 +1277,11 @@ class HistoryAdapter extends Adapter {
     }
 
     getOneFileData(dayList, dayStart, dayEnd, id, options, data, addId) {
-        addId = addId || options.addId;
+        addId ||= options.addId;
 
-        options.debugLog && this.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
+        if (options.debugLog) {
+            this.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
+        }
 
         // get all files in directory
         for (let i = 0; i < dayList.length; i++) {
@@ -1404,7 +1403,7 @@ class HistoryAdapter extends Adapter {
     getHistory(msg) {
         const startTime = Date.now();
 
-        if (!msg.message || !msg.message.options) {
+        if (!msg.message?.options) {
             return this.sendTo(
                 msg.from,
                 msg.command,
@@ -1544,7 +1543,7 @@ class HistoryAdapter extends Adapter {
             options.integralUnit = 60;
         }
 
-        this.history[options.id] = this.history[options.id] || {};
+        this.history[options.id] ||= {};
         const debugLog = (options.debugLog = !!(
             this.history[options.id]?.config?.enableDebugLogs || this.config.enableDebugLogs
         ));
@@ -1576,10 +1575,11 @@ class HistoryAdapter extends Adapter {
             options.aggregate === 'none'
         ) {
             this.getCachedData(options, (cacheData, isFull) => {
-                debugLog &&
+                if (debugLog) {
                     this.log.debug(
                         `${options.logId} after getCachedData: length = ${cacheData.length}, isFull=${isFull}`,
                     );
+                }
 
                 cacheData = this.applyOptions(cacheData, options);
 
@@ -1608,10 +1608,11 @@ class HistoryAdapter extends Adapter {
                         options.count -= cacheData.length;
                     }
                     this.getFileData(options, fileData => {
-                        debugLog &&
+                        if (debugLog) {
                             this.log.debug(
                                 `${options.logId} after getFileData: cacheData.length = ${cacheData.length}, fileData.length = ${fileData.length}`,
                             );
+                        }
                         options.count = origCount;
                         fileData = this.applyOptions(fileData, options);
                         cacheData = cacheData.concat(fileData);
@@ -1634,18 +1635,20 @@ class HistoryAdapter extends Adapter {
                             }
                             cutPoint > 0 && options.result.splice(0, cutPoint);
                             options.result.length = options.count;
-                            debugLog &&
+                            if (debugLog) {
                                 this.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);
+                            }
                         }
                         if (options.debugLog) {
                             options.log = this.log.debug;
                         }
                         Aggregate.beautify(options);
 
-                        debugLog &&
+                        if (debugLog) {
                             this.log.debug(
                                 `${options.logId} after beautify: options.result.length = ${options.result.length}`,
                             );
+                        }
 
                         this.log.debug(
                             `${options.logId} Send: ${options.result.length} values in: ${Date.now() - startTime}ms`,
@@ -1682,9 +1685,8 @@ class HistoryAdapter extends Adapter {
 
                 gh.on('error', err => {
                     gh = null;
-                    !responseSent &&
+                    if (!responseSent) {
                         this.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
-                    !responseSent &&
                         this.sendTo(
                             msg.from,
                             msg.command,
@@ -1695,6 +1697,7 @@ class HistoryAdapter extends Adapter {
                             },
                             msg.callback,
                         );
+                    }
                     responseSent = true;
                 });
 
@@ -2016,7 +2019,7 @@ class HistoryAdapter extends Adapter {
         if (Array.isArray(msg.message)) {
             this.log.debug(`updateState ${msg.message.length} items`);
             for (let i = 0; i < msg.message.length; i++) {
-                id = this.aliasMap[msg.message[i].id] ? this.aliasMap[msg.message[i].id] : msg.message[i].id;
+                id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
 
                 if (msg.message[i].state && typeof msg.message[i].state === 'object') {
                     this.update(id, msg.message[i].state);
@@ -2026,7 +2029,7 @@ class HistoryAdapter extends Adapter {
             }
         } else if (msg.message.state && Array.isArray(msg.message.state)) {
             this.log.debug(`updateState ${msg.message.state.length} items`);
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
             for (let j = 0; j < msg.message.state.length; j++) {
                 if (msg.message.state[j] && typeof msg.message.state[j] === 'object') {
                     this.update(id, msg.message.state[j]);
@@ -2036,7 +2039,7 @@ class HistoryAdapter extends Adapter {
             }
         } else if (msg.message.id && msg.message.state && typeof msg.message.state === 'object') {
             this.log.debug('updateState 1 item');
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
             success = this.update(id, msg.message.state);
         } else {
             this.log.error('updateState called with invalid data');
@@ -2057,7 +2060,7 @@ class HistoryAdapter extends Adapter {
         if (Array.isArray(msg.message)) {
             this.log.debug(`deleteState ${msg.message.length} items`);
             for (let i = 0; i < msg.message.length; i++) {
-                id = this.aliasMap[msg.message[i].id] ? this.aliasMap[msg.message[i].id] : msg.message[i].id;
+                id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
 
                 // {id: 'blabla', ts: 892}
                 if (msg.message[i].ts) {
@@ -2070,17 +2073,9 @@ class HistoryAdapter extends Adapter {
                         msg.message[i].end = new Date(msg.message[i].end).getTime();
                     }
                     this._delete(id, { start: msg.message[i].start, end: msg.message[i].end || Date.now() });
-                } else if (
-                    typeof msg.message[i].state === 'object' &&
-                    msg.message[i].state &&
-                    msg.message[i].state.ts
-                ) {
+                } else if (typeof msg.message[i].state === 'object' && msg.message[i].state?.ts) {
                     this._delete(id, { ts: msg.message[i].state.ts });
-                } else if (
-                    typeof msg.message[i].state === 'object' &&
-                    msg.message[i].state &&
-                    msg.message[i].state.start
-                ) {
+                } else if (typeof msg.message[i].state === 'object' && msg.message[i].state?.start) {
                     if (typeof msg.message[i].state.start === 'string') {
                         msg.message[i].state.start = new Date(msg.message[i].state.start).getTime();
                     }
@@ -2095,9 +2090,9 @@ class HistoryAdapter extends Adapter {
                     this.log.warn(`Invalid state for ${JSON.stringify(msg.message[i])}`);
                 }
             }
-        } else if (msg.message.state && Array.isArray(msg.message.state)) {
+        } else if (Array.isArray(msg.message.state)) {
             this.log.debug(`deleteState ${msg.message.state.length} items`);
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
 
             for (let j = 0; j < msg.message.state.length; j++) {
                 if (msg.message.state[j] && typeof msg.message.state[j] === 'object') {
@@ -2123,7 +2118,7 @@ class HistoryAdapter extends Adapter {
             }
         } else if (msg.message.ts && Array.isArray(msg.message.ts)) {
             this.log.debug(`deleteState ${msg.message.ts.length} items`);
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
             for (let j = 0; j < msg.message.ts.length; j++) {
                 if (msg.message.ts[j] && typeof msg.message.ts[j] === 'number') {
                     this._delete(id, { ts: msg.message.ts[j] });
@@ -2133,11 +2128,11 @@ class HistoryAdapter extends Adapter {
             }
         } else if (msg.message.id && msg.message.state && typeof msg.message.state === 'object') {
             this.log.debug('deleteState 1 item');
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
             success = this._delete(id, { ts: msg.message.state.ts });
         } else if (msg.message.id && msg.message.ts && typeof msg.message.ts === 'number') {
             this.log.debug('deleteState 1 item');
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
             success = this._delete(id, { ts: msg.message.ts });
         } else {
             this.log.error('deleteState called with invalid data');
@@ -2157,12 +2152,12 @@ class HistoryAdapter extends Adapter {
         if (Array.isArray(msg.message)) {
             this.log.debug(`deleteStateAll ${msg.message.length} items`);
             for (let i = 0; i < msg.message.length; i++) {
-                id = this.aliasMap[msg.message[i].id] ? this.aliasMap[msg.message[i].id] : msg.message[i].id;
+                id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
                 this._delete(id, {});
             }
         } else if (msg.message.id) {
             this.log.debug('deleteStateAll 1 item');
-            id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            id = this.aliasMap[msg.message.id] || msg.message.id;
             this._delete(id, {});
         } else {
             this.log.error('deleteStateAll called with invalid data');
@@ -2213,7 +2208,7 @@ class HistoryAdapter extends Adapter {
         if (Array.isArray(msg.message)) {
             this.log.debug(`storeState: store ${msg.message.length} states for multiple ids`);
             for (let i = 0; i < msg.message.length; i++) {
-                const id = this.aliasMap[msg.message[i].id] ? this.aliasMap[msg.message[i].id] : msg.message[i].id;
+                const id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
                 try {
                     this.storeStatePushData(id, msg.message[i].state, msg.message.rules);
                     successCount++;
@@ -2223,7 +2218,7 @@ class HistoryAdapter extends Adapter {
             }
         } else if (msg.message.id && Array.isArray(msg.message.state)) {
             this.log.debug(`storeState: store ${msg.message.state.length} states for ${msg.message.id}`);
-            const id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            const id = this.aliasMap[msg.message.id] || msg.message.id;
             for (let j = 0; j < msg.message.state.length; j++) {
                 try {
                     this.storeStatePushData(id, msg.message.state[j], msg.message.rules);
@@ -2234,7 +2229,7 @@ class HistoryAdapter extends Adapter {
             }
         } else if (msg.message.id && msg.message.state) {
             this.log.debug(`storeState: store 1 state for ${msg.message.id}`);
-            const id = this.aliasMap[msg.message.id] ? this.aliasMap[msg.message.id] : msg.message.id;
+            const id = this.aliasMap[msg.message.id] || msg.message.id;
             try {
                 this.storeStatePushData(id, msg.message.state, msg.message.rules);
                 successCount++;
