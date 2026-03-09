@@ -85,6 +85,10 @@ function sortByTs(a: IobDataEntry, b: IobDataEntry): -1 | 1 | 0 {
     return aTs < bTs ? -1 : aTs > bTs ? 1 : 0;
 }
 
+function sortByTsDesc(a: IobDataEntry, b: IobDataEntry): -1 | 1 | 0 {
+    return a.ts > b.ts ? -1 : a.ts < b.ts ? 1 : 0;
+}
+
 class HistoryAdapter extends Adapter {
     declare config: HistoryAdapterConfig;
 
@@ -1171,7 +1175,7 @@ class HistoryAdapter extends Adapter {
                 try {
                     if (fs.existsSync(file)) {
                         try {
-                            const _data: IobDataEntry[] = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(sortByTs);
+                            const _data: IobDataEntry[] = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(sortByTsDesc);
                             // adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                             let last = false;
 
@@ -1859,7 +1863,7 @@ class HistoryAdapter extends Adapter {
             files.forEach(entry => {
                 try {
                     const tsCheck = new Date(Math.floor(entry.day / 10000), 0, 1).getTime();
-                    let res: IobDataEntry[] = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(sortByTs);
+                    let res: IobDataEntry[] = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(sortByTsDesc);
 
                     if (!state.ts && !state.start && !state.end) {
                         res = [];

@@ -49,6 +49,9 @@ function sortByTs(a, b) {
     const bTs = b.ts;
     return aTs < bTs ? -1 : aTs > bTs ? 1 : 0;
 }
+function sortByTsDesc(a, b) {
+    return a.ts > b.ts ? -1 : a.ts < b.ts ? 1 : 0;
+}
 class HistoryAdapter extends adapter_core_1.Adapter {
     history = {};
     aliasMap = {};
@@ -383,7 +386,7 @@ class HistoryAdapter extends adapter_core_1.Adapter {
                 return;
             }
             if (this.history[task.id]?.config?.changesOnly) {
-                this.getForeignState(this.history[task.id].realId, (err, state) => {
+                void this.getForeignState(this.history[task.id].realId, (err, state) => {
                     const now = task.now || Date.now();
                     this.pushHistory(task.id, {
                         val: null,
@@ -753,7 +756,7 @@ class HistoryAdapter extends adapter_core_1.Adapter {
             this.pushHistory(_id, this.history[_id].state, true);
         }
         else {
-            this.getForeignState(this.history[_id].realId, (err, state) => {
+            void this.getForeignState(this.history[_id].realId, (err, state) => {
                 if (err) {
                     this.log.info(`init timed Relog: can not get State for ${_id} : ${err}`);
                 }
@@ -984,27 +987,24 @@ class HistoryAdapter extends adapter_core_1.Adapter {
                 try {
                     if (node_fs_1.default.existsSync(file)) {
                         try {
-                            const _data = JSON.parse(node_fs_1.default.readFileSync(file, 'utf-8')).sort(sortByTs);
+                            const _data = JSON.parse(node_fs_1.default.readFileSync(file, 'utf-8')).sort(sortByTsDesc);
                             // adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
                             let last = false;
-                            for (const ii in _data) {
-                                if (!Object.prototype.hasOwnProperty.call(_data, ii)) {
-                                    continue;
-                                }
+                            for (const item of _data) {
                                 // if a ts in seconds is in then convert on the fly
-                                if (_data[ii].ts && _data[ii].ts < tsCheck) {
-                                    _data[ii].ts *= 1000;
+                                if (item.ts && item.ts < tsCheck) {
+                                    item.ts *= 1000;
                                 }
-                                if (typeof _data[ii].val === 'number' && isFinite(_data[ii].val) && options.round) {
-                                    _data[ii].val = Math.round(_data[ii].val * options.round) / options.round;
+                                if (typeof item.val === 'number' && isFinite(item.val) && options.round) {
+                                    item.val = Math.round(item.val * options.round) / options.round;
                                 }
                                 if (options.ack) {
-                                    _data[ii].ack = !!_data[ii].ack;
+                                    item.ack = !!item.ack;
                                 }
                                 if (addId) {
-                                    _data[ii].id = id;
+                                    item.id = id;
                                 }
-                                data.push(_data[ii]);
+                                data.push(item);
                                 if ((options.returnNewestEntries ||
                                     options.aggregate === 'onchange' ||
                                     // @ts-expect-error assume it could be empty
@@ -1016,7 +1016,7 @@ class HistoryAdapter extends adapter_core_1.Adapter {
                                 if (last) {
                                     break;
                                 }
-                                if (options.start && _data[ii].ts < options.start) {
+                                if (options.start && item.ts < options.start) {
                                     last = true;
                                 }
                             }
@@ -1573,7 +1573,7 @@ class HistoryAdapter extends adapter_core_1.Adapter {
             files.forEach(entry => {
                 try {
                     const tsCheck = new Date(Math.floor(entry.day / 10000), 0, 1).getTime();
-                    let res = JSON.parse(node_fs_1.default.readFileSync(entry.file, 'utf8')).sort(sortByTs);
+                    let res = JSON.parse(node_fs_1.default.readFileSync(entry.file, 'utf8')).sort(sortByTsDesc);
                     if (!state.ts && !state.start && !state.end) {
                         res = [];
                         found = true;
