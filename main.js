@@ -7,8 +7,7 @@ const node_child_process_1 = __importDefault(require("node:child_process"));
 const adapter_core_1 = require("@iobroker/adapter-core"); // Get common adapter utils
 const node_fs_1 = __importDefault(require("node:fs"));
 const getHistory_1 = require("./lib/getHistory");
-// @ts-expect-error no types
-const aggregate_1 = __importDefault(require("./lib/aggregate"));
+const aggregate_1 = require("./lib/aggregate");
 const dataDir = (0, adapter_core_1.getAbsoluteDefaultDataDir)();
 function isEqual(a, b) {
     // Create arrays of property names
@@ -1278,7 +1277,7 @@ class HistoryAdapter extends adapter_core_1.Adapter {
                         if (options.logDebug) {
                             options.log = this.log.debug;
                         }
-                        aggregate_1.default.beautify(options);
+                        (0, aggregate_1.beautify)(options);
                         if (logDebug) {
                             this.log.debug(`${options.logId} after beautify: options.result.length = ${options.result.length}`);
                         }

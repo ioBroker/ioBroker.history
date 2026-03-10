@@ -2,7 +2,6 @@
 // todo     error tests
 // todo     clean up
 import * as fs from 'node:fs';
-// @ts-expect-error no types
 import { initAggregate, aggregation, finishAggregation } from './aggregate';
 import type { IobDataEntry, InternalHistoryOptions } from './types';
 

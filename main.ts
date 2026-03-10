@@ -2,8 +2,7 @@ import cp from 'node:child_process';
 import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
 import fs from 'node:fs';
 import { ts2day, getFilenameForID } from './lib/getHistory';
-// @ts-expect-error no types
-import Aggregate from './lib/aggregate';
+import { beautify } from './lib/aggregate';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 const dataDir = getAbsoluteDefaultDataDir();
 
@@ -1523,7 +1522,9 @@ class HistoryAdapter extends Adapter {
                                     }
                                 }
                             }
-                            cutPoint > 0 && options.result.splice(0, cutPoint);
+                            if (cutPoint > 0) {
+                                options.result.splice(0, cutPoint);
+                            }
                             options.result.length = options.count;
                             if (logDebug) {
                                 this.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);
@@ -1532,7 +1533,7 @@ class HistoryAdapter extends Adapter {
                         if (options.logDebug) {
                             options.log = this.log.debug;
                         }
-                        Aggregate.beautify(options);
+                        beautify(options);
 
                         if (logDebug) {
                             this.log.debug(

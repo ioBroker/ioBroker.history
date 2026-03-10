@@ -154,8 +154,8 @@ export interface InternalHistoryOptions extends GetHistoryOptions {
     overallLength?: number;
     maxIndex?: number;
     averageCount?: number[];
-    quantileDataPoints?: number[][];
-    integralDataPoints?: IobDataEntry[][];
+    quantileDatapoints?: number[][];
+    integralDatapoints?: IobDataEntry[][];
     totalIntegralDataPoints?: IobDataEntry[];
 
     timeIntervals?: TimeInterval[];

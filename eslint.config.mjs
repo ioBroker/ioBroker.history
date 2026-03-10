@@ -23,6 +23,7 @@ export default [
             'tasks.js',
             'main.js',
             'lib/getHistory.js',
+            'lib/aggregate.js',
             'lib/time.js',
             'tmp/**/*',
             '.**/*',
