@@ -23,9 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
 ### **WORK IN PROGRESS**
-- (iobroker-bot) Adapter requires node.js >= 20 now.
+* (iobroker-bot) Adapter requires node.js >= 20 now.
+* (@GermanBluefox) Migrated to Typescript
+
 ### 3.0.1 (2023-10-24)
 * (tuxyme) activated the round option when averaging
 

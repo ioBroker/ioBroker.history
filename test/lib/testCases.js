@@ -126,7 +126,7 @@ function register(it, expect, sendTo, adapterShortName, writeNulls, assumeExisti
                 sendTo(instanceName, 'enableHistory', {
                     id: `${instanceName}.testValue2`,
                     options: {
-                        changesOnly:  true,
+                        changesOnly:   true,
                         debounce:     0,
                         retention:    31536000,
                         maxLength:    0,
