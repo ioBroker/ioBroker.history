@@ -1268,7 +1268,9 @@ class HistoryAdapter extends adapter_core_1.Adapter {
                                     }
                                 }
                             }
-                            cutPoint > 0 && options.result.splice(0, cutPoint);
+                            if (cutPoint > 0) {
+                                options.result.splice(0, cutPoint);
+                            }
                             options.result.length = options.count;
                             if (logDebug) {
                                 this.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);

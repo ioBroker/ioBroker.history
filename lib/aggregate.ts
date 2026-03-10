@@ -1,10 +1,7 @@
-'use strict';
 // THIS file should be identical with sql and history adapter's one
-
 import type { IobDataEntry } from './types';
 
 // ─── Internal types ──────────────────────────────────────────────────────────
-
 interface AggregatePoint {
     ts: number | null;
     val: number | null;
@@ -32,30 +29,6 @@ type AggregateType =
     | 'integral'
     | 'integralTotal';
 
-/** Minimal adapter interface used by sendResponse / sendResponseCounter */
-interface AdapterLike {
-    log: {
-        error: (msg: string) => void;
-        info: (msg: string) => void;
-        debug: (msg: string) => void;
-    };
-    sendTo: (
-        instanceName: string,
-        command: string,
-        message: Record<string, unknown>,
-        callback: ioBroker.MessageCallbackInfo,
-    ) => void;
-}
-
-interface AdapterMessage {
-    from: string;
-    command: string;
-    callback: ioBroker.MessageCallbackInfo;
-    message?: {
-        options?: Record<string, unknown>;
-    };
-}
-
 export interface AggregateOptions {
     start?: number;
     end?: number;
@@ -65,7 +38,8 @@ export interface AggregateOptions {
 
     maxIndex?: number;
 
-    result?: any[];
+    result?: IobDataEntry[];
+    internalResults?: AggregateResultEntry[];
     averageCount?: number[];
     quantileDatapoints?: number[][];
     integralDatapoints?: IobDataEntry[][];
@@ -80,7 +54,7 @@ export interface AggregateOptions {
     logId?: string;
     logDebug?: boolean;
 
-    log?: (...args: any[]) => void;
+    log?: (...args: string[]) => void;
 
     removeBorderValues?: boolean;
     round?: number;
@@ -94,7 +68,7 @@ export interface AggregateOptions {
 }
 
 /** Options type with all runtime-guaranteed fields after initialization */
-type RuntimeOptions = Omit<AggregateOptions, 'result'> &
+type RuntimeOptions = AggregateOptions &
     Required<
         Pick<
             AggregateOptions,
@@ -106,16 +80,15 @@ type RuntimeOptions = Omit<AggregateOptions, 'result'> &
             | 'averageCount'
             | 'quantileDatapoints'
             | 'integralDatapoints'
+            | 'internalResults'
             | 'aggregate'
             | 'overallLength'
         >
-    > & {
-        result: (AggregateResultEntry | undefined)[];
-    };
+    >;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function sortByTs(a: { ts: number }, b: { ts: number }): number {
+function sortByTs(a: IobDataEntry, b: IobDataEntry): number {
     return a.ts - b.ts;
 }
 
@@ -175,9 +148,9 @@ function quantile(qOrPs: number | number[], list: number[]): number | number[] {
 
 function initAggregate(_options: AggregateOptions): AggregateOptions {
     const options = _options as RuntimeOptions;
-    let log: (...args: unknown[]) => void = () => {};
+    let log: (...args: string[]) => void = () => {};
     if (options.logDebug) {
-        log = (options.log as (...args: unknown[]) => void) || console.log;
+        log = options.log || console.log;
     }
 
     // step; // 1 Step is 1 second
@@ -191,7 +164,7 @@ function initAggregate(_options: AggregateOptions): AggregateOptions {
     }
 
     options.maxIndex = Math.ceil((options.end - options.start) / options.step - 1);
-    options.result = [];
+    options.internalResults = [];
     options.averageCount = [];
     options.quantileDatapoints = [];
     options.integralDatapoints = [];
@@ -221,14 +194,14 @@ function initAggregate(_options: AggregateOptions): AggregateOptions {
     );
     // pre-fill the result with timestamps (add one before start and one after the end)
     try {
-        options.result.length = options.maxIndex + 2;
+        options.internalResults.length = options.maxIndex + 2;
     } catch (err) {
         (err as Error).message += `: ${options.maxIndex + 2}`;
         throw err;
     }
     // We define the array length but do not prefill values, we do that on runtime when needed
-    options.result[0] = makeEmptyEntry();
-    options.result[options.maxIndex + 2] = makeEmptyEntry();
+    options.internalResults[0] = makeEmptyEntry();
+    options.internalResults[options.maxIndex + 2] = makeEmptyEntry();
 
     if (options.aggregate === 'average') {
         options.averageCount[0] = 0;
@@ -248,17 +221,17 @@ function initAggregate(_options: AggregateOptions): AggregateOptions {
 
 function aggregationLogic(data: IobDataEntry, index: number, _options: AggregateOptions): void {
     const options = _options as RuntimeOptions;
-    let log: (...args: unknown[]) => void = () => {};
+    let log: (...args: string[]) => void = () => {};
     if (options.logDebug) {
-        log = (options.log as (...args: unknown[]) => void) || console.log;
+        log = options.log || console.log;
     }
 
-    if (!options.result[index]) {
+    if (!options.internalResults[index]) {
         log(`${options.logId} Data index ${index} not initialized, ignore!`);
         return;
     }
 
-    const entry = options.result[index];
+    const entry = options.internalResults[index];
 
     if (options.aggregate !== 'minmax' && !entry.val.ts) {
         entry.val.ts = Math.round(options.start + (index - 1 + 0.5) * options.step);
@@ -324,7 +297,7 @@ function aggregationLogic(data: IobDataEntry, index: number, _options: Aggregate
 function aggregation(
     _options: AggregateOptions,
     data: IobDataEntry[],
-): { result: any[]; step: number | undefined; sourceLength: number } {
+): { step: number | undefined; sourceLength: number } {
     const options = _options as RuntimeOptions;
     let index: number;
     let preIndex: number;
@@ -366,9 +339,9 @@ function aggregation(
         }
         options.overallLength++;
 
-        if (options.result[index] === undefined) {
+        if (options.internalResults[index] === undefined) {
             // lazy initialization of data structure
-            options.result[index] = makeEmptyEntry();
+            options.internalResults[index] = makeEmptyEntry();
 
             if (options.aggregate === 'average' || options.aggregate === 'count') {
                 options.averageCount[index] = 0;
@@ -398,27 +371,27 @@ function aggregation(
         aggregationLogic(collectedTooLateData[0], options.maxIndex + 2, options);
     }
 
-    return { result: options.result, step: options.step, sourceLength: data.length };
+    return { step: options.step, sourceLength: data.length };
 }
 
 function finishAggregation(_options: AggregateOptions): void {
     const options = _options as RuntimeOptions;
-    let log: (...args: unknown[]) => void = () => {};
+    let log: (...args: string[]) => void = () => {};
     if (options.logDebug) {
-        log = (options.log as (...args: unknown[]) => void) || console.log;
+        log = options.log || console.log;
     }
 
     if (options.aggregate === 'minmax') {
         let preBorderValueRemoved = false;
         let postBorderValueRemoved = false;
-        const originalResultLength = options.result.length;
+        const originalResultLength = options.internalResults.length;
 
         const startIndex = 0;
-        const endIndex = options.result.length;
+        const endIndex = options.internalResults.length;
         const finalResult: IobDataEntry[] = [];
 
         for (let ii = startIndex; ii < endIndex; ii++) {
-            const entry = options.result[ii];
+            const entry = options.internalResults[ii];
             // no one value in this period
             if (entry === undefined || entry.start.ts === null) {
                 if (ii === 0) {
@@ -566,19 +539,19 @@ function finishAggregation(_options: AggregateOptions): void {
                 finalResult.length--;
             }
         }
-        options.result = finalResult as unknown as (AggregateResultEntry | undefined)[];
+        options.result = finalResult;
     } else if (options.aggregate === 'average') {
         const round = options.round || 100;
         let startIndex = 0;
-        let endIndex = options.result.length;
+        let endIndex = options.internalResults.length;
         const finalResult: IobDataEntry[] = [];
         if (options.removeBorderValues) {
             startIndex++;
             endIndex--;
         }
         for (let k = startIndex; k < endIndex; k++) {
-            if (options.result[k] !== undefined && options.result[k]!.val.ts) {
-                const entry = options.result[k]!;
+            if (options.internalResults[k] !== undefined && options.internalResults[k].val.ts) {
+                const entry = options.internalResults[k];
                 finalResult.push({
                     ts: entry.val.ts!,
                     val:
@@ -588,31 +561,31 @@ function finishAggregation(_options: AggregateOptions): void {
                 });
             }
         }
-        options.result = finalResult as unknown as (AggregateResultEntry | undefined)[];
+        options.result = finalResult;
     } else if (options.aggregate === 'count') {
         let startIndex = 0;
-        let endIndex = options.result.length;
+        let endIndex = options.internalResults.length;
         const finalResult: IobDataEntry[] = [];
         if (options.removeBorderValues) {
             startIndex++;
             endIndex--;
         }
         for (let k = startIndex; k < endIndex; k++) {
-            if (options.result[k] !== undefined && options.result[k]!.val.ts) {
+            if (options.internalResults[k] !== undefined && options.internalResults[k].val.ts) {
                 finalResult.push({
-                    ts: options.result[k]!.val.ts!,
+                    ts: options.internalResults[k].val.ts!,
                     val: options.averageCount[k],
                 });
             }
         }
-        options.result = finalResult as unknown as (AggregateResultEntry | undefined)[];
+        options.result = finalResult;
     } else if (options.aggregate === 'integral') {
         let preBorderValueRemoved = false;
         let postBorderValueRemoved = false;
-        const originalResultLength = options.result.length;
+        const originalResultLength = options.internalResults.length;
         const finalResult: IobDataEntry[] = [];
 
-        for (let k = 0; k < options.result.length; k++) {
+        for (let k = 0; k < options.internalResults.length; k++) {
             const indexStartTs = options.start + (k - 1) * options.step;
             const indexEndTs = indexStartTs + options.step;
             if (options.integralDatapoints[k] && options.integralDatapoints[k].length) {
@@ -621,15 +594,12 @@ function finishAggregation(_options: AggregateOptions): void {
             }
             // Make sure that we have entries that always start at the beginning of the interval
             if (
-                (!options.integralDatapoints[k] ||
-                    !options.integralDatapoints[k].length ||
-                    options.integralDatapoints[k][0].ts > indexStartTs) &&
-                options.integralDatapoints[k - 1] &&
-                options.integralDatapoints[k - 1][options.integralDatapoints[k - 1].length - 1]
+                (!options.integralDatapoints[k]?.length || options.integralDatapoints[k][0].ts > indexStartTs) &&
+                options.integralDatapoints[k - 1]?.[options.integralDatapoints[k - 1].length - 1]
             ) {
                 // if the first entry of this interval started somewhere in the start of the interval, add a start entry
                 // same if there is no entry at all in the timeframe, use last entry from interval before
-                options.integralDatapoints[k] = options.integralDatapoints[k] || [];
+                options.integralDatapoints[k] ||= [];
                 options.integralDatapoints[k].unshift({
                     ts: indexStartTs,
                     val: options.integralDatapoints[k - 1][options.integralDatapoints[k - 1].length - 1].val,
@@ -637,11 +607,7 @@ function finishAggregation(_options: AggregateOptions): void {
                 log(
                     `${options.logId} Integral: ${k}: Added start entry for interval with ts=${indexStartTs}, val=${options.integralDatapoints[k][0].val}`,
                 );
-            } else if (
-                options.integralDatapoints[k] &&
-                options.integralDatapoints[k].length &&
-                options.integralDatapoints[k][0].ts > indexStartTs
-            ) {
+            } else if (options.integralDatapoints[k]?.length && options.integralDatapoints[k][0].ts > indexStartTs) {
                 options.integralDatapoints[k].unshift({
                     ts: indexStartTs,
                     val: options.integralDatapoints[k][0].val,
@@ -649,11 +615,7 @@ function finishAggregation(_options: AggregateOptions): void {
                 log(
                     `${options.logId} Integral: ${k}: Added start entry for interval with ts=${indexStartTs}, val=${options.integralDatapoints[k][0].val} with same value as first point in interval because no former datapoint was found`,
                 );
-            } else if (
-                options.integralDatapoints[k] &&
-                options.integralDatapoints[k].length &&
-                options.integralDatapoints[k][0].ts < indexStartTs
-            ) {
+            } else if (options.integralDatapoints[k]?.length && options.integralDatapoints[k][0].ts < indexStartTs) {
                 // if the first entry of this interval started before the start of the interval, search for the last value before the start of the interval, add as start entry
                 let preFirstIndex: number | null = null;
                 for (let kk = 0; kk < options.integralDatapoints[k].length; kk++) {
@@ -666,7 +628,7 @@ function finishAggregation(_options: AggregateOptions): void {
                     options.integralDatapoints[k].splice(0, preFirstIndex, {
                         ts: indexStartTs,
                         val: options.integralDatapoints[k][preFirstIndex].val,
-                    } as unknown as IobDataEntry);
+                    });
                     log(
                         `${options.logId} Integral: ${k}: Remove ${preFirstIndex + 1} entries and add start entry for interval with ts=${indexStartTs}, val=${options.integralDatapoints[k][0].val}`,
                     );
@@ -675,8 +637,8 @@ function finishAggregation(_options: AggregateOptions): void {
 
             const point: IobDataEntry = {
                 ts:
-                    options.result[k] !== undefined && options.result[k]!.val.ts
-                        ? options.result[k]!.val.ts!
+                    options.internalResults[k] !== undefined && options.internalResults[k].val.ts
+                        ? options.internalResults[k].val.ts!
                         : Math.round(options.start + (k - 1 + 0.5) * options.step),
                 val: null,
             };
@@ -711,7 +673,7 @@ function finishAggregation(_options: AggregateOptions): void {
                     parseFloat(
                         (integralDatapoints[kk + 1]
                             ? integralDatapoints[kk + 1].val
-                            : options.integralDatapoints[k + 1] && options.integralDatapoints[k + 1][0]
+                            : options.integralDatapoints[k + 1]?.[0]
                               ? options.integralDatapoints[k + 1][0].val
                               : valStart) as unknown as string,
                     ) || 0;
@@ -772,19 +734,19 @@ function finishAggregation(_options: AggregateOptions): void {
                 finalResult.length--;
             }
         }
-        options.result = finalResult as unknown as (AggregateResultEntry | undefined)[];
+        options.result = finalResult;
     } else if (options.aggregate === 'percentile' || options.aggregate === 'quantile') {
         let startIndex = 0;
-        let endIndex = options.result.length;
+        let endIndex = options.internalResults.length;
         const finalResult: IobDataEntry[] = [];
         if (options.removeBorderValues) {
             startIndex++;
             endIndex--;
         }
         for (let k = startIndex; k < endIndex; k++) {
-            if (options.result[k] !== undefined && options.result[k]!.val.ts) {
+            if (options.internalResults[k] !== undefined && options.internalResults[k].val.ts) {
                 const point: IobDataEntry = {
-                    ts: options.result[k]!.val.ts!,
+                    ts: options.internalResults[k].val.ts!,
                     val: quantile(options.quantile!, options.quantileDatapoints[k]) as number,
                 };
                 log(
@@ -793,24 +755,24 @@ function finishAggregation(_options: AggregateOptions): void {
                 finalResult.push(point);
             }
         }
-        options.result = finalResult as unknown as (AggregateResultEntry | undefined)[];
+        options.result = finalResult;
     } else {
         let startIndex = 0;
-        let endIndex = options.result.length;
+        let endIndex = options.internalResults.length;
         const finalResult: IobDataEntry[] = [];
         if (options.removeBorderValues) {
             startIndex++;
             endIndex--;
         }
         for (let j = startIndex; j < endIndex; j++) {
-            if (options.result[j] !== undefined && options.result[j]!.val.ts) {
+            if (options.internalResults[j] !== undefined && options.internalResults[j].val.ts) {
                 finalResult.push({
-                    ts: options.result[j]!.val.ts!,
-                    val: options.result[j]!.val.val,
+                    ts: options.internalResults[j].val.ts!,
+                    val: options.internalResults[j].val.val,
                 });
             }
         }
-        options.result = finalResult as unknown as (AggregateResultEntry | undefined)[];
+        options.result = finalResult;
     }
 
     beautify(options);
@@ -818,13 +780,13 @@ function finishAggregation(_options: AggregateOptions): void {
 
 function beautify(_options: AggregateOptions): void {
     const options = _options as RuntimeOptions;
-    let log: (...args: unknown[]) => void = () => {};
+    let log: (...args: string[]) => void = () => {};
     if (options.logDebug) {
-        log = (options.log as (...args: unknown[]) => void) || console.log;
+        log = options.log || console.log;
     }
 
     // After finishAggregation, result is IobDataEntry[]
-    const result = options.result as unknown as IobDataEntry[];
+    const result = options.result!;
 
     log(`${options.logId} Beautify: ${result.length} results`);
     let preFirstValue: IobDataEntry | null = null;
@@ -984,12 +946,12 @@ function beautify(_options: AggregateOptions): void {
     }
 
     // Write back (result reference may have changed due to splicing)
-    options.result = result as unknown as (AggregateResultEntry | undefined)[];
+    options.result = result;
 }
 
 function sendResponse(
-    adapter: AdapterLike,
-    msg: AdapterMessage,
+    adapter: ioBroker.Adapter,
+    msg: ioBroker.Message,
     _options: AggregateOptions,
     data: IobDataEntry[] | string,
     startTime: number,
@@ -1016,8 +978,9 @@ function sendResponse(
         data.splice(0, data.length - options.count);
     }
     if (data[0]) {
-        options.start = options.start || data[0].ts;
+        options.start ||= data[0].ts;
 
+        // No aggregation at all
         if (
             !options.aggregate ||
             options.aggregate === 'onchange' ||
@@ -1032,27 +995,26 @@ function sendResponse(
                     aggregateData.result[i].ack = !!aggregateData.result[i].ack;
                 }
             }
-            options.result = aggregateData.result as unknown as (AggregateResultEntry | undefined)[];
+            options.result = aggregateData.result;
 
             beautify(options);
 
             if (options.aggregate === 'none' && options.count) {
-                const result = options.result as unknown as IobDataEntry[];
+                const result = options.result;
                 if (result.length > options.count) {
                     result.splice(0, result.length - options.count);
-                    options.result = result as unknown as (AggregateResultEntry | undefined)[];
+                    options.result = result;
                 }
             }
-            aggregateData.result = options.result as unknown as IobDataEntry[];
+            aggregateData.result = options.result;
         } else {
             initAggregate(options);
-            aggregateData = aggregation(options, data) as unknown as {
-                result: IobDataEntry[];
-                step: number | undefined;
-                sourceLength: number;
-            };
+            const preAggregatedResult = aggregation(options, data);
             finishAggregation(options);
-            aggregateData.result = options.result as unknown as IobDataEntry[];
+            aggregateData = {
+                ...preAggregatedResult,
+                result: options.result!,
+            };
         }
 
         adapter.log.debug(
@@ -1082,8 +1044,8 @@ function sendResponse(
 }
 
 function sendResponseCounter(
-    adapter: AdapterLike,
-    msg: AdapterMessage,
+    adapter: ioBroker.Adapter,
+    msg: ioBroker.Message,
     _options: AggregateOptions,
     data: IobDataEntry[] | string,
     _startTime: number,
@@ -1190,5 +1152,3 @@ function sendResponseCounter(
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
 export { sendResponseCounter, sendResponse, initAggregate, aggregation, beautify, finishAggregation, sortByTs };
-
-export type { AggregateResultEntry, AggregatePoint, AdapterLike, AdapterMessage };
