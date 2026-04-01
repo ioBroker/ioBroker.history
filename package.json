@@ -30,7 +30,7 @@
     "@iobroker/eslint-config": "^2.2.0",
     "@iobroker/legacy-testing": "^2.0.2",
     "@iobroker/testing": "^5.2.2",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.5.0",
     "typescript": "~5.9.3"
   },
   "bugs": {
