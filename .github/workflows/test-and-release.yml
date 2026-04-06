@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-check@v1
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           lint: true
 
   # Runs adapter tests on all supported node versions and OSes
@@ -70,7 +70,7 @@ jobs:
       - uses: ioBroker/testing-action-deploy@v1
         with:
           build: true
-          node-version: '22.x'
+          node-version: '24.x'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
