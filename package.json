@@ -37,7 +37,7 @@
     "url": "https://github.com/ioBroker/ioBroker.history/issues"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "main": "build/main.js",
   "files": [

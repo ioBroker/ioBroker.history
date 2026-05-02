@@ -23,6 +23,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
+
 ### 4.0.0 (2026-03-10)
 * (iobroker-bot) Adapter requires node.js >= 20 now.
 * (@GermanBluefox) Migrated to Typescript
