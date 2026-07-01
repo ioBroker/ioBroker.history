@@ -309,6 +309,8 @@ This adapter saves state history in a two-staged process.
 ### 0.0.6 (2014-10-19)
 * (bluefox) add configuration page
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 
 The MIT License (MIT)
