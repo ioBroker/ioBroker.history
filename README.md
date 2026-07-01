@@ -23,9 +23,11 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+
 ### **WORK IN PROGRESS**
+- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
 * (simatec) Responsive Design added
-* 
+
 ### 4.0.0 (2026-03-10)
 * (iobroker-bot) Adapter requires node.js >= 20 now.
 * (@GermanBluefox) Migrated to Typescript
