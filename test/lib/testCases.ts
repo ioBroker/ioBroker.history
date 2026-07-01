@@ -1,23 +1,31 @@
-/* jshint -W097 */
-/* jshint strict: false */
-/* jslint node: true */
-/* jshint expr: true */
-'use strict';
+import assert from 'node:assert';
 
-const assert = require('node:assert');
+/** Signature of the harness `sendTo` wrapper handed to the test cases */
+type SendTo = (target: string, command: string, message: any, callback: (result: any) => void) => void;
 
-let now;
-let preInitTime;
-let objects = null;
-let states = null;
+/** Shape of the test state objects that are created with a per-datapoint history config */
+interface TestStateObject {
+    type: 'state';
+    common: {
+        type: string;
+        role: string;
+        custom: Record<string, Record<string, unknown>>;
+    };
+}
 
-async function preInit(_objects, _states, sendTo, adapterShortName) {
+let now: number;
+let preInitTime: number;
+// The harness exposes the Objects/States DB clients as `any`
+let objects: any = null;
+let states: any = null;
+
+export async function preInit(_objects: any, _states: any, adapterShortName: string): Promise<void> {
     objects = _objects;
     states = _states;
     preInitTime = Date.now();
 
     const instanceName = `${adapterShortName}.0`;
-    let obj = {
+    let obj: TestStateObject = {
         common: {
             type: 'number',
             role: 'state',
@@ -99,15 +107,16 @@ async function preInit(_objects, _states, sendTo, adapterShortName) {
         ignoreAboveNumber: 100,
     };
     await objects.setObjectAsync(`${instanceName}.testValueBlocked`, obj);
-
-    await objects.setObjectAsync('system.adapter.test.0', {
-        common: {},
-        type: 'instance',
-    });
-    states.subscribeMessage('system.adapter.test.0');
 }
 
-function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, additionalActiveObjects) {
+export function register(
+    it: Mocha.TestFunction,
+    sendTo: SendTo,
+    adapterShortName: string,
+    writeNulls: boolean,
+    assumeExistingData: number,
+    additionalActiveObjects: number,
+): void {
     const instanceName = `${adapterShortName}.0`;
     if (writeNulls) adapterShortName += '-writeNulls';
     if (assumeExistingData) adapterShortName += '-existing';
@@ -464,11 +473,11 @@ function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, 
         );
     });
 
-    function delay(ms) {
+    function delay(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function logSampleData(stateId, waitMultiplier) {
+    async function logSampleData(stateId: string, waitMultiplier?: number): Promise<void> {
         if (!waitMultiplier) waitMultiplier = 1;
         await states.setStateAsync(stateId, { val: 1 }); // expect logged
         await delay(600 * waitMultiplier);
@@ -520,7 +529,7 @@ function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, 
             assert.ok(!err, `Unexpected error: ${err}`);
         }
 
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             sendTo(
                 instanceName,
                 'getHistory',
@@ -563,7 +572,7 @@ function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, 
             assert.ok(!err, `Unexpected error: ${err}`);
         }
 
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             sendTo(
                 instanceName,
                 'getHistory',
@@ -761,7 +770,7 @@ function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, 
             assert.ok(!err, `Unexpected error: ${err}`);
         }
 
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             sendTo(
                 instanceName,
                 'getHistory',
@@ -801,7 +810,7 @@ function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, 
         const nowSampleI23 = Date.now() - 26 * 60 * 60 * 1000;
         const nowSampleI24 = Date.now() - 25 * 60 * 60 * 1000;
 
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             sendTo(
                 instanceName,
                 'storeState',
@@ -1474,6 +1483,3 @@ function register(it, sendTo, adapterShortName, writeNulls, assumeExistingData, 
         );
     });
 }
-
-module.exports.register = register;
-module.exports.preInit = preInit;

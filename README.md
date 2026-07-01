@@ -25,7 +25,7 @@ This adapter saves state history in a two-staged process.
 ## Changelog
 
 ### **WORK IN PROGRESS**
-- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
+* (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
 * (simatec) Responsive Design added
 
 ### 4.0.0 (2026-03-10)
@@ -36,7 +36,7 @@ This adapter saves state history in a two-staged process.
 * (tuxyme) activated the round option when averaging
 
 ### 3.0.0 (2023-09-19)
-* (foxriver76) fix history2db.js with controller v5
+* (foxriver76) fix `history2db.js` with controller v5
 * (bluefox) Minimal node.sj version is 16
 * (bluefox) Added support for `count` aggregate type on getHistory
 
@@ -47,7 +47,7 @@ This adapter saves state history in a two-staged process.
 * (Apollon77) Update for future js-controller versions
 
 ### 2.2.3 (2022-09-12)
-* (Apollon77) Fix error in history2db converter script
+* (Apollon77) Fix error in `history2db` converter script
 
 ### 2.2.1 (2022-08-13)
 * (Apollon77) Fix crash cases reported by Sentry
