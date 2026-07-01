@@ -9,7 +9,7 @@
 // usage: nodejs analyzesql.js sql.0 info
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
-const fs = require('fs');
+const fs = require('node:fs');
 
 let deepAnalyze = false;
 let dbInstance = 'sql.0';
