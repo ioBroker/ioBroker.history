@@ -4,7 +4,6 @@
 # Reference: https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
 updates:
-
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
@@ -22,3 +21,7 @@ updates:
     versioning-strategy: 'increase'
     cooldown:
       default-days: 7
+    ignore:
+      - dependency-name: '@types/node'
+        update-types:
+          - 'version-update:semver-major'  
