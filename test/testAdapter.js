@@ -2,7 +2,7 @@
 /* jshint strict: false */
 /* jslint node: true */
 /* jshint expr: true */
-const expect = require('chai').expect;
+const assert = require('node:assert');
 const setup = require('@iobroker/legacy-testing');
 const tests = require('./lib/testCases');
 
@@ -54,7 +54,7 @@ function checkConnectionOfAdapter(cb, counter) {
 
 describe(`Test ${adapterShortName}-writeNulls adapter`, function () {
     before(`Test ${adapterShortName}-writeNulls adapter: Start js-controller`, function (_done) {
-        this.timeout(600000); // because of the first install from npm
+        this.timeout(600000); // because of the first installation from npm
 
         setup.setupController(async function () {
             var config = await setup.getAdapterConfig();
@@ -87,20 +87,22 @@ describe(`Test ${adapterShortName}-writeNulls adapter`, function () {
 
     it(`Test ${adapterShortName}-writeNulls adapter: Check if adapter started`, function (done) {
         this.timeout(60000);
-        checkConnectionOfAdapter(function (res) {
-            if (res) console.log(res);
-            expect(res).not.to.be.equal('Cannot check connection');
+        checkConnectionOfAdapter(res => {
+            if (res) {
+                console.log(res);
+            }
+            assert.notStrictEqual(res, 'Cannot check connection');
             done();
         });
     });
 
-    tests.register(it, expect, sendTo, adapterShortName, true, 0, 0);
+    tests.register(it, sendTo, adapterShortName, true, 0, 0);
 
     after(`Test ${adapterShortName}-writeNulls adapter: Stop js-controller`, function (done) {
         this.timeout(20000);
 
-        setup.stopController(function (normalTerminated) {
-            console.log('Adapter normal terminated: ' + normalTerminated);
+        setup.stopController(normalTerminated => {
+            console.log(`Adapter normal terminated: ${normalTerminated}`);
             setTimeout(done, 10000);
         });
     });

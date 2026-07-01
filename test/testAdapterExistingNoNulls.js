@@ -1,7 +1,7 @@
 /* jshint -W097 */ // jshint strict:false
 /*jslint node: true */
 /*jshint expr: true*/
-const expect = require('chai').expect;
+const assert = require('node:assert');
 const setup = require('@iobroker/legacy-testing');
 const tests = require('./lib/testCases');
 
@@ -36,13 +36,15 @@ function checkConnectionOfAdapter(cb, counter) {
     counter = counter || 0;
     console.log(`Try check #${counter}`);
     if (counter > 30) {
-        if (cb) cb('Cannot check connection');
+        cb?.('Cannot check connection');
         return;
     }
 
     console.log(`Checking alive key for key : ${adapterShortName}`);
     states.getState(`system.adapter.${adapterShortName}.0.alive`, (err, state) => {
-        err && console.error(err);
+        if (err) {
+            console.error(err);
+        }
         if (state?.val) {
             cb?.();
         } else {
@@ -51,8 +53,8 @@ function checkConnectionOfAdapter(cb, counter) {
     });
 }
 
-describe('Test ' + adapterShortName + '-existing adapter', function () {
-    before('Test ' + adapterShortName + '-existing adapter: Start js-controller', function (_done) {
+describe(`Test ${adapterShortName}-existing adapter`, function () {
+    before(`Test ${adapterShortName}-existing adapter: Start js-controller`, function (_done) {
         this.timeout(600000); // because of first install from npm
 
         setup.setupController(async function () {
@@ -69,10 +71,8 @@ describe('Test ' + adapterShortName + '-existing adapter', function () {
 
             setup.startController(
                 true,
-                function (id, obj) {},
-                function (id, state) {
-                    if (onStateChanged) onStateChanged(id, state);
-                },
+                (id, obj) => {},
+                (id, state) => onStateChanged?.(id, state),
                 async (_objects, _states) => {
                     objects = _objects;
                     states = _states;
@@ -85,22 +85,24 @@ describe('Test ' + adapterShortName + '-existing adapter', function () {
         });
     });
 
-    it('Test ' + adapterShortName + '-existing adapter: Check if adapter started', function (done) {
+    it(`Test ${adapterShortName}-existing adapter: Check if adapter started`, function (done) {
         this.timeout(60000);
-        checkConnectionOfAdapter(function (res) {
-            if (res) console.log(res);
-            expect(res).not.to.be.equal('Cannot check connection');
+        checkConnectionOfAdapter(res => {
+            if (res) {
+                console.log(res);
+            }
+            assert.notStrictEqual(res, 'Cannot check connection');
             done();
         });
     });
 
-    tests.register(it, expect, sendTo, adapterShortName, false, 1, 0);
+    tests.register(it, sendTo, adapterShortName, false, 1, 0);
 
-    after('Test ' + adapterShortName + '-existing adapter: Stop js-controller', function (done) {
+    after(`Test ${adapterShortName}-existing adapter: Stop js-controller`, function (done) {
         this.timeout(20000);
 
-        setup.stopController(function (normalTerminated) {
-            console.log('Adapter normal terminated: ' + normalTerminated);
+        setup.stopController(normalTerminated => {
+            console.log(`Adapter normal terminated: ${normalTerminated}`);
             setTimeout(done, 10000);
         });
     });
