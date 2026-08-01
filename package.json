@@ -20,7 +20,7 @@
     "home automation"
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^3.4.1"
+    "@iobroker/adapter-core": "^3.4.3"
   },
   "devDependencies": {
     "@alcalzone/esbuild-register": "^2.5.1-1",
