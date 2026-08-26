@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "4.0.0",
+    "version": "5.0.0",
     "news": {
+      "5.0.0": {
+        "en": "Adapter requires js-controller >= 6.0.11 now.\nResponsive Design added\nAdapter requires node.js >= 22 now.\nAdded the data browser to the configuration, so the stored values can be viewed, edited and deleted.\nThe aggregation is used now from `@iobroker/aggregate` and is shared with the SQL and InfluxDB adapters.",
+        "de": "Der Adapter benötigt jetzt js-controller >= 6.0.11.\nResponsives Design hinzugefügt\nDer Adapter benötigt jetzt node.js >= 22.\nDer Datenbrowser wurde zur Konfiguration hinzugefügt, sodass die gespeicherten Werte angezeigt, bearbeitet und gelöscht werden können.\nDie Aggregation wird nun von `@iobroker/aggregate` verwendet und wird mit den SQL- und InfluxDB-Adaptern geteilt.",
+        "ru": "Для работы адаптера теперь требуется js-controller версии не ниже 6.0.11.\nДобавлен адаптивный дизайн.\nДля работы адаптера теперь требуется Node.js версии >= 22.\nВ конфигурацию добавлен браузер данных, позволяющий просматривать, редактировать и удалять сохраненные значения.\nАгрегация теперь используется из `@iobroker/aggregate` и совместно используется адаптерами SQL и InfluxDB.",
+        "pt": "O adaptador agora requer js-controller >= 6.0.11.\nDesign responsivo adicionado\nO adaptador agora requer o Node.js versão 22 ou superior.\nAdicionamos o navegador de dados à configuração, para que os valores armazenados possam ser visualizados, editados e excluídos.\nA agregação agora é usada a partir de `@iobroker/aggregate` e é compartilhada com os adaptadores SQL e InfluxDB.",
+        "nl": "De adapter vereist nu js-controller >= 6.0.11.\nResponsief ontwerp toegevoegd\nAdapter vereist nu Node.js versie 22 of hoger.\nDe gegevensbrowser is toegevoegd aan de configuratie, zodat de opgeslagen waarden kunnen worden bekeken, bewerkt en verwijderd.\nDe aggregatie wordt nu gebruikt vanuit `@iobroker/aggregate` en wordt gedeeld met de SQL- en InfluxDB-adapters.",
+        "fr": "L'adaptateur requiert désormais js-controller >= 6.0.11.\nConception adaptative ajoutée\nL'adaptateur requiert désormais node.js >= 22.\nAjout du navigateur de données à la configuration, permettant ainsi de consulter, modifier et supprimer les valeurs enregistrées.\nL'agrégation est désormais utilisée depuis `@iobroker/aggregate` et est partagée avec les adaptateurs SQL et InfluxDB.",
+        "it": "L'adattatore ora richiede js-controller >= 6.0.11.\nDesign responsivo aggiunto\nL'adattatore ora richiede Node.js >= 22.\nÈ stato aggiunto il browser dei dati alla configurazione, in modo che i valori memorizzati possano essere visualizzati, modificati ed eliminati.\nL'aggregazione viene ora utilizzata da `@iobroker/aggregate` ed è condivisa con gli adattatori SQL e InfluxDB.",
+        "es": "El adaptador ahora requiere js-controller >= 6.0.11.\nDiseño adaptable añadido\nEl adaptador ahora requiere node.js >= 22.\nSe ha añadido el explorador de datos a la configuración, de modo que los valores almacenados puedan visualizarse, editarse y eliminarse.\nLa agregación se utiliza ahora desde `@iobroker/aggregate` y se comparte con los adaptadores SQL e InfluxDB.",
+        "pl": "Adapter wymaga teraz js-controller w wersji >= 6.0.11.\nDodano responsywny projekt\nAdapter wymaga teraz node.js >= 22.\nDo konfiguracji dodano przeglądarkę danych, dzięki której można przeglądać, edytować i usuwać zapisane wartości.\nAgregacja jest obecnie używana z `@iobroker/aggregate` i jest współdzielona z adapterami SQL i InfluxDB.",
+        "uk": "Адаптер тепер вимагає js-controller >= 6.0.11.\nДодано адаптивний дизайн\nАдаптер тепер вимагає node.js >= 22.\nДо конфігурації додано браузер даних, щоб збережені значення можна було переглядати, редагувати та видаляти.\nАгрегація тепер використовується з `@iobroker/aggregate` та використовується спільно з адаптерами SQL та InfluxDB.",
+        "zh-cn": "适配器现在需要 js-controller >= 6.0.11。\n响应式设计已添加\n适配器现在需要 node.js >= 22。\n在配置中添加了数据浏览器，以便可以查看、编辑和删除存储的值。\n现在聚合功能来自 `@iobroker/aggregate`，并与 SQL 和 InfluxDB 适配器共享。"
+      },
       "4.0.0": {
         "en": "Adapter requires node.js >= 20 now.\nMigrated to Typescript",
         "de": "Adapter benötigt jetzt node.js >= 20.\nZur Beschreibung",
@@ -104,18 +117,6 @@
         "es": "Actualización para futuras versiones js-controller",
         "pl": "Wersja js-controllerowa",
         "zh-cn": "B. 今后控制容忍版本的最新情况"
-      },
-      "2.2.3": {
-        "en": "Fix error in history2db converter script",
-        "de": "Fehler in history2db Konverter-Skript beheben",
-        "ru": "Исправление ошибки в history2db конвертер скрипт",
-        "pt": "Corrigir erro no script conversor history2db",
-        "nl": "Quality over Quantity (QoQ) Releases Vertaling:",
-        "fr": "Erreur fixe dans le script de convertisseur history2db",
-        "it": "Risolvere l'errore nella sceneggiatura del convertitore storico2db",
-        "es": "Error de fijación en la historia2db convertidor script",
-        "pl": "Błąd w historii2db",
-        "zh-cn": "A. 历史上2b 转换成文的错误"
       }
     },
     "mode": "daemon",
