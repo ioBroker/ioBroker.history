@@ -34,7 +34,7 @@
         "@iobroker/testing": "^5.3.0",
         "@tsconfig/node22": "^22.0.6",
         "@types/node": "^22.20.1",
-        "tsx": "^4.23.1",
+        "tsx": "^4.23.12",
         "typescript": "~6.0.3"
     },
     "bugs": {
