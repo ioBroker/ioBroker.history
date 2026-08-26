@@ -54,7 +54,7 @@
     "scripts": {
         "build": "tsc -p tsconfig.build.json && npm run build:admin",
         "build:admin": "tsx tasks.ts",
-        "npm:admin": "cd src-admin && npm i -f",
+        "npm": "npm i && cd src-admin && npm i",
         "test:package": "mocha --config test/mocharc.custom.json test/package.ts --exit",
         "test:integration": "mocha --config test/mocharc.custom.json test/testAdapter.ts --exit",
         "test": "npm run test:integration && npm run test:package",
@@ -64,7 +64,7 @@
         "release-patch": "release-script patch --yes",
         "release-minor": "release-script minor --yes",
         "release-major": "release-script major --yes",
-        "update-packages": "npx -y npm-check-updates --upgrade"
+        "update-packages": "npx -y npm-check-updates --upgrade && cd src-admin && npx -y npm-check-updates --upgrade"
     },
     "license": "MIT"
 }
