@@ -222,6 +222,20 @@
           "hidden": "true"
         }
       }
+    },
+    "dataTab": {
+      "type": "panel",
+      "label": "Data browser",
+      "items": {
+        "_dataBrowser": {
+          "type": "custom",
+          "i18n": true,
+          "url": "custom/customComponents.js",
+          "name": "HistoryComponentsSet/Components/DataBrowser",
+          "guiApi": 2,
+          "sm": 12
+        }
+      }
     }
   }
 }

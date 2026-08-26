@@ -1,5 +1,5 @@
 {
-    "extends": "@tsconfig/node20/tsconfig.json",
+    "extends": "@tsconfig/node22/tsconfig.json",
     "compileOnSave": true,
     "compilerOptions": {
         "noEmit": true,
@@ -19,7 +19,7 @@
         "sourceMap": true,
         "inlineSourceMap": false,
         "useUnknownInCatchVariables": false,
-        "lib": ["es2021"],
+        "lib": ["es2023"],
         "types": ["@iobroker/types", "@types/node"]
     },
     "include": ["src/**/*.ts", "src/**/*.d.ts"],

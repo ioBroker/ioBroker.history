@@ -38,11 +38,12 @@ exports.getFileData = getFileData;
 exports.ts2day = ts2day;
 exports.response = response;
 exports.getFilenameForID = getFilenameForID;
+exports.getSafeId = getSafeId;
 // todo     add cache data
 // todo     error tests
 // todo     clean up
 const fs = __importStar(require("node:fs"));
-const aggregate_1 = require("./aggregate");
+const aggregate_1 = require("@iobroker/aggregate");
 Object.defineProperty(exports, "initAggregate", { enumerable: true, get: function () { return aggregate_1.initAggregate; } });
 Object.defineProperty(exports, "aggregation", { enumerable: true, get: function () { return aggregate_1.aggregation; } });
 Object.defineProperty(exports, "finishAggregation", { enumerable: true, get: function () { return aggregate_1.finishAggregation; } });
@@ -105,10 +106,18 @@ function getDirectories(path) {
 function tsSort(a, b) {
     return b.ts - a.ts;
 }
-function getFilenameForID(path, date, id) {
+/**
+ * The part of the file name that stands for the ID.
+ *
+ * All characters that are not allowed in a file name are replaced by `~`, so a file name cannot always be
+ * converted back into the ID it was built from. Applying it twice changes nothing, because `~` itself stays.
+ */
+function getSafeId(id) {
     // eslint-disable-next-line no-control-regex
-    const safeId = id.toString().replace(/[\u0000|*,;"'<>?:/\\]/g, '~');
-    return `${path}${date.toString()}/history.${safeId}.json`;
+    return id.toString().replace(/[\u0000|*,;"'<>?:/\\]/g, '~');
+}
+function getFilenameForID(path, date, id) {
+    return `${path}${date.toString()}/history.${getSafeId(id)}.json`;
 }
 function ts2day(ts) {
     const dateObj = new Date(ts);
@@ -234,8 +243,8 @@ function response(options) {
 }
 function processData(options) {
     options.log(`${Date.now()}: Initialize structures: ${JSON.stringify(options)}`);
-    // initAggregate mutates options in-place and returns the same object
-    (0, aggregate_1.initAggregate)(options);
+    // initAggregate mutates the options in-place, but it takes the ID and the log function from its arguments
+    (0, aggregate_1.initAggregate)(options, options.id, undefined, options.log);
     initialized = true;
     if (cacheReceived) {
         options.log(`${Date.now()}: Aggregate cacheData`);

@@ -1,8 +1,8 @@
 import cp from 'node:child_process';
-import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
 import fs from 'node:fs';
-import { ts2day, getFilenameForID } from './lib/getHistory';
-import { beautify } from './lib/aggregate';
+import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
+import { beautify } from '@iobroker/aggregate';
+import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 const dataDir = getAbsoluteDefaultDataDir();
 
@@ -87,6 +87,18 @@ function sortByTs(a: IobDataEntry, b: IobDataEntry): -1 | 1 | 0 {
 function sortByTsDesc(a: IobDataEntry, b: IobDataEntry): -1 | 1 | 0 {
     return a.ts > b.ts ? -1 : a.ts < b.ts ? 1 : 0;
 }
+
+/** Type of a datapoint, as the data browser needs it to interpret an edited value */
+type StorageType = 'Number' | 'String' | 'Boolean';
+
+/** The two parts of a history file name around the ID */
+const FILE_PREFIX = 'history.';
+const FILE_SUFFIX = '.json';
+
+/** Maximal number of entries one `getRawEntries` call may return */
+const MAX_RAW_ENTRIES = 2000;
+/** Maximal number of entries `getRawEntries` reads to count them. Above it, only the newest ones are counted */
+const MAX_RAW_SCAN_ENTRIES = 100000;
 
 class HistoryAdapter extends Adapter {
     declare config: HistoryAdapterConfig;
@@ -446,6 +458,10 @@ class HistoryAdapter extends Adapter {
             this.disableHistory(msg);
         } else if (msg.command === 'getEnabledDPs') {
             this.getEnabledDPs(msg);
+        } else if (msg.command === 'getRawEntries') {
+            this.getRawEntries(msg);
+        } else if (msg.command === 'getDatapoints') {
+            void this.getDatapoints(msg);
         } else if (msg.command === 'stopInstance') {
             this.finish(() => {
                 if (msg.callback) {
@@ -2272,6 +2288,194 @@ class HistoryAdapter extends Adapter {
         }
 
         this.sendTo(msg.from, msg.command, data, msg.callback);
+    }
+
+    /**
+     * Read the entries of one datapoint exactly as they are stored: no aggregation, no interpolation, no
+     * border values and no rounding.
+     *
+     * The entries that are still only in RAM are taken into account too, so a value that was just logged is
+     * visible immediately. The timestamp is the key of an entry, so it also removes the duplicates between
+     * RAM and disk.
+     */
+    readRawEntries(
+        id: string,
+        start: number | undefined,
+        end: number | undefined,
+    ): { entries: IobDataEntry[]; truncated: boolean } {
+        const dayStart = start === undefined ? 0 : parseInt(ts2day(start), 10);
+        const dayEnd = end === undefined ? 99999999 : parseInt(ts2day(end), 10);
+        const inRange = (ts: number): boolean =>
+            (start === undefined || ts >= start) && (end === undefined || ts <= end);
+
+        const byTs = new Map<number, IobDataEntry>();
+        let truncated = false;
+
+        // the newest day first, so that a scan that hits the limit keeps the newest entries
+        const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => b.localeCompare(a));
+
+        for (const dayStr of dayList) {
+            const day = parseInt(dayStr, 10);
+            if (isNaN(day) || day < dayStart || day > dayEnd) {
+                continue;
+            }
+
+            const file = getFilenameForID(this.config.storeDir, dayStr, id);
+            if (!fs.existsSync(file)) {
+                continue;
+            }
+
+            let data: IobDataEntry[];
+            try {
+                data = JSON.parse(fs.readFileSync(file, 'utf8'));
+            } catch (err) {
+                this.log.warn(`Cannot read file "${file}": ${err}`);
+                continue;
+            }
+            if (!Array.isArray(data)) {
+                this.log.warn(`File "${file}" does not contain an array of entries`);
+                continue;
+            }
+
+            // very old versions stored the timestamp in seconds
+            const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
+
+            for (const entry of data) {
+                if (!entry) {
+                    continue;
+                }
+                if (entry.ts && entry.ts < tsCheck) {
+                    entry.ts *= 1000;
+                }
+                if (inRange(entry.ts)) {
+                    byTs.set(entry.ts, entry);
+                }
+            }
+
+            if (byTs.size > MAX_RAW_SCAN_ENTRIES) {
+                truncated = true;
+                break;
+            }
+        }
+
+        // the entries that are not yet written to the disk
+        for (const entry of this.history[id]?.list || []) {
+            if (entry && inRange(entry.ts)) {
+                byTs.set(entry.ts, entry);
+            }
+        }
+
+        return { entries: Array.from(byTs.values()), truncated };
+    }
+
+    /**
+     * Answer the `getRawEntries` message: one page of the stored entries of a datapoint together with the
+     * total number of entries in the range, so that a table can page through them.
+     */
+    getRawEntries(msg: ioBroker.Message): void {
+        if (!msg.message?.id) {
+            this.log.error('getRawEntries called with invalid data');
+            return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
+        }
+
+        const toTs = (value: unknown): number | undefined => {
+            if (value === undefined || value === null || value === '') {
+                return undefined;
+            }
+            const ts = typeof value === 'number' ? value : new Date(value as string).getTime();
+            return isFinite(ts) ? ts : undefined;
+        };
+
+        const id: string = this.aliasMap[msg.message.id] || msg.message.id;
+        const limit = Math.min(Math.max(parseInt(msg.message.limit, 10) || 100, 1), MAX_RAW_ENTRIES);
+        const offset = Math.max(parseInt(msg.message.offset, 10) || 0, 0);
+        const sort: 'asc' | 'desc' = msg.message.sort === 'asc' ? 'asc' : 'desc';
+
+        let entries: IobDataEntry[];
+        let truncated: boolean;
+        try {
+            ({ entries, truncated } = this.readRawEntries(id, toTs(msg.message.start), toTs(msg.message.end)));
+        } catch (err) {
+            this.log.error(`Cannot read the entries of ${id}: ${err}`);
+            return this.sendTo(msg.from, msg.command, { error: err.message }, msg.callback);
+        }
+
+        entries.sort(sort === 'asc' ? sortByTs : sortByTsDesc);
+
+        this.sendTo(
+            msg.from,
+            msg.command,
+            {
+                id: msg.message.id,
+                total: entries.length,
+                truncated,
+                limit,
+                offset,
+                sort,
+                result: entries.slice(offset, offset + limit),
+            },
+            msg.callback,
+        );
+    }
+
+    /**
+     * Answer the `getDatapoints` message: every datapoint that has data on the disk or in RAM, no matter
+     * whether its logging is still enabled.
+     *
+     * A file name only contains the ID with the characters that are not allowed in a file name replaced, so
+     * it cannot always be converted back. The IDs of the known datapoints are therefore preferred, and only
+     * the name of a file that belongs to no known datapoint is taken as it is.
+     */
+    async getDatapoints(msg: ioBroker.Message): Promise<void> {
+        // the file name of every known datapoint -> the ID it was built from
+        const knownIds = new Map<string, string>();
+        for (const id in this.history) {
+            knownIds.set(getSafeId(id), id);
+        }
+
+        const ids = new Set<string>(Object.keys(this.history));
+
+        for (const day of this.getDirectories(this.config.storeDir)) {
+            let files: string[];
+            try {
+                files = await fs.promises.readdir(`${this.config.storeDir}${day}`);
+            } catch (err) {
+                this.log.debug(`Cannot read directory "${this.config.storeDir}${day}": ${err}`);
+                continue;
+            }
+
+            for (const file of files) {
+                if (file.startsWith(FILE_PREFIX) && file.endsWith(FILE_SUFFIX)) {
+                    const safeId = file.substring(FILE_PREFIX.length, file.length - FILE_SUFFIX.length);
+                    if (safeId) {
+                        ids.add(knownIds.get(safeId) || safeId);
+                    }
+                }
+            }
+        }
+
+        const result: { id: string; type: StorageType | null }[] = [];
+
+        for (const id of Array.from(ids).sort((a, b) => a.localeCompare(b))) {
+            // the type is only used to interpret an edited value, so a datapoint without object is no problem
+            let type: StorageType | null = null;
+            try {
+                const obj = await this.getForeignObjectAsync(this.history[id]?.realId || id);
+                const objType = (obj?.common as ioBroker.StateCommon | undefined)?.type;
+                if (objType === 'number') {
+                    type = 'Number';
+                } else if (objType === 'boolean') {
+                    type = 'Boolean';
+                } else if (objType === 'string') {
+                    type = 'String';
+                }
+            } catch {
+                // the object does not exist anymore - the data of a deleted state stays readable
+            }
+            result.push({ id, type });
+        }
+
+        this.sendTo(msg.from, msg.command, { success: true, result }, msg.callback);
     }
 }
 

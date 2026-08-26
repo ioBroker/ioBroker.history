@@ -8,3 +8,4 @@ iob_npm.done
 *.tgz
 /CLAUDE.md
 /.claude/settings.local.json
+src-admin/build

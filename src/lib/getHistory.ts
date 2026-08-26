@@ -2,7 +2,7 @@
 // todo     error tests
 // todo     clean up
 import * as fs from 'node:fs';
-import { initAggregate, aggregation, finishAggregation } from './aggregate';
+import { initAggregate, aggregation, finishAggregation } from '@iobroker/aggregate';
 import type { IobDataEntry, InternalHistoryOptions } from './types';
 
 type ResponseTuple = ['response', IobDataEntry[] | undefined, number | undefined, number | null | undefined];
@@ -76,10 +76,19 @@ function tsSort(a: IobDataEntry, b: IobDataEntry): number {
     return b.ts - a.ts;
 }
 
-function getFilenameForID(path: string, date: string | number, id: string | number): string {
+/**
+ * The part of the file name that stands for the ID.
+ *
+ * All characters that are not allowed in a file name are replaced by `~`, so a file name cannot always be
+ * converted back into the ID it was built from. Applying it twice changes nothing, because `~` itself stays.
+ */
+function getSafeId(id: string | number): string {
     // eslint-disable-next-line no-control-regex
-    const safeId = id.toString().replace(/[\u0000|*,;"'<>?:/\\]/g, '~');
-    return `${path}${date.toString()}/history.${safeId}.json`;
+    return id.toString().replace(/[\u0000|*,;"'<>?:/\\]/g, '~');
+}
+
+function getFilenameForID(path: string, date: string | number, id: string | number): string {
+    return `${path}${date.toString()}/history.${getSafeId(id)}.json`;
 }
 
 function ts2day(ts: number): string {
@@ -226,8 +235,8 @@ function response(options: InternalHistoryOptions): ResponseTuple | void {
 
 function processData(options: InternalHistoryOptions): void {
     options.log!(`${Date.now()}: Initialize structures: ${JSON.stringify(options)}`);
-    // initAggregate mutates options in-place and returns the same object
-    initAggregate(options);
+    // initAggregate mutates the options in-place, but it takes the ID and the log function from its arguments
+    initAggregate(options, options.id, undefined, options.log);
     initialized = true;
 
     if (cacheReceived) {
@@ -251,7 +260,7 @@ function processData(options: InternalHistoryOptions): void {
 
 // ─── Exports (when used as a module) ─────────────────────────────────────────
 
-export { initAggregate, aggregation, finishAggregation, getFileData, ts2day, response, getFilenameForID };
+export { initAggregate, aggregation, finishAggregation, getFileData, ts2day, response, getFilenameForID, getSafeId };
 
 // how to use:
 // const options = initAggregate(options);
