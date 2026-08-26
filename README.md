@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 5.0.1 (2026-08-26)
 * (@joltcoke) Fixed average and total returning null for every interval that contains a null value: parseFloat(null) is NaN and poisoned the sum of the whole interval (thanks to @joltcoke, ioBroker/ioBroker.sql#526). As the result was NaN and not null, ignoreNull could not act on it either
 * (@joltcoke) Fixed min returning a wrong value if the interval contains a null, minmax losing the minimum if the interval starts with a null, and percentile/quantile counting a null as 0
 
@@ -45,9 +45,6 @@ This adapter saves state history in a two-staged process.
 * (foxriver76) fix `history2db.js` with controller v5
 * (bluefox) Minimal node.sj version is 16
 * (bluefox) Added support for `count` aggregate type on getHistory
-
-### 2.2.6 (2023-08-23)
-* (Apollon77) Fix getHistory when aggregations were used in some cases
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

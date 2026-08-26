@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "5.0.0",
+    "version": "5.0.1",
     "news": {
+      "5.0.1": {
+        "en": "Fixed average and total returning null for every interval that contains a null value: parseFloat(null) is NaN and poisoned the sum of the whole interval (thanks to @joltcoke, ioBroker/ioBroker.sql#526). As the result was NaN and not null, ignoreNull could not act on it either\nFixed min returning a wrong value if the interval contains a null, minmax losing the minimum if the interval starts with a null, and percentile/quantile counting a null as 0",
+        "de": "Der korrigierte Durchschnitt und die Summe gaben für jedes Intervall, das einen Nullwert enthielt, null zurück: `parseFloat(null)` lieferte NaN und verfälschte die Summe des gesamten Intervalls (danke an @joltcoke, ioBroker/ioBroker.sql#526). Da das Ergebnis NaN und nicht null war, konnte auch `ignoreNull` nicht darauf reagieren.\nDie Funktion `fixed min` liefert einen falschen Wert, wenn das Intervall einen Nullwert enthält; `minmax` verliert das Minimum, wenn das Intervall mit einem Nullwert beginnt; und die Funktionen `percentile`/`quantile` zählen einen Nullwert als 0.",
+        "ru": "Исправлена ошибка, из-за которой функции average и total возвращали null для каждого интервала, содержащего значение null: parseFloat(null) принимало значение NaN и искажало сумму всего интервала (спасибо @joltcoke, ioBroker/ioBroker.sql#526). Поскольку результатом был NaN, а не null, ignoreNull также не мог с ним работать.\nИсправлена ошибка, из-за которой параметр min возвращал неверное значение, если интервал содержал нулевое значение, параметр minmax терял минимум, если интервал начинался с нулевого значения, а параметр percentile/quantile считал нулевое значение равным 0.",
+        "pt": "A média e o total fixos retornavam nulo para cada intervalo que continha um valor nulo: `parseFloat(null)` retornava NaN e corrompia a soma de todo o intervalo (obrigado a @joltcoke, ioBroker/ioBroker.sql#526). Como o resultado era NaN e não nulo, `ignoreNull` também não podia ser aplicado.\nCorrigido o problema em que a função min retornava um valor incorreto se o intervalo contivesse um valor nulo, a função minmax perdia o valor mínimo se o intervalo começasse com um valor nulo e a função percentil/quantil contava um valor nulo como 0.",
+        "nl": "Het gemiddelde en totaal geven null terug voor elk interval dat een null-waarde bevat: parseFloat(null) is NaN en vergiftigde de som van het hele interval (met dank aan @joltcoke, ioBroker/ioBroker.sql#526). Omdat het resultaat NaN was en niet null, kon ignoreNull er ook niet op reageren.\nDe vaste min-functie geeft een onjuiste waarde terug als het interval een null-waarde bevat, de minmax-functie verliest het minimum als het interval met een null-waarde begint, en de percentiel-/kwantielfunctie telt een null-waarde als 0.",
+        "fr": "La moyenne et le total fixes renvoient null pour chaque intervalle contenant une valeur nulle : `parseFloat(null)` renvoie NaN et fausse la somme de l'intervalle entier (merci à @joltcoke, ioBroker/ioBroker.sql#526). Comme le résultat était NaN et non null, `ignoreNull` ne pouvait pas non plus agir.\nLa fonction min fixe renvoie une valeur incorrecte si l'intervalle contient une valeur nulle, la fonction minmax perd la valeur minimale si l'intervalle commence par une valeur nulle, et les fonctions percentile/quantile comptent une valeur nulle comme 0.",
+        "it": "Media e totale fissi restituiscono null per ogni intervallo che contiene un valore null: parseFloat(null) è NaN e ha alterato la somma dell'intero intervallo (grazie a @joltcoke, ioBroker/ioBroker.sql#526). Poiché il risultato era NaN e non null, ignoreNull non poteva agire su di esso.\nIl minimo fisso restituisce un valore errato se l'intervallo contiene un valore nullo, il minimo massimo perde il minimo se l'intervallo inizia con un valore nullo e il percentile/quantile considera un valore nullo come 0.",
+        "es": "Se corrigió el promedio y el total, devolviendo null para cada intervalo que contiene un valor nulo: parseFloat(null) es NaN y contamina la suma de todo el intervalo (gracias a @joltcoke, ioBroker/ioBroker.sql#526). Como el resultado era NaN y no null, ignoreNull tampoco podía actuar sobre él.\nSe corrigió el error min que devolvía un valor incorrecto si el intervalo contenía un valor nulo, minmax que perdía el mínimo si el intervalo comenzaba con un valor nulo, y percentile/quantile que contaba un valor nulo como 0.",
+        "pl": "Stała średnia i suma zwracająca null dla każdego interwału zawierającego wartość null: parseFloat(null) ma wartość NaN i zatruwa sumę całego interwału (dzięki @joltcoke, ioBroker/ioBroker.sql#526). Ponieważ wynik był NaN, a nie null, funkcja ignoreNull również nie mogła na niego zareagować.\nNaprawiono błąd min. zwracający błędną wartość, jeśli przedział zawiera wartość null, min. max. tracący wartość minimum, jeśli przedział zaczyna się od wartości null, oraz percentyl/kwantyl liczący wartość null jako 0",
+        "uk": "Виправлено середнє та загальне повернення null для кожного інтервалу, що містить null-значення: parseFloat(null) має значення NaN та отруює суму всього інтервалу (дякую @joltcoke, ioBroker/ioBroker.sql#526). Оскільки результатом було NaN, а не null, ignoreNull також не міг на нього вплинути.\nВиправлено помилку, через яку min повертав неправильне значення, якщо інтервал містив null, minmax втрачав мінімум, якщо інтервал починався з null, а процентиль/квантиль враховував null як 0.",
+        "zh-cn": "对于包含空值的每个区间，固定平均值和总和均返回 null：parseFloat(null) 的结果为 NaN，导致整个区间的总和被污染（感谢 @joltcoke，ioBroker/ioBroker.sql#526）。由于结果为 NaN 而非 null，因此 ignoreNull 也无法对其生效。\n修复了当区间包含空值时最小值返回错误值的问题，修复了当区间以空值开头时最小最大值丢失的问题，以及修复了百分位数/分位数将空值计为 0 的问题。"
+      },
       "5.0.0": {
         "en": "Adapter requires js-controller >= 6.0.11 now.\nResponsive Design added\nAdapter requires node.js >= 22 now.\nAdded the data browser to the configuration, so the stored values can be viewed, edited and deleted.\nThe aggregation is used now from `@iobroker/aggregate` and is shared with the SQL and InfluxDB adapters.",
         "de": "Der Adapter benötigt jetzt js-controller >= 6.0.11.\nResponsives Design hinzugefügt\nDer Adapter benötigt jetzt node.js >= 22.\nDer Datenbrowser wurde zur Konfiguration hinzugefügt, sodass die gespeicherten Werte angezeigt, bearbeitet und gelöscht werden können.\nDie Aggregation wird nun von `@iobroker/aggregate` verwendet und wird mit den SQL- und InfluxDB-Adaptern geteilt.",
@@ -105,18 +118,6 @@
         "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
         "uk": "Виправлення Історія при агрегаціях",
         "zh-cn": "固定 在有些情况下使用汇总的历史"
-      },
-      "2.2.4": {
-        "en": "Update for future js-controller versions",
-        "de": "Update für zukünftige js-controller Versionen",
-        "ru": "Обновление для будущих версий js-controller",
-        "pt": "Atualização para futuras versões js-controller",
-        "nl": "Update voor toekomstige Js-controller versie",
-        "fr": "Update for future js-controller versions",
-        "it": "Aggiornamento per future versioni js-controller",
-        "es": "Actualización para futuras versiones js-controller",
-        "pl": "Wersja js-controllerowa",
-        "zh-cn": "B. 今后控制容忍版本的最新情况"
       }
     },
     "mode": "daemon",
