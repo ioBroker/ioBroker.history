@@ -42,7 +42,7 @@
     "aliasId": "Alias-ID",
     "blockTime": "Ignorar todos los valores nuevos para X ms después del último valor registrado",
     "debounce": "Ignorar cambios hasta que el valor permanezca sin cambios durante X milisegundos",
-    "enabled": "habilitado",
+    "enabled": "activado",
     "ignore values above x": "Ignorar los valores anteriores",
     "ignore values below x": "Ignorar valores a continuación",
     "ignore values below zero": "ignorar valores por debajo de cero (<0)",
