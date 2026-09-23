@@ -7,16 +7,16 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'monthly'
-      time: '04:00'
+      interval: 'cron'
       timezone: 'Europe/Berlin'
+      cronjob: '4 2 19 * *'
+    open-pull-requests-limit: 15
 
   - package-ecosystem: 'npm'
-    directory: '/'
     schedule:
-      interval: 'monthly'
-      time: '04:00'
+      interval: 'cron'
       timezone: 'Europe/Berlin'
+      cronjob: '4 2 19 * *'
     open-pull-requests-limit: 20
     versioning-strategy: 'increase'
     cooldown:
@@ -24,4 +24,6 @@ updates:
     ignore:
       - dependency-name: '@types/node'
         update-types:
-          - 'version-update:semver-major'  
+          - 'version-update:semver-major'
+    directories:
+      - '**/*'
