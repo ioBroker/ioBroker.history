@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "5.0.1",
+    "version": "5.1.0",
     "news": {
+      "5.1.0": {
+        "en": "Admin 7.6.20+ is required. Added Ukrainian translation. Removed the obsolete \"subscribe\" attribute\nAdded the \"Statistics\" tab: values, size on disk, files and status of every datapoint, and a cleanup of the data of datapoints that are not logged any more\nThe data browser shows now if a value to edit or delete was not found, and the error of a failed save is no longer hidden by the reload of the table",
+        "de": "Admin 7.6.20+ ist nötig. Ukrainisch hinzugefügt. Das veraltete „Abo“ -Attribut entfernt\nTab „Statistik“ hinzugefügt: Werte, Festplattengröße, Dateien und Status aller Daten und Bereinigung nicht mehr protokollierter Daten\nDer Datenbrowser zeigt nun an, ob kein Wert zum Bearbeiten oder Löschen gefunden wurde.",
+        "ru": "Требуется администратор версии 7.6.20+. Добавлен украинский перевод. Удален устаревший атрибут «подписаться»\nДобавлена вкладка «Статистика»: значения, размер на диске, файлы и статус каждой точки данных, а также очистка данных точек данных, которые больше не регистрируются\nБраузер данных теперь показывает, не найдено ли редактируемое или удаляемое значение и ошибка неудачного сохранения больше не скрывается перезагрузкой таблицы",
+        "pt": "Requer o Admin 7.6.20+. Adição da tradução ucraniana. Removido o atributo obsoleto “assinar”\nAdicionada a aba “Estatísticas”: valores, tamanho do disco, arquivos e status de cada ponto de dados e limpeza dos dados não registrados\nAgora, o navegador de dados mostra se um valor a ser editado ou excluído não é mais oculto ao recarregar a tabela",
+        "nl": "Admin 7.6.20+ is vereist. Oekraïense vertaling toegevoegd. Het verouderde „subscribe” -kenmerk is verwijderd\nHet tabblad „Statistieken” toegevoegd: waarden, grootte op schijf, bestanden en status van elk datapunt, en een opschoning van de gegevens van datapunten die niet meer worden geregistreerd\nDe gegevensbrowser laat nu zien of een waarde die moet worden bewerkt of verwijderd niet is gevonden, en de fout van een mislukte opslag wordt niet langer verborgen door het opnieuw laden van de tabel",
+        "fr": "Admin 7.6.20+ est requis. Traduction en ukrainien ajoutée. L'attribut obsolète « s'abonner » a été supprimé\nAjout de l'onglet « Statistiques » : valeurs, taille du disque, fichiers et état de chaque point de données, et nettoyage des données qui ne sont plus enregistrées\nLe navigateur de données indique désormais si aucune valeur à modifier ou à supprimer n'est masquée et si le rechargement du tableau n'est plus masqué",
+        "it": "Serve Admin 7.6.20+. Aggiunta traduzione ucraina. Rimosso l'obsoleto attributo «subscribe»\nAggiunta la scheda «Statistiche»: valori, dimensioni su disco, file e stato di ogni datapoint e pulizia dei dati non più registrati\nIl browser dati ora mostra se non è stato trovato un valore da modificare e il caricamento della tabella non è più nascosto",
+        "es": "Se necesita Admin 7.6.20+. Añadió traducción al ucraniano. Se quitó el obsoleto atributo «suscribirse»\nSe ha añadido la pestaña «Estadísticas»: valores, tamaño en disco, archivos y estado de cada punto de datos, y limpieza de los datos de los puntos de datos que ya no están registrados\nEl navegador de datos muestra ahora si no se encontró un valor para editar o eliminar, y el error de un error al guardar ya no se oculta al volver a cargar la tabla",
+        "pl": "Wymagany jest Admin 7.6.20+. Dodano tłumaczenie ukraińskie. Usunięto przestarzały atrybut „subskrybuj”\nDodano zakładkę „Statystyki”: wartości, rozmiar na dysku, pliki i stan każdego punktu danych oraz czyszczenie danych punktów danych, które nie są już rejestrowane\nPrzeglądarka danych pokazuje teraz, czy wartość do edycji lub usunięcia nie została znaleziona, a błąd nieudanego zapisu nie jest już ukryty przez ponowne załadowanie tabeli",
+        "uk": "Адміністратор 7.6.20+ обов'язковий. Додано український переклад. Вилучено застарілий атрибут «Subscribe»\nДодана вкладка «Статистика»: значення, розмір на диску, файли та стан кожного пункту даних, а також очищення даних точок даних, які більше не реєструються\nПереглядач даних тепер показує, чи не знайдено значення для редагування або видалення, а помилка невдалого збереження більше не прихована перезавантаженням таблиці",
+        "zh-cn": "需要管理员 7.6.20+。添加了乌克兰语翻译。移除了过时的 “订阅” 属性\n添加了 “统计” 选项卡：值、磁盘大小、每个数据点的文件和状态，以及对不再记录的数据点数据的清理\n现在，数据浏览器会显示是否未找到要编辑或删除的值，并且重新加载表不再隐藏保存失败的错误"
+      },
       "5.0.1": {
         "en": "Fixed average and total returning null for every interval that contains a null value: parseFloat(null) is NaN and poisoned the sum of the whole interval (thanks to @joltcoke, ioBroker/ioBroker.sql#526). As the result was NaN and not null, ignoreNull could not act on it either\nFixed min returning a wrong value if the interval contains a null, minmax losing the minimum if the interval starts with a null, and percentile/quantile counting a null as 0",
         "de": "Der korrigierte Durchschnitt und die Summe gaben für jedes Intervall, das einen Nullwert enthielt, null zurück: `parseFloat(null)` lieferte NaN und verfälschte die Summe des gesamten Intervalls (danke an @joltcoke, ioBroker/ioBroker.sql#526). Da das Ergebnis NaN und nicht null war, konnte auch `ignoreNull` nicht darauf reagieren.\nDie Funktion `fixed min` liefert einen falschen Wert, wenn das Intervall einen Nullwert enthält; `minmax` verliert das Minimum, wenn das Intervall mit einem Nullwert beginnt; und die Funktionen `percentile`/`quantile` zählen einen Nullwert als 0.",
@@ -94,19 +107,6 @@
         "zh-cn": "fix 历史2db.j with controller v5\n米切尔·诺贝尔(签名)\n增加对准礼品总值的支持"
       },
       "2.2.6": {
-        "en": "Fix getHistory when aggregations were used in some cases",
-        "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
-        "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
-        "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
-        "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
-        "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
-        "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
-        "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
-        "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
-        "uk": "Виправлення Історія при агрегаціях",
-        "zh-cn": "固定 在有些情况下使用汇总的历史"
-      },
-      "2.2.5": {
         "en": "Fix getHistory when aggregations were used in some cases",
         "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
         "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",

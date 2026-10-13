@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 5.1.0 (2026-10-13)
 * (@GermanBluefox) Admin 7.6.20+ is required. Added Ukrainian translation. Removed the obsolete "subscribe" attribute
 * (@GermanBluefox) Added the "Statistics" tab: values, size on disk, files and status of every datapoint, and a cleanup of the data of datapoints that are not logged any more
 * (@GermanBluefox) The data browser shows now if a value to edit or delete was not found, and the error of a failed save is no longer hidden by the reload of the table
@@ -45,11 +45,6 @@ This adapter saves state history in a two-staged process.
 
 ### 3.0.1 (2023-10-24)
 * (tuxyme) activated the round option when averaging
-
-### 3.0.0 (2023-09-19)
-* (foxriver76) fix `history2db.js` with controller v5
-* (bluefox) Minimal node.sj version is 16
-* (bluefox) Added support for `count` aggregate type on getHistory
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
