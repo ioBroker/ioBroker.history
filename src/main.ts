@@ -234,7 +234,9 @@ class HistoryAdapter extends Adapter {
                             clearTimeout(timeout);
                             this.history[id].timeout = null;
                         }
-                        this.storeCached(true, id);
+                        // only a datapoint that was really logged gets the closing null - values written by
+                        // `storeState` for a datapoint without history config are just flushed to the disk
+                        this.storeCached(!!this.history[id].config, id);
                         delete this.history[id];
                     }
                 }
