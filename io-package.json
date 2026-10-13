@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "5.1.0",
+    "version": "5.1.1",
     "news": {
+      "5.1.1": {
+        "en": "Values stored with `storeState` for a datapoint without history settings no longer get an additional `null` value when the object of the datapoint changes",
+        "de": "Mit `StoreState` gespeicherte Werte für einen Datenpunkt ohne Historieneinstellungen erhalten keinen Nullwert mehr, wenn sich das Objekt ändert",
+        "ru": "Значения, сохраненные в `storeState` для точки данных без настроек истории, больше не получают дополнительное «нулевое» значение при изменении объекта точки данных",
+        "pt": "Os valores armazenados com `storeState` para um ponto de dados sem histórico não recebem mais um valor `null` quando o objeto muda",
+        "nl": "Waarden die zijn opgeslagen met `StoreState` voor een datapunt zonder geschiedenisinstellingen krijgen niet langer een extra `null` waarde wanneer het object van het datapunt verandert",
+        "fr": "Les valeurs stockées avec « StoreState » pour un point de données sans paramètres d'historique n'obtiennent plus de valeur « nulle » supplémentaire lorsque l'objet change",
+        "it": "I valori memorizzati con `storeState` per un datapoint senza impostazioni di cronologia non ricevono più un valore `null` aggiuntivo",
+        "es": "Los valores almacenados en «StoreState» para un punto de datos sin historial ya no reciben un valor «nulo» adicional cuando el objeto del punto de datos cambia",
+        "pl": "Wartości przechowywane w `storeState` dla punktu danych bez ustawień historii nie otrzymują dodatkowej wartości `nul`, gdy obiekt punktu danych ulegnie zmianie",
+        "uk": "Значення, що зберігаються за допомогою `storeState` для точки даних без налаштувань історії, більше не отримують додаткового значення `null`, коли об'єкт точки даних змінюється",
+        "zh-cn": "当数据点的对象发生变化时，使用`storeState`存储的没有历史记录设置的数据点的值不再获得额外的 “null” 值"
+      },
       "5.1.0": {
         "en": "Admin 7.6.20+ is required. Added Ukrainian translation. Removed the obsolete \"subscribe\" attribute\nAdded the \"Statistics\" tab: values, size on disk, files and status of every datapoint, and a cleanup of the data of datapoints that are not logged any more\nThe data browser shows now if a value to edit or delete was not found, and the error of a failed save is no longer hidden by the reload of the table",
         "de": "Admin 7.6.20+ ist nötig. Ukrainisch hinzugefügt. Das veraltete „Abo“ -Attribut entfernt\nTab „Statistik“ hinzugefügt: Werte, Festplattengröße, Dateien und Status aller Daten und Bereinigung nicht mehr protokollierter Daten\nDer Datenbrowser zeigt nun an, ob kein Wert zum Bearbeiten oder Löschen gefunden wurde.",
@@ -105,19 +118,6 @@
         "pl": "poprawiona historia2db z kontrolerem v5\nWersja minimalna jest 16\nWsparcie dla liczby zbitych typów",
         "uk": "виправити історію2db.js з контролером v5\nMinimal node.sj версія 16\nДодано підтримку підрахунку агрегатного типу на getHistory",
         "zh-cn": "fix 历史2db.j with controller v5\n米切尔·诺贝尔(签名)\n增加对准礼品总值的支持"
-      },
-      "2.2.6": {
-        "en": "Fix getHistory when aggregations were used in some cases",
-        "de": "Bekommen Geschichte, als Aggregate in einigen Fällen verwendet wurden",
-        "ru": "Fix получить История, когда агрегации были использованы в некоторых случаях",
-        "pt": "Fixar get História quando as agregaçãos foram usadas em alguns casos",
-        "nl": "Fix Geschiedenis toen aggregaties werden gebruikt in sommige gevallen",
-        "fr": "Fixe. Historique lorsque des agrégations ont été utilisées dans certains cas",
-        "it": "Risolvere Storia quando le aggregazioni sono state utilizzate in alcuni casi",
-        "es": "Corrección Historia cuando se utilizaron agregaciones en algunos casos",
-        "pl": "Fix Historia, gdy agregacja była używana w niektórych przypadkach",
-        "uk": "Виправлення Історія при агрегаціях",
-        "zh-cn": "固定 在有些情况下使用汇总的历史"
       }
     },
     "mode": "daemon",

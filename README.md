@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 5.1.1 (2026-10-13)
 * (@GermanBluefox) Values stored with `storeState` for a datapoint without history settings no longer get an additional `null` value when the object of the datapoint changes
 
 ### 5.1.0 (2026-10-13)
@@ -45,9 +45,6 @@ This adapter saves state history in a two-staged process.
 ### 4.0.0 (2026-03-10)
 * (iobroker-bot) Adapter requires node.js >= 20 now.
 * (@GermanBluefox) Migrated to TypeScript
-
-### 3.0.1 (2023-10-24)
-* (tuxyme) activated the round option when averaging
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
