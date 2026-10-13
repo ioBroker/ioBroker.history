@@ -59,5 +59,6 @@
     "retention": "保管期限",
     "storeAck": "商店对价值的认可",
     "storeDir": "储存目录",
-    "storeFrom": "存放价值来源"
+    "storeFrom": "存放价值来源",
+    "Statistics": "统计"
 }

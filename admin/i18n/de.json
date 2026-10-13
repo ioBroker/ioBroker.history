@@ -59,5 +59,6 @@
     "retention": "Storage Vorhaltezeit",
     "storeAck": "Speichere ACK vom Ereignis",
     "storeDir": "Speicherverzeichnis",
-    "storeFrom": "Speichere Quelle vom Ereignis"
+    "storeFrom": "Speichere Quelle vom Ereignis",
+    "Statistics": "Statistik"
 }

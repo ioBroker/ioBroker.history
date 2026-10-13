@@ -59,5 +59,6 @@
     "retention": "Opslag retentie",
     "storeAck": "Bewaar erkenning van waarde",
     "storeDir": "Opslagmap",
-    "storeFrom": "Bewaar oorsprong van waarde"
+    "storeFrom": "Bewaar oorsprong van waarde",
+    "Statistics": "Statistieken"
 }

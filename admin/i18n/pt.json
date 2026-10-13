@@ -59,5 +59,6 @@
     "retention": "Retenção de armazenamento",
     "storeAck": "Recorde de valor",
     "storeDir": "Diretório de armazenamento",
-    "storeFrom": "Armazenar origem do valor"
+    "storeFrom": "Armazenar origem do valor",
+    "Statistics": "Estatísticas"
 }

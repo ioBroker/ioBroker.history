@@ -59,5 +59,6 @@
     "retention": "Storage retention",
     "storeAck": "Store acknowledge of value",
     "storeDir": "Storage directory",
-    "storeFrom": "Store origin of value"
+    "storeFrom": "Store origin of value",
+    "Statistics": "Statistics"
 }

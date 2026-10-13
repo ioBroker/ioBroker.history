@@ -1482,4 +1482,75 @@ export function register(
             },
         );
     });
+
+    it(`Test ${adapterShortName}: Statistics and cleanup of datapoints that are not logged`, async function () {
+        this.timeout(25000);
+
+        const statsNow = Date.now();
+        // an existing state without history config: its values are reachable, but nobody logs them
+        const disabledId = `${instanceName}.statsValue-${statsNow}`;
+        await objects.setObjectAsync(disabledId, {
+            type: 'state',
+            common: { type: 'number', role: 'state', read: true, write: true, name: 'stats' },
+            native: {},
+        });
+        // a value of a state that does not exist at all
+        const missingId = `my.own.orphan.value-${statsNow}`;
+
+        const send = (command: string, message: any): Promise<any> =>
+            new Promise(resolve => sendTo(instanceName, command, message, resolve));
+
+        for (const id of [disabledId, missingId]) {
+            const result = await send('storeState', {
+                id,
+                state: [
+                    { val: 1, ack: true, ts: statsNow - 3000 },
+                    { val: 2, ack: true, ts: statsNow - 2000 },
+                    { val: 3, ack: true, ts: statsNow - 1000 },
+                ],
+            });
+            assert.strictEqual(result.success, true);
+        }
+
+        const stats = await send('getDpStatistics', {});
+        assert.strictEqual(stats.success, true);
+        const disabled = stats.result.find((stat: any) => stat.id === disabledId);
+        const missing = stats.result.find((stat: any) => stat.id === missingId);
+        const active = stats.result.find((stat: any) => stat.id === `${instanceName}.testValue`);
+        assert.ok(disabled, `${disabledId} is missing in the statistics`);
+        assert.ok(missing, `${missingId} is missing in the statistics`);
+        assert.ok(active, `${instanceName}.testValue is missing in the statistics`);
+        assert.strictEqual(disabled.status, 'loggingDisabled');
+        assert.strictEqual(disabled.type, 'Number');
+        assert.strictEqual(disabled.count, 3);
+        assert.strictEqual(disabled.firstTs, statsNow - 3000);
+        assert.strictEqual(disabled.lastTs, statsNow - 1000);
+        assert.strictEqual(missing.status, 'objectMissing');
+        assert.strictEqual(missing.type, null);
+        assert.strictEqual(active.status, 'active');
+        assert.ok(active.count > 0, 'testValue has no values');
+        assert.ok(active.bytes > 0 && active.files > 0, 'the files of testValue were not found');
+        assert.strictEqual(stats.summary.datapoints, stats.result.length);
+        assert.ok(!stats.result.some((stat: any) => 'paths' in stat), 'the file paths must not be sent');
+
+        // without confirmation nothing is deleted
+        const preview = await send('cleanupOrphaned', { scope: { objectMissing: false, loggingDisabled: true } });
+        assert.strictEqual(preview.dryRun, true);
+        assert.ok(preview.items.some((item: any) => item.id === disabledId));
+        assert.ok(preview.items.every((item: any) => item.status === 'loggingDisabled'));
+        let raw = await send('getRawEntries', { id: disabledId });
+        assert.strictEqual(raw.total, 3);
+
+        const cleanup = await send('cleanupOrphaned', {
+            scope: { objectMissing: false, loggingDisabled: true },
+            confirm: true,
+        });
+        assert.strictEqual(cleanup.dryRun, false);
+        assert.deepStrictEqual(cleanup.failed, []);
+        raw = await send('getRawEntries', { id: disabledId });
+        assert.strictEqual(raw.total, 0);
+        // the deleted state was out of scope, so its values must still be there
+        raw = await send('getRawEntries', { id: missingId });
+        assert.strictEqual(raw.total, 3);
+    });
 }

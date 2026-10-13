@@ -59,5 +59,6 @@
     "retention": "Conservation du stockage",
     "storeAck": "Enregistrer la confirmation (ACK) de la valeur",
     "storeDir": "Répertoire de stockage",
-    "storeFrom": "Enregistrer l'origine de la valeur"
+    "storeFrom": "Enregistrer l'origine de la valeur",
+    "Statistics": "Statistiques"
 }

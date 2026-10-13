@@ -312,12 +312,18 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
         }
     }
 
-    async loadRows(): Promise<void> {
+    /**
+     * Read the current page of entries.
+     *
+     * @param keepError true after a save or delete, so that its error is not wiped out by the reload
+     */
+    async loadRows(keepError?: boolean): Promise<void> {
         const point = this.state.selected;
         if (!point) {
             return;
         }
-        this.setState({ loadingRows: true, errorText: '' });
+        // the updater sees the error the save just set, even if React has not applied it yet
+        this.setState(prev => ({ loadingRows: true, errorText: keepError ? prev.errorText : '' }));
         try {
             const result = await this.sendToInstance('getRawEntries', {
                 id: point.id,
@@ -379,14 +385,18 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
         this.setState({ entryDialog: null, loadingRows: true });
         try {
             if (dialog.original) {
-                await this.sendToInstance('update', { id: point.id, state });
+                const result = await this.sendToInstance('update', { id: point.id, state });
+                // the adapter answers with `success: false` if no entry has this timestamp
+                if (result?.success === false) {
+                    this.setState({ errorText: I18n.t('history_entry_not_found') });
+                }
             } else {
                 await this.sendToInstance('storeState', { id: point.id, state });
             }
         } catch (e: any) {
             this.setState({ errorText: e.message });
         }
-        await this.loadRows();
+        await this.loadRows(true);
     }
 
     async deleteEntries(entries: number[]): Promise<void> {
@@ -398,7 +408,10 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
         try {
             if (entries.length === 1) {
                 // the single call reports errors back, the array call does not
-                await this.sendToInstance('delete', { id: point.id, ts: entries[0] });
+                const result = await this.sendToInstance('delete', { id: point.id, ts: entries[0] });
+                if (result?.success === false) {
+                    this.setState({ errorText: I18n.t('history_entry_not_found') });
+                }
             } else {
                 await this.sendToInstance(
                     'delete',
@@ -408,7 +421,7 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
         } catch (e: any) {
             this.setState({ errorText: e.message });
         }
-        await this.loadRows();
+        await this.loadRows(true);
     }
 
     renderDatapoints(): React.JSX.Element {

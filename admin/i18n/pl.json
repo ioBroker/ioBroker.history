@@ -59,5 +59,6 @@
     "retention": "Przechowywanie danych",
     "storeAck": "Zapisz potwierdzenie wartości",
     "storeDir": "Katalog pamięci",
-    "storeFrom": "Przechowuj pochodzenie wartości:"
+    "storeFrom": "Przechowuj pochodzenie wartości:",
+    "Statistics": "Statystyki"
 }

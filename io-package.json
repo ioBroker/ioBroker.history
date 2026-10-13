@@ -124,7 +124,6 @@
     "platform": "Javascript/Node.js",
     "loglevel": "info",
     "messagebox": true,
-    "subscribe": "messagebox",
     "eraseOnUpload": true,
     "keywords": [
       "charts",
@@ -143,7 +142,10 @@
       "hobbyquaker <hq@ccu.io>",
       "Apollon77 <ingo@fischer-ka.de>"
     ],
-    "license": "MIT",
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
     "readme": "https://github.com/ioBroker/ioBroker.history/blob/master/README.md",
     "icon": "history.png",
     "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.history/master/admin/history.png",
@@ -157,7 +159,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=5.1.28"
+        "admin": ">=7.6.20"
       }
     ],
     "supportStopInstance": 10000,

@@ -236,6 +236,20 @@
           "sm": 12
         }
       }
+    },
+    "statisticsTab": {
+      "type": "panel",
+      "label": "Statistics",
+      "items": {
+        "_statistics": {
+          "type": "custom",
+          "i18n": true,
+          "url": "custom/customComponents.js",
+          "name": "HistoryComponentsSet/Components/Statistics",
+          "guiApi": 2,
+          "sm": 12
+        }
+      }
     }
   }
 }

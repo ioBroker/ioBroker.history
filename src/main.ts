@@ -4,6 +4,14 @@ import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobrok
 import { beautify } from '@iobroker/aggregate';
 import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
+import {
+    classifyDatapoint,
+    selectForCleanup,
+    summarize,
+    type CleanupScope,
+    type DatapointStat,
+    type StorageType,
+} from './lib/statistics';
 const dataDir = getAbsoluteDefaultDataDir();
 
 interface CustomStateConfig {
@@ -88,8 +96,22 @@ function sortByTsDesc(a: IobDataEntry, b: IobDataEntry): -1 | 1 | 0 {
     return a.ts > b.ts ? -1 : a.ts < b.ts ? 1 : 0;
 }
 
-/** Type of a datapoint, as the data browser needs it to interpret an edited value */
-type StorageType = 'Number' | 'String' | 'Boolean';
+/** A statistics row together with the files it was collected from, which only the cleanup needs */
+type CollectedStat = DatapointStat & { paths: string[] };
+
+/** Convert the `common.type` of a state object into the type the GUI works with */
+function toStorageType(objType: unknown): StorageType | null {
+    if (objType === 'number') {
+        return 'Number';
+    }
+    if (objType === 'boolean') {
+        return 'Boolean';
+    }
+    if (objType === 'string') {
+        return 'String';
+    }
+    return null;
+}
 
 /** The two parts of a history file name around the ID */
 const FILE_PREFIX = 'history.';
@@ -462,11 +484,15 @@ class HistoryAdapter extends Adapter {
             this.getRawEntries(msg);
         } else if (msg.command === 'getDatapoints') {
             void this.getDatapoints(msg);
+        } else if (msg.command === 'getDpStatistics') {
+            void this.getDpStatistics(msg);
+        } else if (msg.command === 'cleanupOrphaned') {
+            void this.cleanupOrphaned(msg);
         } else if (msg.command === 'stopInstance') {
             this.finish(() => {
                 if (msg.callback) {
                     this.sendTo(msg.from, msg.command, 'stopped', msg.callback);
-                    setTimeout(() => (this.terminate ? this.terminate(0) : process.exit(0)), 200);
+                    setTimeout(() => this.terminate(0), 200);
                 }
             });
         }
@@ -2461,14 +2487,7 @@ class HistoryAdapter extends Adapter {
             let type: StorageType | null = null;
             try {
                 const obj = await this.getForeignObjectAsync(this.history[id]?.realId || id);
-                const objType = (obj?.common as ioBroker.StateCommon | undefined)?.type;
-                if (objType === 'number') {
-                    type = 'Number';
-                } else if (objType === 'boolean') {
-                    type = 'Boolean';
-                } else if (objType === 'string') {
-                    type = 'String';
-                }
+                type = toStorageType((obj?.common as ioBroker.StateCommon | undefined)?.type);
             } catch {
                 // the object does not exist anymore - the data of a deleted state stays readable
             }
@@ -2476,6 +2495,273 @@ class HistoryAdapter extends Adapter {
         }
 
         this.sendTo(msg.from, msg.command, { success: true, result }, msg.callback);
+    }
+
+    /**
+     * Collect the statistics of every datapoint that has values on the disk or in RAM.
+     *
+     * Every file of the examined range is read to count its values, so this is a full scan. The
+     * files are read asynchronously one after the other, so the adapter keeps logging meanwhile.
+     *
+     * The status is derived from ioBroker, not from the files: only ioBroker knows whether a state
+     * still exists and whether this instance logs it. A file name only contains the ID with the
+     * characters that are not allowed in a file name replaced, so the IDs of all state objects are
+     * used to find the state a file belongs to - otherwise the data of an existing state with such
+     * a character in its ID would be reported as orphaned.
+     *
+     * A file named after an `Alias-ID` can only be linked to its state while its logging is
+     * enabled - once the custom config is gone, nothing links it back to the real state, so an
+     * orphaned alias is reported as `objectMissing`.
+     *
+     * @param start beginning of the examined range (ms), everything by default
+     * @param end end of the examined range (ms), everything by default
+     */
+    async collectStatistics(start?: number, end?: number): Promise<CollectedStat[]> {
+        const dayStart = start === undefined ? 0 : parseInt(ts2day(start), 10);
+        const dayEnd = end === undefined ? 99999999 : parseInt(ts2day(end), 10);
+        const inRange = (ts: number): boolean =>
+            (start === undefined || ts >= start) && (end === undefined || ts <= end);
+
+        // the ID of every state object -> its type, and the file name of every state object -> its ID
+        const objectTypes = new Map<string, StorageType | null>();
+        const objectIds = new Map<string, string>();
+        const view = await this.getObjectViewAsync('system', 'state', { startkey: '', endkey: '香' });
+        for (const row of view?.rows || []) {
+            objectTypes.set(row.id, toStorageType(row.value?.common?.type));
+            const safeId = getSafeId(row.id);
+            // two IDs can map to the same file name, then the one that is literally the file name wins
+            if (!objectIds.has(safeId) || row.id === safeId) {
+                objectIds.set(safeId, row.id);
+            }
+        }
+
+        // the file name of every datapoint this instance knows -> its ID
+        const knownIds = new Map<string, string>();
+        for (const id in this.history) {
+            knownIds.set(getSafeId(id), id);
+        }
+
+        const stats = new Map<string, CollectedStat>();
+        const getStat = (id: string): CollectedStat => {
+            let stat = stats.get(id);
+            if (!stat) {
+                stat = {
+                    id,
+                    type: null,
+                    count: 0,
+                    firstTs: null,
+                    lastTs: null,
+                    bytes: 0,
+                    files: 0,
+                    status: 'active',
+                    paths: [],
+                };
+                stats.set(id, stat);
+            }
+            return stat;
+        };
+        const addTs = (stat: CollectedStat, ts: number): void => {
+            stat.count++;
+            if (stat.firstTs === null || ts < stat.firstTs) {
+                stat.firstTs = ts;
+            }
+            if (stat.lastTs === null || ts > stat.lastTs) {
+                stat.lastTs = ts;
+            }
+        };
+
+        for (const dayStr of this.getDirectories(this.config.storeDir)) {
+            const day = parseInt(dayStr, 10);
+            if (isNaN(day) || day < dayStart || day > dayEnd) {
+                continue;
+            }
+
+            let files: string[];
+            try {
+                files = await fs.promises.readdir(`${this.config.storeDir}${dayStr}`);
+            } catch (err) {
+                this.log.debug(`Cannot read directory "${this.config.storeDir}${dayStr}": ${err}`);
+                continue;
+            }
+
+            // very old versions stored the timestamp in seconds
+            const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
+
+            for (const file of files) {
+                if (!file.startsWith(FILE_PREFIX) || !file.endsWith(FILE_SUFFIX)) {
+                    continue;
+                }
+                const safeId = file.substring(FILE_PREFIX.length, file.length - FILE_SUFFIX.length);
+                if (!safeId) {
+                    continue;
+                }
+                const path = `${this.config.storeDir}${dayStr}/${file}`;
+                const stat = getStat(knownIds.get(safeId) || objectIds.get(safeId) || safeId);
+                stat.paths.push(path);
+                stat.files++;
+
+                try {
+                    const content = await fs.promises.readFile(path, 'utf8');
+                    stat.bytes += Buffer.byteLength(content);
+                    const data: IobDataEntry[] = JSON.parse(content);
+                    if (Array.isArray(data)) {
+                        for (const entry of data) {
+                            if (!entry || typeof entry.ts !== 'number') {
+                                continue;
+                            }
+                            const ts = entry.ts < tsCheck ? entry.ts * 1000 : entry.ts;
+                            if (inRange(ts)) {
+                                addTs(stat, ts);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    // a broken file still occupies the disk, so it stays in the list
+                    this.log.warn(`Cannot read file "${path}": ${err}`);
+                }
+            }
+        }
+
+        // the values that are not yet written to the disk, and the logged datapoints without any value yet
+        for (const id in this.history) {
+            const entry = this.history[id];
+            const list = (entry?.list || []).filter(item => item && inRange(item.ts));
+            if (!list.length && !entry?.config?.enabled) {
+                continue;
+            }
+            const stat = getStat(id);
+            for (const item of list) {
+                addTs(stat, item.ts);
+            }
+        }
+
+        for (const stat of stats.values()) {
+            const realId = this.history[stat.id]?.realId || stat.id;
+            const objectExists = objectTypes.has(realId);
+            stat.type = objectTypes.get(realId) ?? null;
+            stat.status = classifyDatapoint(objectExists, !!this.history[stat.id]?.config?.enabled);
+        }
+
+        return Array.from(stats.values()).sort((a, b) => a.id.localeCompare(b.id));
+    }
+
+    /**
+     * Answer `getDpStatistics` with one row per datapoint plus totals.
+     *
+     * @param msg the message to answer
+     */
+    async getDpStatistics(msg: ioBroker.Message): Promise<void> {
+        const toTs = (value: unknown): number | undefined => {
+            if (value === undefined || value === null || value === '') {
+                return undefined;
+            }
+            const ts = typeof value === 'number' ? value : new Date(value as string).getTime();
+            return isFinite(ts) ? ts : undefined;
+        };
+
+        try {
+            const collected = await this.collectStatistics(toTs(msg.message?.start), toTs(msg.message?.end));
+            // the file paths are only needed by the cleanup and would only bloat the answer
+            const stats: DatapointStat[] = collected.map(({ paths: _paths, ...stat }) => stat);
+            this.sendTo(
+                msg.from,
+                msg.command,
+                { success: true, result: stats, summary: summarize(stats) },
+                msg.callback,
+            );
+        } catch (err) {
+            this.log.error(`Cannot collect statistics: ${err}`);
+            this.sendTo(msg.from, msg.command, { error: err.message }, msg.callback);
+        }
+    }
+
+    /**
+     * Answer `cleanupOrphaned`: remove the stored values of datapoints nobody logs any more.
+     *
+     * Without `confirm: true` nothing is deleted and the answer only reports what a confirmed run
+     * would remove, so the GUI can show the list and the counts before anything is lost. The same
+     * collection feeds both, so the preview and the deletion cannot disagree about what is
+     * orphaned.
+     *
+     * @param msg the message to answer
+     */
+    async cleanupOrphaned(msg: ioBroker.Message): Promise<void> {
+        const scope: CleanupScope = msg.message?.scope || {};
+        const confirmed = msg.message?.confirm === true;
+
+        try {
+            const victims = selectForCleanup(await this.collectStatistics(), scope);
+            const preview = {
+                datapoints: victims.length,
+                values: victims.reduce((sum, victim) => sum + victim.count, 0),
+                bytes: victims.reduce((sum, victim) => sum + victim.bytes, 0),
+                items: victims.map(({ paths: _paths, ...stat }) => stat),
+            };
+
+            if (!confirmed) {
+                this.sendTo(msg.from, msg.command, { success: true, dryRun: true, ...preview }, msg.callback);
+                return;
+            }
+
+            const failed: string[] = [];
+            const dirs = new Set<string>();
+            for (const victim of victims) {
+                let ok = true;
+                for (const path of victim.paths) {
+                    try {
+                        await fs.promises.unlink(path);
+                        dirs.add(path.substring(0, path.lastIndexOf('/')));
+                    } catch (err) {
+                        if (err.code !== 'ENOENT') {
+                            this.log.warn(`Cannot delete file "${path}": ${err}`);
+                            ok = false;
+                        }
+                    }
+                }
+                // the values in RAM would recreate the files on the next flush
+                const entry = this.history[victim.id];
+                if (entry) {
+                    if (entry.config?.enabled) {
+                        entry.list = [];
+                    } else {
+                        delete this.history[victim.id];
+                    }
+                }
+                if (!ok) {
+                    failed.push(victim.id);
+                }
+            }
+
+            // a day directory without files is of no use any more
+            for (const dir of dirs) {
+                try {
+                    if (!(await fs.promises.readdir(dir)).length) {
+                        await fs.promises.rmdir(dir);
+                    }
+                } catch {
+                    // the directory is used again or is already gone
+                }
+            }
+
+            const removed = victims.filter(victim => !failed.includes(victim.id));
+            const deleted = {
+                datapoints: removed.length,
+                values: removed.reduce((sum, victim) => sum + victim.count, 0),
+                bytes: removed.reduce((sum, victim) => sum + victim.bytes, 0),
+            };
+            this.log.info(
+                `Cleanup removed ${deleted.values} values of ${deleted.datapoints} datapoint(s) that are not logged any more`,
+            );
+            this.sendTo(
+                msg.from,
+                msg.command,
+                { success: true, dryRun: false, ...preview, deleted, failed },
+                msg.callback,
+            );
+        } catch (err) {
+            this.log.error(`Cleanup failed: ${err}`);
+            this.sendTo(msg.from, msg.command, { error: err.message }, msg.callback);
+        }
     }
 }
 

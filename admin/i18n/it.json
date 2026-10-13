@@ -59,5 +59,6 @@
     "retention": "Conservazione di memoria",
     "storeAck": "Memorizza valore di negozio",
     "storeDir": "Directory di archiviazione",
-    "storeFrom": "Memorizza l'origine del valore"
+    "storeFrom": "Memorizza l'origine del valore",
+    "Statistics": "Statistiche"
 }
