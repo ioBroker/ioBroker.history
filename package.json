@@ -33,9 +33,9 @@
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/testing": "^6.3.1",
     "@tsconfig/node22": "^22.0.6",
-    "@types/node": "^26.6.5",
+    "@types/node": "^22.20.5",
     "tsx": "^4.23.15",
-    "typescript": "~7.0.2"
+    "typescript": "~6.0.3"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/ioBroker.history/issues"
