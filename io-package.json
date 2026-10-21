@@ -253,7 +253,8 @@
     "disableSkippedValueLogging": false,
     "enableLogging": false,
     "round": "",
-    "customRetentionDuration": 365
+    "customRetentionDuration": 365,
+    "maxParallelQueries": 3
   },
   "objects": []
 }

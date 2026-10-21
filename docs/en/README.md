@@ -49,6 +49,9 @@ Defines, if the "from" attribute will be stored, too.
 
 **Write NULL values on start/stop boundaries**
 
+**Maximum parallel queries**
+Aggregated history queries (e.g. for charts) are calculated in separate processes. This setting limits how many of these processes may run at the same time (default: 3). Further queries wait in a queue until a process becomes free, so they may take longer under heavy load, but the memory consumption stays predictable. `0` disables the limit.
+
 ### Default settings for states
 
 There are the default settings for every new state which should be logged.

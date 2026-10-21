@@ -49,6 +49,18 @@
           "sm": 12,
           "md": 8,
           "lg": 8
+        },
+        "maxParallelQueries": {
+          "newLine": true,
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "xs": 12,
+          "sm": 12,
+          "md": 4,
+          "lg": 4,
+          "label": "Maximum parallel queries",
+          "help": "maxParallelQueries"
         }
       }
     },

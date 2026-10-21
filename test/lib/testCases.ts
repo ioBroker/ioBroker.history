@@ -403,6 +403,39 @@ export function register(
         );
     });
 
+    it(`Test ${adapterShortName}: Read average from DB using parallel GetHistory requests`, async function () {
+        this.timeout(60000);
+
+        const results = await Promise.all(
+            [0, 1, 2, 3, 4].map(
+                () =>
+                    new Promise<any>(resolve =>
+                        sendTo(
+                            instanceName,
+                            'getHistory',
+                            {
+                                id: `${instanceName}.testValue`,
+                                options: {
+                                    start: now + 100,
+                                    end: now + 30001,
+                                    count: 2,
+                                    aggregate: 'average',
+                                    ignoreNull: true,
+                                },
+                            },
+                            resolve,
+                        ),
+                    ),
+            ),
+        );
+        for (const result of results) {
+            assert.ok(!result.error, `Unexpected error: ${result.error}`);
+            assert.strictEqual(result.result.length, 4);
+            assert.strictEqual(result.result[1].val, 1.5);
+            assert.strictEqual(result.result[2].val, 2.57);
+        }
+    });
+
     it(`Test ${adapterShortName}: Read minmax values from DB using GetHistory`, function (done) {
         this.timeout(10000);
 
