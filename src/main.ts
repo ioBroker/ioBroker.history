@@ -1205,8 +1205,23 @@ class HistoryAdapter extends Adapter {
             this.log.debug(`getOneFileData: ${dayStart} -> ${dayEnd} for ${id}`);
         }
 
+        // The files are read in the same direction as the day list: the newest entries first, if
+        // returnNewestEntries is set, otherwise the oldest entries first. So if the reading stops after
+        // "count" entries, the requested end of the time range is delivered.
+        const newestFirst = !!options.returnNewestEntries;
+        const limited =
+            newestFirst ||
+            options.aggregate === 'onchange' ||
+            (options.aggregate as string) === '' ||
+            options.aggregate === 'none';
+        // number of entries inside the requested time range
+        let found = 0;
+        // the nearest entry outside the time range (before start or after end). It is needed for the borders
+        let outside: IobDataEntry | null = null;
+        let finished = false;
+
         // get all files in directory
-        for (let i = 0; i < dayList.length; i++) {
+        for (let i = 0; i < dayList.length && !finished; i++) {
             const day = parseInt(dayList[i], 10);
             if (!isNaN(day) && day >= dayStart && day <= dayEnd) {
                 const file = getFilenameForID(options.path, day, id);
@@ -1218,16 +1233,19 @@ class HistoryAdapter extends Adapter {
                 try {
                     if (fs.existsSync(file)) {
                         try {
-                            const _data: IobDataEntry[] = JSON.parse(fs.readFileSync(file, 'utf-8')).sort(sortByTsDesc);
-                            // adapter.log.debug(`_data = ${JSON.stringify(_data)}`);
-                            let last = false;
-
+                            // skip broken entries, e.g., null in the array
+                            const _data: IobDataEntry[] = (
+                                JSON.parse(fs.readFileSync(file, 'utf-8')) as IobDataEntry[]
+                            ).filter(item => item && typeof item === 'object');
+                            // if a ts in seconds is in then convert on the fly
                             for (const item of _data) {
-                                // if a ts in seconds is in then convert on the fly
                                 if (item.ts && item.ts < tsCheck) {
                                     item.ts *= 1000;
                                 }
+                            }
+                            _data.sort(newestFirst ? sortByTsDesc : sortByTs);
 
+                            for (const item of _data) {
                                 if (typeof item.val === 'number' && isFinite(item.val) && options.round) {
                                     item.val = Math.round(item.val * options.round) / options.round;
                                 }
@@ -1237,22 +1255,29 @@ class HistoryAdapter extends Adapter {
                                 if (addId) {
                                     item.id = id;
                                 }
+
+                                const beforeStart = !!options.start && item.ts < options.start;
+                                const afterEnd = item.ts > options.end!;
+                                // entries that are outside the range on the side where the reading begins
+                                if (newestFirst ? afterEnd : beforeStart) {
+                                    outside = item;
+                                    continue;
+                                }
+                                if (outside) {
+                                    data.push(outside);
+                                    outside = null;
+                                }
                                 data.push(item);
-                                if (
-                                    (options.returnNewestEntries ||
-                                        options.aggregate === 'onchange' ||
-                                        // @ts-expect-error assume it could be empty
-                                        options.aggregate === '' ||
-                                        options.aggregate === 'none') &&
-                                    data.length >= options.count!
-                                ) {
+
+                                // the first entry outside the range on the side where the reading ends is the last one
+                                if (newestFirst ? beforeStart : afterEnd) {
+                                    finished = true;
                                     break;
                                 }
-                                if (last) {
+                                found++;
+                                if (limited && found >= options.count!) {
+                                    finished = true;
                                     break;
-                                }
-                                if (options.start && item.ts < options.start) {
-                                    last = true;
                                 }
                             }
                         } catch (e) {
@@ -1263,10 +1288,11 @@ class HistoryAdapter extends Adapter {
                     console.log(`Cannot read file ${file}: ${e.message}`);
                 }
             }
+        }
 
-            if (data.length >= options.count!) {
-                break;
-            }
+        // no entry inside the range followed in the files, but the entry is still needed for the border values
+        if (outside) {
+            data.push(outside);
         }
     }
 
@@ -1569,7 +1595,10 @@ class HistoryAdapter extends Adapter {
                             if (cutPoint > 0) {
                                 options.result.splice(0, cutPoint);
                             }
-                            options.result.length = options.count;
+                            // only cut: setting a bigger length would add empty entries, and beautify crashes on them
+                            if (options.result.length > options.count) {
+                                options.result.length = options.count;
+                            }
                             if (logDebug) {
                                 this.log.debug(`${options.logId} pre-cut data to ${options.count} oldest values`);
                             }

@@ -1449,6 +1449,63 @@ export function register(
         );
     });
 
+    it(`Test ${adapterShortName}: getHistory returns the oldest or newest entries from files`, async function () {
+        this.timeout(25000);
+
+        const id = `my.own.order.value-${Date.now()}`;
+        const hour = 3600000;
+        const base = Date.now() - 60 * 24 * hour;
+        // 1000 hourly values over ~42 days: the first 961 are moved to the day files, the rest stays in RAM
+        const state = [];
+        for (let i = 0; i < 1000; i++) {
+            state.push({ val: i, ack: true, ts: base + i * hour });
+        }
+        const getHistory = (options: Record<string, any>): Promise<any> =>
+            new Promise(resolve => sendTo(instanceName, 'getHistory', { id, options }, resolve));
+
+        const stored: any = await new Promise(resolve => sendTo(instanceName, 'storeState', { id, state }, resolve));
+        assert.strictEqual(stored.success, true);
+
+        // the oldest entry, even if only one is requested
+        let result = await getHistory({ start: base - 1000, end: Date.now(), aggregate: 'none', limit: 1 });
+        assert.deepStrictEqual(
+            result.result.map((item: any) => item.val),
+            [0],
+        );
+
+        result = await getHistory({ start: base - 1000, end: Date.now(), aggregate: 'none', count: 3 });
+        assert.deepStrictEqual(
+            result.result.map((item: any) => item.val),
+            [0, 1, 2],
+        );
+
+        // the newest entry from RAM
+        result = await getHistory({
+            start: base - 1000,
+            end: Date.now(),
+            aggregate: 'none',
+            count: 1,
+            returnNewestEntries: true,
+        });
+        assert.deepStrictEqual(
+            result.result.map((item: any) => item.val),
+            [999],
+        );
+
+        // the newest entries before "end" from the files
+        result = await getHistory({
+            start: base - 1000,
+            end: base + 500 * hour + 1,
+            aggregate: 'none',
+            count: 2,
+            returnNewestEntries: true,
+        });
+        assert.deepStrictEqual(
+            result.result.map((item: any) => item.val),
+            [499, 500],
+        );
+    });
+
     it(`Test ${adapterShortName}: storeState error for unknown Id with rules parameter`, function (done) {
         this.timeout(25000);
 
