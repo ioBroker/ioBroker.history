@@ -13,6 +13,8 @@ import {
     type StorageType,
 } from './lib/statistics';
 const dataDir = getAbsoluteDefaultDataDir();
+/** How often the info about queued history requests may be logged (ms) */
+const QUEUE_INFO_INTERVAL = 60000;
 
 interface CustomStateConfig {
     enabled: boolean;
@@ -131,6 +133,11 @@ class HistoryAdapter extends Adapter {
     private bufferChecker: ReturnType<typeof setInterval> | null = null;
     private tasksStart: { id: string; now: number }[] = [];
     private finished = false;
+    /** getHistory processes that are currently running */
+    private runningQueries = new Set<cp.ChildProcess>();
+    /** getHistory requests that wait for a free slot */
+    private queryQueue: { msg: ioBroker.Message; options: InternalHistoryOptions; startTime: number }[] = [];
+    private lastQueueInfo = 0;
 
     public constructor(options: Partial<AdapterOptions> = {}) {
         super({
@@ -433,6 +440,26 @@ class HistoryAdapter extends Adapter {
             clearInterval(this.bufferChecker);
             this.bufferChecker = null;
         }
+
+        // answer the waiting requests and stop the running getHistory processes
+        const queued = this.queryQueue;
+        this.queryQueue = [];
+        for (const task of queued) {
+            this.sendTo(
+                task.msg.from,
+                task.msg.command,
+                { result: [], step: null, error: 'Adapter is stopping' },
+                task.msg.callback,
+            );
+        }
+        for (const child of this.runningQueries) {
+            try {
+                child.kill('SIGINT');
+            } catch {
+                // ignore
+            }
+        }
+
         for (const id in this.history) {
             if (!Object.prototype.hasOwnProperty.call(this.history, id)) {
                 continue;
@@ -1614,27 +1641,191 @@ class HistoryAdapter extends Adapter {
                 }
             });
         } else {
-            // to use parallel requests, activate this.
-            let responseSent = false;
-            this.log.debug(`${options.logId} use parallel requests for getHistory`);
+            this.queueForkedGetHistory(msg, options, startTime);
+        }
+    }
+
+    /** Maximal number of getHistory processes running at the same time. 0 = unlimited */
+    getMaxParallelQueries(): number {
+        const max = parseInt(this.config.maxParallelQueries as string, 10);
+        return isNaN(max) || max < 0 ? 3 : max;
+    }
+
+    /** Starts the getHistory process at once, or puts it into the queue if too many processes are already running */
+    queueForkedGetHistory(msg: ioBroker.Message, options: InternalHistoryOptions, startTime: number): void {
+        const maxParallel = this.getMaxParallelQueries();
+        if (!maxParallel || this.runningQueries.size < maxParallel) {
+            this.runForkedGetHistory(msg, options, startTime);
+            return;
+        }
+
+        this.queryQueue.push({ msg, options, startTime });
+        this.log.debug(
+            `${options.logId} ${this.runningQueries.size} getHistory requests are running, request queued (queue length: ${this.queryQueue.length})`,
+        );
+
+        const now = Date.now();
+        if (now - this.lastQueueInfo > QUEUE_INFO_INTERVAL) {
+            this.lastQueueInfo = now;
+            this.log.info(
+                `Maximum of ${maxParallel} parallel history queries reached. Further requests are queued and may take longer to complete (queue length: ${this.queryQueue.length})`,
+            );
+        }
+    }
+
+    /** Starts as many queued getHistory requests as allowed */
+    processQueryQueue(): void {
+        const maxParallel = this.getMaxParallelQueries();
+        while (this.queryQueue.length && (!maxParallel || this.runningQueries.size < maxParallel)) {
+            const task = this.queryQueue.shift()!;
+            this.log.debug(
+                `${task.options.logId} start queued getHistory request after ${Date.now() - task.startTime}ms`,
+            );
+            this.runForkedGetHistory(task.msg, task.options, task.startTime);
+        }
+    }
+
+    runForkedGetHistory(msg: ioBroker.Message, options: InternalHistoryOptions, startTime: number): void {
+        let responseSent = false;
+        this.log.debug(`${options.logId} use parallel requests for getHistory`);
+
+        let child: cp.ChildProcess;
+        try {
+            child = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], {
+                silent: false,
+            });
+        } catch (err) {
+            this.log.info(`${options.logId} Can not use parallel requests: ${err.message}`);
+            this.sendTo(msg.from, msg.command, { result: [], step: null, error: err.message }, msg.callback);
+            this.processQueryQueue();
+            return;
+        }
+
+        let gh: cp.ChildProcess | null = child;
+        this.runningQueries.add(child);
+
+        let ghTimeout: NodeJS.Timeout | null = setTimeout(() => {
+            ghTimeout = null;
             try {
-                let gh: cp.ChildProcess | null = cp.fork(`${__dirname}/lib/getHistory.js`, [JSON.stringify(options)], {
-                    silent: false,
-                });
+                gh?.kill('SIGINT');
+            } catch (err) {
+                this.log.error(err.message);
+            }
+            gh = null;
+        }, 120000);
 
-                let ghTimeout: NodeJS.Timeout | null = setTimeout(() => {
+        // free the slot only when the process is really gone, so that the limit of parallel processes is kept
+        let released = false;
+        const release = (): void => {
+            if (released) {
+                return;
+            }
+            released = true;
+            if (ghTimeout) {
+                clearTimeout(ghTimeout);
+                ghTimeout = null;
+            }
+            this.runningQueries.delete(child);
+            this.processQueryQueue();
+        };
+
+        child.on('exit', (code, signal) => {
+            gh = null;
+            if (!responseSent) {
+                responseSent = true;
+                this.log.info(
+                    `${options.logId} getHistory process terminated without response (code: ${code}, signal: ${signal})`,
+                );
+                this.sendTo(
+                    msg.from,
+                    msg.command,
+                    {
+                        result: [],
+                        step: null,
+                        error: 'getHistory process terminated without response',
+                    },
+                    msg.callback,
+                );
+            }
+            release();
+        });
+
+        child.on('error', err => {
+            gh = null;
+            if (!responseSent) {
+                this.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
+                this.sendTo(
+                    msg.from,
+                    msg.command,
+                    {
+                        result: [],
+                        step: null,
+                        error: null,
+                    },
+                    msg.callback,
+                );
+            }
+            responseSent = true;
+            // if the process could not be started, no 'exit' event will come
+            if (child.pid === undefined) {
+                release();
+            }
+        });
+
+        child.on('message', (rawData: unknown): void => {
+            const getCacheCommand: [command: 'getCache', options: InternalHistoryOptions] = rawData as [
+                command: 'getCache',
+                options: InternalHistoryOptions,
+            ];
+            const resultCommand: [command: 'response', result: IobDataEntry[], overallLength: number, step: number] =
+                rawData as [command: 'response', result: IobDataEntry[], overallLength: number, step: number];
+            const debugCommand: [command: 'debug', ...string[]] = rawData as [command: 'debug', ...string[]];
+            if (getCacheCommand[0] === 'getCache') {
+                const settings = getCacheCommand[1];
+                this.getCachedData(settings, cacheData => {
                     try {
-                        gh?.kill('SIGINT');
+                        gh?.send(['cacheData', cacheData]);
                     } catch (err) {
-                        this.log.error(err.message);
+                        this.log.info(`${options.logId} Can not send data to forked process: ${err.message}`);
                     }
-                    gh = null;
-                }, 120000);
+                });
+            } else if (resultCommand[0] === 'response') {
+                if (ghTimeout) {
+                    clearTimeout(ghTimeout);
+                    ghTimeout = null;
+                }
 
-                gh.on('error', err => {
-                    gh = null;
+                try {
+                    gh?.send(['exit']);
+                } catch (err) {
+                    this.log.info(`${options.logId} Can not exit forked process: ${err.message}`);
+                }
+                gh = null;
+
+                options.result = this.applyOptions(resultCommand[1], options);
+                const overallLength = resultCommand[2];
+                const step = resultCommand[3];
+                if (options.result) {
+                    !responseSent &&
+                        this.log.debug(
+                            `${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`,
+                        );
+                    !responseSent &&
+                        this.sendTo(
+                            msg.from,
+                            msg.command,
+                            {
+                                result: options.result,
+                                step: step,
+                                error: null,
+                            },
+                            msg.callback,
+                        );
+                    responseSent = true;
+                    options.result = undefined;
+                } else {
                     if (!responseSent) {
-                        this.log.info(`${options.logId} Error communicating to forked process: ${err.message}`);
+                        this.log.info(`${options.logId} No Data`);
                         this.sendTo(
                             msg.from,
                             msg.command,
@@ -1645,93 +1836,17 @@ class HistoryAdapter extends Adapter {
                             },
                             msg.callback,
                         );
+                        responseSent = true;
                     }
-                    responseSent = true;
-                });
-
-                gh.on('message', (rawData: unknown): void => {
-                    const getCacheCommand: [command: 'getCache', options: InternalHistoryOptions] = rawData as [
-                        command: 'getCache',
-                        options: InternalHistoryOptions,
-                    ];
-                    const resultCommand: [
-                        command: 'response',
-                        result: IobDataEntry[],
-                        overallLength: number,
-                        step: number,
-                    ] = rawData as [command: 'response', result: IobDataEntry[], overallLength: number, step: number];
-                    const debugCommand: [command: 'debug', ...string[]] = rawData as [command: 'debug', ...string[]];
-                    if (getCacheCommand[0] === 'getCache') {
-                        const settings = getCacheCommand[1];
-                        this.getCachedData(settings, cacheData => {
-                            try {
-                                gh?.send(['cacheData', cacheData]);
-                            } catch (err) {
-                                this.log.info(`${options.logId} Can not send data to forked process: ${err.message}`);
-                            }
-                        });
-                    } else if (resultCommand[0] === 'response') {
-                        if (ghTimeout) {
-                            clearTimeout(ghTimeout);
-                            ghTimeout = null;
-                        }
-
-                        try {
-                            gh?.send(['exit']);
-                        } catch (err) {
-                            this.log.info(`${options.logId} Can not exit forked process: ${err.message}`);
-                        }
-                        gh = null;
-
-                        options.result = this.applyOptions(resultCommand[1], options);
-                        const overallLength = resultCommand[2];
-                        const step = resultCommand[3];
-                        if (options.result) {
-                            !responseSent &&
-                                this.log.debug(
-                                    `${options.logId} Send: ${options.result.length} of: ${overallLength} in: ${Date.now() - startTime}ms`,
-                                );
-                            !responseSent &&
-                                this.sendTo(
-                                    msg.from,
-                                    msg.command,
-                                    {
-                                        result: options.result,
-                                        step: step,
-                                        error: null,
-                                    },
-                                    msg.callback,
-                                );
-                            responseSent = true;
-                            options.result = undefined;
-                        } else {
-                            if (!responseSent) {
-                                this.log.info(`${options.logId} No Data`);
-                                this.sendTo(
-                                    msg.from,
-                                    msg.command,
-                                    {
-                                        result: [],
-                                        step: null,
-                                        error: null,
-                                    },
-                                    msg.callback,
-                                );
-                                responseSent = true;
-                            }
-                        }
-                    } else if (debugCommand[0] === 'debug') {
-                        let line = debugCommand.slice(1).join(', ');
-                        if (line.includes(options.logId)) {
-                            line = line.replace(`${options.logId} `, '');
-                        }
-                        this.log.debug(`${options.logId} GetHistory fork: ${line}`);
-                    }
-                });
-            } catch (err) {
-                this.log.info(`${options.logId} Can not use parallel requests: ${err.message}`);
+                }
+            } else if (debugCommand[0] === 'debug') {
+                let line = debugCommand.slice(1).join(', ');
+                if (line.includes(options.logId)) {
+                    line = line.replace(`${options.logId} `, '');
+                }
+                this.log.debug(`${options.logId} GetHistory fork: ${line}`);
             }
-        }
+        });
     }
 
     getDirectories(path: string): string[] {

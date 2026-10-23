@@ -60,5 +60,7 @@
     "storeAck": "Speichere ACK vom Ereignis",
     "storeDir": "Speicherverzeichnis",
     "storeFrom": "Speichere Quelle vom Ereignis",
-    "Statistics": "Statistik"
+    "Statistics": "Statistik",
+    "Maximum parallel queries": "Maximale parallele Abfragen",
+    "maxParallelQueries": "Weitere Abfragen warten in einer Warteschlange. 0 = unbegrenzt"
 }
