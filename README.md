@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 5.1.2 (2026-10-23)
 * (@GermanBluefox) The timed relog (`changesRelogInterval`) starts right after the adapter start also when "Write NULL values on start/stop boundaries" (`writeNulls`) is off, not only with the first update of the state
 
 ### 5.1.1 (2026-10-13)
@@ -44,10 +44,6 @@ This adapter saves state history in a two-staged process.
 * (@GermanBluefox) Adapter requires node.js >= 22 now.
 * (@GermanBluefox) Added the data browser to the configuration, so the stored values can be viewed, edited and deleted.
 * (@GermanBluefox) The aggregation is used now from `@iobroker/aggregate` and is shared with the SQL and InfluxDB adapters.
-
-### 4.0.0 (2026-03-10)
-* (iobroker-bot) Adapter requires node.js >= 20 now.
-* (@GermanBluefox) Migrated to TypeScript
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
