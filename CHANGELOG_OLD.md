@@ -1,4 +1,8 @@
 # Older changes
+## 4.0.0 (2026-03-10)
+* (iobroker-bot) Adapter requires node.js >= 20 now.
+* (@GermanBluefox) Migrated to TypeScript
+
 ## 3.0.1 (2023-10-24)
 * (tuxyme) activated the round option when averaging
 

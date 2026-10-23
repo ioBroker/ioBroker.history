@@ -27,6 +27,9 @@ This adapter saves state history in a two-staged process.
 * (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#490, #470, #396)
 * (@GermanBluefox) `getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)
 
+### 5.1.2 (2026-10-23)
+* (@GermanBluefox) The timed relog (`changesRelogInterval`) starts right after the adapter start also when "Write NULL values on start/stop boundaries" (`writeNulls`) is off, not only with the first update of the state
+
 ### 5.1.1 (2026-10-13)
 * (@GermanBluefox) Values stored with `storeState` for a datapoint without history settings no longer get an additional `null` value when the object of the datapoint changes
 
@@ -45,10 +48,6 @@ This adapter saves state history in a two-staged process.
 * (@GermanBluefox) Adapter requires node.js >= 22 now.
 * (@GermanBluefox) Added the data browser to the configuration, so the stored values can be viewed, edited and deleted.
 * (@GermanBluefox) The aggregation is used now from `@iobroker/aggregate` and is shared with the SQL and InfluxDB adapters.
-
-### 4.0.0 (2026-03-10)
-* (iobroker-bot) Adapter requires node.js >= 20 now.
-* (@GermanBluefox) Migrated to TypeScript
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
