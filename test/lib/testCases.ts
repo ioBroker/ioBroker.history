@@ -107,6 +107,26 @@ export async function preInit(_objects: any, _states: any, adapterShortName: str
         ignoreAboveNumber: 100,
     };
     await objects.setObjectAsync(`${instanceName}.testValueBlocked`, obj);
+    obj = {
+        common: {
+            type: 'number',
+            role: 'state',
+            custom: {},
+        },
+        type: 'state',
+    };
+    obj.common.custom[instanceName] = {
+        enabled: true,
+        changesOnly: true,
+        changesRelogInterval: 2,
+        debounceTime: 0,
+        blockTime: 0,
+        retention: 31536000,
+        maxLength: 3,
+    };
+    await objects.setObjectAsync(`${instanceName}.testValueRelogStart`, obj);
+    // set before the adapter starts and never updated: only the timed relog writes this value
+    await states.setStateAsync(`${instanceName}.testValueRelogStart`, { val: 7, ack: true });
 }
 
 export function register(
@@ -166,10 +186,38 @@ export function register(
 
         sendTo(instanceName, 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            assert.strictEqual(Object.keys(result).length, 5 + additionalActiveObjects);
+            assert.strictEqual(Object.keys(result).length, 6 + additionalActiveObjects);
             assert.strictEqual(result[`${instanceName}.testValue`].enabled, true);
             done();
         });
+    });
+
+    it(`Test ${adapterShortName}: Timed relog starts without an update of the state`, function (done) {
+        this.timeout(15000);
+
+        // the relog interval is 2 s, the first relog comes 1 to 2 s after the start
+        setTimeout(() => {
+            sendTo(
+                instanceName,
+                'getHistory',
+                {
+                    id: `${instanceName}.testValueRelogStart`,
+                    options: {
+                        start: preInitTime,
+                        end: Date.now(),
+                        count: 500,
+                        aggregate: 'none',
+                        removeBorderValues: true,
+                    },
+                },
+                function (result) {
+                    console.log(JSON.stringify(result.result, null, 2));
+                    const relogged = result.result.filter((state: any) => state.val === 7);
+                    assert.ok(relogged.length >= 2, `Expected at least 2 relogged values, got ${relogged.length}`);
+                    done();
+                },
+            );
+        }, 5000);
     });
     it(`Test ${adapterShortName}: Write values into DB`, function (done) {
         this.timeout(25000);
@@ -1333,7 +1381,7 @@ export function register(
 
         sendTo(instanceName, 'getEnabledDPs', {}, function (result) {
             console.log(JSON.stringify(result));
-            assert.strictEqual(Object.keys(result).length, 4 + additionalActiveObjects);
+            assert.strictEqual(Object.keys(result).length, 5 + additionalActiveObjects);
             done();
         });
     });

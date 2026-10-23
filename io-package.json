@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "5.1.1",
+    "version": "5.1.2",
     "news": {
+      "5.1.2": {
+        "en": "The timed relog (`changesRelogInterval`) starts right after the adapter start also when \"Write NULL values on start/stop boundaries\" (`writeNulls`) is off, not only with the first update of the state",
+        "de": "Das zeitgesteuerte Relog (`ChangesRelogInterval`) beginnt direkt nach dem Adapterstart, auch wenn „Write NULL values on start/stop boundaries“ (`WriteNulls`) aus ist, nicht nur beim ersten Status-Update",
+        "ru": "Замедленный релог (`ChangesRelogInterval`) начинается сразу после запуска адаптера, а также когда функция «Запись значений NULL на границах начала/остановки» (`WriteNulls`) отключена, а не только при первом обновлении состояния",
+        "pt": "O relog cronometrado (`changesRelogInterval`) começa logo após o adaptador iniciar e quando “WriteNulls” está desativado, não apenas com a primeira atualização do estado",
+        "nl": "De herregistratie met timer (`ChangesRelogInterval`) start direct nadat de adapter is gestart, ook wanneer „Write NULL values on start/stop boundaries” (`WriteNulls`) is uitgeschakeld, niet alleen bij de eerste update van de status",
+        "fr": "Le relog chronométré (`ChangesRelogInterval`) commence juste après le démarrage de l'adaptateur, même lorsque « Write NULL values on start/stop boundaries » (`WriteNulls`) est désactivé, et pas seulement à la première mise à jour de l'état",
+        "it": "Il relog temporizzato (`changesRelogInterval`) inizia subito dopo l'avvio dell'adattatore anche quando «Write NULL values on start/stop» è disattivato, non solo al primo aggiornamento dello stato",
+        "es": "El registro temporizado (`ChangesRelogInterval`) comienza justo después del inicio del adaptador y cuando «Escribir valores NULL en los límites de inicio/parada» (`WriteNulls`) está desactivado, no solo con la primera actualización del estado",
+        "pl": "Relog czasowy (`ChangesRelogInterval`) rozpoczyna się zaraz po uruchomieniu adaptera również wtedy, gdy „Zapisz wartości NULL na granicach start/stop” (`WriteNulls`) jest wyłączone, nie tylko przy pierwszej aktualizacji stanu",
+        "uk": "Час перелогу (`ChangesRelogInterval`) починається відразу після запуску адаптера, також коли «Записати значення NULL на межі старту/зупинки» (`writeNulls`) вимкнено, не тільки при першому оновленні стану",
+        "zh-cn": "定时重新日志（`ChangesRelogInterval`）在适配器启动后立即启动，也是在关闭 “在开始/停止边界上写入空值”（`writeNulls`）时，不仅仅是在状态的第一次更新时"
+      },
       "5.1.1": {
         "en": "Values stored with `storeState` for a datapoint without history settings no longer get an additional `null` value when the object of the datapoint changes",
         "de": "Mit `StoreState` gespeicherte Werte für einen Datenpunkt ohne Historieneinstellungen erhalten keinen Nullwert mehr, wenn sich das Objekt ändert",
@@ -105,19 +118,6 @@
         "pl": "ostateczna opcja aktywowana została w trakcie awarii",
         "uk": "активований круглий варіант при перетворенні",
         "zh-cn": "变 时采用圆桌会议选择"
-      },
-      "3.0.0": {
-        "en": "fix history2db.js with controller v5\nMinimal node.sj version is 16\nAdded support for `count` aggregate type on getHistory",
-        "de": "fix history2db.js mit controller v5\nMinimal node.sj version is 16\nUnterstützung für Grafit-Aggregat-Typ auf getHistory",
-        "ru": "исправить history2db.js с контроллером v5\nМинимальная версия node.sj 16\nДобавлена поддержка подсчета агрегатного типа на getHistory",
-        "pt": "corrigir history2db.js com controlador v5\nVersão mínima do node.sj é 16\nAdicionado suporte para contar o tipo agregado em getHistory",
-        "nl": "vertaling:\nMinimale node\nVermeldde steun voor het tel aggregate type",
-        "fr": "corriger history2db.js avec controller v5\nMinimal node.sj version est 16\nAjout du support pour compter le type agrégé sur getHistory",
-        "it": "correzione cronologia2db.js con controller v5\nVersione minimal node.sj è 16\nAggiunto supporto per conteggio tipo aggregato su getHistory",
-        "es": "fijar historia2db.js con controlador v5\nNodo mínimo.sj versión es 16\nSoporte añadido para el tipo de cuenta agregado en getHistory",
-        "pl": "poprawiona historia2db z kontrolerem v5\nWersja minimalna jest 16\nWsparcie dla liczby zbitych typów",
-        "uk": "виправити історію2db.js з контролером v5\nMinimal node.sj версія 16\nДодано підтримку підрахунку агрегатного типу на getHistory",
-        "zh-cn": "fix 历史2db.j with controller v5\n米切尔·诺贝尔(签名)\n增加对准礼品总值的支持"
       }
     },
     "mode": "daemon",

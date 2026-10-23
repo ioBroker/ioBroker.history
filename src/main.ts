@@ -700,6 +700,17 @@ class HistoryAdapter extends Adapter {
                             this.history[id] = { config: customConfig } as HistoryStateStore;
                             this.history[id].realId = realId;
                             this.history[id].list ||= [];
+
+                            // Without this, the timed relog starts only with the first update of the state, or with
+                            // writeNulls, and a rarely updated state gets no values at all until then
+                            if (customConfig.changesOnly && (customConfig.changesRelogInterval as number) > 0) {
+                                this.history[id].relogTimeout = setTimeout(
+                                    _id => this.reLogHelper(_id),
+                                    (customConfig.changesRelogInterval as number) * 500 * Math.random() +
+                                        (customConfig.changesRelogInterval as number) * 500,
+                                    id,
+                                );
+                            }
                         }
                     }
                 }
