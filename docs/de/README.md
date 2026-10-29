@@ -258,7 +258,7 @@ sendTo('history.0', 'getHistory', {
 
 Verfügbare Optionen:
 
-- **start** - (optional) Zeit in ms - *Date.now()*'
+- **start** - (optional) Zeit in ms - *Date.now()*'. `0` wird wie "nicht angegeben" behandelt: dann werden die neuesten Einträge geliefert. Für die ältesten gespeicherten Einträge `start: 1` verwenden
 - **end** - (optional) Zeit in ms - *Date.now()*', Standarwert
  (jetzt + 5.000 s)
 - **step** - (optional) Nutzung bei Aggregation (m4, max, min, average, total)
@@ -275,7 +275,7 @@ Verfügbare Optionen:
 - **ignoreNull** - wenn Nullwerte enthalten sein sollen (false), ersetzt durch den
   letzten Nicht-Nullwert (true) oder ersetzt durch 0 (0)
 - **removeBorderValues** - Im Standard werden Grenzwerte zurückgegeben, um Diagramme zu optimieren. Diese Option kann genutzt werden, um das Verhalten zu deaktivieren
-- **returnNewestEntries** - Die zurückgegebenen Daten werden immer aufsteigend nach Datum zurückgegeben. Falls aggregrate "none" zusammen mit "count" oder "limit" genutzt wird, werden normalerweise nur die ältesten Einträge zurückgegeben (falls kein "start" übergeben wurde). Mit dieser Option werden stattdessen die neuesten Einträge zurückgegeben.
+- **returnNewestEntries** - Die zurückgegebenen Daten werden immer aufsteigend nach Datum zurückgegeben. Falls aggregrate "none" zusammen mit "count" oder "limit" genutzt wird, werden normalerweise die ältesten Einträge zurückgegeben (außer wenn kein "start" übergeben wurde). Mit dieser Option werden stattdessen die neuesten Einträge zurückgegeben.
 - **aggregate** - Aggregations Methoden:
     - *minmax* - verwendet speziellen Algorithmus. Verbindet den gesamten
      Zeitbereich in kleinen Intervallen und finde für jedes Intervall Max-, Min-,

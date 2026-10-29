@@ -24,6 +24,8 @@ This adapter saves state history in a two-staged process.
 
 ## Changelog
 ### **WORK IN PROGRESS**
+* (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#490, #470, #396)
+* (@GermanBluefox) `getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)
 * (@GermanBluefox) The number of parallel history queries can be limited now (default: 3). Further queries are queued (#536)
 
 ### 5.1.2 (2026-10-23)
