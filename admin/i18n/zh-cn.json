@@ -60,5 +60,7 @@
     "storeAck": "商店对价值的认可",
     "storeDir": "储存目录",
     "storeFrom": "存放价值来源",
-    "Statistics": "统计"
+    "Statistics": "统计",
+    "Maximum parallel queries": "最大并行查询数",
+    "maxParallelQueries": "其他查询将在队列中等待。0 = 无限制"
 }

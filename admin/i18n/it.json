@@ -60,5 +60,7 @@
     "storeAck": "Memorizza valore di negozio",
     "storeDir": "Directory di archiviazione",
     "storeFrom": "Memorizza l'origine del valore",
-    "Statistics": "Statistiche"
+    "Statistics": "Statistiche",
+    "Maximum parallel queries": "Numero massimo di query parallele",
+    "maxParallelQueries": "Le altre query attendono in coda. 0 = illimitato"
 }

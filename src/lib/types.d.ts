@@ -32,6 +32,8 @@ export interface HistoryAdapterConfig {
     round: number | string | null;
     customRetentionDuration: number | string;
     debounce: number | string;
+    /** Maximal number of getHistory processes running at the same time. 0 = unlimited */
+    maxParallelQueries: number | string;
 }
 
 /** The aggregation state of `@iobroker/aggregate` plus the fields that only the history adapter needs */

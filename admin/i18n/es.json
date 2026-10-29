@@ -60,5 +60,7 @@
     "storeAck": "Store acknowledge of value",
     "storeDir": "Storage directory",
     "storeFrom": "Store origin of value",
-    "Statistics": "Estadísticas"
+    "Statistics": "Estadísticas",
+    "Maximum parallel queries": "Máximo de consultas paralelas",
+    "maxParallelQueries": "Las demás consultas esperan en una cola. 0 = ilimitado"
 }
