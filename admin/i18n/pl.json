@@ -60,5 +60,7 @@
     "storeAck": "Zapisz potwierdzenie wartości",
     "storeDir": "Katalog pamięci",
     "storeFrom": "Przechowuj pochodzenie wartości:",
-    "Statistics": "Statystyki"
+    "Statistics": "Statystyki",
+    "Maximum parallel queries": "Maksymalna liczba równoległych zapytań",
+    "maxParallelQueries": "Kolejne zapytania czekają w kolejce. 0 = bez ograniczeń"
 }

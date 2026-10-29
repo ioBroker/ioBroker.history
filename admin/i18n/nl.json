@@ -60,5 +60,7 @@
     "storeAck": "Bewaar erkenning van waarde",
     "storeDir": "Opslagmap",
     "storeFrom": "Bewaar oorsprong van waarde",
-    "Statistics": "Statistieken"
+    "Statistics": "Statistieken",
+    "Maximum parallel queries": "Maximaal aantal parallelle query's",
+    "maxParallelQueries": "Verdere query's wachten in een wachtrij. 0 = onbeperkt"
 }

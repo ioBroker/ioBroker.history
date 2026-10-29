@@ -57,6 +57,9 @@ Legt fest, ob das "Ack-Flag" mit gespeichert werden soll.
 **Schreibe NULL-Werte an Start-/Stop-Grenzen**
 ??
 
+**Maximale parallele Abfragen**
+Aggregierte Verlaufsabfragen (z. B. für Diagramme) werden in eigenen Prozessen berechnet. Diese Einstellung begrenzt, wie viele dieser Prozesse gleichzeitig laufen dürfen (Standard: 3). Weitere Abfragen warten in einer Warteschlange, bis ein Prozess frei wird. Bei hoher Last dauern sie dadurch länger, der Speicherverbrauch bleibt aber berechenbar. `0` hebt die Begrenzung auf.
+
 ### Standardeinstellungen für Zustände
 
 Hiermit werden Voreinstellungen für die zu überwachenden Datenpunkte festgelegt.

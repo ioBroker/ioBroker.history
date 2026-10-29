@@ -60,5 +60,7 @@
     "storeAck": "Enregistrer la confirmation (ACK) de la valeur",
     "storeDir": "Répertoire de stockage",
     "storeFrom": "Enregistrer l'origine de la valeur",
-    "Statistics": "Statistiques"
+    "Statistics": "Statistiques",
+    "Maximum parallel queries": "Nombre maximal de requêtes parallèles",
+    "maxParallelQueries": "Les autres requêtes attendent dans une file d'attente. 0 = illimité"
 }

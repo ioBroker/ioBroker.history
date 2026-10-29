@@ -60,5 +60,7 @@
     "storeAck": "Recorde de valor",
     "storeDir": "Diretório de armazenamento",
     "storeFrom": "Armazenar origem do valor",
-    "Statistics": "Estatísticas"
+    "Statistics": "Estatísticas",
+    "Maximum parallel queries": "Máximo de consultas paralelas",
+    "maxParallelQueries": "Outras consultas aguardam numa fila. 0 = ilimitado"
 }

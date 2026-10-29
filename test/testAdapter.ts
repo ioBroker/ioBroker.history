@@ -33,6 +33,8 @@ tests.integration(path.join(__dirname, '..'), {
                     native: {
                         writeNulls: true,
                         enableDebugLogs: true,
+                        // only one getHistory process at a time, so that the queue is tested
+                        maxParallelQueries: 1,
                     },
                 });
 
