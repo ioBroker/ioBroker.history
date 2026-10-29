@@ -23,6 +23,10 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#490, #470, #396)
+* (@GermanBluefox) `getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)
+
 ### 5.1.2 (2026-10-23)
 * (@GermanBluefox) The timed relog (`changesRelogInterval`) starts right after the adapter start also when "Write NULL values on start/stop boundaries" (`writeNulls`) is off, not only with the first update of the state
 

@@ -237,7 +237,7 @@ sendTo('history.0', 'getHistory', {
 
 Available options:
 
-- **start** - (optional) time in ms - *Date.now()*'
+- **start** - (optional) time in ms - *Date.now()*'. `0` is handled like "not set": then the newest entries are returned. To get the oldest stored entries use `start: 1`
 - **end** - (optional) time in ms - *Date.now()*', by default is (now + 5000 seconds)
 - **step** - (optional) used in aggregate (max, min, average, total, ...) step in ms of intervals
 - **count** - number of values if aggregate is 'onchange' or number of intervals if other aggregate method. Count will be ignored if step is set, else default is 500 if not set
