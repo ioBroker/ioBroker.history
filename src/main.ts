@@ -1,7 +1,7 @@
 import cp from 'node:child_process';
 import fs from 'node:fs';
 import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
-import { beautify } from '@iobroker/aggregate';
+import { beautify, parseIntervalBorders } from '@iobroker/aggregate';
 import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 import {
@@ -1439,6 +1439,17 @@ class HistoryAdapter extends Adapter {
                 },
                 msg.callback,
             );
+        }
+
+        // The client can send the borders of the intervals itself, e.g. the local days of a chart: a fixed step does
+        // not fit a day with 23 or 25 hours. The cache and the files must then be read for exactly the range they
+        // cover. This must happen here and not in the forked process, as that one asks for the cache before it
+        // initializes the aggregation.
+        const intervalBorders = parseIntervalBorders(msg.message.options.intervalBorders, options.limit);
+        if (intervalBorders) {
+            options.intervalBorders = intervalBorders;
+            options.start = intervalBorders[0];
+            options.end = intervalBorders[intervalBorders.length - 1];
         }
 
         if (!options.start && options.count) {

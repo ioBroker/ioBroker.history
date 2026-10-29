@@ -23,6 +23,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (@GermanBluefox) `getHistory` accepts `intervalBorders`: the client can send the borders of the intervals itself, e.g. the local days of a chart. With `count` or `step` every interval after a switch of the daylight saving time ended an hour away from the midnight, so a value written at 23:59:59 was shown on the next day (ioBroker/ioBroker.echarts#1311)
+
 ### 5.1.2 (2026-10-23)
 * (@GermanBluefox) The timed relog (`changesRelogInterval`) starts right after the adapter start also when "Write NULL values on start/stop boundaries" (`writeNulls`) is off, not only with the first update of the state
 
