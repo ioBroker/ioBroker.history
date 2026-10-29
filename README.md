@@ -23,7 +23,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 5.2.0 (2026-10-29)
 * (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#575, #490, #470, #396)
 * (@GermanBluefox) `getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)
 * (@GermanBluefox) `getHistory` accepts `intervalBorders`: the client can send the borders of the intervals itself, e.g. the local days of a chart. With `count` or `step` every interval after a switch of the daylight saving time ended an hour away from the midnight, so a value written at 23:59:59 was shown on the next day (ioBroker/ioBroker.echarts#1311)
@@ -44,13 +44,6 @@ This adapter saves state history in a two-staged process.
 ### 5.0.1 (2026-08-26)
 * (@joltcoke) Fixed average and total returning null for every interval that contains a null value: parseFloat(null) is NaN and poisoned the sum of the whole interval (thanks to @joltcoke, ioBroker/ioBroker.sql#526). As the result was NaN and not null, ignoreNull could not act on it either
 * (@joltcoke) Fixed min returning a wrong value if the interval contains a null, minmax losing the minimum if the interval starts with a null, and percentile/quantile counting a null as 0
-
-### 5.0.0 (2026-08-26)
-* (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
-* (simatec) Responsive Design added
-* (@GermanBluefox) Adapter requires node.js >= 22 now.
-* (@GermanBluefox) Added the data browser to the configuration, so the stored values can be viewed, edited and deleted.
-* (@GermanBluefox) The aggregation is used now from `@iobroker/aggregate` and is shared with the SQL and InfluxDB adapters.
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
