@@ -24,6 +24,8 @@ This adapter saves state history in a two-staged process.
 
 ## Changelog
 ### **WORK IN PROGRESS**
+* (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#490, #470, #396)
+* (@GermanBluefox) `getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)
 * (@GermanBluefox) `getHistory` accepts `intervalBorders`: the client can send the borders of the intervals itself, e.g. the local days of a chart. With `count` or `step` every interval after a switch of the daylight saving time ended an hour away from the midnight, so a value written at 23:59:59 was shown on the next day (ioBroker/ioBroker.echarts#1311)
 
 ### 5.1.2 (2026-10-23)
