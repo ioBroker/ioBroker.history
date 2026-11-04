@@ -26,8 +26,21 @@
       "pl": "Rejestrowanie historii stanu w plikach",
       "zh-cn": "在文件中记录状态历史记录"
     },
-    "version": "5.2.0",
+    "version": "5.3.0",
     "news": {
+      "5.3.0": {
+        "en": "Data browser: the values of a datapoint can be exported as CSV (e.g. for Excel) or as JSON (the format of `storeState`) for the selected time range\nData browser: with \"Oldest first\" and more than 100000 values in the range, the table shows now the oldest values. Before, it showed the oldest of the newest 100000 values\nAdapter requires node.js >= 22.19.0 now",
+        "de": "Datenbrowser: Die Werte eines Datenpunkts können als CSV (z. B. für Excel) oder JSON (StoreState) für den ausgewählten Zeitraum exportiert werden\nDatenbrowser: Mit „Ältester zuerst“ und über 100.000 Werten im Bereich zeigt die Tabelle nun die ältesten Werte. Vorher zeigte es die ältesten der neuesten 100.000 Werte\nAdapter benötigt jetzt node.js >= 22.19.0",
+        "ru": "Браузер данных: значения точки данных можно экспортировать в формате CSV (например, для Excel) или в формате JSON (формат `storeState`) за выбранный временной диапазон\nБраузер данных: теперь в таблице отображаются самые старые значения и более 100000 значений в диапазоне. Ранее в нем отображалось самое старое из 100 000 новейших значений\nТеперь для адаптера требуется файл node.js >= 22.19.0",
+        "pt": "Navegador de dados: os valores de um ponto de dados podem ser exportados como CSV (Excel) ou JSON (StoreState) no período selecionado\nNavegador de dados: com “Oldest first” e mais de 100.000 valores na faixa, a tabela mostra agora os mais antigos. Antes, mostrava o mais antigo dos mais novos 100.000\nO adaptador exige node.js >= 22.19.0",
+        "nl": "Gegevensbrowser: de waarden van een datapunt kunnen worden geëxporteerd als CSV (bijvoorbeeld voor Excel) of als JSON (het formaat van `StoreState`) voor de geselecteerde periode\nGegevensbrowser: met „Oudste eerst” en meer dan 100.000 waarden binnen het bereik, worden in de tabel nu de oudste waarden weergegeven. Vroeger toonde het de oudste van de nieuwste 100.000 waarden\nVoor de adapter is nu node.js >= 22.19.0 nodig",
+        "fr": "Navigateur de données : les valeurs d'un point de données peuvent être exportées au format CSV (Excel, par exemple) ou JSON (StoreState) pour la période choisie\nNavigateur de données : avec « La plus ancienne en premier » et plus de 100 000 valeurs, le tableau affiche les plus anciennes. Avant, il affichait la plus ancienne des 100 000 valeurs\nAdapter nécessite node.js >= 22.19.0",
+        "it": "Browser dati: i valori di un datapoint possono essere esportati come CSV (ad es. Excel) o JSON (`storeState`) per l'intervallo di tempo selezionato\nBrowser dati: con «Prima i più vecchi» e più di 100000 valori, la tabella ora mostra i più vecchi. Prima mostrava il più vecchio dei 100000 valori\nAdapter richiede node.js >= 22.19.0 ora",
+        "es": "Navegador de datos: los valores de un punto de datos se pueden exportar como CSV (por ejemplo, para Excel) o JSON (el formato de «StoreState») para el rango temporal seleccionado\nNavegador de datos: con «el más antiguo primero» y más de 100 000 valores en el rango, la tabla muestra ahora los más antiguos. Antes, mostraba el más antiguo de los 100 000 valores\nEl adaptador ahora necesita node.js >= 22.19.0",
+        "pl": "Przeglądarka danych: wartości punktu danych można wyeksportować jako CSV (np. dla programu Excel) lub jako JSON (format `storeState`) dla wybranego zakresu czasowego\nPrzeglądarka danych: z „Najstarszym najpierw” i ponad 100000 wartościami w zakresie, tabela pokazuje teraz najstarsze wartości. Wcześniej pokazywał najstarszą z najnowszych wartości 100000\nAdapter wymaga teraz node.js >= 22.19.0",
+        "uk": "Браузер даних: значення точки даних можна експортувати як CSV (наприклад, для Excel) або як JSON (формат `StoreState`) для вибраного часового діапазону\nБраузер даних: з «Найстарішим першим» та більш ніж 100000 значень у діапазоні, таблиця тепер показує найстаріші значення. Раніше він показував найстаріше з найновіших 100000 значень\nАдаптер вимагає node.js >= 22.19.0 зараз",
+        "zh-cn": "数据浏览器：在所选时间范围内，数据点的值可以导出为 CSV（例如 Excel）或 JSON（`storeState`格式）\n数据浏览器：使用 “最旧的优先” 且范围内的值超过 100,000 个，该表现在显示的是最旧的值。以前，它显示了最新 100,000 个值中最旧的\n适配器现在需要 node.js >= 22.19.0"
+      },
       "5.2.0": {
         "en": "Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#575, #490, #470, #396)\n`getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)\n`getHistory` accepts `intervalBorders`: the client can send the borders of the intervals itself, e.g. the local days of a chart. With `count` or `step` every interval after a switch of the daylight saving time ended an hour away from the midnight, so a value written at 23:59:59 was shown on the next day (ioBroker/ioBroker.echarts#1311)\nThe number of parallel history queries can be limited now (default: 3). Further queries are queued (#536)\nUpdated packages",
         "de": "Absturz von `Undefined ('val'/'ts') nicht lesen `in `GetHistory` behoben (#575, #490, #470, #396)\n`getHistory` mit `aggregate: 'none' und `count`/`limit` gibt nun die ältesten Einträge der Dateien zurück, wenn `returnNewestEntries` nicht gesetzt ist (#530, #331, #210)\n`GetHistory` akzeptiert `IntervalBorders`: Der Client kann die Ränder selbst senden, z. B. die lokalen Tage. Mit `Count` oder `Step` endete jedes Intervall nach der Sommerzeit eine Stunde vor Mitternacht, sodass am nächsten Tag ein Wert um 23:59:59 Uhr angezeigt wurde (ioBroker/ioBroker.eCharts #1311)\nDie Anzahl paralleler Verlaufsabfragen kann nun begrenzt werden (Standard: 3). Weitere Anfragen stehen an (#536)\nNeue Pakete",
@@ -105,19 +118,6 @@
         "pl": "Adapter wymaga teraz js-controller w wersji >= 6.0.11.\nDodano responsywny projekt\nAdapter wymaga teraz node.js >= 22.\nDo konfiguracji dodano przeglądarkę danych, dzięki której można przeglądać, edytować i usuwać zapisane wartości.\nAgregacja jest obecnie używana z `@iobroker/aggregate` i jest współdzielona z adapterami SQL i InfluxDB.",
         "uk": "Адаптер тепер вимагає js-controller >= 6.0.11.\nДодано адаптивний дизайн\nАдаптер тепер вимагає node.js >= 22.\nДо конфігурації додано браузер даних, щоб збережені значення можна було переглядати, редагувати та видаляти.\nАгрегація тепер використовується з `@iobroker/aggregate` та використовується спільно з адаптерами SQL та InfluxDB.",
         "zh-cn": "适配器现在需要 js-controller >= 6.0.11。\n响应式设计已添加\n适配器现在需要 node.js >= 22。\n在配置中添加了数据浏览器，以便可以查看、编辑和删除存储的值。\n现在聚合功能来自 `@iobroker/aggregate`，并与 SQL 和 InfluxDB 适配器共享。"
-      },
-      "4.0.0": {
-        "en": "Adapter requires node.js >= 20 now.\nMigrated to Typescript",
-        "de": "Adapter benötigt jetzt node.js >= 20.\nZur Beschreibung",
-        "ru": "Адаптер требует node.js >= 20 сейчас.\nИммиграция в Typescript",
-        "pt": "O adaptador requer gnod.js >= 20 agora.\nMigrado para escrever",
-        "nl": "Voor de adapter zijn node.js < 20 nu nodig.\nNaar typescript migreren",
-        "fr": "Adaptateur nécessite node.js >= 20 maintenant.\nMigrés en caractères",
-        "it": "Adattatore richiede node.js >= 20 ora.\nMigrato a Typescript",
-        "es": "Adaptador requiere node.js >= 20 ahora.\nMigrated to Typescript",
-        "pl": "Adapter wymaga node.js > = 20 teraz.\nMigrant to Typescript",
-        "uk": "Адаптер вимагає node.js >= 20 тепер.\nМіграція до Typescript",
-        "zh-cn": "适配器需要节点.js >= 20 现在.\n移动到 Typescript"
       }
     },
     "mode": "daemon",
