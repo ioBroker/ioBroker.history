@@ -25,6 +25,8 @@ This adapter saves state history in a two-staged process.
 ## Changelog
 
 ### **WORK IN PROGRESS**
+* (@GermanBluefox) Data browser: the values of a datapoint can be exported as CSV (e.g. for Excel) or as JSON (the format of `storeState`) for the selected time range
+* (@GermanBluefox) Data browser: with "Oldest first" and more than 100000 values in the range, the table shows now the oldest values. Before, it showed the oldest of the newest 100000 values
 - (copilot) Adapter requires node.js >= 22.19.0 now
 ### 5.2.0 (2026-10-29)
 * (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#575, #490, #470, #396)

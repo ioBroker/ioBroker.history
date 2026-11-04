@@ -198,6 +198,35 @@ enable the logging for many states at once. The following process is just an exa
 
 ![State-Settings](img/object-settings-multiple.png)
 
+## Data browser and export
+
+The **Data browser** tab of the instance configuration shows the values stored for a datapoint exactly as
+they are in the files (together with the values that are still in RAM), and lets you insert, edit and
+delete single values.
+
+The export button in its toolbar writes all values of the selected datapoint in the selected time range
+into a file, oldest first:
+
+- **CSV** with the columns `ts` (milliseconds since 1970, UTC), `time` (local time), `val`, `ack`, `q` and
+  `from`. Column and decimal separator can be chosen; the preselection (`;` and `,` for most languages,
+  `,` and `.` for English and Chinese) is what Excel usually expects with the language of the admin.
+  `ack` and `from` are only filled if "Store acknowledge of value" and "Store origin of value" are enabled.
+- **JSON** as an array of `{ts, val, ack, q, from}` (plus `user` and `c`, if a value has them) - the
+  format [`storeState`](#storestate) accepts, so the values can be written back, e.g. to another datapoint:
+
+```javascript
+const fs = require('fs');
+const values = JSON.parse(fs.readFileSync('/opt/export/hm-rpc.0.ABC123.1.TEMPERATURE.json', 'utf8'));
+sendTo('history.0', 'storeState', { id: 'javascript.0.temperatureCopy', state: values }, result =>
+    console.log(JSON.stringify(result)),
+);
+```
+
+The export reads the range in time windows of a few thousand values each, so the adapter only reads the
+day files of one window at a time and never holds millions of values in memory. With more than 100000
+values in the range the adapter stops counting them, and the progress follows the time instead. A very
+large export still takes a while and needs the memory of the browser for the whole file.
+
 ## Access values from Javascript adapter
 
 The values can be accessed from the installed JavaScript adapter. Examples:
