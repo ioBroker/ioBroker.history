@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
 import { beautify, parseIntervalBorders } from '@iobroker/aggregate';
 import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
+import { readRawEntries } from './lib/rawEntries';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 import {
     classifyDatapoint,
@@ -119,9 +120,15 @@ function toStorageType(objType: unknown): StorageType | null {
 const FILE_PREFIX = 'history.';
 const FILE_SUFFIX = '.json';
 
-/** Maximal number of entries one `getRawEntries` call may return */
-const MAX_RAW_ENTRIES = 2000;
-/** Maximal number of entries `getRawEntries` reads to count them. Above it, only the newest ones are counted */
+/**
+ * Maximal number of entries one `getRawEntries` call may return. An export of the data browser reads with
+ * this page size, and 5000 entries are still well below 1 MB as a message
+ */
+const MAX_RAW_ENTRIES = 5000;
+/**
+ * Maximal number of entries `getRawEntries` reads to count them. Above it, only the first ones in the
+ * requested order are counted: the newest ones for "newest first", the oldest ones for "oldest first"
+ */
 const MAX_RAW_SCAN_ENTRIES = 100000;
 
 class HistoryAdapter extends Adapter {
@@ -2485,86 +2492,13 @@ class HistoryAdapter extends Adapter {
     }
 
     /**
-     * Read the entries of one datapoint exactly as they are stored: no aggregation, no interpolation, no
-     * border values and no rounding.
-     *
-     * The entries that are still only in RAM are taken into account too, so a value that was just logged is
-     * visible immediately. The timestamp is the key of an entry, so it also removes the duplicates between
-     * RAM and disk.
-     */
-    readRawEntries(
-        id: string,
-        start: number | undefined,
-        end: number | undefined,
-    ): { entries: IobDataEntry[]; truncated: boolean } {
-        const dayStart = start === undefined ? 0 : parseInt(ts2day(start), 10);
-        const dayEnd = end === undefined ? 99999999 : parseInt(ts2day(end), 10);
-        const inRange = (ts: number): boolean =>
-            (start === undefined || ts >= start) && (end === undefined || ts <= end);
-
-        const byTs = new Map<number, IobDataEntry>();
-        let truncated = false;
-
-        // the newest day first, so that a scan that hits the limit keeps the newest entries
-        const dayList = this.getDirectories(this.config.storeDir).sort((a, b) => b.localeCompare(a));
-
-        for (const dayStr of dayList) {
-            const day = parseInt(dayStr, 10);
-            if (isNaN(day) || day < dayStart || day > dayEnd) {
-                continue;
-            }
-
-            const file = getFilenameForID(this.config.storeDir, dayStr, id);
-            if (!fs.existsSync(file)) {
-                continue;
-            }
-
-            let data: IobDataEntry[];
-            try {
-                data = JSON.parse(fs.readFileSync(file, 'utf8'));
-            } catch (err) {
-                this.log.warn(`Cannot read file "${file}": ${err}`);
-                continue;
-            }
-            if (!Array.isArray(data)) {
-                this.log.warn(`File "${file}" does not contain an array of entries`);
-                continue;
-            }
-
-            // very old versions stored the timestamp in seconds
-            const tsCheck = new Date(Math.floor(day / 10000), 0, 1).getTime();
-
-            for (const entry of data) {
-                if (!entry) {
-                    continue;
-                }
-                if (entry.ts && entry.ts < tsCheck) {
-                    entry.ts *= 1000;
-                }
-                if (inRange(entry.ts)) {
-                    byTs.set(entry.ts, entry);
-                }
-            }
-
-            if (byTs.size > MAX_RAW_SCAN_ENTRIES) {
-                truncated = true;
-                break;
-            }
-        }
-
-        // the entries that are not yet written to the disk
-        for (const entry of this.history[id]?.list || []) {
-            if (entry && inRange(entry.ts)) {
-                byTs.set(entry.ts, entry);
-            }
-        }
-
-        return { entries: Array.from(byTs.values()), truncated };
-    }
-
-    /**
      * Answer the `getRawEntries` message: one page of the stored entries of a datapoint together with the
      * total number of entries in the range, so that a table can page through them.
+     *
+     * `start` and `end` are inclusive. Counting means reading every file of the range, so it stops after
+     * `MAX_RAW_SCAN_ENTRIES` and reports `truncated`: the count only covers the first entries in the
+     * requested order then. With `noTotal: true` nothing is counted and only the files up to the
+     * requested page are read - an export of the data browser reads its windows this way.
      */
     getRawEntries(msg: ioBroker.Message): void {
         if (!msg.message?.id) {
@@ -2584,25 +2518,34 @@ class HistoryAdapter extends Adapter {
         const limit = Math.min(Math.max(parseInt(msg.message.limit, 10) || 100, 1), MAX_RAW_ENTRIES);
         const offset = Math.max(parseInt(msg.message.offset, 10) || 0, 0);
         const sort: 'asc' | 'desc' = msg.message.sort === 'asc' ? 'asc' : 'desc';
+        const noTotal = msg.message.noTotal === true;
 
         let entries: IobDataEntry[];
         let truncated: boolean;
         try {
-            ({ entries, truncated } = this.readRawEntries(id, toTs(msg.message.start), toTs(msg.message.end)));
+            ({ entries, truncated } = readRawEntries({
+                storeDir: this.config.storeDir,
+                id,
+                cache: this.history[id]?.list,
+                start: toTs(msg.message.start),
+                end: toTs(msg.message.end),
+                sort,
+                // the requested page is always complete, even far behind the counted entries
+                maxEntries: noTotal ? offset + limit : Math.max(MAX_RAW_SCAN_ENTRIES, offset + limit),
+                log: this.log,
+            }));
         } catch (err) {
             this.log.error(`Cannot read the entries of ${id}: ${err}`);
             return this.sendTo(msg.from, msg.command, { error: err.message }, msg.callback);
         }
-
-        entries.sort(sort === 'asc' ? sortByTs : sortByTsDesc);
 
         this.sendTo(
             msg.from,
             msg.command,
             {
                 id: msg.message.id,
-                total: entries.length,
-                truncated,
+                // without counting, the number of entries read says nothing about the range
+                ...(noTotal ? {} : { total: entries.length, truncated }),
                 limit,
                 offset,
                 sort,

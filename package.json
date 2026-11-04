@@ -55,7 +55,7 @@
     "build": "tsc -p tsconfig.build.json && npm run build:admin",
     "build:admin": "tsx tasks.ts",
     "npm": "npm i && cd src-admin && npm i",
-    "test:unit": "mocha --config test/mocharc.custom.json test/testStatistics.ts --exit",
+    "test:unit": "mocha --config test/mocharc.custom.json test/testStatistics.ts test/testRawEntries.ts --exit",
     "test:package": "mocha --config test/mocharc.custom.json test/package.ts --exit",
     "test:integration": "mocha --config test/mocharc.custom.json test/testAdapter.ts --exit",
     "test": "npm run test:unit && npm run test:integration && npm run test:package",

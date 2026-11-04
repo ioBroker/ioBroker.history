@@ -215,6 +215,38 @@ nur als Beispiel!
 
 ![Datenpunkt-Einstellungen](img/object-settings-multiple.png)
 
+## Datenbrowser und Export
+
+Der Reiter **Datenbrowser** in der Konfiguration der Instanz zeigt die Werte eines Datenpunkts genau so,
+wie sie in den Dateien gespeichert sind (zusammen mit den Werten, die noch im RAM liegen), und erlaubt es,
+einzelne Werte einzufügen, zu ändern und zu löschen.
+
+Der Export-Knopf in seiner Werkzeugleiste schreibt alle Werte des gewählten Datenpunkts im gewählten
+Zeitraum in eine Datei, die ältesten zuerst:
+
+- **CSV** mit den Spalten `ts` (Millisekunden seit 1970, UTC), `time` (Ortszeit), `val`, `ack`, `q` und
+  `from`. Spalten- und Dezimaltrennzeichen sind wählbar; die Vorauswahl (`;` und `,` für die meisten
+  Sprachen, `,` und `.` für Englisch und Chinesisch) ist das, was Excel in der Sprache des Admins meist
+  erwartet. `ack` und `from` sind nur gefüllt, wenn "Speichere ACK vom Ereignis" und "Speichere Quelle vom
+  Ereignis" eingeschaltet sind.
+- **JSON** als Array aus `{ts, val, ack, q, from}` (dazu `user` und `c`, wenn ein Wert sie hat) - das
+  Format, das [`storeState`](#storestate) annimmt. So lassen sich die Werte wieder einspielen, z.B. in einen
+  anderen Datenpunkt:
+
+```javascript
+const fs = require('fs');
+const values = JSON.parse(fs.readFileSync('/opt/export/hm-rpc.0.ABC123.1.TEMPERATURE.json', 'utf8'));
+sendTo('history.0', 'storeState', { id: 'javascript.0.temperatureCopy', state: values }, result =>
+    console.log(JSON.stringify(result)),
+);
+```
+
+Der Export liest den Zeitraum in Zeitfenstern von jeweils einigen tausend Werten. Der Adapter liest also
+immer nur die Tagesdateien eines Fensters und hält nie Millionen Werte im Speicher. Mit mehr als 100000
+Werten im Zeitraum hört der Adapter auf, sie zu zählen, und der Fortschritt richtet sich dann nach der
+Zeit. Ein sehr großer Export dauert trotzdem eine Weile und braucht den Speicher des Browsers für die
+ganze Datei.
+
 ## Zugriff auf History Werte mit JavaScript
 
 Mit installiertem JavaScript-Adapter kann auf die Werte des Adapters

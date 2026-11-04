@@ -38,6 +38,7 @@ import {
     Close,
     Delete,
     Edit,
+    FileDownload,
     Refresh,
     Search,
 } from '@mui/icons-material';
@@ -70,6 +71,33 @@ interface EntryDialog {
     q: string;
 }
 
+type ExportFormat = 'csv' | 'json';
+type ExportSeparator = ';' | ',' | '\t';
+type ExportDecimal = '.' | ',';
+
+interface ExportDialog {
+    format: ExportFormat;
+    separator: ExportSeparator;
+    decimal: ExportDecimal;
+    running: boolean;
+    /** number of entries read so far */
+    exported: number;
+    /** number of entries in the range, as counted by the adapter */
+    total: number;
+    /** the range held too many entries to count them all, so `total` is only a lower bound */
+    truncated: boolean;
+    /** share of the time range read so far (0 - 1): the progress if `total` is only a lower bound */
+    position: number;
+    info: string;
+    error: string;
+}
+
+/** Entries per request of an export. The adapter may cap it, so the `limit` of its answer is what counts */
+const EXPORT_PAGE_SIZE = 5000;
+
+/** Number of entries an export window should hold: below a page, so that one request usually reads it all */
+const EXPORT_WINDOW_TARGET = EXPORT_PAGE_SIZE * 0.75;
+
 interface DataBrowserState extends ConfigGenericState {
     points: DataPoint[] | null;
     /** name of the object behind a datapoint, if it has one and it differs from the ID */
@@ -90,6 +118,7 @@ interface DataBrowserState extends ConfigGenericState {
     loadingRows: boolean;
     errorText: string;
     entryDialog: EntryDialog | null;
+    exportDialog: ExportDialog | null;
     confirmText: string;
     confirmAction: (() => void) | null;
 }
@@ -221,6 +250,73 @@ function fromInputValue(value: string): number | undefined {
     return isNaN(ts) ? undefined : ts;
 }
 
+/**
+ * Column and decimal separator that a spreadsheet in the language of the admin most likely expects.
+ * Excel decides by the regional settings of the computer, so this is only the preselection.
+ */
+function defaultCsvSeparators(): { separator: ExportSeparator; decimal: ExportDecimal } {
+    const language = I18n.getLanguage();
+    return language === 'en' || language === 'zh-cn'
+        ? { separator: ',', decimal: '.' }
+        : { separator: ';', decimal: ',' };
+}
+
+/** Quote a CSV field if it contains the separator, a quote or a line break (RFC 4180) */
+function csvField(value: string, separator: ExportSeparator): string {
+    if (value.includes(separator) || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+        return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+}
+
+const CSV_COLUMNS = ['ts', 'time', 'val', 'ack', 'q', 'from'];
+
+const UTF8_BOM = '\uFEFF';
+
+function entryToCsv(entry: RawEntry, separator: ExportSeparator, decimal: ExportDecimal): string {
+    let val = '';
+    if (entry.val !== null && entry.val !== undefined) {
+        val =
+            typeof entry.val === 'number' && decimal === ','
+                ? entry.val.toString().replace('.', ',')
+                : entry.val.toString();
+    }
+    return [
+        entry.ts.toString(),
+        formatTs(entry.ts),
+        val,
+        entry.ack === undefined || entry.ack === null ? '' : (!!entry.ack).toString(),
+        entry.q === undefined || entry.q === null ? '' : entry.q.toString(),
+        entry.from || '',
+    ]
+        .map(field => csvField(field, separator))
+        .join(separator);
+}
+
+/** `<id>[_<start day>][_<end day>].<format>`, with every character a file system may not like replaced */
+function exportFileName(id: string, start: number | undefined, end: number | undefined, format: ExportFormat): string {
+    const parts = [id.replace(/[^\w.-]+/g, '_')];
+    if (start !== undefined) {
+        parts.push(toDateInput(new Date(start)));
+    }
+    if (end !== undefined) {
+        parts.push(toDateInput(new Date(end)));
+    }
+    return `${parts.join('_')}.${format}`;
+}
+
+function downloadFile(chunks: string[], fileName: string, type: string): void {
+    const url = URL.createObjectURL(new Blob(chunks, { type }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    // the browser reads the blob only after the click, so it must not be released at once
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
 export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataBrowserState> {
     constructor(props: ConfigGenericProps) {
         super(props);
@@ -244,9 +340,18 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
             loadingRows: false,
             errorText: '',
             entryDialog: null,
+            exportDialog: null,
             confirmText: '',
             confirmAction: null,
         };
+    }
+
+    /** set to stop a running export: on cancel, on leaving the tab */
+    private exportCancelled = false;
+
+    componentWillUnmount(): void {
+        this.exportCancelled = true;
+        super.componentWillUnmount();
     }
 
     async componentDidMount(): Promise<void> {
@@ -424,6 +529,189 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
         await this.loadRows(true);
     }
 
+    /** One page of the entries of a time window, oldest first, and whether the window holds more of them */
+    async readExportPage(
+        id: string,
+        start: number,
+        end: number | undefined,
+        offset: number,
+    ): Promise<{ entries: RawEntry[]; full: boolean }> {
+        const result = await this.sendToInstance('getRawEntries', {
+            id,
+            start,
+            end,
+            sort: 'asc',
+            limit: EXPORT_PAGE_SIZE,
+            offset,
+            // the count reads every file of the window - without it, only the files up to the page are read
+            noTotal: true,
+        });
+        const entries: RawEntry[] = result?.result || [];
+        return { entries, full: !!entries.length && entries.length >= (result?.limit || EXPORT_PAGE_SIZE) };
+    }
+
+    /**
+     * Read all entries of a time window page by page with an offset.
+     *
+     * Only for windows that are small anyway: a single millisecond, or the values after now. Every page
+     * lets the adapter read the files of the window again, up to that page.
+     */
+    async exportWindowByOffset(
+        id: string,
+        start: number,
+        end: number | undefined,
+        onEntries: (entries: RawEntry[]) => void,
+    ): Promise<void> {
+        let offset = 0;
+        while (!this.exportCancelled) {
+            const { entries, full } = await this.readExportPage(id, start, end, offset);
+            onEntries(entries);
+            offset += entries.length;
+            if (!full) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * Export all entries of the selected range into a file.
+     *
+     * Paging through the whole range with an offset would let the adapter read all day files from the start of
+     * the range up to the page for every single page. So the range is read in consecutive time windows instead,
+     * each one sized to hold a bit less than a page: grown over sparse data, shrunk over dense data. Only the
+     * files of a window are read at a time. If a window still holds more than a page, it is cut at the last
+     * timestamp of the page and the next window starts there.
+     *
+     * With more entries than the adapter counts (it stops at 100000), the total is only a lower bound: the
+     * first window is too big then and is cut like any other full one, and the progress follows the time.
+     */
+    async exportEntries(): Promise<void> {
+        const point = this.state.selected;
+        const dialog = this.state.exportDialog;
+        if (!point || !dialog) {
+            return;
+        }
+        const start = fromInputValue(this.state.start);
+        const end = fromInputValue(this.state.end);
+        const { format, separator, decimal } = dialog;
+
+        this.exportCancelled = false;
+        let progress: ExportDialog = {
+            ...dialog,
+            running: true,
+            exported: 0,
+            total: 0,
+            truncated: false,
+            position: 0,
+            info: '',
+            error: '',
+        };
+        this.setState({ exportDialog: progress });
+
+        // the byte order mark makes Excel read the file as UTF-8
+        const chunks: string[] = format === 'csv' ? [`${UTF8_BOM}${CSV_COLUMNS.join(separator)}\r\n`] : ['['];
+        let exported = 0;
+        // the time range from the first entry on, for the progress by time
+        let rangeStart = 0;
+        let rangeLength = 1;
+        const addEntries = (entries: RawEntry[]): void => {
+            if (this.exportCancelled || !entries.length) {
+                return;
+            }
+            if (format === 'csv') {
+                chunks.push(`${entries.map(entry => entryToCsv(entry, separator, decimal)).join('\r\n')}\r\n`);
+            } else {
+                chunks.push(`${exported ? ',' : ''}\n${entries.map(entry => JSON.stringify(entry)).join(',\n')}`);
+            }
+            exported += entries.length;
+            const position = Math.min(1, Math.max(0, (entries[entries.length - 1].ts - rangeStart + 1) / rangeLength));
+            progress = { ...progress, exported, position };
+            this.setState({ exportDialog: progress });
+        };
+
+        try {
+            // the first entry and the number of entries, to size the windows
+            const probe = await this.sendToInstance('getRawEntries', {
+                id: point.id,
+                start,
+                end,
+                sort: 'asc',
+                limit: 1,
+                offset: 0,
+            });
+            const first: RawEntry | undefined = probe?.result?.[0];
+            if (this.exportCancelled) {
+                return;
+            }
+            if (!first) {
+                this.setState({
+                    exportDialog: { ...progress, running: false, info: I18n.t('history_export_nothing') },
+                });
+                return;
+            }
+            const total: number = probe.total || 0;
+            progress = { ...progress, total, truncated: !!probe.truncated };
+            this.setState({ exportDialog: progress });
+
+            const last = end ?? Date.now();
+            rangeStart = first.ts;
+            rangeLength = Math.max(1, last - first.ts + 1);
+            let windowStart = first.ts;
+            let windowSize = Math.max(
+                1,
+                Math.round(((last - first.ts + 1) * EXPORT_WINDOW_TARGET) / Math.max(total, 1)),
+            );
+            while (windowStart <= last && !this.exportCancelled) {
+                const windowEnd = Math.min(last, windowStart + windowSize - 1);
+                const { entries, full } = await this.readExportPage(point.id, windowStart, windowEnd, 0);
+                if (!full) {
+                    addEntries(entries);
+                    windowStart = windowEnd + 1;
+                    const factor = entries.length ? EXPORT_WINDOW_TARGET / entries.length : 8;
+                    windowSize = Math.max(1, Math.round(windowSize * Math.min(8, Math.max(0.125, factor))));
+                    continue;
+                }
+
+                const lastTs = entries[entries.length - 1].ts;
+                if (entries[0].ts === lastTs) {
+                    // more entries with one and the same timestamp than a page holds
+                    await this.exportWindowByOffset(point.id, lastTs, lastTs, addEntries);
+                    windowStart = lastTs + 1;
+                } else {
+                    // more entries of the last timestamp may follow on the next page, so the next window
+                    // starts with that timestamp and reads them all again
+                    addEntries(entries.filter(entry => entry.ts < lastTs));
+                    windowSize = Math.max(
+                        1,
+                        Math.round(((lastTs - windowStart) * EXPORT_WINDOW_TARGET) / entries.length),
+                    );
+                    windowStart = lastTs;
+                }
+            }
+            if (end === undefined && !this.exportCancelled) {
+                // values with a timestamp in the future
+                await this.exportWindowByOffset(point.id, windowStart, undefined, addEntries);
+            }
+            if (this.exportCancelled) {
+                return;
+            }
+
+            if (format === 'json') {
+                chunks.push(exported ? '\n]\n' : ']\n');
+            }
+            downloadFile(
+                chunks,
+                exportFileName(point.id, start, end, format),
+                format === 'csv' ? 'text/csv;charset=utf-8' : 'application/json',
+            );
+            this.setState({ exportDialog: null });
+        } catch (e: any) {
+            if (!this.exportCancelled) {
+                this.setState({ exportDialog: { ...progress, running: false, error: e.message } });
+            }
+        }
+    }
+
     renderDatapoints(): React.JSX.Element {
         const filter = this.state.filter.toLowerCase();
         const points = (this.state.points || []).filter(
@@ -578,7 +866,13 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
                         {this.state.sort === 'desc' ? <ArrowDownward /> : <ArrowUpward />}
                     </IconButton>
                 </Tooltip>
-                <Tooltip title={this.state.truncated ? I18n.t('history_truncated') : ''}>
+                <Tooltip
+                    title={
+                        this.state.truncated
+                            ? I18n.t(this.state.sort === 'asc' ? 'history_truncated_oldest' : 'history_truncated')
+                            : ''
+                    }
+                >
                     <Typography style={styles.pageInfo}>
                         {I18n.t(
                             'history_page',
@@ -609,6 +903,31 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
                     >
                         <Refresh />
                     </IconButton>
+                </Tooltip>
+                <Tooltip title={I18n.t('history_export')}>
+                    <span>
+                        <IconButton
+                            size="small"
+                            disabled={!total}
+                            onClick={() =>
+                                this.setState({
+                                    exportDialog: {
+                                        format: 'csv',
+                                        ...defaultCsvSeparators(),
+                                        running: false,
+                                        exported: 0,
+                                        total: 0,
+                                        truncated: false,
+                                        position: 0,
+                                        info: '',
+                                        error: '',
+                                    },
+                                })
+                            }
+                        >
+                            <FileDownload />
+                        </IconButton>
+                    </span>
                 </Tooltip>
                 <Tooltip title={I18n.t('history_add')}>
                     <IconButton
@@ -905,6 +1224,136 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
         );
     }
 
+    renderExportDialog(): React.JSX.Element | null {
+        const dialog = this.state.exportDialog;
+        if (!dialog) {
+            return null;
+        }
+        const start = fromInputValue(this.state.start);
+        const end = fromInputValue(this.state.end);
+        const range =
+            start === undefined && end === undefined
+                ? I18n.t('history_range_all')
+                : `${start === undefined ? '…' : formatTs(start)} – ${end === undefined ? '…' : formatTs(end)}`;
+        // values logged during the export may push the count beyond the total, so it is never more than 100%
+        let percent = dialog.total ? Math.min(100, (dialog.exported / dialog.total) * 100) : 0;
+        if (dialog.truncated) {
+            percent = dialog.position * 100;
+        }
+        const cancel = (): void => {
+            this.exportCancelled = true;
+            this.setState({ exportDialog: null });
+        };
+
+        return (
+            <Dialog
+                open={!0}
+                maxWidth="sm"
+                fullWidth
+                onClose={() => !dialog.running && cancel()}
+            >
+                <DialogTitle>{I18n.t('history_export')}</DialogTitle>
+                <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 8 }}>
+                    <div>
+                        <Typography style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>
+                            {this.state.selected?.id}
+                        </Typography>
+                        <Typography variant="body2">{`${I18n.t('history_export_range')}: ${range}`}</Typography>
+                    </div>
+                    <TextField
+                        select
+                        label={I18n.t('history_export_format')}
+                        value={dialog.format}
+                        disabled={dialog.running}
+                        onChange={e =>
+                            this.setState({ exportDialog: { ...dialog, format: e.target.value as ExportFormat } })
+                        }
+                    >
+                        <MenuItem value="csv">CSV</MenuItem>
+                        <MenuItem value="json">JSON</MenuItem>
+                    </TextField>
+                    {dialog.format === 'csv' ? (
+                        <div style={{ display: 'flex', gap: 16 }}>
+                            <TextField
+                                select
+                                label={I18n.t('history_export_separator')}
+                                value={dialog.separator}
+                                disabled={dialog.running}
+                                style={{ flexGrow: 1 }}
+                                onChange={e =>
+                                    this.setState({
+                                        exportDialog: { ...dialog, separator: e.target.value as ExportSeparator },
+                                    })
+                                }
+                            >
+                                <MenuItem value=";">{I18n.t('history_export_semicolon')}</MenuItem>
+                                <MenuItem value=",">{I18n.t('history_export_comma')}</MenuItem>
+                                <MenuItem value={'\t'}>{I18n.t('history_export_tab')}</MenuItem>
+                            </TextField>
+                            <TextField
+                                select
+                                label={I18n.t('history_export_decimal')}
+                                value={dialog.decimal}
+                                disabled={dialog.running}
+                                style={{ flexGrow: 1 }}
+                                onChange={e =>
+                                    this.setState({
+                                        exportDialog: { ...dialog, decimal: e.target.value as ExportDecimal },
+                                    })
+                                }
+                            >
+                                <MenuItem value=".">{I18n.t('history_export_point')}</MenuItem>
+                                <MenuItem value=",">{I18n.t('history_export_comma')}</MenuItem>
+                            </TextField>
+                        </div>
+                    ) : null}
+                    <Typography
+                        variant="body2"
+                        style={{ opacity: 0.7 }}
+                    >
+                        {I18n.t(dialog.format === 'csv' ? 'history_export_csv_info' : 'history_export_json_info')}
+                    </Typography>
+                    {dialog.running ? (
+                        <div>
+                            <LinearProgress
+                                variant={dialog.total ? 'determinate' : 'indeterminate'}
+                                value={percent}
+                            />
+                            <Typography variant="caption">
+                                {dialog.truncated
+                                    ? I18n.t('history_export_progress_count', dialog.exported.toString())
+                                    : I18n.t(
+                                          'history_export_progress',
+                                          dialog.exported.toString(),
+                                          Math.max(dialog.total, dialog.exported).toString(),
+                                      )}
+                            </Typography>
+                        </div>
+                    ) : null}
+                    {dialog.info ? <Alert severity="info">{dialog.info}</Alert> : null}
+                    {dialog.error ? <Alert severity="error">{dialog.error}</Alert> : null}
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<FileDownload />}
+                        disabled={dialog.running}
+                        onClick={() => void this.exportEntries()}
+                    >
+                        {I18n.t('history_export_start')}
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        onClick={cancel}
+                    >
+                        {I18n.t('history_cancel')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        );
+    }
+
     renderConfirmDialog(): React.JSX.Element | null {
         if (!this.state.confirmAction) {
             return null;
@@ -971,6 +1420,7 @@ export default class DataBrowser extends ConfigGeneric<ConfigGenericProps, DataB
                     )}
                 </Paper>
                 {this.renderEntryDialog()}
+                {this.renderExportDialog()}
                 {this.renderConfirmDialog()}
             </Box>
         );

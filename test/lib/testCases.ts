@@ -1691,4 +1691,75 @@ export function register(
         raw = await send('getRawEntries', { id: missingId });
         assert.strictEqual(raw.total, 3);
     });
+
+    it(`Test ${adapterShortName}: getRawEntries reads windows and pages without counting, over files and RAM`, async function () {
+        this.timeout(25000);
+
+        const rawNow = Date.now();
+        const id = `my.own.export.value-${rawNow}`;
+        // 2500 values 100 s apart, about three days: every 961st value moves the values in RAM into the day
+        // files (`maxLength` is 960), so the first 1922 are on the disk and the rest is still in RAM
+        const first = rawNow - 10 * 24 * 3600000;
+        const state = Array.from({ length: 2500 }, (_, i) => ({ ts: first + i * 100000, val: i, ack: true }));
+        const all = state.map(s => s.ts);
+
+        const send = (command: string, message: any): Promise<any> =>
+            new Promise(resolve => sendTo(instanceName, command, message, resolve));
+
+        const stored = await send('storeState', { id, state });
+        assert.strictEqual(stored.success, true);
+        assert.strictEqual(stored.successCount, 2500);
+
+        // the first request of an export: the first entry and the number of all entries
+        const probe = await send('getRawEntries', { id, sort: 'asc', limit: 1 });
+        assert.strictEqual(probe.total, 2500);
+        assert.strictEqual(probe.truncated, false);
+        assert.deepStrictEqual(
+            probe.result.map((e: any) => e.ts),
+            [first],
+        );
+
+        // a window: start and end are inclusive, and nothing is counted
+        const window = await send('getRawEntries', {
+            id,
+            start: all[10],
+            end: all[20],
+            sort: 'asc',
+            limit: 100,
+            noTotal: true,
+        });
+        assert.strictEqual(window.error, undefined);
+        assert.strictEqual(window.total, undefined);
+        assert.strictEqual(window.truncated, undefined);
+        assert.deepStrictEqual(
+            window.result.map((e: any) => e.ts),
+            all.slice(10, 21),
+        );
+        assert.strictEqual(window.result[0].val, 10);
+
+        // the adapter caps the page size and says so in `limit`
+        const everything = await send('getRawEntries', { id, sort: 'asc', limit: 100000, noTotal: true });
+        assert.strictEqual(everything.limit, 5000);
+        assert.deepStrictEqual(
+            everything.result.map((e: any) => e.ts),
+            all,
+        );
+
+        // pages without counting: across the border between the files and RAM, and from the newest end
+        const page = await send('getRawEntries', { id, sort: 'asc', limit: 5, offset: 1920, noTotal: true });
+        assert.deepStrictEqual(
+            page.result.map((e: any) => e.ts),
+            all.slice(1920, 1925),
+        );
+        const newest = await send('getRawEntries', { id, sort: 'desc', limit: 3, noTotal: true });
+        assert.deepStrictEqual(
+            newest.result.map((e: any) => e.ts),
+            all.slice(-3).reverse(),
+        );
+        const open = await send('getRawEntries', { id, start: all[2495], sort: 'asc', limit: 100, noTotal: true });
+        assert.deepStrictEqual(
+            open.result.map((e: any) => e.ts),
+            all.slice(2495),
+        );
+    });
 }
