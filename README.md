@@ -23,11 +23,11 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 5.3.0 (2026-11-04)
 * (@GermanBluefox) Data browser: the values of a datapoint can be exported as CSV (e.g. for Excel) or as JSON (the format of `storeState`) for the selected time range
 * (@GermanBluefox) Data browser: with "Oldest first" and more than 100000 values in the range, the table shows now the oldest values. Before, it showed the oldest of the newest 100000 values
 - (copilot) Adapter requires node.js >= 22.19.0 now
+
 ### 5.2.0 (2026-10-29)
 * (@GermanBluefox) Fixed the crash `Cannot read properties of undefined (reading 'val'/'ts')` in `getHistory` (#575, #490, #470, #396)
 * (@GermanBluefox) `getHistory` with `aggregate: 'none'` and `count`/`limit` returns now the oldest entries from the files, if `returnNewestEntries` is not set (#530, #331, #210)
@@ -45,10 +45,6 @@ This adapter saves state history in a two-staged process.
 * (@GermanBluefox) Admin 7.6.20+ is required. Added Ukrainian translation. Removed the obsolete "subscribe" attribute
 * (@GermanBluefox) Added the "Statistics" tab: values, size on disk, files and status of every datapoint, and a cleanup of the data of datapoints that are not logged any more
 * (@GermanBluefox) The data browser shows now if a value to edit or delete was not found, and the error of a failed save is no longer hidden by the reload of the table
-
-### 5.0.1 (2026-08-26)
-* (@joltcoke) Fixed average and total returning null for every interval that contains a null value: parseFloat(null) is NaN and poisoned the sum of the whole interval (thanks to @joltcoke, ioBroker/ioBroker.sql#526). As the result was NaN and not null, ignoreNull could not act on it either
-* (@joltcoke) Fixed min returning a wrong value if the interval contains a null, minmax losing the minimum if the interval starts with a null, and percentile/quantile counting a null as 0
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
