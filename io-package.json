@@ -12,6 +12,7 @@
       "it": "History",
       "es": "History",
       "pl": "History",
+      "uk": "History",
       "zh-cn": "历史"
     },
     "desc": {
@@ -24,6 +25,7 @@
       "it": "Registrazione della cronologia di stato nei file",
       "es": "Registro del historial del estado en archivos",
       "pl": "Rejestrowanie historii stanu w plikach",
+      "uk": "Журналювання історії станів у файлах",
       "zh-cn": "在文件中记录状态历史记录"
     },
     "version": "5.3.0",
