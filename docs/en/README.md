@@ -381,36 +381,44 @@ Additionally, you can add attribute ``rules: true`` in message to activate all r
 
 ### Delete states
 
-If you want to delete entries from the database you can use the build in system function **delete**:
+If you want to delete entries from the database you can use the build in system function **delete**. It deletes the value with exactly the given `ts`:
 
 ```javascript
 sendTo('history.0', 'delete', [
-    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352}, 
-    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353}
+    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352}},
+    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353}}
 ], result => console.log('deleted'));
 ```
+
+A single entry can be sent without the list (`{id: 'mbus.0.counter.xxx', state: {ts: 1589458809352}}` or `{id: 'mbus.0.counter.xxx', ts: 1589458809352}`), several values of one data point as `{id: 'mbus.0.counter.xxx', ts: [1589458809352, 1589458809353]}`.
 
 To delete ALL history data for some data point execute:
 
 ```javascript
 sendTo('history.0', 'deleteAll', [
-    {id: 'mbus.0.counter.xxx'} 
+    {id: 'mbus.0.counter.xxx'},
     {id: 'mbus.0.counter.yyy'}
 ], result => console.log('deleted'));
-``` 
+```
 
 To delete history data for some data point and for some range, execute:
 
 ```javascript
 sendTo('history.0', 'deleteRange', [
-    {id: 'mbus.0.counter.xxx', start: '2019-01-01T00:00:00.000Z', end: '2019-12-31T23:59:59.999'}, 
+    {id: 'mbus.0.counter.xxx', start: '2019-01-01T00:00:00.000Z', end: '2019-12-31T23:59:59.999'},
     {id: 'mbus.0.counter.yyy', start: 1589458809352, end: 1589458809353}
 ], result => console.log('deleted'));
-``` 
+```
 
-Time could be ms since epoch or ans string, that could be converted by javascript Date object.
+A single range can be sent without the list: `{id: 'mbus.0.counter.xxx', start: 1589458809352, end: 1589458809353}` or `{id: 'mbus.0.counter.xxx', state: {start: 1589458809352, end: 1589458809353}}`. `start` is required, `end` is optional and defaults to now.
+
+Time could be ms since epoch or a string, that could be converted by javascript Date object. `0` is a valid time.
 
 Values will be deleted **including defined limits** (``ts >= start AND ts <= end``).
+
+Every entry needs a valid `ts` (one value) or a valid `start` (a range; `end` alone is not accepted). If one entry has neither, the adapter answers with `{success: false, error}` naming it and deletes nothing, not even the valid entries of the same message. To delete all values of a data point, use `deleteAll`.
+
+A single entry answers `{success: false}` if nothing was found to delete, a list always answers `{success: true}`.
 
 ## Update states
 

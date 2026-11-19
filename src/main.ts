@@ -4,6 +4,7 @@ import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobrok
 import { beautify, parseIntervalBorders } from '@iobroker/aggregate';
 import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
 import { readRawEntries } from './lib/rawEntries';
+import { deleteRangeProblem, parseDeleteRequests, type DeleteRange } from './lib/deleteRequests';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 import {
     classifyDatapoint,
@@ -2003,27 +2004,28 @@ class HistoryAdapter extends Adapter {
         return found;
     }
 
-    _delete(id: string, state: { ts?: number; start?: number; end?: number }): boolean {
+    _delete(id: string, state: DeleteRange): boolean {
+        // A missing or invalid time stamp fell through to "delete all" before: refuse it, whoever calls
+        const problem = deleteRangeProblem(state);
+        if (problem) {
+            throw new Error(`Nothing deleted for ${id}: ${problem}`);
+        }
+
         // first try to find the value in not yet saved data
         let found = false;
+        // values of a range deleted in RAM: the files are searched anyway, but the answer must report them
+        let deletedInRam = false;
         if (this.history[id]) {
             const res = this.history[id].list;
             if (res) {
-                if (!state.ts && !state.start && !state.end) {
+                if (state.mode === 'all') {
                     this.history[id].list = [];
                 } else {
                     for (let i = res.length - 1; i >= 0; i--) {
-                        if (state.start && state.end) {
+                        if (state.mode === 'range') {
                             if (res[i].ts >= state.start && res[i].ts <= state.end) {
                                 res.splice(i, 1);
-                            }
-                        } else if (state.start) {
-                            if (res[i].ts >= state.start) {
-                                res.splice(i, 1);
-                            }
-                        } else if (state.end) {
-                            if (res[i].ts <= state.end) {
-                                res.splice(i, 1);
+                                deletedInRam = true;
                             }
                         } else if (res[i].ts === state.ts) {
                             res.splice(i, 1);
@@ -2037,7 +2039,7 @@ class HistoryAdapter extends Adapter {
 
         if (!found) {
             const files = [];
-            if (state.ts) {
+            if (state.mode === 'one') {
                 const dayStr = ts2day(state.ts);
                 const day = parseInt(dayStr, 10);
                 if (!isNaN(day)) {
@@ -2050,16 +2052,11 @@ class HistoryAdapter extends Adapter {
             } else {
                 let dayStart;
                 let dayEnd;
-                if (state.start && state.end) {
+                if (state.mode === 'range') {
                     dayStart = parseInt(ts2day(state.start), 10);
-                    dayEnd = parseInt(ts2day(state.end), 10);
-                } else if (state.start) {
-                    dayStart = parseInt(ts2day(state.start), 10);
-                    dayEnd = parseInt(ts2day(Date.now()), 10);
-                } else if (state.end) {
-                    dayStart = 0;
                     dayEnd = parseInt(ts2day(state.end), 10);
                 } else {
+                    // delete all
                     dayStart = 0;
                     dayEnd = parseInt(ts2day(Date.now()), 10);
                 }
@@ -2083,7 +2080,7 @@ class HistoryAdapter extends Adapter {
                     const tsCheck = new Date(Math.floor(entry.day / 10000), 0, 1).getTime();
                     let res: IobDataEntry[] = JSON.parse(fs.readFileSync(entry.file, 'utf8')).sort(sortByTsDesc);
 
-                    if (!state.ts && !state.start && !state.end) {
+                    if (state.mode === 'all') {
                         res = [];
                         found = true;
                     } else {
@@ -2092,18 +2089,8 @@ class HistoryAdapter extends Adapter {
                             if (res[i].ts && res[i].ts < tsCheck) {
                                 res[i].ts *= 1000;
                             }
-                            if (state.start && state.end) {
+                            if (state.mode === 'range') {
                                 if (res[i].ts >= state.start && res[i].ts <= state.end) {
-                                    res.splice(i, 1);
-                                    found = true;
-                                }
-                            } else if (state.start) {
-                                if (res[i].ts >= state.start) {
-                                    res.splice(i, 1);
-                                    found = true;
-                                }
-                            } else if (state.end) {
-                                if (res[i].ts <= state.end) {
                                     res.splice(i, 1);
                                     found = true;
                                 }
@@ -2130,7 +2117,7 @@ class HistoryAdapter extends Adapter {
             });
         }
 
-        return found;
+        return found || deletedInRam;
     }
 
     updateState(msg: ioBroker.Message): void {
@@ -2180,88 +2167,31 @@ class HistoryAdapter extends Adapter {
             return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
         }
 
-        let id;
+        // Every entry is checked before anything is deleted. A missing or invalid `ts`, `start` or `end`
+        // fell through to "delete every value of the datapoint" before.
+        const { requests, errors } = parseDeleteRequests(msg.message, Date.now(), id => this.aliasMap[id] || id);
+        if (errors.length) {
+            const error = `${errors.join('; ')}. Nothing was deleted`;
+            this.log.error(`${msg.command}: ${error}`);
+            return this.sendTo(msg.from, msg.command, { success: false, error }, msg.callback);
+        }
+
+        // A single entry answers whether something was deleted (the data browser reports "not found"), a list
+        // always answers success
+        const single =
+            !Array.isArray(msg.message) && !Array.isArray(msg.message.state) && !Array.isArray(msg.message.ts);
+        this.log.debug(`deleteStateHistory ${requests.length} items`);
         let success = true;
-        if (Array.isArray(msg.message)) {
-            this.log.debug(`deleteStateHistory ${msg.message.length} items`);
-            for (let i = 0; i < msg.message.length; i++) {
-                id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
-
-                // {id: 'blabla', ts: 892}
-                if (msg.message[i].ts) {
-                    this._delete(id, { ts: msg.message[i].ts });
-                } else if (msg.message[i].start) {
-                    if (typeof msg.message[i].start === 'string') {
-                        msg.message[i].start = new Date(msg.message[i].start).getTime();
-                    }
-                    if (typeof msg.message[i].end === 'string') {
-                        msg.message[i].end = new Date(msg.message[i].end).getTime();
-                    }
-                    this._delete(id, { start: msg.message[i].start, end: msg.message[i].end || Date.now() });
-                } else if (typeof msg.message[i].state === 'object' && msg.message[i].state?.ts) {
-                    this._delete(id, { ts: msg.message[i].state.ts });
-                } else if (typeof msg.message[i].state === 'object' && msg.message[i].state?.start) {
-                    if (typeof msg.message[i].state.start === 'string') {
-                        msg.message[i].state.start = new Date(msg.message[i].state.start).getTime();
-                    }
-                    if (typeof msg.message[i].state.end === 'string') {
-                        msg.message[i].state.end = new Date(msg.message[i].state.end).getTime();
-                    }
-                    this._delete(id, {
-                        start: msg.message[i].state.start,
-                        end: msg.message[i].state.end || Date.now(),
-                    });
-                } else {
-                    this.log.warn(`Invalid state for ${JSON.stringify(msg.message[i])}`);
+        try {
+            for (const request of requests) {
+                const deleted = this._delete(request.id, request.range);
+                if (single) {
+                    success = deleted;
                 }
             }
-        } else if (Array.isArray(msg.message.state)) {
-            this.log.debug(`deleteStateHistory ${msg.message.state.length} items`);
-            id = this.aliasMap[msg.message.id] || msg.message.id;
-
-            for (let j = 0; j < msg.message.state.length; j++) {
-                if (msg.message.state[j] && typeof msg.message.state[j] === 'object') {
-                    if (msg.message.state[j].ts) {
-                        this._delete(id, { ts: msg.message.state[j].ts });
-                    } else if (msg.message.state[j].start) {
-                        if (typeof msg.message.state[j].start === 'string') {
-                            msg.message.state[j].start = new Date(msg.message.state[j].start).getTime();
-                        }
-                        if (typeof msg.message.state[j].end === 'string') {
-                            msg.message.state[j].end = new Date(msg.message.state[j].end).getTime();
-                        }
-                        this._delete(id, {
-                            start: msg.message.state[j].start,
-                            end: msg.message.state[j].end || Date.now(),
-                        });
-                    }
-                } else if (msg.message.state[j] && typeof msg.message.state[j] === 'number') {
-                    this._delete(id, { ts: msg.message.state[j] });
-                } else {
-                    this.log.warn(`Invalid state for ${JSON.stringify(msg.message.state[j])}`);
-                }
-            }
-        } else if (msg.message.ts && Array.isArray(msg.message.ts)) {
-            this.log.debug(`deleteStateHistory ${msg.message.ts.length} items`);
-            id = this.aliasMap[msg.message.id] || msg.message.id;
-            for (let j = 0; j < msg.message.ts.length; j++) {
-                if (msg.message.ts[j] && typeof msg.message.ts[j] === 'number') {
-                    this._delete(id, { ts: msg.message.ts[j] });
-                } else {
-                    this.log.warn(`Invalid state for ${JSON.stringify(msg.message.ts[j])}`);
-                }
-            }
-        } else if (msg.message.id && msg.message.state && typeof msg.message.state === 'object') {
-            this.log.debug('deleteStateHistory 1 item');
-            id = this.aliasMap[msg.message.id] || msg.message.id;
-            success = this._delete(id, { ts: msg.message.state.ts });
-        } else if (msg.message.id && msg.message.ts && typeof msg.message.ts === 'number') {
-            this.log.debug('deleteStateHistory 1 item');
-            id = this.aliasMap[msg.message.id] || msg.message.id;
-            success = this._delete(id, { ts: msg.message.ts });
-        } else {
-            this.log.error('deleteStateHistory called with invalid data');
-            return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
+        } catch (error) {
+            this.log.error(`${msg.command}: ${error.message}`);
+            return this.sendTo(msg.from, msg.command, { success: false, error: error.message }, msg.callback);
         }
 
         this.sendTo(msg.from, msg.command, { success }, msg.callback);
@@ -2278,12 +2208,12 @@ class HistoryAdapter extends Adapter {
             this.log.debug(`deleteStateAll ${msg.message.length} items`);
             for (let i = 0; i < msg.message.length; i++) {
                 id = this.aliasMap[msg.message[i].id] || msg.message[i].id;
-                this._delete(id, {});
+                this._delete(id, { mode: 'all' });
             }
         } else if (msg.message.id) {
             this.log.debug('deleteStateAll 1 item');
             id = this.aliasMap[msg.message.id] || msg.message.id;
-            this._delete(id, {});
+            this._delete(id, { mode: 'all' });
         } else {
             this.log.error('deleteStateAll called with invalid data');
             return this.sendTo(msg.from, msg.command, { error: `Invalid call: ${JSON.stringify(msg)}` }, msg.callback);
