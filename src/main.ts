@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Adapter, type AdapterOptions, getAbsoluteDefaultDataDir } from '@iobroker/adapter-core'; // Get common adapter utils
 import { beautify, parseIntervalBorders } from '@iobroker/aggregate';
 import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
+import { COMMANDS, HELP } from './lib/help';
 import { readRawEntries } from './lib/rawEntries';
 import { deleteRangeProblem, parseDeleteRequests, type DeleteRange } from './lib/deleteRequests';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
@@ -492,7 +493,12 @@ class HistoryAdapter extends Adapter {
     }
 
     processMessage(msg: ioBroker.Message): void {
-        if (msg.command === 'features') {
+        if (msg.command === 'help') {
+            // what the instance answers, for AI agents and script authors
+            if (msg.callback) {
+                this.sendTo(msg.from, msg.command, { help: HELP, commands: COMMANDS }, msg.callback);
+            }
+        } else if (msg.command === 'features') {
             this.sendTo(
                 msg.from,
                 msg.command,

@@ -8,6 +8,7 @@ const node_fs_1 = __importDefault(require("node:fs"));
 const adapter_core_1 = require("@iobroker/adapter-core"); // Get common adapter utils
 const aggregate_1 = require("@iobroker/aggregate");
 const getHistory_1 = require("./lib/getHistory");
+const help_1 = require("./lib/help");
 const rawEntries_1 = require("./lib/rawEntries");
 const deleteRequests_1 = require("./lib/deleteRequests");
 const statistics_1 = require("./lib/statistics");
@@ -391,7 +392,13 @@ class HistoryAdapter extends adapter_core_1.Adapter {
         callback?.();
     }
     processMessage(msg) {
-        if (msg.command === 'features') {
+        if (msg.command === 'help') {
+            // what the instance answers, for AI agents and script authors
+            if (msg.callback) {
+                this.sendTo(msg.from, msg.command, { help: help_1.HELP, commands: help_1.COMMANDS }, msg.callback);
+            }
+        }
+        else if (msg.command === 'features') {
             this.sendTo(msg.from, msg.command, { supportedFeatures: ['update', 'delete', 'deleteRange', 'deleteAll', 'storeState'] }, msg.callback);
         }
         else if (msg.command === 'update') {
