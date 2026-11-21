@@ -10,6 +10,7 @@ const aggregate_1 = require("@iobroker/aggregate");
 const getHistory_1 = require("./lib/getHistory");
 const help_1 = require("./lib/help");
 const rawEntries_1 = require("./lib/rawEntries");
+const standardHistory_1 = require("./lib/standardHistory");
 const deleteRequests_1 = require("./lib/deleteRequests");
 const statistics_1 = require("./lib/statistics");
 const dataDir = (0, adapter_core_1.getAbsoluteDefaultDataDir)();
@@ -430,6 +431,12 @@ class HistoryAdapter extends adapter_core_1.Adapter {
         }
         else if (msg.command === 'getRawEntries') {
             this.getRawEntries(msg);
+        }
+        else if (msg.command === 'aggregate') {
+            void this.answerStandard(msg, standardHistory_1.aggregate);
+        }
+        else if (msg.command === 'lastChange') {
+            void this.answerStandard(msg, standardHistory_1.lastChange);
         }
         else if (msg.command === 'getDatapoints') {
             void this.getDatapoints(msg);
@@ -2096,6 +2103,33 @@ class HistoryAdapter extends adapter_core_1.Adapter {
             sort,
             result: entries.slice(offset, offset + limit),
         }, msg.callback);
+    }
+    /**
+     * Answer `aggregate` or `lastChange` of the shared catalog of sendTo commands (family history): computed from the
+     * stored values, read as for `getRawEntries`
+     */
+    async answerStandard(msg, command) {
+        const answer = await command(msg.message, {
+            read: (requested, query) => {
+                const id = this.aliasMap[requested] || requested;
+                const { entries } = (0, rawEntries_1.readRawEntries)({
+                    storeDir: this.config.storeDir,
+                    id,
+                    cache: this.history[id]?.list,
+                    start: query.start,
+                    end: query.end,
+                    // without start: the newest values
+                    sort: query.start === undefined ? 'desc' : 'asc',
+                    maxEntries: query.count,
+                    log: this.log,
+                });
+                return Promise.resolve(entries.slice(0, query.count));
+            },
+            unit: async (id) => (await this.getForeignObjectAsync(id))?.common?.unit,
+        });
+        if (msg.callback) {
+            this.sendTo(msg.from, msg.command, answer, msg.callback);
+        }
     }
     /**
      * Answer the `getDatapoints` message: every datapoint that has data on the disk or in RAM, no matter

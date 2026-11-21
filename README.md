@@ -20,12 +20,19 @@ This adapter saves state history in a two-staged process.
 ## Messages for scripts and AI agents
 `sendTo('history.0', 'help', {})` answers `{help, commands}`: a description of all messages (`getHistory`, `storeState`, `delete` ...) for AI agents (e.g. ioBroker.pi-agent) and script authors, and the list of all commands with `write: true` for the ones that change something.
 
+`getHistory`, `aggregate` and `lastChange` are standard commands of the shared catalog of sendTo commands (family `history`, marked with `standard` in the answer of `help`), the same in history, sql, influxdb and recorder:
+- `aggregate {id, start, end?, fn, value?}` answers one number for a period, `{value, ts?, unit?, count}`. `fn`: `min`, `max`, `avg`, `sum`, `count` (with `value`: how often the state became it), `delta` (how much a counter rose, resets included), `first`, `last`, `integral` (value × hours, W gives Wh), `duration` (with `value`: seconds the state had it).
+- `lastChange {id, value?, before?}` answers when the state last changed (to `value`): `{ts, val}`.
+
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (@GermanBluefox) Added the standard commands of the shared catalog: history.aggregate (one number for a period: min, max, avg, sum, count, delta, first, last, integral, duration) and history.lastChange; getHistory is marked as history.getHistory
+
 ### 5.4.0 (2026-11-19)
 * (@GermanBluefox) Fixed: `delete` / `deleteRange` without a valid `ts` or range no longer deletes all values of the state. A single `{id, state: {start, end}}`, a state without `ts` or with `ts: 0` deleted all values in RAM and all files up to today, an unparsable `start` everything up to `end`. Such a message is refused now with an error and nothing is deleted; `{id, state: {start, end}}` and `{id, start, end}` delete the range, `ts: 0` the value at 0
 * (@GermanBluefox) Added the message "help": a description of all messages for AI agents (e.g. pi-agent), and `common.supportedMessages.help`

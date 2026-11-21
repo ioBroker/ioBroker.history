@@ -5,10 +5,15 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HELP = exports.COMMANDS = void 0;
-/** Every command `processMessage` answers; `write` = it changes data, settings or the instance */
+/**
+ * Every command `processMessage` answers; `write` = it changes data, settings or the instance; `standard` = it follows
+ * the shared catalog of sendTo commands (HELP.md of ioBroker.assistant), the same in history, sql, influxdb and recorder
+ */
 exports.COMMANDS = [
     { command: 'help', write: false },
-    { command: 'getHistory', write: false },
+    { command: 'getHistory', write: false, standard: 'history.getHistory' },
+    { command: 'aggregate', write: false, standard: 'history.aggregate' },
+    { command: 'lastChange', write: false, standard: 'history.lastChange' },
     { command: 'getEnabledDPs', write: false },
     { command: 'getDatapoints', write: false },
     { command: 'getRawEntries', write: false },
@@ -32,7 +37,8 @@ the user's request, enable or disable the logging and store, change or delete va
 Times (start, end, ts): milliseconds since 1970 or a date text such as "2026-11-19T08:00" (local time of the host).
 Times in the answers are milliseconds since 1970.
 
-Commands (sendTo history.0):
+Commands (sendTo history.0): getHistory, aggregate and lastChange are standard commands of the shared catalog of
+ioBroker (family history): the same names, parameters and answers in history, sql, influxdb and recorder.
 - getHistory {id, options: {start?, end?, aggregate?, count?, step?, ...}}: the course of one state:
   {result: [{ts, val, ack?, from?, q?, id?}], step, error}. options is required (may be {}).
   aggregate: average (default), min, max, minmax (min and max of each interval), total, count, percentile
@@ -48,6 +54,14 @@ Commands (sendTo history.0):
   ack, from, q, addId: true adds these fields. round: digits after the decimal point. ignoreNull: false
   (default, null stays), true (replaced by the value before), 0 (replaced by 0). removeBorderValues: true drops
   the values before start and after end that are added for charts.
+- aggregate {id, start, end?, fn, value?}: one number for a period: {value, ts?, unit?, count}. fn: min, max (ts =
+  when), avg (the mean of the stored values), sum, count (with value: how often the state became it, e.g. true),
+  delta (how much a counter rose, resets included), first, last, integral (value × hours: W gives Wh), duration
+  (with value: how many seconds the state had it). end: default now. count: the stored values in the period, at
+  most 50000 (else reason TOO_MANY_VALUES). Errors: {error, reason} (reason BAD_REQUEST for a wrong parameter).
+- lastChange {id, value?, before?}: when the state last changed (to value): {ts, val}; before: only the values
+  before this time. A value logged again does not count as a change. Reason NOT_FOUND if it never had the value;
+  only the newest 10000 stored values are searched: limited true = it had it already then.
 - getEnabledDPs {}: the states this instance logs: {[id]: their settings (enabled, changesOnly, debounceTime,
   blockTime, changesMinDelta, changesRelogInterval, retention in s, maxLength, aliasId, ...)}.
 - getDatapoints {}: every state with stored values, also the ones no longer logged:
@@ -84,7 +98,9 @@ How to talk to the user:
 - Find the state first (search the objects); name states by their name, give times in local time and values
   with their unit.
 - A state has a history only if it is or was logged (getEnabledDPs, getDatapoints). For a longer period request
-  one value per interval (e.g. aggregate average with count 24 to 200) instead of every stored value.
+  one value per interval (e.g. aggregate average with count 24 to 200) instead of every stored value. For one
+  number of a period (the highest value, how often, how long, how much) use the command aggregate, for "when was
+  it last ..." lastChange.
 - delete, deleteRange, deleteAll, update, storeState, cleanupOrphaned, enableHistory, disableHistory and
   stopInstance change the stored values, the settings or the instance: never without the user's explicit
   request. Deleted values cannot be restored: name the state and the range and ask for confirmation first;

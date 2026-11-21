@@ -5,6 +5,7 @@ import { beautify, parseIntervalBorders } from '@iobroker/aggregate';
 import { ts2day, getFilenameForID, getSafeId } from './lib/getHistory';
 import { COMMANDS, HELP } from './lib/help';
 import { readRawEntries } from './lib/rawEntries';
+import { aggregate, lastChange, type StandardAnswer, type ValueSource } from './lib/standardHistory';
 import { deleteRangeProblem, parseDeleteRequests, type DeleteRange } from './lib/deleteRequests';
 import type { HistoryAdapterConfig, InternalHistoryOptions, IobDataEntry } from './lib/types';
 import {
@@ -525,6 +526,10 @@ class HistoryAdapter extends Adapter {
             this.getEnabledDPs(msg);
         } else if (msg.command === 'getRawEntries') {
             this.getRawEntries(msg);
+        } else if (msg.command === 'aggregate') {
+            void this.answerStandard(msg, aggregate);
+        } else if (msg.command === 'lastChange') {
+            void this.answerStandard(msg, lastChange);
         } else if (msg.command === 'getDatapoints') {
             void this.getDatapoints(msg);
         } else if (msg.command === 'getDpStatistics') {
@@ -2489,6 +2494,38 @@ class HistoryAdapter extends Adapter {
             },
             msg.callback,
         );
+    }
+
+    /**
+     * Answer `aggregate` or `lastChange` of the shared catalog of sendTo commands (family history): computed from the
+     * stored values, read as for `getRawEntries`
+     */
+    async answerStandard(
+        msg: ioBroker.Message,
+        command: (message: unknown, source: ValueSource) => Promise<StandardAnswer>,
+    ): Promise<void> {
+        const answer = await command(msg.message, {
+            read: (requested, query) => {
+                const id = this.aliasMap[requested] || requested;
+                const { entries } = readRawEntries({
+                    storeDir: this.config.storeDir,
+                    id,
+                    cache: this.history[id]?.list,
+                    start: query.start,
+                    end: query.end,
+                    // without start: the newest values
+                    sort: query.start === undefined ? 'desc' : 'asc',
+                    maxEntries: query.count,
+                    log: this.log,
+                });
+                return Promise.resolve(entries.slice(0, query.count));
+            },
+            unit: async id =>
+                ((await this.getForeignObjectAsync(id))?.common as ioBroker.StateCommon | undefined)?.unit,
+        });
+        if (msg.callback) {
+            this.sendTo(msg.from, msg.command, answer, msg.callback);
+        }
     }
 
     /**
