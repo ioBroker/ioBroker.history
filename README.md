@@ -30,7 +30,7 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 5.5.0 (2026-11-23)
 * (@GermanBluefox) Added the standard commands of the shared catalog: history.aggregate (one number for a period: min, max, avg, sum, count, delta, first, last, integral, duration) and history.lastChange; getHistory is marked as history.getHistory
 
 ### 5.4.0 (2026-11-19)
@@ -51,9 +51,6 @@ This adapter saves state history in a two-staged process.
 
 ### 5.1.2 (2026-10-23)
 * (@GermanBluefox) The timed relog (`changesRelogInterval`) starts right after the adapter start also when "Write NULL values on start/stop boundaries" (`writeNulls`) is off, not only with the first update of the state
-
-### 5.1.1 (2026-10-13)
-* (@GermanBluefox) Values stored with `storeState` for a datapoint without history settings no longer get an additional `null` value when the object of the datapoint changes
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
