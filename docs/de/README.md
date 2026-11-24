@@ -454,9 +454,9 @@ Wenn Sie den Wert, die Qualität oder das Acknowledge-Flag in der Datenbank änd
 
 ```javascript
 sendTo('history.0', 'update', [
-    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352, val: 15, ack: true, q: 0}, 
-    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353, val: 16, ack: true, q: 0}
-], result => console.log('deleted'));
+    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352, val: 15, ack: true, q: 0}},
+    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353, val: 16, ack: true, q: 0}}
+], result => console.log('updated'));
 ```
 
 ``ts`` ist obligatorisch. Mindestens ein weiteres Flag muss im Zustandsobjekt enthalten sein.
