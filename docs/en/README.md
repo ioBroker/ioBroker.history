@@ -426,9 +426,9 @@ If you want to change values, quality or acknowledge flag in the database you ca
 
 ```javascript
 sendTo('history.0', 'update', [
-    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352, val: 15, ack: true, q: 0}, 
-    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353, val: 16, ack: true, q: 0}
-], result => console.log('deleted'));
+    {id: 'mbus.0.counter.xxx', state: {ts: 1589458809352, val: 15, ack: true, q: 0}},
+    {id: 'mbus.0.counter.yyy', state: {ts: 1589458809353, val: 16, ack: true, q: 0}}
+], result => console.log('updated'));
 ```
 
 ``ts`` is mandatory. At least one other flags must be included in state object.
