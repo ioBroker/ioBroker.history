@@ -33,6 +33,7 @@ let logChangesOnly = false;
 let logChangesOnlyTime = 60 * 60 * 1000;
 let delayMultiplicator = 1;
 let processCounter = 0;
+const safeIdMap = {}; // safe ID (as in file name) -> real ID, null if ambiguous
 
 if (process.argv[2]) {
     dbInstance = process.argv[2];
@@ -165,7 +166,39 @@ function main() {
         console.log('No stored existingDBTypes found');
     }
 
-    processFiles();
+    // file names contain the safe ID (e.g. ":" replaced by "~"), so map them back to the real IDs
+    let warnedAmbiguous = false;
+    const addSafeId = id => {
+        const safeId = getSafeId(id);
+        if (safeIdMap[safeId] === undefined) {
+            safeIdMap[safeId] = id;
+        } else if (safeIdMap[safeId] !== null && safeIdMap[safeId] !== id) {
+            if (!warnedAmbiguous) {
+                console.log(
+                    `WARNING: Different IDs have the same file name "${safeId}", such files are used with the ID from the file name`,
+                );
+                warnedAmbiguous = true;
+            }
+            safeIdMap[safeId] = null;
+        }
+    };
+    Object.keys(earliestDBValue).forEach(addSafeId);
+    Object.keys(existingTypes).forEach(addSafeId);
+    Object.keys(existingDBValues).forEach(addSafeId);
+
+    adapter.getForeignObjects('*', 'state', (err, objs) => {
+        if (err) {
+            console.log(`Cannot read state objects: ${err}`);
+        } else if (objs) {
+            Object.keys(objs).forEach(addSafeId);
+        }
+        processFiles();
+    });
+}
+
+function getSafeId(id) {
+    // eslint-disable-next-line no-control-regex
+    return id.toString().replace(/[\u0000|*,;"'<>?:/\\]/g, '~');
 }
 
 const allFiles = {};
@@ -221,14 +254,18 @@ function processFile() {
     if (allFiles[day].files.length > 0) {
         const dir = allFiles[day].dirname;
         const file = allFiles[day].files.shift();
-        const id = file.substring(8, file.length - 5);
+        const fileId = file.substring(8, file.length - 5);
+        const id = safeIdMap[fileId] || fileId;
         const weatherunderground_special_handling =
             id.indexOf('weatherunderground') !== -1 && id.indexOf('current.precip') !== -1;
         console.log(`Day ${day} - ${file}`);
+        if (safeIdMap[fileId] === null) {
+            console.log(`    ID of ${file} is ambiguous, use ${fileId}`);
+        }
 
         if (earliesValCachefileExists) {
             if (!earliestDBValue[id] || earliestDBValue[id] === 0) {
-                console.log(`    Ignore ID ${file}: ${id}`);
+                console.log(`    Ignore ID ${file}: ${fileId} (resolved to ${id})`);
                 setTimeout(processFile, 10);
                 return;
             }
