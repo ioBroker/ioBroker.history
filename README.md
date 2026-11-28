@@ -30,6 +30,9 @@ This adapter saves state history in a two-staged process.
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (@GermanBluefox) Documentation: described all options of `enableHistory`, `debounce` replaced with `debounceTime`/`blockTime` (#338)
+
 ### 5.5.0 (2026-11-23)
 * (@GermanBluefox) Added the standard commands of the shared catalog: history.aggregate (one number for a period: min, max, avg, sum, count, delta, first, last, integral, duration) and history.lastChange; getHistory is marked as history.getHistory
 
