@@ -477,7 +477,8 @@ sendTo('history.0', 'enableHistory', {
     id: 'system.adapter.history.0.memRss',
     options: {
         changesOnly:  true,
-        debounce:     0,
+        debounceTime: 0,
+        blockTime:    0,
         retention:    31536000,
         maxLength:    3,
         changesMinDelta: 0.5,
@@ -492,6 +493,26 @@ sendTo('history.0', 'enableHistory', {
     }
 });
 ```
+
+Unterstützte ``options`` (wie in den Datenpunkt-Einstellungen):
+
+* ``debounceTime`` (ms): Entprellzeit, nur Werte, die so lange stabil sind, werden gespeichert
+* ``blockTime`` (ms): Mindestabstand nach dem zuletzt gespeicherten Wert, bevor ein neuer Wert gespeichert wird
+* ``changesOnly`` (boolean, Standard `false`): nur geänderte Werte speichern
+* ``changesRelogInterval`` (Sekunden, `0` = aus): unveränderte Werte nach diesem Intervall erneut speichern, nur mit ``changesOnly``
+* ``changesMinDelta`` (Zahl, `0` = aus): minimale Abweichung zum zuletzt gespeicherten Wert, nur mit ``changesOnly``
+* ``ignoreBelowNumber`` / ``ignoreAboveNumber`` (Zahl oder leer): Werte unter / über dieser Zahl ignorieren
+* ``ignoreZero`` (boolean, Standard `false`): Werte `0` oder `null` ignorieren
+* ``disableSkippedValueLogging`` (boolean): den letzten übersprungenen Wert vor einer Änderung nicht speichern
+* ``aliasId`` (string): Werte unter dieser ID speichern
+* ``retention`` (Sekunden, `0` = für immer, `-1` = eigener Zeitraum über ``customRetentionDuration``)
+* ``customRetentionDuration`` (Tage): wird mit ``retention: -1`` verwendet
+* ``maxLength`` (Anzahl Werte im RAM, bevor sie auf die Platte geschrieben werden)
+* ``round`` (Anzahl Nachkommastellen)
+* ``enableDebugLogs`` (boolean): Debug-Logs für diesen Datenpunkt
+
+Nicht gesetzte Optionen übernehmen die Standardwerte der Instanz (außer ``changesOnly``, ``ignoreZero``, ``ignoreBelowNumber`` und ``ignoreAboveNumber``, diese sind dann aus).
+Hinweis: ``debounce`` ist ein alter Name und wird nur noch als ``blockTime`` gelesen. Für die Entprellung ``debounceTime`` verwenden.
 
 ### Deaktivieren
 
@@ -520,7 +541,8 @@ sendTo('history.0', 'getEnabledDPs', {}, function (result) {
     {
         "system.adapter.history.0.memRss": {
             changesOnly: true,
-            debounce: 0,
+            debounceTime: 0,
+            blockTime: 0,
             retention: 31536000,
             maxLength: 3,
             changesMinDelta: 0.5,

@@ -448,7 +448,8 @@ sendTo('history.0', 'enableHistory', {
     id: 'system.adapter.history.0.memRss',
     options: {
         changesOnly:  true,
-        debounce:     0,
+        debounceTime: 0,
+        blockTime:    0,
         retention:    31536000,
         maxLength:    3,
         changesMinDelta: 0.5,
@@ -463,6 +464,26 @@ sendTo('history.0', 'enableHistory', {
     }
 });
 ```
+
+Supported ``options`` (the same as in the custom settings of the datapoint):
+
+* ``debounceTime`` (ms): de-bounce interval, only values that are stable for this time are stored
+* ``blockTime`` (ms): minimal time after the last stored value before a new value is stored
+* ``changesOnly`` (boolean, default `false`): store only changed values
+* ``changesRelogInterval`` (seconds, `0` = off): store unchanged values again after this interval, only with ``changesOnly``
+* ``changesMinDelta`` (number, `0` = off): minimal difference to the last stored value, only with ``changesOnly``
+* ``ignoreBelowNumber`` / ``ignoreAboveNumber`` (number or empty): ignore values below / above this number
+* ``ignoreZero`` (boolean, default `false`): ignore `0` or `null` values
+* ``disableSkippedValueLogging`` (boolean): do not store the last skipped value before a change
+* ``aliasId`` (string): store the values under this ID
+* ``retention`` (seconds, `0` = keep forever, `-1` = custom period from ``customRetentionDuration``)
+* ``customRetentionDuration`` (days): used with ``retention: -1``
+* ``maxLength`` (number of values kept in RAM before they are written to disk)
+* ``round`` (number of digits after the decimal point)
+* ``enableDebugLogs`` (boolean): debug logs for this datapoint
+
+Options that are not set take the default values of the instance (except ``changesOnly``, ``ignoreZero``, ``ignoreBelowNumber`` and ``ignoreAboveNumber``, which are off then).
+Note: ``debounce`` is an old name and is only read as ``blockTime`` now. Use ``debounceTime`` for de-bouncing.
 
 ### Disable
 
@@ -491,7 +512,8 @@ sendTo('history.0', 'getEnabledDPs', {}, function (result) {
     {
         "system.adapter.history.0.memRss": {
             changesOnly: true,
-            debounce: 0,
+            debounceTime: 0,
+            blockTime: 0,
             retention: 31536000,
             maxLength: 3,
             changesMinDelta: 0.5,
