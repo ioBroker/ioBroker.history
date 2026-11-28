@@ -83,7 +83,10 @@ async function main() {
             }
 
             adapter.sendTo(influxInstance, 'query', query, result => {
-                if (result) {
+                if (!result || !result.result || !result.result[0]) {
+                    console.error(`Cannot read measurements: ${result && result.error ? result.error : 'no data'}`);
+                    process.exit();
+                } else {
                     dpList = result.result[0];
 
                     console.log(`Datapoints found: ${dpList.length}`);
@@ -138,18 +141,24 @@ function analyze() {
             }
 
             adapter.sendTo(influxInstance, 'query', query, resultDP => {
-                if (resultDP.error) {
-                    console.error(resultDP.error);
+                if (!resultDP || resultDP.error) {
+                    console.error(resultDP ? resultDP.error : `No response for ${dpName}`);
                 } else {
-                    if (resultDP.result[0]) {
-                        earliestDBValue[dpName] = resultDP.result[0][0].ts;
-                        console.log(
-                            `FirstVal ID: ${dpName}, Rows: ${JSON.stringify(resultDP.result[0])} --> ${new Date(earliestDBValue[dpName]).toString()}`,
-                        );
+                    const first = resultDP.result && resultDP.result[0] && resultDP.result[0][0];
+                    if (first) {
+                        const ts = influxDbVersion == 2 ? new Date(first._time).getTime() : first.ts;
+                        if (ts) {
+                            earliestDBValue[dpName] = ts;
+                            console.log(
+                                `FirstVal ID: ${dpName}, Rows: ${JSON.stringify(resultDP.result[0])} --> ${new Date(earliestDBValue[dpName]).toString()}`,
+                            );
+                        }
+                    } else {
+                        console.log(`No data found for ${dpName}`);
                     }
 
-                    if (deepAnalyze) {
-                        if (resultDP.result[1]) {
+                    if (deepAnalyze && resultDP.result) {
+                        if (Array.isArray(resultDP.result[1])) {
                             existingData[dpName] = [];
                             for (let j = 0; j < resultDP.result[1].length; j++) {
                                 if (influxDbVersion == 2) {
